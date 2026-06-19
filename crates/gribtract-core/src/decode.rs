@@ -115,6 +115,24 @@ impl<'a> Buf<'a> {
     }
 }
 
+// ── Extra parameters for DRT=2/3 (complex packing) ───────────────────────────
+
+/// Group structure parameters from Section 5 template 5.2 / 5.3.
+/// Only populated when decoding complex packing (DRT=2 or DRT=3).
+struct ComplexPackingExtra {
+    n_groups: u32,
+    ref_group_widths: u8,
+    bits_group_widths: u8,
+    ref_group_lengths: u32,
+    length_increment: u8,
+    true_last_group_length: u32,
+    bits_scaled_group_lengths: u8,
+    /// 0 = no spatial differencing (DRT=2), 1 = first order, 2 = second order (DRT=3).
+    order_spatial_diff: u8,
+    /// Number of octets per "seed" value in the Section 7 extra-octets block.
+    extra_octet_count: u8,
+}
+
 // ── Intermediate parsing state accumulated across sections ────────────────────
 
 #[derive(Default)]
@@ -135,6 +153,7 @@ struct FieldBuilder {
     // From Section 5
     packing: Option<PackingInfo>,
     drt_template: Option<u16>,
+    complex_extra: Option<ComplexPackingExtra>,
     // From Section 6
     has_bitmap: Option<bool>,
     // From Section 7
@@ -269,9 +288,10 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
                 builder.ensemble = Some(ens);
             }
             5 => {
-                let (drt, packing) = parse_section5(sec_body)?;
+                let (drt, packing, complex_extra) = parse_section5(sec_body)?;
                 builder.drt_template = Some(drt);
                 builder.packing = Some(packing);
+                builder.complex_extra = complex_extra;
             }
             6 => {
                 let has_bitmap = parse_section6(sec_body)?;
@@ -281,7 +301,7 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
                 let n_points = builder.grid.as_ref().map(|g| g.num_data_points as usize).unwrap_or(0);
                 let packing = builder.packing.as_ref().ok_or(Error::NotImplemented)?;
                 let has_bitmap = builder.has_bitmap.unwrap_or(false);
-                let values = decode_section7(sec_body, packing, n_points, has_bitmap)?;
+                let values = decode_section7(sec_body, packing, builder.complex_extra.as_ref(), n_points, has_bitmap)?;
                 builder.values = Some(values);
 
                 // Complete field — flush the builder.
@@ -466,27 +486,31 @@ fn parse_pdt_0(
 
 // ── Section 5: Data Representation ───────────────────────────────────────────
 
-fn parse_section5(body: &[u8]) -> Result<(u16, PackingInfo)> {
+fn parse_section5(body: &[u8]) -> Result<(u16, PackingInfo, Option<ComplexPackingExtra>)> {
     let mut b = Buf::new(body);
     let _n_values = b.read_u32be()?; // oct 6-9: number of packed values
     let template = b.read_u16be()?;  // oct 10-11: DRT template number
 
     match template {
         0 => {
-            let packing = parse_drt_0(&mut b)?;
-            Ok((0, packing))
+            let packing = parse_drt_common(&mut b)?;
+            Ok((0, packing, None))
+        }
+        3 => {
+            let (packing, extra) = parse_drt_3(&mut b)?;
+            Ok((3, packing, Some(extra)))
         }
         _ => Err(Error::NotImplemented),
     }
 }
 
-/// Data Representation Template 5.0: Simple packing.
-fn parse_drt_0(b: &mut Buf) -> Result<PackingInfo> {
-    let reference_value = b.read_f32be()?;          // oct 12-15: R
+/// Parse the common packing header shared by DRT templates 0, 2, and 3.
+fn parse_drt_common(b: &mut Buf) -> Result<PackingInfo> {
+    let reference_value = b.read_f32be()?;               // oct 12-15: R
     let binary_scale_factor = b.read_scale_factor_i16()?; // oct 16-17: E
     let decimal_scale_factor = b.read_scale_factor_i16()?; // oct 18-19: D
-    let bits_per_value = b.read_u8()?;              // oct 20: N
-    let original_field_type = b.read_u8()?;         // oct 21
+    let bits_per_value = b.read_u8()?;                   // oct 20: N
+    let original_field_type = b.read_u8()?;              // oct 21
 
     Ok(PackingInfo {
         reference_value,
@@ -495,6 +519,38 @@ fn parse_drt_0(b: &mut Buf) -> Result<PackingInfo> {
         bits_per_value,
         original_field_type,
     })
+}
+
+/// Data Representation Template 5.3: Complex packing with spatial differencing.
+fn parse_drt_3(b: &mut Buf) -> Result<(PackingInfo, ComplexPackingExtra)> {
+    let packing = parse_drt_common(b)?;  // oct 12-21: common header
+
+    b.skip(1)?; // oct 22: group splitting method
+    b.skip(1)?; // oct 23: missing value management (0 = none)
+    b.skip(4)?; // oct 24-27: primary missing value
+    b.skip(4)?; // oct 28-31: secondary missing value
+
+    let n_groups = b.read_u32be()?;              // oct 32-35
+    let ref_group_widths = b.read_u8()?;         // oct 36
+    let bits_group_widths = b.read_u8()?;        // oct 37
+    let ref_group_lengths = b.read_u32be()?;     // oct 38-41
+    let length_increment = b.read_u8()?;         // oct 42
+    let true_last_group_length = b.read_u32be()?; // oct 43-46
+    let bits_scaled_group_lengths = b.read_u8()?; // oct 47
+    let order_spatial_diff = b.read_u8()?;       // oct 48
+    let extra_octet_count = b.read_u8()?;        // oct 49
+
+    Ok((packing, ComplexPackingExtra {
+        n_groups,
+        ref_group_widths,
+        bits_group_widths,
+        ref_group_lengths,
+        length_increment,
+        true_last_group_length,
+        bits_scaled_group_lengths,
+        order_spatial_diff,
+        extra_octet_count,
+    }))
 }
 
 // ── Section 6: Bit Map ────────────────────────────────────────────────────────
@@ -516,27 +572,180 @@ fn parse_section6(body: &[u8]) -> Result<bool> {
 fn decode_section7(
     body: &[u8],
     packing: &PackingInfo,
+    complex_extra: Option<&ComplexPackingExtra>,
     n_points: usize,
     _has_bitmap: bool,
 ) -> Result<GridValues> {
-    // For DRT 5.0 (simple packing), all data is packed after the section header.
-    // Section 7 body (after sec_len + sec_num) is raw packed data starting at oct 6.
+    if let Some(extra) = complex_extra {
+        return decode_drt3(body, packing, extra, n_points);
+    }
+
+    // DRT=0: simple packing.
+    let r = packing.reference_value as f64;
+    let e = packing.binary_scale_factor as i32;
+    let d = packing.decimal_scale_factor as i32;
+    let two_e = 2f64.powi(e);
+    let ten_d = 10f64.powi(d);
+
     match packing.bits_per_value {
         0 => {
-            // Constant field: all values equal to R.
-            let v = packing.reference_value as f64;
+            // Constant field: X=0 for all points, so Y = (R + 0) / 10^D = R / 10^D.
+            let v = r / ten_d;
             Ok(GridValues::Dense(vec![v; n_points]))
         }
         n_bits => {
             let packed = unpack_n_bits(body, n_points, n_bits as usize);
-            let r = packing.reference_value as f64;
-            let e = packing.binary_scale_factor as i32;
-            let d = packing.decimal_scale_factor as i32;
-            let scale = 2f64.powi(e) / 10f64.powi(d);
-            let values: Vec<f64> = packed.iter().map(|&x| r + x as f64 * scale).collect();
+            // WMO spec: Y × 10^D = R + X × 2^E  →  Y = (R + X × 2^E) / 10^D
+            let values: Vec<f64> = packed.iter().map(|&x| (r + x as f64 * two_e) / ten_d).collect();
             Ok(GridValues::Dense(values))
         }
     }
+}
+
+/// Decode Template 5.3: complex packing with spatial differencing.
+///
+/// The Section 7 body contains:
+///   1. `(order+1) × extra_octet_count` bytes: seed values (ival1, [ival2,] minsd) in
+///      GRIB2 sign-magnitude big-endian encoding.
+///   2. `n_groups × bits_per_value` bits (byte-aligned sub-array): group references.
+///   3. `n_groups × bits_group_widths` bits (byte-aligned): group width offsets.
+///   4. `n_groups × bits_scaled_group_lengths` bits (byte-aligned): scaled group lengths
+///      (last group uses `true_last_group_length` from Section 5 instead).
+///   5. Data values packed within groups (per-group bit width).
+///
+/// All sub-arrays are byte-aligned (padded to the next byte boundary between arrays).
+fn decode_drt3(
+    body: &[u8],
+    packing: &PackingInfo,
+    extra: &ComplexPackingExtra,
+    n_points: usize,
+) -> Result<GridValues> {
+    let order = extra.order_spatial_diff as usize;
+    let eo = extra.extra_octet_count as usize;
+    let n_groups = extra.n_groups as usize;
+    let total_seed_bytes = (order + 1) * eo;
+
+    if body.len() < total_seed_bytes {
+        return Err(Error::TooShort { needed: total_seed_bytes, got: body.len() });
+    }
+
+    // 1. Read seed values from extra octets (sign-magnitude big-endian).
+    let ival1 = read_sign_magnitude_be(&body[..eo]);
+    let ival2 = if order >= 2 { read_sign_magnitude_be(&body[eo..2 * eo]) } else { 0i64 };
+    let minsd = read_sign_magnitude_be(&body[order * eo..total_seed_bytes]);
+
+    let mut byte_pos = total_seed_bytes;
+
+    // 2. Group references: n_groups × bits_per_value bits, byte-aligned.
+    let nbits = packing.bits_per_value as usize;
+    let group_refs = unpack_n_bits(&body[byte_pos..], n_groups, nbits);
+    byte_pos += (n_groups * nbits + 7) / 8;
+
+    // 3. Group widths: n_groups × bits_group_widths bits, byte-aligned.
+    let bw = extra.bits_group_widths as usize;
+    let raw_widths = unpack_n_bits(&body[byte_pos..], n_groups, bw);
+    let group_widths: Vec<usize> = raw_widths.iter()
+        .map(|&w| extra.ref_group_widths as usize + w as usize)
+        .collect();
+    byte_pos += (n_groups * bw + 7) / 8;
+
+    // 4. Group lengths: n_groups × bits_scaled_group_lengths bits, byte-aligned.
+    //    The last group always uses `true_last_group_length` from Section 5.
+    let bl = extra.bits_scaled_group_lengths as usize;
+    let raw_lengths = unpack_n_bits(&body[byte_pos..], n_groups, bl);
+    let group_lengths: Vec<usize> = raw_lengths.iter().enumerate().map(|(g, &l)| {
+        if g == n_groups - 1 {
+            extra.true_last_group_length as usize
+        } else {
+            extra.ref_group_lengths as usize + l as usize * extra.length_increment as usize
+        }
+    }).collect();
+    byte_pos += (n_groups * bl + 7) / 8;
+
+    // 5. Packed values within groups (variable bit width per group).
+    let mut packed = Vec::with_capacity(n_points);
+    let mut bit_offset = byte_pos * 8;
+    for g in 0..n_groups {
+        let w = group_widths[g];
+        let l = group_lengths[g];
+        let gref = group_refs[g] as i64;
+        for _ in 0..l {
+            let v = read_bits_at(body, bit_offset, w) as i64;
+            packed.push(gref + v);
+            bit_offset += w;
+        }
+    }
+
+    if packed.len() != n_points {
+        return Err(Error::TooShort { needed: n_points, got: packed.len() });
+    }
+
+    // 6. Reconstruct original integers via spatial differencing (order=2 path).
+    //    packed[i] for i >= order holds (second_diff[i] − minsd) from the encoder,
+    //    where second_diff[i] = X[i] − 2·X[i−1] + X[i−2].
+    //    seeds override packed[0..order].
+    packed[0] = ival1;
+    if order >= 2 {
+        packed[1] = ival2;
+    }
+
+    if order == 1 {
+        for i in 1..n_points {
+            let delta = packed[i] + minsd;
+            packed[i] = packed[i - 1] + delta;
+        }
+    } else if order == 2 {
+        let mut delta = packed[1] - packed[0]; // first difference at position 1
+        for i in 2..n_points {
+            let second_diff = packed[i] + minsd;
+            delta += second_diff;
+            packed[i] = packed[i - 1] + delta;
+        }
+    }
+
+    // 7. Apply packing formula: Y = (R + X × 2^E) / 10^D.
+    let r = packing.reference_value as f64;
+    let two_e = 2f64.powi(packing.binary_scale_factor as i32);
+    let ten_d = 10f64.powi(packing.decimal_scale_factor as i32);
+    let values: Vec<f64> = packed.iter().map(|&x| (r + x as f64 * two_e) / ten_d).collect();
+
+    Ok(GridValues::Dense(values))
+}
+
+/// Read a GRIB2 sign-magnitude big-endian integer from `bytes`.
+///
+/// The MSB of the first byte is the sign (1 = negative); the remaining bits
+/// form the unsigned magnitude.
+fn read_sign_magnitude_be(bytes: &[u8]) -> i64 {
+    let n = bytes.len();
+    debug_assert!(n > 0 && n <= 7, "sign-magnitude: unsupported width {n}");
+    let mut raw = 0u64;
+    for &b in bytes {
+        raw = (raw << 8) | b as u64;
+    }
+    let sign_bit = 1u64 << (n * 8 - 1);
+    let magnitude = (raw & (sign_bit - 1)) as i64;
+    if raw & sign_bit != 0 { -magnitude } else { magnitude }
+}
+
+/// Read `n_bits` bits from `data` starting at `bit_offset` (MSB-first).
+fn read_bits_at(data: &[u8], bit_offset: usize, n_bits: usize) -> u64 {
+    if n_bits == 0 {
+        return 0;
+    }
+    let byte_start = bit_offset / 8;
+    let bit_start = bit_offset % 8;
+    let bits_needed = bit_start + n_bits;
+    let bytes_needed = bits_needed.div_ceil(8);
+    let mut raw: u64 = 0;
+    for i in 0..bytes_needed {
+        let byte = if byte_start + i < data.len() { data[byte_start + i] } else { 0 };
+        raw = (raw << 8) | byte as u64;
+    }
+    let total_bits = bytes_needed * 8;
+    let shift = total_bits - bit_start - n_bits;
+    let mask = (1u64 << n_bits) - 1;
+    (raw >> shift) & mask
 }
 
 /// Extract `count` unsigned integers each `n_bits` wide from `data`.
@@ -628,7 +837,8 @@ mod tests {
             original_field_type: 0,
         };
         let data: Vec<u8> = (0u8..25).collect();
-        let values = decode_section7(&data, &packing, 25, false).unwrap();
+        // DRT=0: no complex extra
+        let values = decode_section7(&data, &packing, None, 25, false).unwrap();
         match values {
             GridValues::Dense(v) => {
                 assert_eq!(v.len(), 25);

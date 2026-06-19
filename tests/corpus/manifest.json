@@ -19,7 +19,7 @@
       "path": "small/gfs_tmp2m_1deg_anl.grib2",
       "sha256": "81eebed451cb536de0332f7a35041688574fe076f6bb7b8be68106a045c39c38",
       "size_bytes": 47582,
-      "storage": "deferred",
+      "storage": "inline",
       "provenance": {
         "source": "NOAA NCEP GFS",
         "description": "GFS 1-degree global lat/lon analysis (t00z f000), 2026-06-18 cycle. Single GRIB2 message: TMP 2m above ground, template GDT=0/PDT=0/DRT=3 (complex packing with spatial differencing), 360x181=65160 points. Byte-range extracted from gfs.t00z.pgrb2.1p00.f000 via NOMADS: bytes 35437282-35484863. Storage marked 'deferred' because gribtract does not yet implement DRT=3; change to 'inline' when DRT=3 support is added.",
