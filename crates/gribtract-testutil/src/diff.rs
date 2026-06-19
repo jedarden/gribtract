@@ -398,10 +398,12 @@ mod tests {
 
     #[test]
     fn coverage_report_agreement_pct() {
-        let mut report = CoverageReport::default();
-        report.fixtures_total = 4;
-        report.fixtures_matched = 2;
-        report.fixtures_no_golden = 1;
+        let report = CoverageReport {
+            fixtures_total: 4,
+            fixtures_matched: 2,
+            fixtures_no_golden: 1,
+            ..Default::default()
+        };
         // comparable = 4 - 1 = 3; matched = 2
         assert!((report.agreement_pct() - 66.666).abs() < 0.01);
     }

@@ -94,6 +94,10 @@ impl GoldenGridValues {
         }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = (f64, bool)> + '_ {
         match self {
             GoldenGridValues::Dense(v) => v
