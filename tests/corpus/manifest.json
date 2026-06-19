@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "fixtures": [
+    {
+      "id": "gfs_anl_t2m_5x5",
+      "path": "small/gfs_anl_t2m_5x5.grib2",
+      "sha256": "3f7963bfdc4d81851d16839517a6d828970404e95ccb4e938a533d94ae04c69d",
+      "size_bytes": 204,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 fixture: 2m temperature analysis, 5x5 lat/lon grid (0-40N, 0-40E, 10deg spacing). Section 0 discipline=0 (meteorological), edition=2. Section 1: center=7 (US NCEP), analysis (significance=0), 2024-06-19T00:00:00Z. Section 3 template 3.0 (lat/lon), shape=6 (WGS84), Ni=5, Nj=5, scanning_mode=0x00 (+i, -j). Section 4 template 4.0: discipline=0/cat=0/num=0 (temperature K), level type=103 (height above ground), value=2m, forecast_offset=0h. Section 5 template 5.0 (simple packing): R=270.0, E=0, D=0, nbits=8. Section 6: no bitmap (indicator=255). Section 7: 25 packed bytes X=0..24, unpacked values = 270.0+X K (270K at 40N/0E .. 294K at 0N/40E).",
+        "capture_date": "2026-06-19",
+        "generated_by": "scripts/gen_grib2.py (gribtract project)"
+      }
+    }
+  ],
+  "_comment_large": "Fixtures with storage=remote live in tests/corpus/large/ (gitignored). The harness fetches them by sha256 from B2. Add a manifest entry here first, then seed the file."
+}
