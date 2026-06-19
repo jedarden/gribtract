@@ -11,3 +11,4 @@ rust-version.workspace = true
 gribtract-core = { workspace = true }
 
 [dev-dependencies]
+gribtract-testutil.workspace = true

@@ -7,6 +7,7 @@ pub enum Error {
     UnknownEdition(u8),
     BadSectionNumber { expected: u8, got: u8 },
     Overflow,
+    NotImplemented,
 }
 
 impl fmt::Display for Error {
@@ -22,6 +23,8 @@ impl fmt::Display for Error {
                 write!(f, "unexpected section number: expected {expected}, got {got}"),
             Error::Overflow =>
                 write!(f, "integer overflow in section length"),
+            Error::NotImplemented =>
+                write!(f, "decode not implemented"),
         }
     }
 }

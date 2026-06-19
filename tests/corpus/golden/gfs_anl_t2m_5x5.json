@@ -1,0 +1,59 @@
+{
+  "fixture_id": "gfs_anl_t2m_5x5",
+  "_provenance": "Derived from scripts/gen_grib2.py provenance; matches what eccodes would report for this synthetic fixture. Provenance: synthetic GFS-like 2m temperature, 5x5 lat/lon grid.",
+  "fields": [
+    {
+      "center": 7,
+      "subcenter": 0,
+      "parameter": { "discipline": 0, "category": 0, "number": 0 },
+      "forecast": {
+        "reference_time": {
+          "year": 2024, "month": 6, "day": 19,
+          "hour": 0, "minute": 0, "second": 0,
+          "significance": 0
+        },
+        "time_range_unit": 1,
+        "forecast_offset": 0
+      },
+      "level": {
+        "type1": 103, "scale_factor1": 0, "scaled_value1": 2,
+        "type2": 255, "scale_factor2": 0, "scaled_value2": 0
+      },
+      "ensemble": null,
+      "grid": {
+        "template": 0,
+        "num_data_points": 25,
+        "nx": 5,
+        "ny": 5,
+        "lat_first": 40.0,
+        "lon_first": 0.0,
+        "lat_last": 0.0,
+        "lon_last": 40.0,
+        "di": 10.0,
+        "dj": 10.0,
+        "scanning_mode": 0,
+        "resolution_flags": 48,
+        "shape_of_earth": 6
+      },
+      "values": {
+        "Dense": [
+          270.0, 271.0, 272.0, 273.0, 274.0,
+          275.0, 276.0, 277.0, 278.0, 279.0,
+          280.0, 281.0, 282.0, 283.0, 284.0,
+          285.0, 286.0, 287.0, 288.0, 289.0,
+          290.0, 291.0, 292.0, 293.0, 294.0
+        ]
+      },
+      "gdt_template": 0,
+      "pdt_template": 0,
+      "drt_template": 0,
+      "packing": {
+        "reference_value": 270.0,
+        "binary_scale_factor": 0,
+        "decimal_scale_factor": 0,
+        "bits_per_value": 8,
+        "original_field_type": 0
+      }
+    }
+  ]
+}

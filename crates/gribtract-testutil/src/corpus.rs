@@ -32,7 +32,7 @@ pub struct FixtureEntry {
 ///
 /// Checks `GRIBTRACT_CORPUS_ROOT` env var first; falls back to
 /// `<CARGO_MANIFEST_DIR>/../../tests/corpus`.
-fn corpus_root() -> PathBuf {
+pub fn corpus_root() -> PathBuf {
     if let Ok(root) = std::env::var("GRIBTRACT_CORPUS_ROOT") {
         return PathBuf::from(root);
     }
@@ -53,6 +53,11 @@ fn load_manifest() -> Result<Manifest, String> {
         return Err(format!("unsupported manifest version: {}", manifest.version));
     }
     Ok(manifest)
+}
+
+/// Return all entries from the manifest.
+pub fn list_fixtures() -> Result<Vec<FixtureEntry>, String> {
+    Ok(load_manifest()?.fixtures)
 }
 
 /// Find the manifest entry for a fixture by id.
