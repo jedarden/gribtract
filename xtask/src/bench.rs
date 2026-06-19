@@ -1,5 +1,5 @@
-//! `xtask bench` — measure gribtract decode throughput and write bench-results.json
-//! + bench-history.jsonl + dashboard.html.
+//! `xtask bench` — measure gribtract decode throughput and write bench-results.json,
+//! bench-history.jsonl, and dashboard.html.
 //! Schema matches docs/plan/plan.md "Benchmark result".
 
 use std::collections::HashMap;
@@ -252,7 +252,7 @@ pub fn run(args: &[String]) {
     runs.sort_by(|a, b| a.template_5x.cmp(&b.template_5x));
 
     // ── Station-extract bench ─────────────────────────────────────────────────
-    let run_station = !workload_filter.contains(&"full-grid");
+    let run_station = !workload_filter.contains("full-grid");
     if run_station && !all_decoded_fields.is_empty() {
         eprintln!("xtask bench: station-extract workload");
         let station_results = bench_station::run(&all_decoded_fields);
