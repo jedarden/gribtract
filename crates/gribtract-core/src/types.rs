@@ -269,6 +269,125 @@ impl GridValues {
                 .into_iter(),
         }
     }
+
+    /// Value at a flat index; None if the point is masked, absent, or out of bounds.
+    pub fn get_at(&self, idx: usize) -> Option<f64> {
+        match self {
+            GridValues::Dense(v) => v.get(idx).copied(),
+            GridValues::Masked { values, present } => {
+                if *present.get(idx)? { values.get(idx).copied() } else { None }
+            }
+        }
+    }
+
+    /// Bilinear interpolation from four corners produced by [`GridDefinition::bilinear_corners`].
+    /// Returns None if any corner is masked or out of bounds.
+    pub fn bilinear(&self, c: &BilinearCorners) -> Option<f64> {
+        let v_nw = self.get_at(c.idx_nw)?;
+        let v_ne = self.get_at(c.idx_ne)?;
+        let v_sw = self.get_at(c.idx_sw)?;
+        let v_se = self.get_at(c.idx_se)?;
+        Some(
+            (1.0 - c.fx) * (1.0 - c.fy) * v_nw
+                + c.fx * (1.0 - c.fy) * v_ne
+                + (1.0 - c.fx) * c.fy * v_sw
+                + c.fx * c.fy * v_se,
+        )
+    }
+}
+
+// ── Grid point extraction ─────────────────────────────────────────────────────
+
+/// Four corner indices and fractional weights for bilinear interpolation.
+/// Produced by [`GridDefinition::bilinear_corners`].
+#[derive(Debug, Clone, Copy)]
+pub struct BilinearCorners {
+    /// Flat index of the "north-west" corner (lower j, lower i).
+    pub idx_nw: usize,
+    /// Flat index of the "north-east" corner (lower j, higher i).
+    pub idx_ne: usize,
+    /// Flat index of the "south-west" corner (higher j, lower i).
+    pub idx_sw: usize,
+    /// Flat index of the "south-east" corner (higher j, higher i).
+    pub idx_se: usize,
+    /// Fractional longitude within the cell [0, 1].
+    pub fx: f64,
+    /// Fractional latitude toward the "south" edge (increasing j) [0, 1].
+    pub fy: f64,
+}
+
+impl GridDefinition {
+    /// Nearest-grid-point flat index for template 0 (lat/lon) grids.
+    ///
+    /// Returns None for non-lat/lon grids, grids with zero increments, or
+    /// queries outside the grid extent (with half-cell tolerance).
+    pub fn nearest_index(&self, lat: f64, lon: f64) -> Option<usize> {
+        if self.template != 0 || self.di == 0.0 || self.dj == 0.0 {
+            return None;
+        }
+        let mut fi = Self::lon_to_fi(lon, self.lon_first, self.di, self.nx);
+        // Try ±360° wrap once if out of the [-0.5, nx-0.5] window
+        let nx_f = self.nx as f64;
+        if fi < -0.5 { fi += 360.0 / self.di; }
+        else if fi > nx_f - 0.5 { fi -= 360.0 / self.di; }
+        if fi < -0.5 || fi > nx_f - 0.5 { return None; }
+
+        let fj = self.lat_to_fj(lat);
+        let ny_f = self.ny as f64;
+        if fj < -0.5 || fj > ny_f - 0.5 { return None; }
+
+        let i = fi.round() as usize;
+        let j = fj.round() as usize;
+        Some(j * self.nx as usize + i)
+    }
+
+    /// Bilinear interpolation corners for template 0 (lat/lon) grids.
+    ///
+    /// Returns None for non-lat/lon grids, zero-increment grids, or queries
+    /// outside the grid (no extrapolation).
+    pub fn bilinear_corners(&self, lat: f64, lon: f64) -> Option<BilinearCorners> {
+        if self.template != 0 || self.di == 0.0 || self.dj == 0.0 {
+            return None;
+        }
+        let mut fi = Self::lon_to_fi(lon, self.lon_first, self.di, self.nx);
+        let nx1 = (self.nx - 1) as f64;
+        if fi < 0.0 { fi += 360.0 / self.di; }
+        else if fi >= nx1 + 1.0 { fi -= 360.0 / self.di; }
+        if fi < 0.0 || fi >= nx1 { return None; }
+
+        let fj = self.lat_to_fj(lat);
+        let ny1 = (self.ny - 1) as f64;
+        if fj < 0.0 || fj >= ny1 { return None; }
+
+        let i0 = fi.floor() as usize;
+        let j0 = fj.floor() as usize;
+        let nx = self.nx as usize;
+        Some(BilinearCorners {
+            idx_nw: j0 * nx + i0,
+            idx_ne: j0 * nx + (i0 + 1),
+            idx_sw: (j0 + 1) * nx + i0,
+            idx_se: (j0 + 1) * nx + (i0 + 1),
+            fx: fi - i0 as f64,
+            fy: fj - j0 as f64,
+        })
+    }
+
+    /// Fractional column index for a longitude query.
+    fn lon_to_fi(lon: f64, lon_first: f64, di: f64, _nx: u32) -> f64 {
+        // Normalize to [0, 360) to match GRIB2 convention, then compute offset
+        let mut lon_n = lon % 360.0;
+        if lon_n < 0.0 { lon_n += 360.0; }
+        (lon_n - lon_first) / di
+    }
+
+    /// Fractional row index for a latitude query.
+    fn lat_to_fj(&self, lat: f64) -> f64 {
+        if self.j_positive() {
+            (lat - self.lat_first) / self.dj
+        } else {
+            (self.lat_first - lat) / self.dj
+        }
+    }
 }
 
 // ── Field ────────────────────────────────────────────────────────────────────
@@ -456,5 +575,110 @@ mod tests {
         };
         let pairs2: Vec<_> = gv2.iter().collect();
         assert_eq!(pairs2, vec![(1.0, true), (0.0, false), (3.0, true)]);
+    }
+
+    // ── Test helpers ──────────────────────────────────────────────────────────
+
+    fn test_grid_5x5() -> GridDefinition {
+        // 5×5 lat/lon grid: 40N→0N, 0E→40E, 10° spacing, standard scanning
+        GridDefinition {
+            template: 0,
+            num_data_points: 25,
+            nx: 5, ny: 5,
+            lat_first: 40.0, lon_first: 0.0,
+            lat_last: 0.0, lon_last: 40.0,
+            di: 10.0, dj: 10.0,
+            scanning_mode: 0x00, // +i, -j
+            resolution_flags: 0x30,
+            shape_of_earth: 6,
+        }
+    }
+
+    #[test]
+    fn nearest_index_in_range() {
+        let g = test_grid_5x5();
+        // Corner: lat=40, lon=0 → i=0, j=0 → index 0
+        assert_eq!(g.nearest_index(40.0, 0.0), Some(0));
+        // Opposite corner: lat=0, lon=40 → i=4, j=4 → index 24
+        assert_eq!(g.nearest_index(0.0, 40.0), Some(24));
+        // Centre: lat=20, lon=20 → i=2, j=2 → index 12
+        assert_eq!(g.nearest_index(20.0, 20.0), Some(12));
+        // Near-corner snap: lat=39.0, lon=1.0 → rounds to i=0, j=0 → index 0
+        assert_eq!(g.nearest_index(39.0, 1.0), Some(0));
+    }
+
+    #[test]
+    fn nearest_index_out_of_range() {
+        let g = test_grid_5x5();
+        // Latitude too far north
+        assert_eq!(g.nearest_index(50.0, 20.0), None);
+        // Longitude too far west (negative longitude, not in grid)
+        assert_eq!(g.nearest_index(20.0, -10.0), None);
+        // Non-lat/lon template
+        let g2 = GridDefinition { template: 30, ..g };
+        assert_eq!(g2.nearest_index(20.0, 20.0), None);
+    }
+
+    #[test]
+    fn nearest_index_negative_lon_normalized() {
+        // A global grid starting at 0E with 1° spacing, 360 points
+        let g = GridDefinition {
+            template: 0, num_data_points: 360,
+            nx: 360, ny: 1,
+            lat_first: 0.0, lon_first: 0.0,
+            lat_last: 0.0, lon_last: 359.0,
+            di: 1.0, dj: 1.0,
+            scanning_mode: 0x00,
+            resolution_flags: 0x30, shape_of_earth: 6,
+        };
+        // -73.97° E = 286.03° E
+        let idx = g.nearest_index(0.0, -73.97);
+        assert_eq!(idx, Some(286));
+    }
+
+    #[test]
+    fn bilinear_corners_interior() {
+        let g = test_grid_5x5();
+        // Query at the exact centre of the NW cell: lat=35, lon=5
+        // fi = (5-0)/10 = 0.5, fj = (40-35)/10 = 0.5
+        let c = g.bilinear_corners(35.0, 5.0).expect("should find corners");
+        assert_eq!(c.idx_nw, 0);  // j=0, i=0
+        assert_eq!(c.idx_ne, 1);  // j=0, i=1
+        assert_eq!(c.idx_sw, 5);  // j=1, i=0
+        assert_eq!(c.idx_se, 6);  // j=1, i=1
+        assert!((c.fx - 0.5).abs() < 1e-9);
+        assert!((c.fy - 0.5).abs() < 1e-9);
+    }
+
+    #[test]
+    fn bilinear_corners_at_boundary_returns_none() {
+        let g = test_grid_5x5();
+        // Exact last grid point — no room for bilinear on the SE side
+        assert!(g.bilinear_corners(0.0, 40.0).is_none());
+        // Outside grid entirely
+        assert!(g.bilinear_corners(50.0, 20.0).is_none());
+    }
+
+    #[test]
+    fn bilinear_interpolate_dense() {
+        // A 2×2 Dense grid with known values, query at centre
+        // Grid: NW=1, NE=2, SW=3, SE=4
+        let gv = GridValues::Dense(vec![1.0, 2.0, 3.0, 4.0]);
+        let c = BilinearCorners { idx_nw: 0, idx_ne: 1, idx_sw: 2, idx_se: 3, fx: 0.5, fy: 0.5 };
+        let v = gv.bilinear(&c).expect("should interpolate");
+        // (0.5*0.5*1 + 0.5*0.5*2 + 0.5*0.5*3 + 0.5*0.5*4) = 0.25*(1+2+3+4) = 2.5
+        assert!((v - 2.5).abs() < 1e-9);
+    }
+
+    #[test]
+    fn get_at_masked() {
+        let gv = GridValues::Masked {
+            values: vec![1.0, 9999.0, 3.0],
+            present: vec![true, false, true],
+        };
+        assert_eq!(gv.get_at(0), Some(1.0));
+        assert_eq!(gv.get_at(1), None); // masked
+        assert_eq!(gv.get_at(2), Some(3.0));
+        assert_eq!(gv.get_at(3), None); // out of bounds
     }
 }
