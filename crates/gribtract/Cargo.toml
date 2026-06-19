@@ -1,0 +1,13 @@
+[package]
+name = "gribtract"
+description = "High-level GRIB2 decoder — message iterator, field selection, public API"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+gribtract-core = { workspace = true }
+
+[dev-dependencies]

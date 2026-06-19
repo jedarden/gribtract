@@ -1,0 +1,12 @@
+[package]
+name = "xtask"
+description = "Build/bench/corpus management tasks for gribtract"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "xtask"
+path = "src/main.rs"
+
+[dependencies]

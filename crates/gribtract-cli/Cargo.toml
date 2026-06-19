@@ -1,0 +1,15 @@
+[package]
+name = "gribtract-cli"
+description = "CLI for gribtract: decode, list, dump GRIB2 files as JSON/CSV"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "gribtract"
+path = "src/main.rs"
+
+[dependencies]
+gribtract = { workspace = true }
