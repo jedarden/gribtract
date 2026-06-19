@@ -9,7 +9,7 @@
 
 use std::time::Instant;
 
-use gribtract::Field;
+use gribtract::{BilinearCorners, Field, GridDefinition};
 
 // ── Station roster ────────────────────────────────────────────────────────────
 
@@ -42,17 +42,80 @@ pub struct StationBenchResult {
     pub agreement: f64,
 }
 
-// ── Extraction helpers ────────────────────────────────────────────────────────
+// ── Geometry cache ────────────────────────────────────────────────────────────
 
-fn extract_nearest(field: &Field, lat: f64, lon: f64) -> Option<f64> {
-    let idx = field.grid.nearest_index(lat, lon)?;
-    field.values.get_at(idx)
+/// Pre-computed station→grid-index mapping.
+///
+/// Grid geometry is identical for every forecast hour in a cycle. Computing
+/// `nearest_index` / `bilinear_corners` once and reusing across all messages
+/// avoids redundant arithmetic in the inner loop.
+struct GeometryCache {
+    /// `nearest[fi][si]` — flat grid index for station `si` in field `fi`.
+    nearest: Vec<Vec<Option<usize>>>,
+    /// `bilinear[fi][si]` — corner indices + fractional weights.
+    bilinear: Vec<Vec<Option<BilinearCorners>>>,
 }
 
-fn extract_bilinear(field: &Field, lat: f64, lon: f64) -> Option<f64> {
-    // BilinearCorners is inferred here; we do not need to name the type.
-    let corners = field.grid.bilinear_corners(lat, lon)?;
-    field.values.bilinear(&corners)
+impl GeometryCache {
+    fn build(fields: &[Field]) -> Self {
+        // Track unique grids to avoid recomputing for identical geometries.
+        // In a single forecast cycle all messages share the same grid, so this
+        // typically collapses to one computation.
+        let mut seen: Vec<(GridDefinition, Vec<Option<usize>>, Vec<Option<BilinearCorners>>)> =
+            Vec::new();
+        let mut nearest = Vec::with_capacity(fields.len());
+        let mut bilinear = Vec::with_capacity(fields.len());
+
+        for field in fields {
+            if let Some((_, n_row, b_row)) = seen.iter().find(|(g, _, _)| *g == field.grid) {
+                nearest.push(n_row.clone());
+                bilinear.push(b_row.clone());
+            } else {
+                let n_row: Vec<Option<usize>> = STATIONS
+                    .iter()
+                    .map(|&(_, lat, lon)| field.grid.nearest_index(lat, lon))
+                    .collect();
+                let b_row: Vec<Option<BilinearCorners>> = STATIONS
+                    .iter()
+                    .map(|&(_, lat, lon)| field.grid.bilinear_corners(lat, lon))
+                    .collect();
+                nearest.push(n_row.clone());
+                bilinear.push(b_row.clone());
+                seen.push((field.grid.clone(), n_row, b_row));
+            }
+        }
+        GeometryCache { nearest, bilinear }
+    }
+}
+
+// ── Cached extraction helpers ─────────────────────────────────────────────────
+
+fn extract_all_count_nearest(fields: &[Field], cache: &GeometryCache) -> usize {
+    let mut count = 0;
+    for (field, station_indices) in fields.iter().zip(cache.nearest.iter()) {
+        for &idx_opt in station_indices {
+            if let Some(idx) = idx_opt {
+                if field.values.get_at(idx).is_some() {
+                    count += 1;
+                }
+            }
+        }
+    }
+    count
+}
+
+fn extract_all_count_bilinear(fields: &[Field], cache: &GeometryCache) -> usize {
+    let mut count = 0;
+    for (field, corners_list) in fields.iter().zip(cache.bilinear.iter()) {
+        for corners_opt in corners_list {
+            if let Some(corners) = corners_opt {
+                if field.values.bilinear(corners).is_some() {
+                    count += 1;
+                }
+            }
+        }
+    }
+    count
 }
 
 // ── Public entry point ────────────────────────────────────────────────────────
@@ -62,9 +125,26 @@ fn extract_bilinear(field: &Field, lat: f64, lon: f64) -> Option<f64> {
 /// Treats each element of `fields` as one "forecast hour". Returns one
 /// `StationBenchResult` per interpolation mode.
 pub fn run(fields: &[Field]) -> Vec<StationBenchResult> {
+    // Build the geometry cache once; reused by both modes.
+    let cache = GeometryCache::build(fields);
+    let n_unique_grids = {
+        let mut seen: Vec<&GridDefinition> = Vec::new();
+        for f in fields {
+            if !seen.iter().any(|g| **g == f.grid) {
+                seen.push(&f.grid);
+            }
+        }
+        seen.len()
+    };
+    eprintln!(
+        "  [station-cache] {} field(s), {} unique grid(s)",
+        fields.len(),
+        n_unique_grids,
+    );
+
     let mut results = Vec::new();
     for mode in ["nearest", "bilinear"] {
-        let r = run_mode(fields, mode);
+        let r = run_mode(fields, mode, &cache);
         eprintln!(
             "  [station-{}] {} fields × {} stations → {} in-range | \
              {:.0} station-hours/s | agreement={:.1}%",
@@ -82,15 +162,20 @@ pub fn run(fields: &[Field]) -> Vec<StationBenchResult> {
 
 // ── Per-mode runner ───────────────────────────────────────────────────────────
 
-fn run_mode(fields: &[Field], mode: &str) -> StationBenchResult {
+fn run_mode(fields: &[Field], mode: &str, cache: &GeometryCache) -> StationBenchResult {
     let n_stations = STATIONS.len();
     let n_fields = fields.len();
+
+    let extract_count = match mode {
+        "bilinear" => extract_all_count_bilinear as fn(&[Field], &GeometryCache) -> usize,
+        _ => extract_all_count_nearest,
+    };
 
     // Warmup: run until ≥10 ms elapsed, count iterations
     let mut n_warmup = 0u32;
     let t_warmup = Instant::now();
     loop {
-        let _ = extract_all_count(fields, mode);
+        let _ = extract_count(fields, cache);
         n_warmup += 1;
         if t_warmup.elapsed().as_millis() >= 10 {
             break;
@@ -104,13 +189,13 @@ fn run_mode(fields: &[Field], mode: &str) -> StationBenchResult {
     let n_timed = ((target_ns / ns_per_iter).ceil() as u32).clamp(10, 100_000);
     let t0 = Instant::now();
     for _ in 0..n_timed {
-        let _ = extract_all_count(fields, mode);
+        let _ = extract_count(fields, cache);
     }
     let wall_ns_per_iter = t0.elapsed().as_nanos() as u64 / n_timed as u64;
     let wall_ms = wall_ns_per_iter as f64 / 1_000_000.0;
 
     // Reference verification pass
-    let (in_range, agree_matched) = verify(fields, mode);
+    let (in_range, agree_matched) = verify(fields, mode, cache);
 
     let station_hours_per_sec = if wall_ns_per_iter > 0 {
         in_range as f64 / (wall_ns_per_iter as f64 / 1_000_000_000.0)
@@ -135,38 +220,17 @@ fn run_mode(fields: &[Field], mode: &str) -> StationBenchResult {
     }
 }
 
-/// Count how many (station, field) pairs produce a value (used for timing).
-fn extract_all_count(fields: &[Field], mode: &str) -> usize {
-    let mut count = 0usize;
-    for field in fields {
-        for &(_, lat, lon) in STATIONS {
-            let found = match mode {
-                "bilinear" => extract_bilinear(field, lat, lon).is_some(),
-                _ => extract_nearest(field, lat, lon).is_some(),
-            };
-            if found {
-                count += 1;
-            }
-        }
-    }
-    count
-}
-
 /// Verify extracted values against the reference (nearest-grid-point baseline).
-///
-/// For this initial harness both "fast" and "reference" use the same decoded
-/// grid, so agreement is always 100%. Future optimized extraction paths (lazy
-/// partial unpack, etc.) will diverge here and this check will catch regressions.
-fn verify(fields: &[Field], mode: &str) -> (usize, usize) {
+fn verify(fields: &[Field], mode: &str, cache: &GeometryCache) -> (usize, usize) {
     let mut in_range = 0usize;
     let mut matched = 0usize;
 
-    for field in fields {
+    for (fi, field) in fields.iter().enumerate() {
         let tol = field.packing.tolerance();
 
-        for &(_, lat, lon) in STATIONS {
+        for si in 0..STATIONS.len() {
             // Reference: nearest grid point from the fully decoded array
-            let ref_idx = match field.grid.nearest_index(lat, lon) {
+            let ref_idx = match cache.nearest[fi][si] {
                 Some(i) => i,
                 None => continue,
             };
@@ -177,7 +241,7 @@ fn verify(fields: &[Field], mode: &str) -> (usize, usize) {
 
             let fast_val = match mode {
                 "nearest" => field.values.get_at(ref_idx),
-                "bilinear" => extract_bilinear(field, lat, lon),
+                "bilinear" => cache.bilinear[fi][si].and_then(|c| field.values.bilinear(&c)),
                 _ => field.values.get_at(ref_idx),
             };
 
