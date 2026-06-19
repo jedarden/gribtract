@@ -143,9 +143,9 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
   files live; not the VPS), the field-by-field comparator, and the tolerance
   policy. Wire `cargo test` to run a sampled differential suite. *Deliverable: a
   failing-but-green-framework that can score any decoder against the corpus.*
-- [ ] **Phase 1 — Framing + metadata.** Section 0–8 split, identification/grid/
+- [x] **Phase 1 — Framing + metadata.** Section 0–8 split, identification/grid/
   product metadata. Match all non-value fields exactly for GFS surface temp.
-- [ ] **Phase 2 — Simple packing (5.0) + lat/lon grid (3.0).** First end-to-end
+- [x] **Phase 2 — Simple packing (5.0) + lat/lon grid (3.0).** First end-to-end
   numeric agreement on the most common GFS/NBM fields.
 - [ ] **Phase 2b — Proof-of-speed dashboard (wired in here, updated forever after).**
   Benchmark harness emits `bench-results.json` (throughput + agreement, vs
