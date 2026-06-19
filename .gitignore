@@ -12,3 +12,6 @@ Cargo.lock
 /bench-results.json
 /bench-history.jsonl
 /dashboard.html
+
+# local operational pointers (kept out of public repo)
+/.marathon/local-env.md

@@ -17,7 +17,7 @@ repeat.*
 1. **The oracle is the product.** The decoder is only as trustworthy as the
    corpus and the differential check behind it. Harness work is never "overhead."
 2. **Real files only.** Fixtures are actual NOAA grib2 messages (GFS, HRRR, NBM,
-   GEFS, …), not synthetic. The upstream archive already captures these — seed from it.
+   GEFS, …), not synthetic. An upstream archive already captures these — seed from it.
 3. **Tolerance is derived, not guessed.** Grid-value equality is checked within
    the precision implied by the packing template (e.g. decimal/binary scale
    factors), not a magic epsilon. The tolerance policy is documented and tested.
@@ -151,7 +151,7 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
 ## Implementation Phases
 
 - [x] **Phase 0 — Oracle harness first.** Stand up the corpus loader, the
-  eccodes/wgrib2 reference runner (in internal cluster where the toolchain +
+  eccodes/wgrib2 reference runner (on an internal cluster where the toolchain +
   files live; not the VPS), the field-by-field comparator, and the tolerance
   policy. Wire `cargo test` to run a sampled differential suite. *Deliverable: a
   failing-but-green-framework that can score any decoder against the corpus.*
@@ -185,7 +185,7 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
 - [ ] **Phase 6 — Ensembles + statistical products (GEFS).** Product templates for
   members and time-aggregated fields.
 - [ ] **Phase 7 — Publish + integrate.** crates.io, Python bindings, and the
-  forecast-timeseries emitter consumed by the downstream backtest join.
+  forecast-timeseries emitter consumed by a downstream backtest join.
 
 ## Marathon loop contract
 
@@ -221,6 +221,6 @@ the obvious next pick, advancing this track is always valid work.
 - **JPEG2000 in Rust:** is there a pure-Rust J2K decoder of sufficient fidelity,
   or is a vetted FFI dependency acceptable for template 5.40 only?
 - **Where the reference runs:** the differential harness needs the C toolchain;
-  run it in internal-cluster (has files + cluster), not the VPS. CI wiring TBD.
+  run it on the internal cluster (has files + toolchain), not the VPS. CI wiring TBD.
 - **Scope of metadata naming:** ship a parameter/level name table, or expose raw
   numeric ids and leave naming to the consumer initially?

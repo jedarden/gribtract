@@ -74,11 +74,12 @@ The differential harness compares gribtract against **golden reference outputs**
 captured from eccodes/wgrib2 — not a live reference decoder in the test loop. So:
 
 - Commit a small set of golden fixtures: real `.grib2` input + the reference-decoded
-  output + provenance (source URL/cycle, capture date, sha256). The upstream archive
+  output + provenance (source URL/cycle, capture date, sha256). An upstream archive
   already captures real grib2 — seed from there.
 - If `eccodes`/`wgrib2` are **not installed on this box**, do not block: build the
   comparator against the committed goldens, and `br create` a bead to generate/refresh
-  goldens in the internal cluster (where the toolchain + files live). Keep moving.
+  goldens on the internal cluster (where the toolchain + files live — see the
+  gitignored `.marathon/local-env.md` for the concrete cluster/archive names). Keep moving.
 - Tolerance is derived from each message's packing header (half-ULP of the
   quantization step) — see the design note. Never a global epsilon.
 - Large fixtures live out-of-tree (B2) with an in-tree manifest + sha256; the

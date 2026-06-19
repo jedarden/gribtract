@@ -2,9 +2,9 @@
 
 A pure-Rust GRIB2 decoder — decodes NOAA/WMO GRIB2 messages into typed fields and gridded numeric data, verified field-by-field against eccodes/wgrib2.
 
-`gribtract` exists to turn the raw GRIB2 files already captured by the upstream
-weather stack into decoded forecast values that can be asof-joined at backtest
-time — without shelling out to a C toolchain. It is built **oracle-first**: every
+`gribtract` exists to turn raw GRIB2 files already captured by an upstream weather
+pipeline into decoded forecast values that can be asof-joined at backtest time —
+without shelling out to a C toolchain. It is built **oracle-first**: every
 release is gated on byte-and-number-exact agreement with a reference decoder over
 a growing corpus of real NOAA products.
 
@@ -12,8 +12,8 @@ a growing corpus of real NOAA products.
 
 - There is no high-quality, pure-Rust GRIB2 decoder. The ecosystem shells out to
   `wgrib2`/eccodes (C) or wraps them via FFI.
-- The downstream forecast-timeseries work needs to decode GFS/HRRR/NBM/GEFS grids in
-  a Rust pipeline and emit a separate weather/forecast timeseries.
+- A downstream forecast-timeseries pipeline needs to decode GFS/HRRR/NBM/GEFS grids
+  in Rust and emit a separate weather/forecast timeseries.
 - GRIB2 has a *bounded spec but an unbounded tail* of real-world packing templates
   and grid definitions — exactly the shape that benefits from continuous,
   verification-gated improvement (marathon coding sessions).

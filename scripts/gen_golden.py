@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """gen_golden.py — Generate gribtract golden reference files using eccodes.
 
-Run this script where eccodes is available (e.g., internal cluster with
+Run this script where eccodes is available (e.g., an internal cluster with the
 ECMWF toolchain installed).  The output JSON is committed into the repo and
 used by the differential harness for offline comparison.
 
