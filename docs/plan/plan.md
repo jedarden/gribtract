@@ -138,7 +138,7 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
 
 ## Implementation Phases
 
-- [ ] **Phase 0 — Oracle harness first.** Stand up the corpus loader, the
+- [x] **Phase 0 — Oracle harness first.** Stand up the corpus loader, the
   eccodes/wgrib2 reference runner (in internal cluster where the toolchain +
   files live; not the VPS), the field-by-field comparator, and the tolerance
   policy. Wire `cargo test` to run a sampled differential suite. *Deliverable: a
