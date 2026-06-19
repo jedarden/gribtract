@@ -10,7 +10,7 @@ use gribtract_testutil::diff::{compare_fixture, CoverageReport};
 use gribtract_testutil::golden;
 
 /// Minimum acceptable agreement percentage. Raise this as templates are implemented.
-const AGREEMENT_FLOOR: f64 = 0.0;
+const AGREEMENT_FLOOR: f64 = 100.0;
 
 #[test]
 fn differential_coverage_report() {
