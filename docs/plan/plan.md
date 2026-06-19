@@ -86,6 +86,16 @@ JPEG2000/PNG decode; (for 5.3) spatial differencing reversal.
 Runs both decoders over the corpus, compares metadata exactly and grid values
 within derived tolerance, emits a per-template coverage + agreement report.
 
+### Throughput & proof-of-speed dashboard
+A self-contained HTML dashboard that **proves gribtract decodes at the claimed
+speed, on real files, reproducibly** — and shows it next to correctness so speed
+is never claimed without proof of a correct decode. Fed by a machine-readable
+`bench-results.json` emitted by the benchmark harness (`cargo bench` / xtask),
+never hand-edited. See `docs/notes/throughput-dashboard.md` for the full spec.
+This is the artifact that answers "is it actually working at that speed?" — it is
+a deliverable, not an afterthought, and is wired in early (Phase 2) so every later
+iteration updates it.
+
 ## Data Models
 
 ```rust
@@ -104,6 +114,28 @@ struct Field {
 enum GridValues { Dense(Vec<f64>), Masked { values: Vec<f64>, present: BitVec } }
 ```
 
+### Benchmark result (drives the dashboard)
+
+```jsonc
+// bench-results.json — one record per benchmarked decode run
+{
+  "git_sha": "…", "timestamp": "…",          // provenance, stamped by xtask
+  "host": { "cpu": "…", "cores": 8, "mem_gb": 62 },
+  "corpus": { "name": "gfs-2026-06", "messages": 4096, "bytes": 1734967296 },
+  "runs": [
+    { "decoder": "gribtract", "template_5x": "5.3",
+      "messages_per_sec": 0, "mb_per_sec": 0, "grid_points_per_sec": 0,
+      "wall_ms": 0, "agreement": 1.0 },          // correctness rides alongside speed
+    { "decoder": "eccodes",  "template_5x": "5.3", "mb_per_sec": 0, "wall_ms": 0 },
+    { "decoder": "wgrib2",   "template_5x": "5.3", "mb_per_sec": 0, "wall_ms": 0 }
+  ]
+}
+```
+
+Speedup vs. each reference decoder is computed from these records; the dashboard
+renders the comparison and the absolute throughput, both tagged with `git_sha` +
+`host` so a claimed number is always reproducible and attributable.
+
 ## Implementation Phases
 
 - [ ] **Phase 0 — Oracle harness first.** Stand up the corpus loader, the
@@ -115,6 +147,11 @@ enum GridValues { Dense(Vec<f64>), Masked { values: Vec<f64>, present: BitVec } 
   product metadata. Match all non-value fields exactly for GFS surface temp.
 - [ ] **Phase 2 — Simple packing (5.0) + lat/lon grid (3.0).** First end-to-end
   numeric agreement on the most common GFS/NBM fields.
+- [ ] **Phase 2b — Proof-of-speed dashboard (wired in here, updated forever after).**
+  Benchmark harness emits `bench-results.json` (throughput + agreement, vs
+  eccodes/wgrib2); self-contained HTML dashboard renders it with a live `--serve`
+  mode. From here on, every phase's work must keep the dashboard green and current.
+  See `docs/notes/throughput-dashboard.md`.
 - [ ] **Phase 3 — Complex packing (5.2/5.3) + spatial differencing.** Unlocks most
   HRRR fields. The numerically trickiest unpacker.
 - [ ] **Phase 4 — JPEG2000 (5.40) + PNG (5.41).** Compressed grids (common in some
@@ -134,8 +171,11 @@ For an autonomous session to make safe, monotonic progress, each iteration must:
 3. Implement/repair the relevant template decoder.
 4. `cargo test` → full sampled differential suite passes; no regression vs the
    ratcheted fixture set.
-5. Commit. The agreement-coverage report (% messages matching, by template) is the
-   single north-star metric the loop drives upward.
+5. Commit. The loop drives two coupled north-star metrics upward, **in this
+   priority**: (a) **agreement coverage** (% messages matching, by template) — the
+   gate; and (b) **decode throughput** (MB/s and speedup vs eccodes/wgrib2) — the
+   proof. A throughput gain that lowers agreement is a regression, not progress.
+   Both are published to the proof-of-speed dashboard every iteration.
 
 ## Open Questions
 

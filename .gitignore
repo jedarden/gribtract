@@ -4,3 +4,6 @@ Cargo.lock
 .DS_Store
 # large grib2 fixtures fetched by hash, not committed
 /tests/corpus/large/
+
+# marathon session logs
+/.marathon/logs/
