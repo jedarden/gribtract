@@ -61,8 +61,8 @@ impl GeometryCache {
         // Track unique grids to avoid recomputing for identical geometries.
         // In a single forecast cycle all messages share the same grid, so this
         // typically collapses to one computation.
-        let mut seen: Vec<(GridDefinition, Vec<Option<usize>>, Vec<Option<BilinearCorners>>)> =
-            Vec::new();
+        type GridEntry = (GridDefinition, Vec<Option<usize>>, Vec<Option<BilinearCorners>>);
+        let mut seen: Vec<GridEntry> = Vec::new();
         let mut nearest = Vec::with_capacity(fields.len());
         let mut bilinear = Vec::with_capacity(fields.len());
 
@@ -107,11 +107,9 @@ fn extract_all_count_nearest(fields: &[Field], cache: &GeometryCache) -> usize {
 fn extract_all_count_bilinear(fields: &[Field], cache: &GeometryCache) -> usize {
     let mut count = 0;
     for (field, corners_list) in fields.iter().zip(cache.bilinear.iter()) {
-        for corners_opt in corners_list {
-            if let Some(corners) = corners_opt {
-                if field.values.bilinear(corners).is_some() {
-                    count += 1;
-                }
+        for corners in corners_list.iter().flatten() {
+            if field.values.bilinear(corners).is_some() {
+                count += 1;
             }
         }
     }
