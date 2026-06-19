@@ -7,3 +7,7 @@ Cargo.lock
 
 # marathon session logs
 /.marathon/logs/
+
+# generated benchmark artifacts (written by xtask bench; not committed)
+/bench-results.json
+/bench-history.jsonl

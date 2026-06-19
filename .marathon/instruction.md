@@ -45,6 +45,29 @@ not progress. Never claim a speed number without a passing decode behind it.
    the phase in `docs/plan/plan.md`.
 10. `br sync --flush-only` to checkpoint the db → JSONL. Then stop.
 
+## Parse-speed track (Phase 2c — open-ended, dead ends expected)
+
+Alongside the phase work there is a standing optimization loop: the **fixed-station
+point-extraction benchmark** (`docs/notes/station-extraction-benchmark.md`) — extract
+a per-station time series at a fixed roster of US metro coordinates and make it fast.
+
+- This track is **never "done."** Keep trying new techniques to raise
+  `stations × hours / sec`: lazy/partial unpack, geometry + bitmap-rank caches reused
+  across forecast hours, SIMD spans, decode-once-extract-many, parallelism, zero-copy
+  slicing, and ideas not listed here.
+- **Expect most attempts to fail, regress, or prove impossible — that's expected and
+  fine.** Back out anything that doesn't help, and append a one-line entry to a
+  techniques log (e.g. `notes/parse-speed-log.md`: technique → result → why) so the
+  loop doesn't re-walk the same dead end.
+- The one hard rule still holds: **correctness gates speed.** Every extraction is
+  verified against the full-grid decode at the same points within derived tolerance.
+  A faster path that changes a value is a regression, not progress — revert it.
+- When there's no obvious template/correctness bead to pick, **advancing this track
+  is always valid work.** Make one concrete speed attempt, measure it on the
+  dashboard, keep it if it helps and is still correct, otherwise revert + log.
+- Keep this benchmark framed generically (point forecasts at fixed station
+  coordinates). Do not describe it as being for any particular downstream consumer.
+
 ## Bootstrapping the oracle (Phase 0 reality check)
 
 The differential harness compares gribtract against **golden reference outputs**

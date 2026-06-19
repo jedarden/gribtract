@@ -96,6 +96,18 @@ This is the artifact that answers "is it actually working at that speed?" — it
 a deliverable, not an afterthought, and is wired in early (Phase 2) so every later
 iteration updates it.
 
+### Fixed-station point-extraction benchmark
+A second benchmark workload alongside bulk full-grid decode: extract a per-station
+**time series** (one value per forecast hour, across a cycle) at a fixed roster of
+~7–10 US metropolitan station coordinates — the common "I only need the value at
+these points, across the horizon" hot path. It measures `stations × hours / sec`
+from raw bytes to assembled matrix, in nearest and bilinear modes, each verified
+against the full-grid decode at the same points. This is deliberately an **open-
+ended optimization target**: decoding a whole grid to read a few points is wasteful,
+but GRIB2 packing makes cheap random access hard, so there is a long tail of
+techniques to try — many will be dead ends, and that is expected. See
+`docs/notes/station-extraction-benchmark.md`.
+
 ## Data Models
 
 ```rust
@@ -152,6 +164,18 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
   eccodes/wgrib2); self-contained HTML dashboard renders it with a live `--serve`
   mode. From here on, every phase's work must keep the dashboard green and current.
   See `docs/notes/throughput-dashboard.md`.
+- [ ] **Phase 2c — Point-extraction parse-speed track (ongoing, never "done").**
+  Add the fixed-station point-extraction benchmark (`stations × hours / sec`,
+  nearest + bilinear, each verified against full-grid decode at the points), then
+  **iterate on parse speed indefinitely** — lazy/partial unpack, geometry +
+  bitmap-rank caches reused across forecast hours, SIMD spans, decode-once-extract-
+  many, parallelism, zero-copy slicing, and techniques not yet thought of. **Expect
+  many dead ends and failed attempts — that is the point of the track.** A technique
+  that proves *not* to help is a valid iteration: record it in the techniques log so
+  the loop doesn't re-walk it. The only hard rule is the project's rule — correctness
+  gates speed; a faster path that changes a value is a regression, not progress.
+  See `docs/notes/station-extraction-benchmark.md`. This track runs in parallel with
+  the phases below and is never checked off.
 - [ ] **Phase 3 — Complex packing (5.2/5.3) + spatial differencing.** Unlocks most
   HRRR fields. The numerically trickiest unpacker.
 - [ ] **Phase 4 — JPEG2000 (5.40) + PNG (5.41).** Compressed grids (common in some
@@ -173,9 +197,17 @@ For an autonomous session to make safe, monotonic progress, each iteration must:
    ratcheted fixture set.
 5. Commit. The loop drives two coupled north-star metrics upward, **in this
    priority**: (a) **agreement coverage** (% messages matching, by template) — the
-   gate; and (b) **decode throughput** (MB/s and speedup vs eccodes/wgrib2) — the
-   proof. A throughput gain that lowers agreement is a regression, not progress.
-   Both are published to the proof-of-speed dashboard every iteration.
+   gate; and (b) **decode throughput** (MB/s and speedup vs eccodes/wgrib2, plus
+   `stations × hours / sec` for point extraction) — the proof. A throughput gain
+   that lowers agreement is a regression, not progress. Both are published to the
+   proof-of-speed dashboard every iteration.
+
+Separately from the phase work, the **point-extraction parse-speed track (Phase 2c)
+is an open-ended optimization loop**: keep trying new techniques to make station
+extraction faster, expect most attempts to fail or regress and back them out, and
+log what didn't work so the loop doesn't repeat it. Dead ends are normal here — the
+correctness gate makes the exploration safe. When no template/correctness bead is
+the obvious next pick, advancing this track is always valid work.
 
 ## Open Questions
 
