@@ -256,7 +256,7 @@ impl GridValues {
             GridValues::Dense(v) => {
                 let v2: Vec<bool> = vec![true; v.len()];
                 v.iter()
-                    .zip(v2.into_iter())
+                    .zip(v2)
                     .map(|(&val, p)| (val, p))
                     .collect::<Vec<_>>()
                     .into_iter()

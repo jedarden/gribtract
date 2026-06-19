@@ -553,7 +553,7 @@ fn unpack_n_bits(data: &[u8], count: usize, n_bits: usize) -> Vec<u64> {
         let byte_start = bit_offset / 8;
         let bit_start = bit_offset % 8;
         let bits_needed = bit_start + n_bits;
-        let bytes_needed = (bits_needed + 7) / 8;
+        let bytes_needed = bits_needed.div_ceil(8);
 
         let mut raw: u64 = 0;
         for i in 0..bytes_needed {
