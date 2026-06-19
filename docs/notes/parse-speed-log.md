@@ -42,5 +42,37 @@ is added to the corpus.
 **As expected:** Does NOT generalize to complex packing (DRT=2/3) — group-based coding means
 point `i` is NOT at a fixed bit offset; `section7_raw` is intentionally left empty for DRT≠0.
 
-_Add entries here as optimization attempts are made. Include even failed attempts
-so the loop doesn't repeat them._
+## Attempt 2: SIMD-like unpack via byte-aligned fast paths + loop refactor
+
+**Technique:** Two changes to `decode.rs`:
+
+1. **Byte-aligned fast paths in `unpack_n_bits`** — added `match n_bits { 8 | 16 | 32 => ... }`
+   specializations that use direct byte/u16be/u32be reads instead of the general shift/mask
+   loop. These expose the inner iterator loops to LLVM auto-vectorization.
+
+2. **DRT=3 group inner loop refactor** — two sub-changes:
+   - Zero-width group fast path: when `w == 0`, fill with `gref` × `l` without any bit reads.
+   - Precomputed bit offset: replaced the loop-carried `bit_offset` update with
+     `start_bit + k * w` so LLVM can treat `k` as the induction variable and potentially
+     vectorize the `read_bits_at` calls within a group.
+
+**Result:**
+- DRT=0 (5×5 fixture, n_bits=8): 519K msg/s vs 422K baseline → **+23% throughput**, 106 MB/s vs 86 MB/s.
+  The n_bits=8 fast path is the driver — direct byte copy, compiler auto-vectorizes.
+- DRT=3 (GFS 1-degree, 65160 points): 313 msg/s vs 316 baseline → **no measurable change** (within noise).
+  The precomputed-offset refactor did not move the DRT=3 needle: `read_bits_at` itself has
+  too much internal branching (variable `bytes_needed`) for LLVM to vectorize it, even when
+  the loop induction variable is dependency-free. The zero-width fast path may help on data
+  with more w=0 groups, but not on this field.
+- Agreement: 100% for DRT=0 and DRT=3 — no correctness regression.
+
+**Why stopped:** DRT=3 improvement requires a fundamentally different approach — either
+explicitly unrolling the common group widths (e.g. dedicated extractors for w=12, w=8) or
+using `std::arch` SIMD intrinsics with `#[target_feature(enable="avx2")]`. Not attempted here
+to keep the change auditable and the correctness bar clear. The DRT=0 win is kept.
+
+**Implication for DRT=3 speed:** To materially speed up the DRT=3 inner loop, the next
+attempt should specialize per-group extraction for the most common widths (typically w=0,
+4, 8, 12 in GFS complex packing). A dispatch table keyed on `w` returning a closure that
+reads values directly (without the `bytes_needed` branch) would remove the last major
+scalar bottleneck in `read_bits_at`.

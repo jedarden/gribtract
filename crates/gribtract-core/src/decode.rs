@@ -669,11 +669,21 @@ fn decode_drt3(
         let w = group_widths[g];
         let l = group_lengths[g];
         let gref = group_refs[g] as i64;
-        for _ in 0..l {
-            let v = read_bits_at(body, bit_offset, w) as i64;
-            packed.push(gref + v);
-            bit_offset += w;
+        if w == 0 {
+            // Zero-width group: all values equal the group reference.
+            // Extending without any bit reads — common in flat regions.
+            for _ in 0..l { packed.push(gref); }
+            continue;
         }
+        // Precompute the starting bit offset so `k * w` has no loop-carried
+        // dependency on `bit_offset`. This lets the compiler auto-vectorize
+        // when the group width is constant (which it is within each group).
+        let start_bit = bit_offset;
+        for k in 0..l {
+            let v = read_bits_at(body, start_bit + k * w, w) as i64;
+            packed.push(gref + v);
+        }
+        bit_offset = start_bit + w * l;
     }
 
     if packed.len() != n_points {
@@ -755,6 +765,36 @@ fn unpack_n_bits(data: &[u8], count: usize, n_bits: usize) -> Vec<u64> {
     if n_bits == 0 {
         return vec![0u64; count];
     }
+    // Fast paths for byte-aligned widths — avoids per-element shift/mask
+    // overhead and exposes the inner loops to compiler auto-vectorization.
+    match n_bits {
+        8 => {
+            let available = count.min(data.len());
+            let mut v: Vec<u64> = data[..available].iter().map(|&b| b as u64).collect();
+            v.resize(count, 0);
+            return v;
+        }
+        16 => {
+            let available = count.min(data.len() / 2);
+            let mut v: Vec<u64> = data.chunks_exact(2)
+                .take(available)
+                .map(|c| u16::from_be_bytes([c[0], c[1]]) as u64)
+                .collect();
+            v.resize(count, 0);
+            return v;
+        }
+        32 => {
+            let available = count.min(data.len() / 4);
+            let mut v: Vec<u64> = data.chunks_exact(4)
+                .take(available)
+                .map(|c| u32::from_be_bytes([c[0], c[1], c[2], c[3]]) as u64)
+                .collect();
+            v.resize(count, 0);
+            return v;
+        }
+        _ => {}
+    }
+
     let mut values = Vec::with_capacity(count);
     let mut bit_offset = 0usize;
 
