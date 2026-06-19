@@ -117,6 +117,7 @@ pub fn run(args: &[String]) {
     let mut corpus_bytes = 0u64;
     // Accumulate all decoded fields for station-extract bench
     let mut all_decoded_fields: Vec<gribtract::Field> = Vec::new();
+    let mut all_lazy_fields: Vec<gribtract::LazyField> = Vec::new();
     let run_full_grid = workload_filter != "station-extract";
 
     for entry in &inline_fixtures {
@@ -141,8 +142,11 @@ pub fn run(args: &[String]) {
         corpus_messages += 1;
         corpus_bytes += bytes.len() as u64;
 
-        // Accumulate for station-extract bench
+        // Accumulate for station-extract bench (both full and lazy)
         all_decoded_fields.extend(fields.iter().cloned());
+        if let Ok(lazy) = gribtract::decode_lazy(&bytes) {
+            all_lazy_fields.extend(lazy);
+        }
 
         if !run_full_grid {
             continue;
@@ -271,6 +275,27 @@ pub fn run(args: &[String]) {
                 n_fields: Some(sr.n_fields as u32),
                 in_range: Some(sr.in_range as u32),
                 station_hours_per_sec: Some(sr.station_hours_per_sec),
+            });
+        }
+
+        // Lazy DRT=0 partial-decode path (only runs when DRT=0 data with raw bytes available)
+        if let Some(lazy_r) =
+            bench_station::run_lazy_nearest(&all_lazy_fields, &all_decoded_fields)
+        {
+            runs.push(BenchRun {
+                decoder: "gribtract".to_string(),
+                workload: Some("station-extract".to_string()),
+                template_5x: None,
+                messages_per_sec: None,
+                mb_per_sec: None,
+                grid_points_per_sec: None,
+                wall_ms: lazy_r.wall_ms,
+                agreement: Some(lazy_r.agreement),
+                interpolation: Some(lazy_r.interpolation.clone()),
+                n_stations: Some(lazy_r.n_stations as u32),
+                n_fields: Some(lazy_r.n_fields as u32),
+                in_range: Some(lazy_r.in_range as u32),
+                station_hours_per_sec: Some(lazy_r.station_hours_per_sec),
             });
         }
     }

@@ -430,6 +430,34 @@ pub struct Field {
     pub packing: PackingInfo,
 }
 
+// ── Lazy field ───────────────────────────────────────────────────────────────
+
+/// A GRIB2 field with Section 7 data stored as raw bytes — not yet decoded.
+///
+/// Used by the lazy point-extraction path.  The caller extracts individual
+/// grid points on demand via `decode_point_drt0` instead of decoding the full
+/// grid.  Only supported for DRT=0 (simple packing) without a bitmap; for
+/// other templates or bitmap fields `section7_raw` is empty and the lazy path
+/// returns `None`.
+#[derive(Debug, Clone)]
+pub struct LazyField {
+    pub center: u16,
+    pub subcenter: u16,
+    pub parameter: ParameterId,
+    pub forecast: ForecastTime,
+    pub level: Level,
+    pub ensemble: Option<Ensemble>,
+    pub grid: GridDefinition,
+    pub packing: PackingInfo,
+    pub gdt_template: u16,
+    pub pdt_template: u16,
+    pub drt_template: u16,
+    /// Raw Section 7 body bytes.  Non-empty only for DRT=0 without a bitmap.
+    pub section7_raw: Vec<u8>,
+    /// True when the message has an active bitmap (lazy extraction unsupported).
+    pub has_bitmap: bool,
+}
+
 // ── Message ──────────────────────────────────────────────────────────────────
 
 /// A GRIB2 message: zero or more fields sharing a common identification section.

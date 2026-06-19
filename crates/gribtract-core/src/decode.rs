@@ -10,7 +10,7 @@
 
 use crate::error::{Error, Result};
 use crate::types::{
-    Ensemble, Field, ForecastTime, GridDefinition, GridValues, Level, PackingInfo,
+    Ensemble, Field, ForecastTime, GridDefinition, GridValues, LazyField, Level, PackingInfo,
     ParameterId, ReferenceTime,
 };
 
@@ -783,6 +783,190 @@ fn unpack_n_bits(data: &[u8], count: usize, n_bits: usize) -> Vec<u64> {
     values
 }
 
+// ── Lazy / partial decode (DRT=0 only) ───────────────────────────────────────
+
+/// Decode a single grid point from a DRT=0 (simple packing) Section 7 body.
+///
+/// Returns `None` when `idx` is out of range for the given body length and
+/// packing, or when `bits_per_value` is non-zero but the bit span for `idx`
+/// exceeds the body.  Returns a value for all indices when `bits_per_value == 0`
+/// (constant field).
+pub fn decode_point_drt0(body: &[u8], packing: &PackingInfo, idx: usize) -> Option<f64> {
+    let r = packing.reference_value as f64;
+    let two_e = 2f64.powi(packing.binary_scale_factor as i32);
+    let ten_d = 10f64.powi(packing.decimal_scale_factor as i32);
+
+    if packing.bits_per_value == 0 {
+        return Some(r / ten_d);
+    }
+
+    let n = packing.bits_per_value as usize;
+    let bit_offset = idx * n;
+    let byte_end = (bit_offset + n + 7) / 8;
+    if byte_end > body.len() {
+        return None;
+    }
+    let x = read_bits_at(body, bit_offset, n);
+    Some((r + x as f64 * two_e) / ten_d)
+}
+
+/// Decode all fields lazily — Section 7 data is stored as raw bytes.
+///
+/// Only DRT=0 fields without a bitmap populate `section7_raw`.  Call
+/// [`decode_point_drt0`] to extract individual points on demand.
+pub fn decode_bytes_lazy(bytes: &[u8]) -> Result<Vec<LazyField>> {
+    let mut fields = Vec::new();
+    let mut pos = 0;
+    while pos < bytes.len() {
+        if bytes.len() - pos < 4 {
+            break;
+        }
+        if &bytes[pos..pos + 4] != b"GRIB" {
+            return Err(Error::BadMagic(bytes[pos..pos + 4].try_into().unwrap()));
+        }
+        let msg_len = decode_lazy_message(&bytes[pos..], &mut fields)?;
+        pos += msg_len;
+    }
+    Ok(fields)
+}
+
+// ── Lazy message builder ──────────────────────────────────────────────────────
+
+#[derive(Default)]
+struct LazyFieldBuilder {
+    center: Option<u16>,
+    subcenter: Option<u16>,
+    ref_time: Option<ReferenceTime>,
+    parameter: Option<ParameterId>,
+    forecast: Option<ForecastTime>,
+    level: Option<Level>,
+    ensemble: Option<Option<Ensemble>>,
+    pdt_template: Option<u16>,
+    grid: Option<GridDefinition>,
+    gdt_template: Option<u16>,
+    packing: Option<PackingInfo>,
+    drt_template: Option<u16>,
+    has_bitmap: Option<bool>,
+    section7_raw: Option<Vec<u8>>,
+}
+
+impl LazyFieldBuilder {
+    fn build(self) -> Option<LazyField> {
+        let center = self.center?;
+        let subcenter = self.subcenter?;
+        let ref_time = self.ref_time?;
+        let parameter = self.parameter?;
+        let mut forecast = self.forecast?;
+        forecast.reference_time = ref_time;
+        let level = self.level?;
+        let ensemble = self.ensemble.unwrap_or(None);
+        let grid = self.grid?;
+        let gdt_template = self.gdt_template?;
+        let pdt_template = self.pdt_template?;
+        let packing = self.packing?;
+        let drt_template = self.drt_template?;
+        let has_bitmap = self.has_bitmap.unwrap_or(false);
+        let section7_raw = self.section7_raw.unwrap_or_default();
+        Some(LazyField {
+            center, subcenter, parameter, forecast, level, ensemble,
+            grid, packing, gdt_template, pdt_template, drt_template,
+            has_bitmap, section7_raw,
+        })
+    }
+}
+
+fn decode_lazy_message(msg: &[u8], out: &mut Vec<LazyField>) -> Result<usize> {
+    let mut buf = Buf::new(msg);
+    let magic = [buf.read_u8()?, buf.read_u8()?, buf.read_u8()?, buf.read_u8()?];
+    if &magic != b"GRIB" {
+        return Err(Error::BadMagic(magic));
+    }
+    buf.skip(2)?;
+    let discipline = buf.read_u8()?;
+    let edition = buf.read_u8()?;
+    if edition != 2 {
+        return Err(Error::UnknownEdition(edition));
+    }
+    let total_len = buf.read_u64be()? as usize;
+    if msg.len() < total_len {
+        return Err(Error::TooShort { needed: total_len, got: msg.len() });
+    }
+
+    let mut builder = LazyFieldBuilder::default();
+    let body_end = total_len - 4;
+
+    while buf.pos < body_end {
+        let sec_start = buf.pos;
+        let sec_len = buf.read_u32be()? as usize;
+        let sec_num = buf.read_u8()?;
+        if sec_len < 5 {
+            return Err(Error::TooShort { needed: 5, got: sec_len });
+        }
+        let body_start = buf.pos;
+        let body_len = sec_len - 5;
+        let sec_body = &msg[body_start..body_start + body_len];
+
+        match sec_num {
+            1 => {
+                let (center, subcenter, ref_time) = parse_section1(sec_body)?;
+                builder.center = Some(center);
+                builder.subcenter = Some(subcenter);
+                builder.ref_time = Some(ref_time);
+            }
+            2 => {}
+            3 => {
+                let (gdt, grid) = parse_section3(sec_body)?;
+                builder.gdt_template = Some(gdt);
+                builder.grid = Some(grid);
+            }
+            4 => {
+                let (pdt, param, fore, lvl, ens) = parse_section4(sec_body, discipline)?;
+                builder.pdt_template = Some(pdt);
+                builder.parameter = Some(param);
+                builder.forecast = Some(fore);
+                builder.level = Some(lvl);
+                builder.ensemble = Some(ens);
+            }
+            5 => {
+                // Parse only common packing header; complex extras ignored in lazy mode.
+                let (drt, packing, _extra) = parse_section5(sec_body)?;
+                builder.drt_template = Some(drt);
+                builder.packing = Some(packing);
+            }
+            6 => {
+                let has_bitmap = parse_section6(sec_body)?;
+                builder.has_bitmap = Some(has_bitmap);
+            }
+            7 => {
+                // Store raw bytes only for DRT=0 without a bitmap.
+                let drt0 = builder.drt_template == Some(0);
+                let no_bitmap = !builder.has_bitmap.unwrap_or(false);
+                let raw = if drt0 && no_bitmap { sec_body.to_vec() } else { Vec::new() };
+                builder.section7_raw = Some(raw);
+
+                let next_builder = LazyFieldBuilder {
+                    center: builder.center,
+                    subcenter: builder.subcenter,
+                    ref_time: builder.ref_time,
+                    ..Default::default()
+                };
+                if let Some(field) = builder.build() {
+                    out.push(field);
+                }
+                builder = next_builder;
+            }
+            _ => {}
+        }
+        buf.pos = sec_start + sec_len;
+    }
+
+    let end = &msg[body_end..body_end + 4];
+    if end != b"7777" {
+        return Err(Error::TooShort { needed: 4, got: 0 });
+    }
+    Ok(total_len)
+}
+
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -847,6 +1031,88 @@ mod tests {
                 }
             }
             _ => panic!("expected Dense"),
+        }
+    }
+
+    #[test]
+    fn decode_point_drt0_matches_full_decode() {
+        // 8-bit packing: value[i] = 270 + i
+        let packing = PackingInfo {
+            reference_value: 270.0,
+            binary_scale_factor: 0,
+            decimal_scale_factor: 0,
+            bits_per_value: 8,
+            original_field_type: 0,
+        };
+        let data: Vec<u8> = (0u8..25).collect();
+        let full = decode_section7(&data, &packing, None, 25, false).unwrap();
+        let GridValues::Dense(full_vals) = full else { panic!() };
+
+        for idx in 0..25 {
+            let lazy_val = decode_point_drt0(&data, &packing, idx).expect("idx in range");
+            assert!(
+                (lazy_val - full_vals[idx]).abs() < 1e-9,
+                "idx={idx}: lazy={lazy_val} full={}",
+                full_vals[idx],
+            );
+        }
+        assert!(decode_point_drt0(&data, &packing, 25).is_none()); // out of range
+    }
+
+    #[test]
+    fn decode_point_drt0_constant_field() {
+        // 0-bit packing: all values equal R / 10^D
+        let packing = PackingInfo {
+            reference_value: 300.0,
+            binary_scale_factor: 0,
+            decimal_scale_factor: 0,
+            bits_per_value: 0,
+            original_field_type: 0,
+        };
+        // Any idx returns 300.0 (constant field, no body bytes needed)
+        assert_eq!(decode_point_drt0(&[], &packing, 0), Some(300.0));
+        assert_eq!(decode_point_drt0(&[], &packing, 999), Some(300.0));
+    }
+
+    #[test]
+    fn decode_bytes_lazy_matches_decode_bytes() {
+        // Verify lazy parse of the 5×5 synthetic fixture against full decode.
+        // We test the structure (grid, packing) and that decode_point_drt0
+        // produces values matching the full decode at every index.
+        let corpus_root = {
+            let manifest_dir = env!("CARGO_MANIFEST_DIR");
+            std::path::Path::new(manifest_dir)
+                .join("../..")
+                .join("tests/corpus")
+        };
+        let fixture = corpus_root.join("small/gfs_anl_t2m_5x5.grib2");
+        let bytes = match std::fs::read(&fixture) {
+            Ok(b) => b,
+            Err(_) => return, // skip if fixture not present (CI may not have corpus)
+        };
+
+        let full_fields = decode_bytes(&bytes).expect("full decode");
+        let lazy_fields = decode_bytes_lazy(&bytes).expect("lazy decode");
+
+        assert_eq!(full_fields.len(), lazy_fields.len());
+        for (ff, lf) in full_fields.iter().zip(lazy_fields.iter()) {
+            assert_eq!(ff.grid, lf.grid);
+            assert_eq!(ff.packing, lf.packing);
+            assert_eq!(ff.drt_template, lf.drt_template);
+            assert!(!lf.has_bitmap);
+            assert!(!lf.section7_raw.is_empty(), "DRT=0 should have raw bytes");
+
+            let GridValues::Dense(ref full_vals) = ff.values else { panic!("expected Dense") };
+            for idx in 0..full_vals.len() {
+                let lazy_val = decode_point_drt0(&lf.section7_raw, &lf.packing, idx)
+                    .expect("idx in range");
+                let tol = lf.packing.tolerance().max(1e-12);
+                assert!(
+                    (lazy_val - full_vals[idx]).abs() <= tol,
+                    "idx={idx}: lazy={lazy_val} full={}",
+                    full_vals[idx],
+                );
+            }
         }
     }
 }
