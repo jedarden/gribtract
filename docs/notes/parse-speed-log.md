@@ -76,3 +76,32 @@ attempt should specialize per-group extraction for the most common widths (typic
 4, 8, 12 in GFS complex packing). A dispatch table keyed on `w` returning a closure that
 reads values directly (without the `bytes_needed` branch) would remove the last major
 scalar bottleneck in `read_bits_at`.
+
+## Attempt 3: Parallelism across forecast-hour messages (rayon par_iter)
+
+**Technique:** Fan the per-forecast-hour `Field` objects across cores using `rayon::par_iter()`
+zipped with the geometry cache rows. Each thread handles one field's N-station extractions,
+results summed. `Field` is `Send + Sync` (all fields are owned `Vec`s / primitive types).
+
+**Result:**
+- nearest serial: 59,829,060 station-hours/s
+- nearest-parallel (rayon): 1,344,086 station-hours/s → **44× SLOWER**
+- bilinear serial: 16,018,307 station-hours/s
+- bilinear-parallel (rayon): 1,272,033 station-hours/s → **12× SLOWER**
+- Agreement: 100% nearest, 42.9% bilinear (same as serial — no correctness change)
+
+**Why it failed:** With only 2 fields and 7 stations per field, each rayon task is 7 Vec
+index operations (< 100 ns). Rayon's work-stealing queue overhead (microseconds per task)
+completely swamps the payload. The parallel version is essentially measuring thread-scheduling
+latency, not extraction time.
+
+**When parallelism would help:** With 40+ forecast-hour messages (a full GFS f000-f120 cycle)
+AND more expensive per-field work (e.g., DRT=3 decode-on-demand rather than pre-decoded vecs),
+the thread overhead becomes negligible. The geometry cache is already read-only and trivially
+shared — the architecture is correct, just the current corpus is too thin to benefit.
+
+**Reverted:** No code kept. Rayon not added as dependency.
+
+**Prerequisite for a useful retry:** Real multi-message corpus (40+ messages from one GFS
+cycle covering CONUS). Once that corpus exists, re-run with rayon on the pre-decoded
+`&[Field]` slice — expected linear speedup to core count for the extraction loop.
