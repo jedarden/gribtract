@@ -639,7 +639,7 @@ fn decode_drt3(
     // 2. Group references: n_groups × bits_per_value bits, byte-aligned.
     let nbits = packing.bits_per_value as usize;
     let group_refs = unpack_n_bits(&body[byte_pos..], n_groups, nbits);
-    byte_pos += (n_groups * nbits + 7) / 8;
+    byte_pos += (n_groups * nbits).div_ceil(8);
 
     // 3. Group widths: n_groups × bits_group_widths bits, byte-aligned.
     let bw = extra.bits_group_widths as usize;
@@ -647,7 +647,7 @@ fn decode_drt3(
     let group_widths: Vec<usize> = raw_widths.iter()
         .map(|&w| extra.ref_group_widths as usize + w as usize)
         .collect();
-    byte_pos += (n_groups * bw + 7) / 8;
+    byte_pos += (n_groups * bw).div_ceil(8);
 
     // 4. Group lengths: n_groups × bits_scaled_group_lengths bits, byte-aligned.
     //    The last group always uses `true_last_group_length` from Section 5.
@@ -660,7 +660,7 @@ fn decode_drt3(
             extra.ref_group_lengths as usize + l as usize * extra.length_increment as usize
         }
     }).collect();
-    byte_pos += (n_groups * bl + 7) / 8;
+    byte_pos += (n_groups * bl).div_ceil(8);
 
     // 5. Packed values within groups (variable bit width per group).
     let mut packed = Vec::with_capacity(n_points);
@@ -842,7 +842,7 @@ pub fn decode_point_drt0(body: &[u8], packing: &PackingInfo, idx: usize) -> Opti
 
     let n = packing.bits_per_value as usize;
     let bit_offset = idx * n;
-    let byte_end = (bit_offset + n + 7) / 8;
+    let byte_end = (bit_offset + n).div_ceil(8);
     if byte_end > body.len() {
         return None;
     }
@@ -1088,12 +1088,11 @@ mod tests {
         let full = decode_section7(&data, &packing, None, 25, false).unwrap();
         let GridValues::Dense(full_vals) = full else { panic!() };
 
-        for idx in 0..25 {
+        for (idx, &full_val) in full_vals.iter().enumerate().take(25) {
             let lazy_val = decode_point_drt0(&data, &packing, idx).expect("idx in range");
             assert!(
-                (lazy_val - full_vals[idx]).abs() < 1e-9,
-                "idx={idx}: lazy={lazy_val} full={}",
-                full_vals[idx],
+                (lazy_val - full_val).abs() < 1e-9,
+                "idx={idx}: lazy={lazy_val} full={full_val}",
             );
         }
         assert!(decode_point_drt0(&data, &packing, 25).is_none()); // out of range
@@ -1143,14 +1142,13 @@ mod tests {
             assert!(!lf.section7_raw.is_empty(), "DRT=0 should have raw bytes");
 
             let GridValues::Dense(ref full_vals) = ff.values else { panic!("expected Dense") };
-            for idx in 0..full_vals.len() {
+            for (idx, &full_val) in full_vals.iter().enumerate() {
                 let lazy_val = decode_point_drt0(&lf.section7_raw, &lf.packing, idx)
                     .expect("idx in range");
                 let tol = lf.packing.tolerance().max(1e-12);
                 assert!(
-                    (lazy_val - full_vals[idx]).abs() <= tol,
-                    "idx={idx}: lazy={lazy_val} full={}",
-                    full_vals[idx],
+                    (lazy_val - full_val).abs() <= tol,
+                    "idx={idx}: lazy={lazy_val} full={full_val}",
                 );
             }
         }
