@@ -83,6 +83,18 @@ struct TemplateAcc {
 // ── Entry point ───────────────────────────────────────────────────────────────
 
 pub fn run(args: &[String]) {
+    // --dashboard-only: re-render dashboard.html from existing bench-results.json/bench-history.jsonl
+    if args.iter().any(|a| a == "--dashboard-only") {
+        let bench_json = std::fs::read_to_string("bench-results.json")
+            .expect("bench-results.json not found — run xtask bench first");
+        let history_csv = read_history_for_dashboard();
+        let git_sha = get_git_sha();
+        let html = render_dashboard(&bench_json, &history_csv, &git_sha);
+        std::fs::write("dashboard.html", &html).expect("write dashboard.html");
+        eprintln!("dashboard.html regenerated from existing bench-results.json");
+        return;
+    }
+
     let corpus_name = args
         .iter()
         .position(|a| a == "--corpus")

@@ -13,12 +13,13 @@
   td{padding:6px 10px;font-size:0.85rem;border-top:1px solid #21262d}
   .green{color:#3fb950}.red{color:#f85149}.amber{color:#d29922}
   .badge{display:inline-block;padding:2px 6px;border-radius:3px;font-size:0.75rem;font-weight:600}
-  .badge-green{background:#1a4226;color:#3fb950}.badge-red{background:#3d1c1c;color:#f85149}
+  .badge-green{background:#1a4226;color:#3fb950}.badge-red{background:#3d1c1c;color:#f85149}.badge-amber{background:#3d2c00;color:#d29922}
   canvas{background:#161b22;border-radius:6px;margin-top:0.5rem;display:block}
   .row{display:flex;gap:1rem;flex-wrap:wrap}
-  .card{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:1rem;flex:1;min-width:220px}
+  .card{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:1rem;flex:1;min-width:180px}
   .big-num{font-size:2rem;font-weight:700;color:#58a6ff;line-height:1.1}
   .big-label{font-size:0.75rem;color:#8b949e;margin-top:4px}
+  .provenance{font-size:0.7rem;color:#484f58;margin-top:6px}
 </style>
 </head>
 <body>
@@ -30,7 +31,23 @@ const BENCH = __BENCH_JSON__;
 const HISTORY = [__HISTORY_CSV__];
 </script>
 
+<!-- View 1: Headline big numbers -->
+<h2>Headline</h2>
 <div id="headline" class="row"></div>
+
+<!-- View 2: Throughput over commits (history) -->
+<h2>Throughput history (MB/s, full-grid)</h2>
+<canvas id="history-chart" width="900" height="180"></canvas>
+
+<!-- View 3: Throughput by data-representation template (grouped bars) -->
+<h2>Throughput by template (MB/s)</h2>
+<canvas id="tmpl-mbps-chart" width="900" height="220"></canvas>
+
+<!-- View 4: Agreement coverage companion (same layout as View 3) -->
+<h2>Agreement coverage by template</h2>
+<canvas id="tmpl-agr-chart" width="900" height="220"></canvas>
+
+<!-- Detailed tables -->
 <h2>Full-grid decode throughput</h2>
 <table id="full-grid-table">
   <thead><tr><th>Template</th><th>Decoder</th><th>MB/s</th><th>Messages/s</th><th>Grid pts/s</th><th>Wall ms</th><th>Agreement</th></tr></thead>
@@ -43,43 +60,109 @@ const HISTORY = [__HISTORY_CSV__];
   <tbody id="station-body"></tbody>
 </table>
 
-<h2>Throughput history (MB/s, full-grid)</h2>
-<canvas id="history-chart" width="900" height="180"></canvas>
-
 <script>
 (function() {
   var runs = BENCH.runs || [];
+  var host = BENCH.host || {};
+  var corpus = BENCH.corpus || {};
+  var sha7 = (BENCH.git_sha || '').slice(0, 7);
 
-  // Headline cards
-  var headline = document.getElementById('headline');
+  var provStr = 'corpus: '+(corpus.name||'?')+' · '+sha7+' · '+(host.cpu||'?');
+
   var fullGrid = runs.filter(function(r) { return !r.workload || r.workload === 'full-grid'; });
-  var stationNearest = runs.filter(function(r) { return r.workload === 'station-extract' && r.interpolation === 'nearest'; });
+  var stationRuns = runs.filter(function(r) { return r.workload === 'station-extract'; });
+  var stationNearest = stationRuns.filter(function(r) { return r.interpolation === 'nearest' && (r.in_range||0) > 0; });
+
+  // ── View 1: Headline ──────────────────────────────────────────────────────
+  var headline = document.getElementById('headline');
+
+  function addCard(bigNum, label, badgeText, badgeCls, prov) {
+    headline.innerHTML += '<div class="card">'
+      +'<div class="big-num">'+bigNum+'</div>'
+      +'<div class="big-label">'+label+'</div>'
+      +(badgeText ? '<div style="margin-top:8px"><span class="badge '+badgeCls+'">'+badgeText+'</span></div>' : '')
+      +(prov ? '<div class="provenance">'+prov+'</div>' : '')
+      +'</div>';
+  }
 
   if (fullGrid.length > 0) {
     var best = fullGrid.reduce(function(a, b) { return (b.mb_per_sec||0) > (a.mb_per_sec||0) ? b : a; }, fullGrid[0]);
-    var agr = best.agreement != null ? (best.agreement*100).toFixed(1)+'%' : 'n/a';
-    var cls = best.agreement >= 1.0 ? 'badge-green' : 'badge-red';
-    headline.innerHTML += '<div class="card"><div class="big-num">'+Math.round(best.mb_per_sec||0)+'</div>'
-      +'<div class="big-label">MB/s (full-grid, '+(best.template_5x||'?')+')</div>'
-      +'<div style="margin-top:8px"><span class="badge '+cls+'">'+agr+' agreement</span></div></div>';
+    var agrPct = best.agreement != null ? (best.agreement*100).toFixed(1)+'%' : 'n/a';
+    var agrCls = best.agreement >= 1.0 ? 'badge-green' : (best.agreement >= 0.99 ? 'badge-amber' : 'badge-red');
+
+    addCard(Math.round(best.mb_per_sec||0), 'MB/s (full-grid, '+(best.template_5x||'?')+')', agrPct+' agreement', agrCls, provStr);
+    addCard(fmtNum(best.messages_per_sec||0), 'messages/s', null, '', provStr);
+    addCard(fmtNum(best.grid_points_per_sec||0), 'grid-points/s', null, '', provStr);
+
+    // Speedup vs reference (only if reference runs exist)
+    var refRuns = fullGrid.filter(function(r) { return r.decoder !== 'gribtract'; });
+    if (refRuns.length > 0) {
+      var bestRef = refRuns.reduce(function(a, b) { return (b.mb_per_sec||0) > (a.mb_per_sec||0) ? b : a; }, refRuns[0]);
+      var speedup = (best.mb_per_sec / (bestRef.mb_per_sec||1)).toFixed(2);
+      addCard(speedup+'×', 'speedup vs '+bestRef.decoder, null, '', provStr);
+    }
   }
 
   if (stationNearest.length > 0) {
     var sr = stationNearest[0];
     var agrS = sr.agreement != null ? (sr.agreement*100).toFixed(1)+'%' : 'n/a';
-    var clsS = sr.agreement >= 1.0 ? 'badge-green' : 'badge-red';
+    var clsS = sr.agreement >= 1.0 ? 'badge-green' : (sr.agreement >= 0.99 ? 'badge-amber' : 'badge-red');
     var inr = sr.in_range || 0;
-    headline.innerHTML += '<div class="card"><div class="big-num">'+Math.round(sr.station_hours_per_sec||0)+'</div>'
-      +'<div class="big-label">station-hours/s (nearest, '+inr+' in-range)</div>'
-      +'<div style="margin-top:8px"><span class="badge '+clsS+'">'+agrS+' agreement</span></div></div>';
+    addCard(fmtNum(sr.station_hours_per_sec||0), 'station-hours/s (nearest, '+inr+' in-range)', agrS+' agreement', clsS, provStr);
   }
 
-  // Full-grid table
+  // ── View 2: Throughput history line chart ─────────────────────────────────
+  var canvas2 = document.getElementById('history-chart');
+  var ctx2 = canvas2.getContext('2d');
+  var W2 = canvas2.width, H2 = canvas2.height;
+  var PAD2 = {l:54, r:20, t:10, b:30};
+
+  var histPts = [];
+  HISTORY.forEach(function(h, hi) {
+    var fg = (h.runs||[]).filter(function(r) { return !r.workload || r.workload === 'full-grid'; });
+    fg.forEach(function(r) {
+      histPts.push({x: hi, y: r.mb_per_sec||0, sha: (h.git_sha||'').slice(0,7), tpl: r.template_5x||'?'});
+    });
+  });
+
+  drawLineChart(ctx2, W2, H2, PAD2, histPts, 'MB/s');
+
+  // ── View 3: Throughput by template — bar chart ────────────────────────────
+  var tmplMap = {};
+  fullGrid.forEach(function(r) {
+    var t = r.template_5x || '?';
+    var dec = r.decoder || 'gribtract';
+    var key = t + '|' + dec;
+    if (!tmplMap[key]) tmplMap[key] = {label: t, decoder: dec, mb_per_sec: 0, agreement: 1.0};
+    if ((r.mb_per_sec||0) > tmplMap[key].mb_per_sec) {
+      tmplMap[key].mb_per_sec = r.mb_per_sec;
+      tmplMap[key].agreement = r.agreement != null ? r.agreement : 1.0;
+    }
+  });
+  var tmplItems = Object.keys(tmplMap).sort().map(function(k) { return tmplMap[k]; });
+
+  if (tmplItems.length > 0) {
+    // Pre-compute agreement_pct for View 4
+    tmplItems.forEach(function(item) { item.agreement_pct = (item.agreement||0) * 100; });
+
+    var maxMbps = Math.max.apply(null, tmplItems.map(function(x) { return x.mb_per_sec; })) * 1.2 || 1;
+    drawBarChart('tmpl-mbps-chart', tmplItems, maxMbps, 'mb_per_sec', '', function(item) {
+      return item.agreement >= 1.0 ? '#3fb950' : (item.agreement >= 0.99 ? '#d29922' : '#f85149');
+    }, function(v) { return fmtNum(v); });
+
+    // ── View 4: Agreement coverage companion ─────────────────────────────────
+    drawBarChart('tmpl-agr-chart', tmplItems, 100, 'agreement_pct', '%', function(item) {
+      return item.agreement >= 1.0 ? '#3fb950' : (item.agreement >= 0.99 ? '#d29922' : '#f85149');
+    }, function(v) { return v.toFixed(1)+'%'; });
+  }
+
+  // ── Full-grid detail table ─────────────────────────────────────────────────
   var fgBody = document.getElementById('full-grid-body');
   fullGrid.forEach(function(r) {
     var agr = r.agreement != null ? (r.agreement*100).toFixed(1)+'%' : 'n/a';
-    var cls = r.agreement >= 1.0 ? 'green' : 'red';
-    fgBody.innerHTML += '<tr><td>'+(r.template_5x||'?')+'</td><td>'+r.decoder+'</td>'
+    var cls = r.agreement >= 1.0 ? 'green' : (r.agreement >= 0.99 ? 'amber' : 'red');
+    fgBody.innerHTML += '<tr>'
+      +'<td>'+(r.template_5x||'?')+'</td><td>'+r.decoder+'</td>'
       +'<td>'+(r.mb_per_sec||0).toFixed(1)+'</td>'
       +'<td>'+(r.messages_per_sec||0).toFixed(0)+'</td>'
       +'<td>'+(r.grid_points_per_sec||0).toFixed(0)+'</td>'
@@ -87,67 +170,120 @@ const HISTORY = [__HISTORY_CSV__];
       +'<td class="'+cls+'">'+agr+'</td></tr>';
   });
 
-  // Station table
+  // ── Station detail table ───────────────────────────────────────────────────
   var stBody = document.getElementById('station-body');
-  runs.filter(function(r) { return r.workload === 'station-extract'; }).forEach(function(r) {
+  stationRuns.forEach(function(r) {
     var agr = r.agreement != null ? (r.agreement*100).toFixed(1)+'%' : 'n/a';
     var cls = r.agreement >= 1.0 ? 'green' : (r.agreement >= 0.99 ? 'amber' : 'red');
     var inr = r.in_range != null ? r.in_range : 0;
-    stBody.innerHTML += '<tr><td>'+(r.interpolation||'?')+'</td><td>'+(r.n_stations||0)+'</td>'
+    stBody.innerHTML += '<tr>'
+      +'<td>'+(r.interpolation||'?')+'</td><td>'+(r.n_stations||0)+'</td>'
       +'<td>'+(r.n_fields||0)+'</td><td>'+inr+'</td>'
       +'<td>'+(r.station_hours_per_sec||0).toFixed(0)+'</td>'
-      +'<td>'+(r.wall_ms||0).toFixed(3)+'</td>'
+      +'<td>'+(r.wall_ms||0).toFixed(6)+'</td>'
       +'<td class="'+cls+'">'+agr+'</td></tr>';
   });
 
-  // History chart
-  var canvas = document.getElementById('history-chart');
-  var ctx = canvas.getContext('2d');
-  var W = canvas.width, H = canvas.height;
-  var PAD = {l:50, r:20, t:10, b:30};
+  // ── Helpers ────────────────────────────────────────────────────────────────
 
-  var points = [];
-  HISTORY.forEach(function(h, hi) {
-    var fg = (h.runs||[]).filter(function(r) { return !r.workload || r.workload === 'full-grid'; });
-    fg.forEach(function(r) { points.push({x: hi, y: r.mb_per_sec||0, sha: (h.git_sha||'').slice(0,7)}); });
-  });
+  function fmtNum(n) {
+    if (n >= 1e9) return (n/1e9).toFixed(2)+'B';
+    if (n >= 1e6) return (n/1e6).toFixed(2)+'M';
+    if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+    return n.toFixed(0);
+  }
 
-  if (points.length > 0) {
+  function drawLineChart(ctx, W, H, PAD, points, yLabel) {
+    if (points.length === 0) {
+      ctx.fillStyle = '#8b949e'; ctx.font = '14px system-ui';
+      ctx.fillText('No history data yet — run xtask bench to populate', PAD.l + 10, H/2);
+      return;
+    }
     var maxY = Math.max.apply(null, points.map(function(p) { return p.y; })) * 1.15 || 1;
     var maxX = Math.max(1, points.length - 1);
+    var plotW = W - PAD.l - PAD.r, plotH = H - PAD.t - PAD.b;
 
-    ctx.strokeStyle = '#21262d';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#21262d'; ctx.lineWidth = 1;
     for (var i = 0; i <= 4; i++) {
-      var y = PAD.t + (H - PAD.t - PAD.b) * (1 - i/4);
-      ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
-      ctx.fillStyle = '#8b949e'; ctx.font = '11px system-ui';
-      ctx.fillText((maxY * i / 4).toFixed(0), 2, y+4);
+      var gy = PAD.t + plotH * (1 - i/4);
+      ctx.beginPath(); ctx.moveTo(PAD.l, gy); ctx.lineTo(W - PAD.r, gy); ctx.stroke();
+      ctx.fillStyle = '#8b949e'; ctx.font = '11px system-ui'; ctx.textAlign = 'right';
+      ctx.fillText((maxY * i / 4).toFixed(0), PAD.l - 4, gy + 4);
     }
 
-    ctx.strokeStyle = '#58a6ff';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#58a6ff'; ctx.lineWidth = 2;
     ctx.beginPath();
     points.forEach(function(p, i) {
-      var px = PAD.l + (p.x / maxX) * (W - PAD.l - PAD.r);
-      var py = PAD.t + (H - PAD.t - PAD.b) * (1 - p.y / maxY);
-      if (i === 0) { ctx.moveTo(px, py); } else { ctx.lineTo(px, py); }
+      var px = PAD.l + (p.x / maxX) * plotW;
+      var py = PAD.t + plotH * (1 - p.y / maxY);
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
     });
     ctx.stroke();
 
     ctx.fillStyle = '#58a6ff';
     points.forEach(function(p) {
-      var px = PAD.l + (p.x / maxX) * (W - PAD.l - PAD.r);
-      var py = PAD.t + (H - PAD.t - PAD.b) * (1 - p.y / maxY);
+      var px = PAD.l + (p.x / maxX) * plotW;
+      var py = PAD.t + plotH * (1 - p.y / maxY);
       ctx.beginPath(); ctx.arc(px, py, 4, 0, 2*Math.PI); ctx.fill();
     });
 
-    ctx.fillStyle = '#8b949e'; ctx.font = '11px system-ui';
-    ctx.fillText('MB/s', PAD.l + 4, PAD.t + 12);
-  } else {
-    ctx.fillStyle = '#8b949e'; ctx.font = '14px system-ui';
-    ctx.fillText('No history data yet — run xtask bench to populate', 60, H/2);
+    ctx.fillStyle = '#8b949e'; ctx.font = '11px system-ui'; ctx.textAlign = 'left';
+    ctx.fillText(yLabel, PAD.l + 4, PAD.t + 14);
   }
+
+  function drawBarChart(canvasId, items, maxVal, valueKey, unitSuffix, getColor, fmtVal) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    var PAD = {l:60, r:20, t:20, b:44};
+    var plotW = W - PAD.l - PAD.r, plotH = H - PAD.t - PAD.b;
+
+    ctx.clearRect(0, 0, W, H);
+
+    if (items.length === 0) {
+      ctx.fillStyle = '#8b949e'; ctx.font = '14px system-ui'; ctx.textAlign = 'left';
+      ctx.fillText('No data', PAD.l + 10, H/2);
+      return;
+    }
+
+    // Grid lines + y-axis labels
+    ctx.strokeStyle = '#21262d'; ctx.lineWidth = 1;
+    for (var i = 0; i <= 4; i++) {
+      var gy = PAD.t + plotH * (1 - i/4);
+      ctx.beginPath(); ctx.moveTo(PAD.l, gy); ctx.lineTo(W - PAD.r, gy); ctx.stroke();
+      ctx.fillStyle = '#8b949e'; ctx.font = '11px system-ui'; ctx.textAlign = 'right';
+      var tickVal = maxVal * i / 4;
+      var tickStr = fmtVal ? fmtVal(tickVal) : (tickVal.toFixed(0) + unitSuffix);
+      ctx.fillText(tickStr, PAD.l - 4, gy + 4);
+    }
+
+    var gapW = plotW / items.length;
+    var barW = Math.max(8, Math.floor(gapW * 0.55));
+
+    items.forEach(function(item, i) {
+      var val = item[valueKey] || 0;
+      var barH = plotH * Math.min(1, val / (maxVal || 1));
+      var bx = PAD.l + gapW * i + (gapW - barW) / 2;
+      var by = PAD.t + plotH - barH;
+
+      ctx.fillStyle = getColor(item);
+      ctx.fillRect(bx, by, barW, barH);
+
+      // Value label above bar
+      ctx.fillStyle = '#c9d1d9'; ctx.font = '10px system-ui'; ctx.textAlign = 'center';
+      var valStr = fmtVal ? fmtVal(val) : (val.toFixed(0) + unitSuffix);
+      ctx.fillText(valStr, bx + barW/2, Math.max(PAD.t + 12, by - 4));
+
+      // Template label below bar
+      ctx.fillStyle = '#8b949e'; ctx.font = '11px system-ui'; ctx.textAlign = 'center';
+      ctx.fillText(item.label || item.template_5x || '?', bx + barW/2, H - PAD.b + 16);
+      if (item.decoder && item.decoder !== 'gribtract') {
+        ctx.fillText(item.decoder, bx + barW/2, H - PAD.b + 28);
+      }
+    });
+  }
+
 }());
 </script>
 </body>
