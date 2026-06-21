@@ -15,6 +15,19 @@
       }
     },
     {
+      "id": "drt2_simple_3x3",
+      "path": "small/drt2_simple_3x3.grib2",
+      "sha256": "7283846fc85e9feeb04079baa9c284f2f44769febdea5cf63558888e200426f5",
+      "size_bytes": 217,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 DRT=2 fixture: 3x3 lat/lon, 1 group, R=100.0 E=0 D=0 N=8. X=[0..8] -> Y=[100..108]. Section 5 template 5.2 (complex packing, no spatial differencing).",
+        "capture_date": "2026-06-21",
+        "generated_by": "scripts/gen_grib2_drt2.py (gribtract project)"
+      }
+    },
+    {
       "id": "gfs_tmp2m_1deg_anl",
       "path": "small/gfs_tmp2m_1deg_anl.grib2",
       "sha256": "81eebed451cb536de0332f7a35041688574fe076f6bb7b8be68106a045c39c38",

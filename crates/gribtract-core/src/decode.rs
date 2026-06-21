@@ -496,6 +496,10 @@ fn parse_section5(body: &[u8]) -> Result<(u16, PackingInfo, Option<ComplexPackin
             let packing = parse_drt_common(&mut b)?;
             Ok((0, packing, None))
         }
+        2 => {
+            let (packing, extra) = parse_drt_2(&mut b)?;
+            Ok((2, packing, Some(extra)))
+        }
         3 => {
             let (packing, extra) = parse_drt_3(&mut b)?;
             Ok((3, packing, Some(extra)))
@@ -519,6 +523,37 @@ fn parse_drt_common(b: &mut Buf) -> Result<PackingInfo> {
         bits_per_value,
         original_field_type,
     })
+}
+
+/// Data Representation Template 5.2: Complex packing (no spatial differencing).
+fn parse_drt_2(b: &mut Buf) -> Result<(PackingInfo, ComplexPackingExtra)> {
+    let packing = parse_drt_common(b)?;  // oct 12-21: common header
+
+    b.skip(1)?; // oct 22: group splitting method
+    b.skip(1)?; // oct 23: missing value management (0 = none)
+    b.skip(4)?; // oct 24-27: primary missing value
+    b.skip(4)?; // oct 28-31: secondary missing value
+
+    let n_groups = b.read_u32be()?;              // oct 32-35
+    let ref_group_widths = b.read_u8()?;         // oct 36
+    let bits_group_widths = b.read_u8()?;        // oct 37
+    let ref_group_lengths = b.read_u32be()?;     // oct 38-41
+    let length_increment = b.read_u8()?;         // oct 42
+    let true_last_group_length = b.read_u32be()?; // oct 43-46
+    let bits_scaled_group_lengths = b.read_u8()?; // oct 47
+    // Octets 48-49 (order_spatial_diff, extra_octet_count) are absent in template 5.2.
+
+    Ok((packing, ComplexPackingExtra {
+        n_groups,
+        ref_group_widths,
+        bits_group_widths,
+        ref_group_lengths,
+        length_increment,
+        true_last_group_length,
+        bits_scaled_group_lengths,
+        order_spatial_diff: 0,
+        extra_octet_count: 0,
+    }))
 }
 
 /// Data Representation Template 5.3: Complex packing with spatial differencing.
@@ -630,9 +665,10 @@ fn decode_drt3(
     }
 
     // 1. Read seed values from extra octets (sign-magnitude big-endian).
-    let ival1 = read_sign_magnitude_be(&body[..eo]);
-    let ival2 = if order >= 2 { read_sign_magnitude_be(&body[eo..2 * eo]) } else { 0i64 };
-    let minsd = read_sign_magnitude_be(&body[order * eo..total_seed_bytes]);
+    //    For DRT=2 (order=0, eo=0) there are no extra octets — skip reads entirely.
+    let ival1 = if eo > 0 { read_sign_magnitude_be(&body[..eo]) } else { 0i64 };
+    let ival2 = if order >= 2 && eo > 0 { read_sign_magnitude_be(&body[eo..2 * eo]) } else { 0i64 };
+    let minsd = if eo > 0 { read_sign_magnitude_be(&body[order * eo..total_seed_bytes]) } else { 0i64 };
 
     let mut byte_pos = total_seed_bytes;
 
@@ -690,11 +726,14 @@ fn decode_drt3(
         return Err(Error::TooShort { needed: n_points, got: packed.len() });
     }
 
-    // 6. Reconstruct original integers via spatial differencing (order=2 path).
-    //    packed[i] for i >= order holds (second_diff[i] − minsd) from the encoder,
-    //    where second_diff[i] = X[i] − 2·X[i−1] + X[i−2].
-    //    seeds override packed[0..order].
-    packed[0] = ival1;
+    // 6. Reconstruct original integers via spatial differencing.
+    //    For order >= 1 the packed sub-array holds differences, not originals.
+    //    Seed values (ival1, ival2) restore the first 1 or 2 originals; minsd
+    //    is the minimum difference subtracted by the encoder to keep values ≥ 0.
+    //    For order=0 (DRT=2) the packed values are already the original integers.
+    if order >= 1 {
+        packed[0] = ival1;
+    }
     if order >= 2 {
         packed[1] = ival2;
     }
