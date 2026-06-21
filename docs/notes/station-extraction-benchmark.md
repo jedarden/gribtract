@@ -17,21 +17,35 @@ horizon."** This is the parse-speed hot path most downstream consumers actually 
 
 ### Station roster (fixed, representative US metros)
 
-A stable set of major-metro station coordinates so runs are comparable over time:
+A stable set of major-metro METAR station coordinates so runs are comparable over
+time. Coordinates match official observation sites for reproducibility.
 
-| Station | Lat | Lon |
-|---------|-----|-----|
-| New York, NY (Central Park) | 40.78 | −73.97 |
-| Philadelphia, PA           | 39.87 | −75.23 |
-| Chicago, IL (Midway)       | 41.79 | −87.75 |
-| Miami, FL                  | 25.79 | −80.29 |
-| Austin, TX (Camp Mabry)    | 30.32 | −97.76 |
-| Denver, CO                 | 39.85 | −104.66 |
-| Los Angeles, CA            | 33.94 | −118.41 |
+| Station | METAR | Lat | Lon | TZ |
+|---------|-------|-----|-----|----|
+| New York, NY (Central Park) | KNYC | 40.7789 | −73.9692 | ET |
+| Miami, FL                   | KMIA | 25.7959 | −80.2870 | ET |
+| Philadelphia, PA            | KPHL | 39.8721 | −75.2411 | ET |
+| Atlanta, GA                 | KATL | 33.6407 | −84.4277 | ET |
+| Boston, MA                  | KBOS | 42.3656 | −71.0096 | ET |
+| Washington, DC              | KDCA | 38.8512 | −77.0402 | ET |
+| Chicago, IL (Midway)        | KMDW | 41.7868 | −87.7522 | CT |
+| Dallas, TX                  | KDFW | 32.8998 | −97.0403 | CT |
+| Houston, TX                 | KIAH | 29.9902 | −95.3368 | CT |
+| Minneapolis, MN             | KMSP | 44.8820 | −93.2218 | CT |
+| Austin, TX                  | KAUS | 30.1945 | −97.6699 | CT |
+| New Orleans, LA             | KMSY | 29.9934 | −90.2580 | CT |
+| San Antonio, TX             | KSAT | 29.5337 | −98.4698 | CT |
+| Oklahoma City, OK           | KOKC | 35.3931 | −97.6007 | CT |
+| Denver, CO                  | KDEN | 39.8561 | −104.6737 | MT |
+| Phoenix, AZ                 | KPHX | 33.4373 | −112.0078 | AZ |
+| Los Angeles, CA             | KLAX | 33.9416 | −118.4085 | PT |
+| Las Vegas, NV               | KLAS | 36.0840 | −115.1537 | PT |
+| Seattle, WA                 | KSEA | 47.4502 | −122.3088 | PT |
+| San Francisco, CA           | KSFO | 37.6189 | −122.3750 | PT |
 
-These are just fixed geographic probe points for a reproducible point-extraction
-benchmark — nothing about them is special beyond being well-separated US metros that
-exercise different grid regions (coastal, interior, high-elevation, low-latitude).
+These are fixed geographic probe points for a reproducible point-extraction benchmark,
+covering a broad spread of US grid regions — coastal, interior, high-elevation,
+low-latitude, and all four CONUS time zones.
 
 ## Why this is a rich optimization target
 

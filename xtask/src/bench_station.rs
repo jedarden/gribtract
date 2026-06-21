@@ -14,15 +14,33 @@ use gribtract::{BilinearCorners, Field, GridDefinition, LazyField};
 // ── Station roster ────────────────────────────────────────────────────────────
 
 /// Fixed US metro weather-station coordinates (lat, lon in degrees).
-/// Stable over time so benchmark runs are comparable.
+/// Coordinates match official METAR observation stations. Stable over time
+/// so benchmark runs are comparable across builds and hardware.
 pub const STATIONS: &[(&str, f64, f64)] = &[
-    ("New York",     40.78,  -73.97),
-    ("Philadelphia", 39.87,  -75.23),
-    ("Chicago",      41.79,  -87.75),
-    ("Miami",        25.79,  -80.29),
-    ("Austin",       30.32,  -97.76),
-    ("Denver",       39.85, -104.66),
-    ("Los Angeles",  33.94, -118.41),
+    // Eastern Time
+    ("New York",       40.7789,  -73.9692),  // KNYC Central Park
+    ("Miami",          25.7959,  -80.2870),  // KMIA
+    ("Philadelphia",   39.8721,  -75.2411),  // KPHL
+    ("Atlanta",        33.6407,  -84.4277),  // KATL
+    ("Boston",         42.3656,  -71.0096),  // KBOS
+    ("Washington DC",  38.8512,  -77.0402),  // KDCA Reagan
+    // Central Time
+    ("Chicago",        41.7868,  -87.7522),  // KMDW Midway
+    ("Dallas",         32.8998,  -97.0403),  // KDFW
+    ("Houston",        29.9902,  -95.3368),  // KIAH
+    ("Minneapolis",    44.8820,  -93.2218),  // KMSP
+    ("Austin",         30.1945,  -97.6699),  // KAUS
+    ("New Orleans",    29.9934,  -90.2580),  // KMSY
+    ("San Antonio",    29.5337,  -98.4698),  // KSAT
+    ("Oklahoma City",  35.3931,  -97.6007),  // KOKC
+    // Mountain / Arizona
+    ("Denver",         39.8561, -104.6737),  // KDEN
+    ("Phoenix",        33.4373, -112.0078),  // KPHX Sky Harbor
+    // Pacific Time
+    ("Los Angeles",    33.9416, -118.4085),  // KLAX
+    ("Las Vegas",      36.0840, -115.1537),  // KLAS
+    ("Seattle",        47.4502, -122.3088),  // KSEA Sea-Tac
+    ("San Francisco",  37.6189, -122.3750),  // KSFO
 ];
 
 // ── Result type ───────────────────────────────────────────────────────────────
