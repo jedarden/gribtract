@@ -8,6 +8,7 @@ repository.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+jpeg2k = { version = "0.10", default-features = false, features = ["openjpeg-sys"] }
 png = "0.18"
 
 [dev-dependencies]

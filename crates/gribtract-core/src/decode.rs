@@ -505,6 +505,11 @@ fn parse_section5(body: &[u8]) -> Result<(u16, PackingInfo, Option<ComplexPackin
             let (packing, extra) = parse_drt_3(&mut b)?;
             Ok((3, packing, Some(extra)))
         }
+        40 => {
+            // Template 5.40: JPEG 2000 data compression — same common header as DRT=0.
+            let packing = parse_drt_common(&mut b)?;
+            Ok((40, packing, None))
+        }
         41 => {
             // Template 5.41: PNG data compression — same common header as DRT=0.
             let packing = parse_drt_common(&mut b)?;
@@ -622,6 +627,10 @@ fn decode_section7(
         return decode_drt3(body, packing, extra, n_points);
     }
 
+    if drt == 40 {
+        return decode_drt40(body, packing, n_points);
+    }
+
     if drt == 41 {
         return decode_drt41(body, packing, n_points);
     }
@@ -646,6 +655,35 @@ fn decode_section7(
             Ok(GridValues::Dense(values))
         }
     }
+}
+
+/// Decode Template 5.40: JPEG 2000 data compression.
+///
+/// Section 7 contains a JPEG 2000 codestream (J2K) or JP2 container. The first
+/// component carries packed integers X; decoded values follow: Y = (R + X × 2^E) / 10^D.
+fn decode_drt40(body: &[u8], packing: &PackingInfo, n_points: usize) -> Result<GridValues> {
+    let img = jpeg2k::Image::from_bytes(body)
+        .map_err(|_| Error::InvalidData("JPEG2000 decode failed"))?;
+    let comp = img.components().first()
+        .ok_or(Error::InvalidData("J2K: no image components"))?;
+
+    let r = packing.reference_value as f64;
+    let e = packing.binary_scale_factor as i32;
+    let d = packing.decimal_scale_factor as i32;
+    let two_e = 2f64.powi(e);
+    let ten_d = 10f64.powi(d);
+
+    let data = comp.data(); // &[i32] — raw packed integer X values
+    let values: Vec<f64> = data.iter()
+        .take(n_points)
+        .map(|&x| (r + x as f64 * two_e) / ten_d)
+        .collect();
+
+    if values.len() < n_points {
+        return Err(Error::InvalidData("J2K: fewer pixels than grid points"));
+    }
+
+    Ok(GridValues::Dense(values))
 }
 
 /// Decode Template 5.41: PNG data compression.

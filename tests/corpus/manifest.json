@@ -41,6 +41,19 @@
       }
     },
     {
+      "id": "drt40_j2k_3x2",
+      "path": "small/drt40_j2k_3x2.grib2",
+      "sha256": "33ee87d2db50abf79d3ea811e95ce12423b64580aa61a644957911d7e392de05",
+      "size_bytes": 312,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 DRT=40 fixture: 3x2 lat/lon, JPEG2000 J2K codestream, R=100.0 E=0 D=0 N=8 (lossless). Pixels X=[0..5] -> Y=[100..105]. Section 5 template 5.40 (JPEG 2000 data compression).",
+        "capture_date": "2026-06-21",
+        "generated_by": "scripts/gen_grib2_drt40.py (gribtract project)"
+      }
+    },
+    {
       "id": "drt41_png_3x2",
       "path": "small/drt41_png_3x2.grib2",
       "sha256": "f5de774c2f075aa8392cf3f74443547f9aaf19d91a9abce1413190a53abc4b5d",
