@@ -8,6 +8,7 @@ pub enum Error {
     BadSectionNumber { expected: u8, got: u8 },
     Overflow,
     NotImplemented,
+    InvalidData(&'static str),
 }
 
 impl fmt::Display for Error {
@@ -25,6 +26,8 @@ impl fmt::Display for Error {
                 write!(f, "integer overflow in section length"),
             Error::NotImplemented =>
                 write!(f, "decode not implemented"),
+            Error::InvalidData(msg) =>
+                write!(f, "invalid data: {msg}"),
         }
     }
 }

@@ -39,6 +39,19 @@
         "capture_date": "2026-06-19",
         "generated_by": "curl byte-range from nomads.ncep.noaa.gov; golden by scripts/gen_golden.py (eccodes)"
       }
+    },
+    {
+      "id": "drt41_png_3x2",
+      "path": "small/drt41_png_3x2.grib2",
+      "sha256": "f5de774c2f075aa8392cf3f74443547f9aaf19d91a9abce1413190a53abc4b5d",
+      "size_bytes": 252,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 DRT=41 fixture: 3x2 lat/lon, PNG compression, R=100.0 E=0 D=0 N=8. Pixels X=[0..5] -> Y=[100..105]. Section 5 template 5.41 (PNG data compression).",
+        "capture_date": "2026-06-21",
+        "generated_by": "scripts/gen_grib2_drt41.py (gribtract project)"
+      }
     }
   ],
   "_comment_large": "Fixtures with storage=remote live in tests/corpus/large/ (gitignored). The harness fetches them by sha256 from B2. Add a manifest entry here first, then seed the file.",

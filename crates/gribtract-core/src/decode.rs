@@ -300,8 +300,9 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
             7 => {
                 let n_points = builder.grid.as_ref().map(|g| g.num_data_points as usize).unwrap_or(0);
                 let packing = builder.packing.as_ref().ok_or(Error::NotImplemented)?;
+                let drt = builder.drt_template.unwrap_or(0);
                 let has_bitmap = builder.has_bitmap.unwrap_or(false);
-                let values = decode_section7(sec_body, packing, builder.complex_extra.as_ref(), n_points, has_bitmap)?;
+                let values = decode_section7(sec_body, packing, drt, builder.complex_extra.as_ref(), n_points, has_bitmap)?;
                 builder.values = Some(values);
 
                 // Complete field — flush the builder.
@@ -504,6 +505,11 @@ fn parse_section5(body: &[u8]) -> Result<(u16, PackingInfo, Option<ComplexPackin
             let (packing, extra) = parse_drt_3(&mut b)?;
             Ok((3, packing, Some(extra)))
         }
+        41 => {
+            // Template 5.41: PNG data compression — same common header as DRT=0.
+            let packing = parse_drt_common(&mut b)?;
+            Ok((41, packing, None))
+        }
         _ => Err(Error::NotImplemented),
     }
 }
@@ -607,12 +613,17 @@ fn parse_section6(body: &[u8]) -> Result<bool> {
 fn decode_section7(
     body: &[u8],
     packing: &PackingInfo,
+    drt: u16,
     complex_extra: Option<&ComplexPackingExtra>,
     n_points: usize,
     _has_bitmap: bool,
 ) -> Result<GridValues> {
     if let Some(extra) = complex_extra {
         return decode_drt3(body, packing, extra, n_points);
+    }
+
+    if drt == 41 {
+        return decode_drt41(body, packing, n_points);
     }
 
     // DRT=0: simple packing.
@@ -635,6 +646,46 @@ fn decode_section7(
             Ok(GridValues::Dense(values))
         }
     }
+}
+
+/// Decode Template 5.41: PNG data compression.
+///
+/// Section 7 contains a raw PNG image. Pixel values are packed integers X;
+/// decoded grid values follow the standard formula: Y = (R + X × 2^E) / 10^D.
+/// Only 8-bit and 16-bit grayscale PNGs are supported (the common GRIB2 case).
+fn decode_drt41(body: &[u8], packing: &PackingInfo, n_points: usize) -> Result<GridValues> {
+    let cursor = std::io::Cursor::new(body);
+    let decoder = png::Decoder::new(cursor);
+    let mut reader = decoder.read_info().map_err(|_| Error::InvalidData("PNG header decode failed"))?;
+
+    let buf_size = reader.output_buffer_size().ok_or(Error::InvalidData("PNG: buffer size unknown"))?;
+    let mut img_data = vec![0u8; buf_size];
+    let info = reader.next_frame(&mut img_data).map_err(|_| Error::InvalidData("PNG frame decode failed"))?;
+
+    let r = packing.reference_value as f64;
+    let e = packing.binary_scale_factor as i32;
+    let d = packing.decimal_scale_factor as i32;
+    let two_e = 2f64.powi(e);
+    let ten_d = 10f64.powi(d);
+
+    let values: Vec<f64> = match (info.bit_depth, info.color_type) {
+        (png::BitDepth::Eight, png::ColorType::Grayscale) => {
+            img_data[..n_points]
+                .iter()
+                .map(|&x| (r + x as f64 * two_e) / ten_d)
+                .collect()
+        }
+        (png::BitDepth::Sixteen, png::ColorType::Grayscale) => {
+            img_data[..n_points * 2]
+                .chunks_exact(2)
+                .map(|b| u16::from_be_bytes([b[0], b[1]]) as f64)
+                .map(|x| (r + x * two_e) / ten_d)
+                .collect()
+        }
+        _ => return Err(Error::NotImplemented),
+    };
+
+    Ok(GridValues::Dense(values))
 }
 
 /// Decode Template 5.3: complex packing with spatial differencing.
@@ -1101,7 +1152,7 @@ mod tests {
         };
         let data: Vec<u8> = (0u8..25).collect();
         // DRT=0: no complex extra
-        let values = decode_section7(&data, &packing, None, 25, false).unwrap();
+        let values = decode_section7(&data, &packing, 0, None, 25, false).unwrap();
         match values {
             GridValues::Dense(v) => {
                 assert_eq!(v.len(), 25);
@@ -1124,7 +1175,7 @@ mod tests {
             original_field_type: 0,
         };
         let data: Vec<u8> = (0u8..25).collect();
-        let full = decode_section7(&data, &packing, None, 25, false).unwrap();
+        let full = decode_section7(&data, &packing, 0, None, 25, false).unwrap();
         let GridValues::Dense(full_vals) = full else { panic!() };
 
         for (idx, &full_val) in full_vals.iter().enumerate().take(25) {
