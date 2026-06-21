@@ -96,10 +96,45 @@ This is the artifact that answers "is it actually working at that speed?" — it
 a deliverable, not an afterthought, and is wired in early (Phase 2) so every later
 iteration updates it.
 
+### Provider probe & selection
+
+gribtract's fetch layer (Phase 7) must retrieve GRIB2 files from one of several
+upstream providers that mirror the same NOAA data with different latency and
+throughput characteristics depending on deployment location:
+
+| Provider | Hosts | Notes |
+|----------|-------|-------|
+| NOAA S3 | `noaa-gfs-bdp-pds`, `noaa-hrrr-bdp-pds`, `noaa-gefs-pds`, `noaa-nbm-grib2-pds` (all us-east-1) | Direct regional endpoint; no CDN; ~10ms from US east coast, ~100ms from Europe |
+| Google Cloud Storage | `high-resolution-rapid-refresh`, `national-blend-of-models`, `gfs-ensemble-forecast-system` | CDN-fronted; ~3–5ms connect anywhere; TTFB still ~110–290ms depending on distance to US origin |
+| NOMADS | `nomads.ncep.noaa.gov` | CDN-fronted HTTP; index + range-request capable; good TTFB fallback |
+
+The optimal provider is **per-model and per-deployment** — e.g. a Europe-based host
+should prefer GCS for HRRR + NBM (CDN gives 3ms connect vs 100ms S3) while a
+US-east host should prefer S3 for GFS + NBM (direct 11ms connect, 375ms TTFB vs
+GCS's 112ms). Hardcoding a provider is fragile; instead, gribtract probes at
+startup and caches the result.
+
+**Probe mechanism (`xtask probe-providers` / runtime `ProviderProbe`):**
+
+1. For each (model, provider) pair, issue a small representative request:
+   a. Fetch the `.idx` index file (a few KB, always text) for a recent known cycle.
+   b. Issue one HTTP range request for the first message in that index (validates
+      both connectivity and range-request support end-to-end).
+2. Record: TCP connect time, TTFB, bytes-per-second for the range payload.
+3. Rank providers per model by a combined score: `connect_ms + ttfb_ms + 1000/throughput_mbs`.
+4. Write results to `provider-probe.json` (alongside `bench-results.json`).
+5. At runtime, the fetch layer loads `provider-probe.json` on startup and falls
+   back to re-probing live if the file is absent, stale (>24h), or if a provider
+   returns HTTP errors on N consecutive requests.
+
+**Probe is non-blocking for decoding.** The library itself (gribtract-core,
+gribtract) has zero network dependencies. The probe lives in `xtask` and in an
+optional `gribtract-fetch` crate that the CLI and downstream integrations opt in to.
+
 ### Fixed-station point-extraction benchmark
 A second benchmark workload alongside bulk full-grid decode: extract a per-station
 **time series** (one value per forecast hour, across a cycle) at a fixed roster of
-~7–10 US metropolitan station coordinates — the common "I only need the value at
+20 US metropolitan METAR station coordinates — the common "I only need the value at
 these points, across the horizon" hot path. It measures `stations × hours / sec`
 from raw bytes to assembled matrix, in nearest and bilinear modes, each verified
 against the full-grid decode at the same points. This is deliberately an **open-
@@ -186,6 +221,10 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
   members and time-aggregated fields.
 - [ ] **Phase 7 — Publish + integrate.** crates.io, Python bindings, and the
   forecast-timeseries emitter consumed by a downstream backtest join.
+  Includes the **provider probe** (`xtask probe-providers` + runtime `ProviderProbe`):
+  each candidate provider for each model is probed at startup (`.idx` fetch + one
+  range request); results cached to `provider-probe.json` with a 24h TTL. See the
+  "Provider probe & selection" component above for the full spec.
 
 ## Marathon loop contract
 
