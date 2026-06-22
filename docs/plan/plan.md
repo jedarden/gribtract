@@ -219,7 +219,7 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
   stereographic, Gaussian, rotated. Geometry must match for point asof-joins.
 - [x] **Phase 6 — Ensembles + statistical products (GEFS).** Product templates for
   members and time-aggregated fields.
-- [ ] **Phase 7 — Publish + integrate.** crates.io, Python bindings, and the
+- [x] **Phase 7 — Publish + integrate.** crates.io, Python bindings, and the
   forecast-timeseries emitter consumed by a downstream backtest join.
   Includes the **provider probe** (`xtask probe-providers` + runtime `ProviderProbe`):
   each candidate provider for each model is probed at startup (`.idx` fetch + one

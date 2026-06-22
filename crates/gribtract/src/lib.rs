@@ -3,10 +3,13 @@
 pub mod provider_probe;
 pub use provider_probe::{ProviderProbe, ProviderResult};
 
+pub mod timeseries;
+pub use timeseries::{extract_timeseries, ForecastTimeseries, Station, TimeseriesRequest, TimeseriesRow};
+
 pub use gribtract_core::types::{
     BilinearCorners, ComplexExtra, Ensemble, Field, ForecastTime, GaussianLatLonParams,
-    GridDefinition, GridValues, LazyField, LambertConformalParams, Level, Message, PackingInfo,
-    ParameterId, ReferenceTime,
+    GridDefinition, GridProjection, GridValues, LazyField, LambertConformalParams, Level, Message,
+    PackingInfo, ParameterId, ReferenceTime,
 };
 pub use gribtract_core::error::{Error, Result};
 
