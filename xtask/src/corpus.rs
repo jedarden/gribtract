@@ -57,8 +57,8 @@ fn cmd_list() {
     let root = corpus_root();
 
     println!(
-        "{:<30}  {:<10}  {:<10}  {}",
-        "id", "storage", "present", "path"
+        "{:<30}  {:<10}  {:<10}  path",
+        "id", "storage", "present"
     );
     println!("{}", "-".repeat(80));
 
@@ -324,7 +324,7 @@ fn verify_sha256(path: &Path, expected: &str) -> Result<bool, String> {
 /// Used for B2 Basic-auth header — avoids pulling in a base64 crate.
 fn base64_encode(input: &[u8]) -> String {
     const TABLE: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    let mut out = String::with_capacity((input.len() + 2) / 3 * 4);
+    let mut out = String::with_capacity(input.len().div_ceil(3) * 4);
     for chunk in input.chunks(3) {
         let b0 = chunk[0] as u32;
         let b1 = chunk.get(1).copied().unwrap_or(0) as u32;
