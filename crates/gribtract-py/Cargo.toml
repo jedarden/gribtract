@@ -1,0 +1,17 @@
+[package]
+name = "gribtract-py"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Python bindings for gribtract — pure-Rust GRIB2 decoder"
+repository = "https://github.com/jedarden/gribtract"
+
+# Build as a cdylib for Python import
+[lib]
+name = "gribtract"
+crate-type = ["cdylib"]
+
+[dependencies]
+gribtract-core = { path = "../gribtract-core", version = "0.1.0" }
+gribtract = { path = "../gribtract", version = "0.1.0" }
+pyo3 = { version = "0.22", features = ["extension-module"] }
