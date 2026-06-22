@@ -105,3 +105,44 @@ shared — the architecture is correct, just the current corpus is too thin to b
 **Prerequisite for a useful retry:** Real multi-message corpus (40+ messages from one GFS
 cycle covering CONUS). Once that corpus exists, re-run with rayon on the pre-decoded
 `&[Field]` slice — expected linear speedup to core count for the extraction loop.
+
+## Attempt 4: Left-aligned u64 sliding-window extractor for DRT=3 groups
+
+**Technique:** Replace the per-element `read_bits_at` calls inside each group's inner
+loop in `decode_drt3` with a new `extract_group_windowed` function.  The function
+maintains a 64-bit buffer that is kept left-aligned (valid bits at the MSB end):
+
+- **Pre-fill:** load `ceil((skip + w) / 8)` bytes upfront so the buffer holds at
+  least `(alignment_skip + w)` valid bits before the first extraction.
+- **Extraction per element:** one `buf >> (64 - w) & mask` + `buf <<= w` — no
+  division, no inner byte loop, no per-element `div_ceil`.
+- **Refill:** `while buf_bits < w { load one byte }` runs at most `ceil(w/8) ≤ 4`
+  times per element for `w ≤ 32`, amortised ~one byte load per 8 bits consumed.
+
+**Result:**
+- DRT=3 (GFS 1-degree, ~65K points): **109.1 MB/s vs 92.8 MB/s baseline → +17.6%**
+- grid_points/sec: 149M vs 127M → +17.3%
+- Agreement: 100% — no correctness regression.
+- New cross-validation test (`extract_group_windowed_matches_read_bits_at`) verifies
+  all (skip=0..7, w=1..20) combinations against `read_bits_at` — all 140 cases pass.
+
+**Why it worked:** The original per-element path called `read_bits_at`, which
+computed `bytes_needed = div_ceil(bit_start + n_bits, 8)` and then looped over
+1–3 bytes to assemble `raw`.  Even with the loop unrolled, the branch over
+`bytes_needed` (1 vs 2 vs 3 bytes) caused branch mispredictions.  The windowed
+path eliminates this branch entirely: for a given group, the refill pattern is
+determined only by `w mod 8`, which the branch predictor can learn quickly (or LLVM
+can analyse at compile time).
+
+**Code kept:** `extract_group_windowed` in `crates/gribtract-core/src/decode.rs`.
+`read_bits_at` is retained (used by `unpack_n_bits`, `decode_point_drt0`, and the
+non-group-value arrays in `decode_drt3`).
+
+**Remaining DRT=3 headroom:** the spatial differencing step (running sum over ~65K
+elements with a sequential dependency) is likely the next bottleneck — it cannot
+be vectorized and is O(n_points).  Possible next attempts:
+- Prefix-sum SIMD approximation (non-trivial correctness risk).
+- Avoid the intermediate `Vec<i64>` by combining bit extraction + spatial diff in
+  one pass (saves one O(n) allocation and scan).
+- Increase group-level parallelism if the GRIB2 encoder writes independent group
+  blocks (format investigation needed).
