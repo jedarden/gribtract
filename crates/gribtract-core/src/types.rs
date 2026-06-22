@@ -281,6 +281,102 @@ impl LambertConformalParams {
     }
 }
 
+/// Parameters unique to GDT 3.20 (Polar Stereographic).
+#[derive(Debug, Clone, PartialEq)]
+pub struct PolarStereographicParams {
+    /// Latitude where Dx and Dy are specified (degrees, positive N).
+    pub lad: f64,
+    /// Orientation of the grid / central meridian (degrees, positive E, 0–360).
+    pub lov: f64,
+    /// i-direction (x) increment in metres at LaD.
+    pub dx_m: f64,
+    /// j-direction (y) increment in metres at LaD.
+    pub dy_m: f64,
+    /// Projection centre flag (Table 3.5): bit 7 set = South Pole in plane.
+    pub proj_centre: u8,
+}
+
+impl PolarStereographicParams {
+    /// Earth radius for GRIB2 shape=6 (WMO standard sphere), in metres.
+    const EARTH_R: f64 = 6_371_229.0;
+
+    /// Forward polar stereographic projection on a sphere.
+    ///
+    /// Returns (x, y) in metres in a Cartesian frame centred at the projection
+    /// pole (North or South according to `proj_centre`).
+    ///
+    /// The projection is scaled so that Dx and Dy are exact distances at
+    /// latitude `lad`.  Convention: x increases in the direction 90° east of
+    /// LoV; y increases toward the pole along the LoV meridian.
+    ///
+    /// For North Polar (bit 7 of `proj_centre` == 0):
+    ///   ρ = R · (1 + sin LaD) · cos φ / (1 + sin φ)
+    ///   x = ρ sin θ,   y = −ρ cos θ    (θ = λ − LoV)
+    ///
+    /// For South Polar (bit 7 of `proj_centre` == 1):
+    ///   ρ = R · (1 − sin LaD) · cos φ / (1 − sin φ)
+    ///   x = ρ sin θ,   y = +ρ cos θ
+    pub fn project_xy(&self, lat: f64, lon: f64) -> (f64, f64) {
+        use std::f64::consts::PI;
+        let to_rad = PI / 180.0;
+
+        let phi    = lat * to_rad;
+        let lam    = lon * to_rad;
+        let lam0   = self.lov * to_rad;
+        let phi_d  = self.lad * to_rad;
+
+        // Normalise longitude difference to (−π, π].
+        let mut theta = lam - lam0;
+        while theta >  PI { theta -= 2.0 * PI; }
+        while theta < -PI { theta += 2.0 * PI; }
+
+        let r = Self::EARTH_R;
+        let north_pole = self.proj_centre & 0x80 == 0;
+
+        let (rho, y) = if north_pole {
+            let rho = r * (1.0 + phi_d.sin()) * phi.cos() / (1.0 + phi.sin());
+            let y   = -rho * theta.cos();
+            (rho, y)
+        } else {
+            // South Polar: phi_d is negative (e.g. −60°), so (1 − sin φ_d) > 1.
+            let rho = r * (1.0 - phi_d.sin()) * phi.cos() / (1.0 - phi.sin());
+            let y   = rho * theta.cos();
+            (rho, y)
+        };
+
+        let x = rho * theta.sin();
+        (x, y)
+    }
+
+    /// Nearest grid-point flat index for a polar stereographic grid.
+    ///
+    /// Returns `None` if the query falls outside the grid extent.
+    pub fn nearest_index(&self, grid: &GridDefinition, lat: f64, lon: f64) -> Option<usize> {
+        let (x0, y0) = self.project_xy(grid.lat_first, grid.lon_first);
+        let (xq, yq) = self.project_xy(lat, lon);
+
+        // i increases in the +x direction; j direction follows scanning mode.
+        let di_f = (xq - x0) / self.dx_m;
+        let dj_f = if grid.j_positive() {
+            (yq - y0) / self.dy_m
+        } else {
+            (y0 - yq) / self.dy_m
+        };
+
+        // Half-cell tolerance for boundary snapping.
+        if di_f < -0.5 || dj_f < -0.5 { return None; }
+        let nx_f = grid.nx as f64;
+        let ny_f = grid.ny as f64;
+        if di_f > nx_f - 0.5 || dj_f > ny_f - 0.5 { return None; }
+
+        let i = di_f.round() as usize;
+        let j = dj_f.round() as usize;
+        if i >= grid.nx as usize || j >= grid.ny as usize { return None; }
+
+        Some(j * grid.nx as usize + i)
+    }
+}
+
 /// Template-specific grid projection parameters.
 ///
 /// Carried inside [`GridDefinition`] to hold parameters that are only present
@@ -290,6 +386,8 @@ impl LambertConformalParams {
 pub enum GridProjection {
     /// GDT 3.0 (or similar lat/lon): all geometry in the common fields.
     LatLon,
+    /// GDT 3.20: polar stereographic.
+    PolarStereographic(PolarStereographicParams),
     /// GDT 3.30: Lambert conformal conic.
     LambertConformal(LambertConformalParams),
 }
@@ -450,11 +548,14 @@ impl GridDefinition {
     /// Dispatches on `self.projection`:
     /// - [`GridProjection::LatLon`]: regular lat/lon arithmetic (template 0).
     ///   Returns `None` if increments are zero or the query is outside the grid.
+    /// - [`GridProjection::PolarStereographic`]: polar stereographic projection.
+    ///   Returns `None` if the query is outside the grid extent.
     /// - [`GridProjection::LambertConformal`]: Lambert conformal conic projection.
     ///   Returns `None` if the query is outside the grid extent.
     pub fn nearest_index(&self, lat: f64, lon: f64) -> Option<usize> {
         match &self.projection {
             GridProjection::LatLon => self.nearest_index_latlon(lat, lon),
+            GridProjection::PolarStereographic(p) => p.nearest_index(self, lat, lon),
             GridProjection::LambertConformal(p) => p.nearest_index(self, lat, lon),
         }
     }
@@ -485,7 +586,10 @@ impl GridDefinition {
     /// Currently implemented for lat/lon grids only.  Returns `None` for
     /// projected grids, zero-increment grids, or queries outside the grid.
     pub fn bilinear_corners(&self, lat: f64, lon: f64) -> Option<BilinearCorners> {
-        if !matches!(self.projection, GridProjection::LatLon) || self.di == 0.0 || self.dj == 0.0 {
+        if !matches!(self.projection, GridProjection::LatLon)
+            || self.di == 0.0
+            || self.dj == 0.0
+        {
             return None;
         }
         let mut fi = Self::lon_to_fi(lon, self.lon_first, self.di, self.nx);
@@ -943,5 +1047,131 @@ mod tests {
         // At (LaD, LoV), θ = 0, ρ = ρ₀, so x = 0 and y = ρ₀ - ρ₀ = 0.
         assert!(x.abs() < 1e-6, "x at origin should be 0, got {x}");
         assert!(y.abs() < 1e-6, "y at origin should be 0, got {y}");
+    }
+
+    // ── Polar stereographic (GDT 3.20) tests ─────────────────────────────────
+
+    /// A small synthetic North Polar Stereographic grid approximating NCEP NH
+    /// grids.  LaD = 60°N, LoV = 270°E (–90°), 10×10, 100 km step.
+    /// First point placed at (30°N, 315°E) — southwest corner.
+    fn test_polar_stereo_grid() -> GridDefinition {
+        let p = PolarStereographicParams {
+            lad: 60.0,
+            lov: 270.0,
+            dx_m: 100_000.0,
+            dy_m: 100_000.0,
+            proj_centre: 0, // North Pole
+        };
+        GridDefinition {
+            template: 20,
+            num_data_points: 100,
+            nx: 10,
+            ny: 10,
+            lat_first: 30.0,
+            lon_first: 315.0,
+            lat_last: 0.0,
+            lon_last: 0.0,
+            di: 0.0,
+            dj: 0.0,
+            scanning_mode: 0x40, // +i, +j
+            resolution_flags: 0x08,
+            shape_of_earth: 6,
+            projection: GridProjection::PolarStereographic(p),
+        }
+    }
+
+    #[test]
+    fn polar_stereo_nearest_first_point_returns_zero() {
+        // The first grid point (La1, Lo1) must always map to flat index 0.
+        let g = test_polar_stereo_grid();
+        let idx = g.nearest_index(g.lat_first, g.lon_first);
+        assert_eq!(idx, Some(0), "first grid point should map to index 0");
+    }
+
+    #[test]
+    fn polar_stereo_north_pole_projects_to_origin() {
+        // The North Pole projects to (0, 0) in the polar stereographic plane
+        // regardless of longitude.
+        let g = test_polar_stereo_grid();
+        let pp = match &g.projection {
+            GridProjection::PolarStereographic(p) => p,
+            _ => panic!("expected PolarStereographic"),
+        };
+        let (x, y) = pp.project_xy(90.0, pp.lov);
+        assert!(x.abs() < 1e-3, "x at North Pole should be 0, got {x}");
+        assert!(y.abs() < 1e-3, "y at North Pole should be 0, got {y}");
+    }
+
+    #[test]
+    fn polar_stereo_lad_lov_rho_equals_r_cos_lad() {
+        // At (LaD, LoV), θ = 0 and ρ = R·(1+sin LaD)·cos LaD/(1+sin LaD) = R·cos LaD.
+        // This is the defining property of the scale-true latitude.
+        let g = test_polar_stereo_grid();
+        let pp = match &g.projection {
+            GridProjection::PolarStereographic(p) => p,
+            _ => panic!("expected PolarStereographic"),
+        };
+        let (x, y) = pp.project_xy(pp.lad, pp.lov);
+        let expected_rho = PolarStereographicParams::EARTH_R * (pp.lad.to_radians()).cos();
+        // At (LaD, LoV): θ=0 → x=0, y = -ρ
+        assert!(x.abs() < 1e-3, "x should be 0, got {x}");
+        assert!((y.abs() - expected_rho).abs() < 1.0, "ρ at LaD = {}, expected ≈ {expected_rho}", y.abs());
+    }
+
+    #[test]
+    fn polar_stereo_point_offset_consistent() {
+        // Project the first grid point to (x0, y0).  A projected point one Dx
+        // east and one Dy north should give fractional indices (1.0, 1.0),
+        // confirming the grid-step arithmetic is self-consistent.
+        let g = test_polar_stereo_grid();
+        let pp = match &g.projection {
+            GridProjection::PolarStereographic(p) => p,
+            _ => panic!("expected PolarStereographic"),
+        };
+        let (x0, y0) = pp.project_xy(g.lat_first, g.lon_first);
+        let (x1, y1) = (x0 + pp.dx_m, y0 + pp.dy_m);
+
+        let di_f = (x1 - x0) / pp.dx_m;
+        let dj_f = (y1 - y0) / pp.dy_m;
+        assert!((di_f - 1.0).abs() < 1e-9, "i offset should be 1.0, got {di_f}");
+        assert!((dj_f - 1.0).abs() < 1e-9, "j offset should be 1.0, got {dj_f}");
+    }
+
+    #[test]
+    fn polar_stereo_outside_grid_returns_none() {
+        let g = test_polar_stereo_grid();
+        // The South Pole is always far outside any north-polar grid.
+        let idx = g.nearest_index(-90.0, 270.0);
+        assert_eq!(idx, None, "South Pole should be outside north-polar grid");
+    }
+
+    #[test]
+    fn polar_stereo_on_lov_x_is_zero() {
+        // At any latitude along LoV, x = 0 and y is determined by ρ.
+        let g = test_polar_stereo_grid();
+        let pp = match &g.projection {
+            GridProjection::PolarStereographic(p) => p,
+            _ => panic!("expected PolarStereographic"),
+        };
+        let (x45, _y45) = pp.project_xy(45.0, pp.lov);
+        let (x70, _y70) = pp.project_xy(70.0, pp.lov);
+        assert!(x45.abs() < 1e-6, "x on LoV at 45° should be 0, got {x45}");
+        assert!(x70.abs() < 1e-6, "x on LoV at 70° should be 0, got {x70}");
+    }
+
+    #[test]
+    fn polar_stereo_y_increases_toward_pole() {
+        // For North Polar, projecting a higher latitude on LoV should give a
+        // larger (less negative) y — i.e. y increases toward the pole.
+        let g = test_polar_stereo_grid();
+        let pp = match &g.projection {
+            GridProjection::PolarStereographic(p) => p,
+            _ => panic!("expected PolarStereographic"),
+        };
+        let (_x30, y30) = pp.project_xy(30.0, pp.lov);
+        let (_x60, y60) = pp.project_xy(60.0, pp.lov);
+        let (_x80, y80) = pp.project_xy(80.0, pp.lov);
+        assert!(y60 > y30, "y should increase northward: y30={y30}, y60={y60}");
+        assert!(y80 > y60, "y should increase northward: y60={y60}, y80={y80}");
     }
 }

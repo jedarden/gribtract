@@ -11,7 +11,8 @@
 use crate::error::{Error, Result};
 use crate::types::{
     Ensemble, Field, ForecastTime, GridDefinition, GridProjection, GridValues, LazyField,
-    LambertConformalParams, Level, PackingInfo, ParameterId, ReferenceTime,
+    LambertConformalParams, Level, PackingInfo, ParameterId, PolarStereographicParams,
+    ReferenceTime,
 };
 
 // ── Byte buffer reader ────────────────────────────────────────────────────────
@@ -373,6 +374,10 @@ fn parse_section3(body: &[u8]) -> Result<(u16, GridDefinition)> {
             let grid = parse_gdt_0(&mut b, num_data_points)?;
             Ok((0, grid))
         }
+        20 => {
+            let grid = parse_gdt_20(&mut b, num_data_points)?;
+            Ok((20, grid))
+        }
         30 => {
             let grid = parse_gdt_30(&mut b, num_data_points)?;
             Ok((30, grid))
@@ -423,6 +428,71 @@ fn parse_gdt_0(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
         resolution_flags,
         shape_of_earth,
         projection: GridProjection::LatLon,
+    })
+}
+
+/// Grid Definition Template 3.20: Polar Stereographic Projection.
+///
+/// Byte layout (b starts at section octet 15 = first body byte after template number):
+///
+/// | Octets | Field |
+/// |--------|-------|
+/// | 15     | shape of earth |
+/// | 16–20  | earth radius scale + value (skipped) |
+/// | 21–25  | major-axis scale + value (skipped) |
+/// | 26–30  | minor-axis scale + value (skipped) |
+/// | 31–34  | Nx |
+/// | 35–38  | Ny |
+/// | 39–42  | La1 (signed microdegrees) |
+/// | 43–46  | Lo1 (unsigned microdegrees, 0–360) |
+/// | 47     | resolution/component flags |
+/// | 48–51  | LaD (signed microdegrees, latitude where Dx/Dy are specified) |
+/// | 52–55  | LoV (unsigned microdegrees, orientation / central meridian) |
+/// | 56–59  | Dx in metres |
+/// | 60–63  | Dy in metres |
+/// | 64     | projection centre flag (Table 3.5; bit 7=0 North Pole, bit 7=1 South Pole) |
+/// | 65     | scanning mode |
+fn parse_gdt_20(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
+    let shape_of_earth = b.read_u8()?;    // oct 15
+    b.skip(1 + 4)?;                       // oct 16–20: earth radius scale + value
+    b.skip(1 + 4)?;                       // oct 21–25: major axis
+    b.skip(1 + 4)?;                       // oct 26–30: minor axis
+
+    let nx = b.read_u32be()?;             // oct 31–34: Nx
+    let ny = b.read_u32be()?;             // oct 35–38: Ny
+
+    let lat_first = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 39–42: La1
+    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 43–46: Lo1
+    let resolution_flags = b.read_u8()?;  // oct 47
+
+    let lad = b.read_latlon_micro()? as f64 / 1_000_000.0;       // oct 48–51: LaD
+    let lov = b.read_longi_micro()? as f64 / 1_000_000.0;        // oct 52–55: LoV
+
+    let dx_m = b.read_u32be()? as f64;   // oct 56–59: Dx in metres
+    let dy_m = b.read_u32be()? as f64;   // oct 60–63: Dy in metres
+
+    let proj_centre = b.read_u8()?;       // oct 64
+    let scanning_mode = b.read_u8()?;     // oct 65
+
+    let projection = GridProjection::PolarStereographic(PolarStereographicParams {
+        lad, lov, dx_m, dy_m, proj_centre,
+    });
+
+    Ok(GridDefinition {
+        template: 20,
+        num_data_points,
+        nx,
+        ny,
+        lat_first,
+        lon_first,
+        lat_last: 0.0,  // not stored in GDT 3.20; derive via projection if needed
+        lon_last: 0.0,
+        di: 0.0,        // increment in metres, stored in PolarStereographicParams
+        dj: 0.0,
+        scanning_mode,
+        resolution_flags,
+        shape_of_earth,
+        projection,
     })
 }
 
