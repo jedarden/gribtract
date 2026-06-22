@@ -215,7 +215,7 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
   HRRR fields. The numerically trickiest unpacker.
 - [x] **Phase 4 — JPEG2000 (5.40) + PNG (5.41).** Compressed grids (common in some
   NOAA products). Pull in a Rust j2k/png path.
-- [ ] **Phase 5 — Grid geometry breadth.** Lambert conformal (HRRR native), polar
+- [x] **Phase 5 — Grid geometry breadth.** Lambert conformal (HRRR native), polar
   stereographic, Gaussian, rotated. Geometry must match for point asof-joins.
 - [ ] **Phase 6 — Ensembles + statistical products (GEFS).** Product templates for
   members and time-aggregated fields.
