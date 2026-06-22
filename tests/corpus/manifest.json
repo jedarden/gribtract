@@ -78,6 +78,19 @@
         "capture_date": "2026-06-21",
         "generated_by": "scripts/gen_grib2_pdt1.py (gribtract project)"
       }
+    },
+    {
+      "id": "pdt8_accum_3x2",
+      "path": "small/pdt8_accum_3x2.grib2",
+      "sha256": "2350627fb2ad5e316b607925f6cbb9d26ccbff6573eb329c9dbc650c6a204dc8",
+      "size_bytes": 205,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 PDT=8 fixture: time-processed statistical product (6-hour accumulation). 3x2 lat/lon grid (30-20N, 0-20E, 10deg spacing). Section 0 discipline=0 (meteorological), edition=2. Section 1: center=7 (US NCEP), start-of-forecast (significance=1), 2024-01-15T00:00:00Z. Section 3 template 3.0 (lat/lon), shape=6 (WGS84), Ni=3, Nj=2. Section 4 template 4.8 (time-processed statistical product): discipline=0/cat=1/num=8 (total precipitation kg/m^2), level type=1 (surface), forecast_offset=6h, end-of-interval=2024-01-15T06:00:00Z, n_ranges=1 (accumulation, 6-hour period). Section 5 template 5.0 (simple packing): R=0.0, E=0, D=0, nbits=8. Section 6: no bitmap. Section 7: 6 packed bytes X=0..5, unpacked values = 0.0+X = [0.0..5.0].",
+        "capture_date": "2026-06-22",
+        "generated_by": "scripts/gen_grib2_pdt8.py (gribtract project)"
+      }
     }
   ],
   "_comment_large": "Fixtures with storage=remote live in tests/corpus/large/ (gitignored). The harness fetches them by sha256 from B2. Add a manifest entry here first, then seed the file.",

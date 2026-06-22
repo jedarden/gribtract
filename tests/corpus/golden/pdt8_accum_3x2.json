@@ -1,0 +1,53 @@
+{
+  "fixture_id": "pdt8_accum_3x2",
+  "_provenance": "Derived from scripts/gen_grib2_pdt8.py. PDT=8 (time-processed statistical product / 6-hour accumulation), 3x2 lat/lon grid, total precipitation at surface.",
+  "fields": [
+    {
+      "center": 7,
+      "subcenter": 0,
+      "parameter": { "discipline": 0, "category": 1, "number": 8 },
+      "forecast": {
+        "reference_time": {
+          "year": 2024, "month": 1, "day": 15,
+          "hour": 0, "minute": 0, "second": 0,
+          "significance": 1
+        },
+        "time_range_unit": 1,
+        "forecast_offset": 6
+      },
+      "level": {
+        "type1": 1, "scale_factor1": 0, "scaled_value1": 0,
+        "type2": 255, "scale_factor2": 0, "scaled_value2": 0
+      },
+      "ensemble": null,
+      "grid": {
+        "template": 0,
+        "num_data_points": 6,
+        "nx": 3,
+        "ny": 2,
+        "lat_first": 30.0,
+        "lon_first": 0.0,
+        "lat_last": 20.0,
+        "lon_last": 20.0,
+        "di": 10.0,
+        "dj": 10.0,
+        "scanning_mode": 0,
+        "resolution_flags": 48,
+        "shape_of_earth": 6
+      },
+      "values": {
+        "Dense": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+      },
+      "gdt_template": 0,
+      "pdt_template": 8,
+      "drt_template": 0,
+      "packing": {
+        "reference_value": 0.0,
+        "binary_scale_factor": 0,
+        "decimal_scale_factor": 0,
+        "bits_per_value": 8,
+        "original_field_type": 0
+      }
+    }
+  ]
+}
