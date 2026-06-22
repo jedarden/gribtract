@@ -213,7 +213,7 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
   the phases below and is never checked off.
 - [x] **Phase 3 — Complex packing (5.2/5.3) + spatial differencing.** Unlocks most
   HRRR fields. The numerically trickiest unpacker.
-- [ ] **Phase 4 — JPEG2000 (5.40) + PNG (5.41).** Compressed grids (common in some
+- [x] **Phase 4 — JPEG2000 (5.40) + PNG (5.41).** Compressed grids (common in some
   NOAA products). Pull in a Rust j2k/png path.
 - [ ] **Phase 5 — Grid geometry breadth.** Lambert conformal (HRRR native), polar
   stereographic, Gaussian, rotated. Geometry must match for point asof-joins.
