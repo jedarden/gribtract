@@ -64,3 +64,28 @@ pub fn decode_all_drt3(
 ) -> Result<Vec<f64>> {
     gribtract_core::decode::decode_all_drt3(body, packing, extra, n_points)
 }
+
+/// Extract a single grid point from a DRT=2 or DRT=3 (complex packing) Section 7 body.
+///
+/// Decodes the full grid and returns `values[idx]`.
+///
+/// **Performance note:** For DRT=3 (spatial differencing), each call decodes
+/// the entire grid.  When extracting multiple stations from the same field,
+/// prefer [`decode_all_drt3`] (decode once, cache `Vec<f64>`, index in O(1))
+/// to avoid paying the full-decode cost per station.
+///
+/// Returns `None` if `idx >= n_points` or if decoding fails.
+///
+/// `body` is `LazyField::section7_raw`.
+/// `packing` is `LazyField::packing`.
+/// `extra` is `LazyField::complex_extra.as_ref().unwrap()` (must be `Some` for DRT=2/3).
+/// `n_points` is `LazyField::grid.num_data_points as usize`.
+pub fn decode_point_drt3(
+    body: &[u8],
+    packing: &PackingInfo,
+    extra: &ComplexExtra,
+    n_points: usize,
+    idx: usize,
+) -> Option<f64> {
+    gribtract_core::decode::decode_point_drt3(body, packing, extra, n_points, idx)
+}

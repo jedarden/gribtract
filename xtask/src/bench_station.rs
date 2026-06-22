@@ -238,12 +238,20 @@ fn run_mode(fields: &[Field], mode: &str, cache: &GeometryCache) -> StationBench
 
 // ── Lazy nearest-point bench ──────────────────────────────────────────────────
 
-/// Bench the lazy DRT=0 partial-decode path for nearest-point extraction.
+/// Bench the lazy partial-decode path for nearest-point extraction.
 ///
-/// Times `decode_point_drt0(section7_raw, packing, idx)` vs the current
-/// `field.values.get_at(idx)` (a plain Vec index).  The lazy path skips
-/// decoding the full grid — relevant when only a handful of points are needed
-/// from a large message.
+/// Handles two packing kinds:
+///
+/// * **DRT=0** (simple packing) — `decode_point_drt0` gives true O(1) random
+///   access by reading just `bits_per_value` bits from the packed body.
+///   Efficient even for a single station because no full-grid decode occurs.
+///
+/// * **DRT=2/3** (complex packing) — `decode_point_drt3` must decode the
+///   entire grid to honour spatial differencing, but avoids re-parsing
+///   sections 0–6 on every call.  For multi-station workloads, prefer
+///   `run_lazy_drt3_cached` (decode-once-extract-many) which is ~N× faster.
+///   This function exists to exercise the single-point API and confirm
+///   `in_range > 0` for DRT=3 fields.
 ///
 /// `lazy_fields` and `full_fields` must be aligned (same order, same grids).
 /// The geometry cache is derived from `full_fields` (identical grids).
@@ -254,10 +262,14 @@ pub fn run_lazy_nearest(
     if lazy_fields.is_empty() || full_fields.is_empty() {
         return None;
     }
-    // Only run when there are DRT=0 lazy fields with raw bytes.
-    let has_lazy_data = lazy_fields
-        .iter()
-        .any(|lf| lf.drt_template == 0 && !lf.section7_raw.is_empty());
+    // Run when there are DRT=0 OR DRT=2/3 lazy fields with raw bytes.
+    let has_lazy_data = lazy_fields.iter().any(|lf| {
+        !lf.section7_raw.is_empty()
+            && !lf.has_bitmap
+            && (lf.drt_template == 0
+                || ((lf.drt_template == 2 || lf.drt_template == 3)
+                    && lf.complex_extra.is_some()))
+    });
     if !has_lazy_data {
         return None;
     }
@@ -268,17 +280,35 @@ pub fn run_lazy_nearest(
     let n_stations = STATIONS.len();
     let n_fields = lazy_fields.len();
 
+    /// Extract a single value from a lazy field at grid index `idx`.
+    /// Returns `Some(val)` if extraction succeeds, `None` otherwise.
+    fn extract_lazy_point(lf: &LazyField, idx: usize) -> Option<f64> {
+        if lf.has_bitmap || lf.section7_raw.is_empty() {
+            return None;
+        }
+        match lf.drt_template {
+            0 => gribtract::decode_point_drt0(&lf.section7_raw, &lf.packing, idx),
+            2 | 3 => {
+                let extra = lf.complex_extra.as_ref()?;
+                let n_pts = lf.grid.num_data_points as usize;
+                gribtract::decode_point_drt3(
+                    &lf.section7_raw,
+                    &lf.packing,
+                    extra,
+                    n_pts,
+                    idx,
+                )
+            }
+            _ => None,
+        }
+    }
+
     let extract = |lfs: &[LazyField], c: &GeometryCache| -> usize {
         let mut count = 0;
         for (fi, lf) in lfs.iter().enumerate() {
-            if lf.drt_template != 0 || lf.has_bitmap || lf.section7_raw.is_empty() {
-                continue;
-            }
             for &idx_opt in &c.nearest[fi] {
                 if let Some(idx) = idx_opt {
-                    if gribtract::decode_point_drt0(&lf.section7_raw, &lf.packing, idx)
-                        .is_some()
-                    {
+                    if extract_lazy_point(lf, idx).is_some() {
                         count += 1;
                     }
                 }
@@ -313,17 +343,10 @@ pub fn run_lazy_nearest(
     let mut in_range = 0usize;
     let mut matched = 0usize;
     for (fi, lf) in lazy_fields.iter().enumerate() {
-        if lf.drt_template != 0 || lf.has_bitmap || lf.section7_raw.is_empty() {
-            continue;
-        }
         let tol = lf.packing.tolerance().max(1e-12);
         for si in 0..n_stations {
             let Some(idx) = cache.nearest[fi][si] else { continue };
-            let Some(lazy_val) =
-                gribtract::decode_point_drt0(&lf.section7_raw, &lf.packing, idx)
-            else {
-                continue;
-            };
+            let Some(lazy_val) = extract_lazy_point(lf, idx) else { continue };
             let Some(ref_val) = full_fields[fi].values.get_at(idx) else { continue };
             in_range += 1;
             if (lazy_val - ref_val).abs() <= tol {

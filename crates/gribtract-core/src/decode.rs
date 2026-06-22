@@ -1318,6 +1318,36 @@ pub fn decode_all_drt3(
     }
 }
 
+/// Extract a single grid point from a DRT=2 or DRT=3 (complex packing) Section 7 body.
+///
+/// Decodes the full grid and returns `values[idx]`.
+///
+/// **Performance note:** For DRT=3 (spatial differencing), each call decodes
+/// the entire grid — random access is impossible because each value depends on
+/// all prior values.  When extracting multiple stations from the same field,
+/// prefer [`decode_all_drt3`] (decode once, cache, index in O(1)) to avoid
+/// paying the full-decode cost N times.
+///
+/// Returns `None` if `idx >= n_points` or if decoding fails.
+///
+/// `body` is `LazyField::section7_raw`.
+/// `packing` is `LazyField::packing`.
+/// `extra` is `LazyField::complex_extra.as_ref().unwrap()` (must be `Some` for DRT=2/3).
+/// `n_points` is `LazyField::grid.num_data_points as usize`.
+pub fn decode_point_drt3(
+    body: &[u8],
+    packing: &PackingInfo,
+    extra: &ComplexExtra,
+    n_points: usize,
+    idx: usize,
+) -> Option<f64> {
+    if idx >= n_points {
+        return None;
+    }
+    let values = decode_all_drt3(body, packing, extra, n_points).ok()?;
+    values.get(idx).copied()
+}
+
 /// Decode all fields lazily — Section 7 data is stored as raw bytes.
 ///
 /// DRT=0 fields without a bitmap: `section7_raw` is populated; use
@@ -1592,6 +1622,51 @@ mod tests {
         // Any idx returns 300.0 (constant field, no body bytes needed)
         assert_eq!(decode_point_drt0(&[], &packing, 0), Some(300.0));
         assert_eq!(decode_point_drt0(&[], &packing, 999), Some(300.0));
+    }
+
+    #[test]
+    fn decode_point_drt3_matches_full_decode() {
+        // Verify decode_point_drt3 returns the same value as decode_all_drt3[idx]
+        // for the DRT=3 GFS fixture (gfs_tmp2m_1deg_anl).
+        let corpus_root = {
+            let manifest_dir = env!("CARGO_MANIFEST_DIR");
+            std::path::Path::new(manifest_dir)
+                .join("../..")
+                .join("tests/corpus")
+        };
+        let fixture = corpus_root.join("small/gfs_tmp2m_1deg_anl.grib2");
+        let bytes = match std::fs::read(&fixture) {
+            Ok(b) => b,
+            Err(_) => return, // skip if fixture not present
+        };
+        let lazy_fields = decode_bytes_lazy(&bytes).expect("lazy decode");
+        for lf in &lazy_fields {
+            if lf.drt_template != 3 || lf.section7_raw.is_empty() {
+                continue;
+            }
+            let extra = lf.complex_extra.as_ref().expect("DRT=3 must have complex_extra");
+            let n_pts = lf.grid.num_data_points as usize;
+            let all_vals = decode_all_drt3(&lf.section7_raw, &lf.packing, extra, n_pts)
+                .expect("decode_all_drt3 ok");
+            // Verify first 5, middle, last index.
+            let indices: Vec<usize> = (0..5.min(n_pts))
+                .chain([n_pts / 2, n_pts.saturating_sub(1)])
+                .collect();
+            for idx in indices {
+                let point_val = decode_point_drt3(
+                    &lf.section7_raw, &lf.packing, extra, n_pts, idx,
+                ).expect("in-range idx");
+                assert!(
+                    (point_val - all_vals[idx]).abs() < 1e-9,
+                    "idx={idx}: point={point_val} all={}", all_vals[idx],
+                );
+            }
+            // Out-of-range must return None.
+            assert!(
+                decode_point_drt3(&lf.section7_raw, &lf.packing, extra, n_pts, n_pts).is_none(),
+                "out-of-range idx must return None",
+            );
+        }
     }
 
     #[test]
