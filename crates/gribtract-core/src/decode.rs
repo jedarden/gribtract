@@ -1196,14 +1196,10 @@ fn decode_drt3(
             for _ in 0..l { packed.push(gref); }
             continue;
         }
-        // Precompute the starting bit offset so `k * w` has no loop-carried
-        // dependency on `bit_offset`. This lets the compiler auto-vectorize
-        // when the group width is constant (which it is within each group).
+        // Use the sliding-window extractor (avoids per-element div_ceil and
+        // inner byte-loop from read_bits_at; see extract_group_windowed).
         let start_bit = bit_offset;
-        for k in 0..l {
-            let v = read_bits_at(body, start_bit + k * w, w) as i64;
-            packed.push(gref + v);
-        }
+        extract_group_windowed(body, start_bit, w, l, gref, &mut packed);
         bit_offset = start_bit + w * l;
     }
 
@@ -1260,6 +1256,88 @@ fn read_sign_magnitude_be(bytes: &[u8]) -> i64 {
     let sign_bit = 1u64 << (n * 8 - 1);
     let magnitude = (raw & (sign_bit - 1)) as i64;
     if raw & sign_bit != 0 { -magnitude } else { magnitude }
+}
+
+/// Extract `count` values each `w` bits wide from `data` starting at `start_bit`,
+/// pushing `gref + raw_value` onto `out` for each.
+///
+/// Uses a left-aligned u64 sliding window (MSB-first, matching GRIB2 bit order)
+/// instead of per-element [`read_bits_at`] calls.  The key savings vs. the
+/// per-element path:
+///
+/// * No `div_ceil` per element — `bytes_needed` is computed once on pre-fill.
+/// * No inner byte-assembly loop per element — bytes are amortised over a
+///   window: one byte loaded per 8 bits consumed on average.
+/// * Single `shift + mask` per value instead of 3–9 byte-load + shift operations.
+///
+/// The left-aligned invariant: valid bits always occupy the MSB positions of
+/// `buf`, so the next `w`-bit value is always extracted as `(buf >> (64 - w)) & mask`.
+///
+/// # Panics (debug only)
+/// `w` must satisfy `0 < w ≤ 32`.  The caller is responsible for the w=0 fast
+/// path (zero-width groups).
+#[inline]
+fn extract_group_windowed(
+    data: &[u8],
+    start_bit: usize,
+    w: usize,
+    count: usize,
+    gref: i64,
+    out: &mut Vec<i64>,
+) {
+    debug_assert!(w > 0 && w <= 32, "w={w} out of range (caller must handle w=0)");
+    let mask: u64 = (1u64 << w) - 1;
+
+    // `buf` holds up to 64 bits of stream data, left-aligned (MSB = next bit).
+    // `buf_bits` tracks how many valid bits sit at the top of `buf`.
+    let mut buf: u64 = 0;
+    let mut buf_bits: usize = 0;
+    let mut byte_pos = start_bit / 8;
+    let skip = start_bit % 8; // alignment bits to discard before the first value
+
+    // Inline loader: place data[byte_pos] at the next available MSB position.
+    // Precondition: buf_bits ≤ 56 (so buf_bits + 8 ≤ 64, no overflow).
+    // buf_bits stays ≤ 40 in the inner loop (analysis below), so this always holds.
+    macro_rules! load_byte {
+        () => {
+            if byte_pos < data.len() {
+                buf |= (data[byte_pos] as u64) << (56 - buf_bits);
+                buf_bits += 8;
+            }
+            // Always advance byte_pos (prevents infinite loop on malformed data).
+            byte_pos += 1;
+        };
+    }
+
+    // Pre-fill: load enough bytes so buf holds at least (skip + w) valid bits.
+    // Worst case: skip=7, w=32 → 39 bits → 5 bytes → buf_bits ≤ 40 after pre-fill.
+    let init_bytes = (skip + w + 7) / 8;
+    for _ in 0..init_bytes {
+        load_byte!();
+    }
+
+    // Discard the alignment prefix (bits before start_bit within the first byte).
+    if skip > 0 {
+        buf <<= skip;
+        buf_bits -= skip;
+    }
+
+    // Main extraction loop.
+    // After `buf <<= w`, buf_bits decreases by w.  After at most ceil(w/8)
+    // refills (each adding 8 bits), buf_bits ≤ w + 8*ceil(w/8) ≤ 40 for w ≤ 32.
+    for _ in 0..count {
+        // Refill if needed (at most ceil(w/8) ≤ 4 iterations for w ≤ 32).
+        while buf_bits < w {
+            load_byte!();
+        }
+
+        // Extract the top w bits and advance the window.
+        let v = (buf >> (64 - w)) & mask;
+        buf <<= w;
+        buf_bits -= w;
+
+        out.push(gref + v as i64);
+    }
 }
 
 /// Read `n_bits` bits from `data` starting at `bit_offset` (MSB-first).
@@ -1746,6 +1824,35 @@ mod tests {
                 decode_point_drt3(&lf.section7_raw, &lf.packing, extra, n_pts, n_pts).is_none(),
                 "out-of-range idx must return None",
             );
+        }
+    }
+
+    /// Verify extract_group_windowed matches read_bits_at across many (skip, w) combos.
+    #[test]
+    fn extract_group_windowed_matches_read_bits_at() {
+        // Pseudo-random but deterministic 64-byte data buffer.
+        let data: Vec<u8> = (0u8..=255).cycle().take(64).collect();
+        let gref = 7i64;
+        let count = 10;
+
+        for skip in 0..8usize {
+            for w in 1usize..=20 {
+                // Reference: per-element read_bits_at
+                let mut expected = Vec::with_capacity(count);
+                for k in 0..count {
+                    let v = read_bits_at(&data, skip + k * w, w) as i64;
+                    expected.push(gref + v);
+                }
+
+                // Windowed extractor under test
+                let mut actual = Vec::with_capacity(count);
+                extract_group_windowed(&data, skip, w, count, gref, &mut actual);
+
+                assert_eq!(
+                    expected, actual,
+                    "skip={skip} w={w}: windowed result differs from read_bits_at",
+                );
+            }
         }
     }
 
