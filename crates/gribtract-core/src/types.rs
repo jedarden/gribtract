@@ -433,9 +433,10 @@ impl GaussianLatLonParams {
 /// Carried inside [`GridDefinition`] to hold parameters that are only present
 /// for projected (non-lat/lon) grid types.  The `LatLon` variant requires no
 /// extra data because all geometry is encoded in the common fields.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub enum GridProjection {
     /// GDT 3.0 (or similar lat/lon): all geometry in the common fields.
+    #[default]
     LatLon,
     /// GDT 3.20: polar stereographic.
     PolarStereographic(PolarStereographicParams),
@@ -443,12 +444,6 @@ pub enum GridProjection {
     LambertConformal(LambertConformalParams),
     /// GDT 3.40: Gaussian latitude/longitude.
     GaussianLatLon(GaussianLatLonParams),
-}
-
-impl Default for GridProjection {
-    fn default() -> Self {
-        GridProjection::LatLon
-    }
 }
 
 /// Grid geometry from the Grid Definition Section.
