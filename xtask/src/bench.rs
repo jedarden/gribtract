@@ -310,6 +310,28 @@ pub fn run(args: &[String]) {
                 station_hours_per_sec: Some(lazy_r.station_hours_per_sec),
             });
         }
+
+        // DRT=2/3 cached decode-once-extract-many path.
+        // Only runs when DRT=2/3 lazy fields with raw bytes + complex_extra are present.
+        if let Some(drt3_r) =
+            bench_station::run_lazy_drt3_cached(&all_lazy_fields, &all_decoded_fields)
+        {
+            runs.push(BenchRun {
+                decoder: "gribtract".to_string(),
+                workload: Some("station-extract".to_string()),
+                template_5x: None,
+                messages_per_sec: None,
+                mb_per_sec: None,
+                grid_points_per_sec: None,
+                wall_ms: drt3_r.wall_ms,
+                agreement: Some(drt3_r.agreement),
+                interpolation: Some(drt3_r.interpolation.clone()),
+                n_stations: Some(drt3_r.n_stations as u32),
+                n_fields: Some(drt3_r.n_fields as u32),
+                in_range: Some(drt3_r.in_range as u32),
+                station_hours_per_sec: Some(drt3_r.station_hours_per_sec),
+            });
+        }
     }
 
     let result = BenchResult {

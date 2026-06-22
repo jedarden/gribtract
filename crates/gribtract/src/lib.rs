@@ -1,8 +1,9 @@
 #![doc = "High-level GRIB2 decoder — message iterator, field selection, public API."]
 
 pub use gribtract_core::types::{
-    BilinearCorners, Ensemble, Field, ForecastTime, GaussianLatLonParams, GridDefinition,
-    GridValues, LazyField, Level, Message, PackingInfo, ParameterId, ReferenceTime,
+    BilinearCorners, ComplexExtra, Ensemble, Field, ForecastTime, GaussianLatLonParams,
+    GridDefinition, GridValues, LazyField, LambertConformalParams, Level, Message, PackingInfo,
+    ParameterId, ReferenceTime,
 };
 pub use gribtract_core::error::{Error, Result};
 
@@ -16,9 +17,13 @@ pub fn decode(bytes: &[u8]) -> Result<Vec<Field>> {
 
 /// Decode fields lazily — Section 7 data stored as raw bytes, not decoded.
 ///
-/// Only DRT=0 (simple packing) fields without a bitmap populate
-/// `LazyField::section7_raw`. Use [`decode_point_drt0`] to extract individual
-/// grid points on demand without decoding the full grid.
+/// DRT=0 (simple packing) fields without a bitmap: `section7_raw` is
+/// populated; use [`decode_point_drt0`] for O(1) single-point extraction.
+///
+/// DRT=2/3 (complex packing) fields without a bitmap: both `section7_raw`
+/// and `complex_extra` are populated; use [`decode_all_drt3`] to decode the
+/// full grid once and cache it, then index into the `Vec<f64>` for each
+/// station (the "decode-once-extract-many" pattern).
 pub fn decode_lazy(bytes: &[u8]) -> Result<Vec<LazyField>> {
     gribtract_core::decode::decode_bytes_lazy(bytes)
 }
@@ -33,4 +38,29 @@ pub fn decode_point_drt0(
     idx: usize,
 ) -> Option<f64> {
     gribtract_core::decode::decode_point_drt0(body, packing, idx)
+}
+
+/// Decode the full grid from a DRT=2 or DRT=3 (complex packing) Section 7 body.
+///
+/// Returns all grid values as a flat `Vec<f64>` in grid-point order.  This is
+/// the entry point for the "decode-once-extract-many" pattern when working with
+/// DRT=2/3 [`LazyField`] values: decode the grid once, cache the `Vec<f64>`,
+/// then use `values[idx]` for each station.
+///
+/// For DRT=3 (spatial differencing), random access without a full decode is
+/// impossible because each value depends on all prior values.  The cached path
+/// gives the same throughput as a single full decode divided across N stations —
+/// ~N× better than calling the decoder once per station.
+///
+/// `body` is `LazyField::section7_raw`.
+/// `packing` is `LazyField::packing`.
+/// `extra` is `LazyField::complex_extra.as_ref()` (must be `Some` for DRT=2/3).
+/// `n_points` is `LazyField::grid.num_data_points as usize`.
+pub fn decode_all_drt3(
+    body: &[u8],
+    packing: &PackingInfo,
+    extra: &ComplexExtra,
+    n_points: usize,
+) -> Result<Vec<f64>> {
+    gribtract_core::decode::decode_all_drt3(body, packing, extra, n_points)
 }

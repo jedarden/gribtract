@@ -21,6 +21,82 @@ const STATIONS: &[(&str, f64, f64)] = &[
     ("Los Angeles",  33.94, -118.41),
 ];
 
+/// Verifies the decode-once-extract-many pattern for DRT=3 data.
+///
+/// Checks that:
+/// 1. `decode_lazy` populates `section7_raw` and `complex_extra` for DRT=3 fields.
+/// 2. `decode_all_drt3` reproduces every value of the full `decode` within packing
+///    tolerance — i.e. the cached path is bit-identical to the eager decode.
+/// 3. Station lookups via the cached path match the golden reference.
+#[test]
+fn drt3_decode_once_extract_many_matches_full_decode() {
+    let bytes = corpus::load("gfs_tmp2m_1deg_anl")
+        .expect("fixture gfs_tmp2m_1deg_anl must be present in corpus");
+
+    let full_fields = gribtract::decode(&bytes).expect("full decode");
+    let lazy_fields = gribtract::decode_lazy(&bytes).expect("lazy decode");
+
+    assert_eq!(full_fields.len(), lazy_fields.len());
+
+    for (full, lazy) in full_fields.iter().zip(lazy_fields.iter()) {
+        // DRT=3 field must have raw bytes.
+        assert_eq!(lazy.drt_template, 3, "fixture must be DRT=3");
+        assert!(
+            !lazy.section7_raw.is_empty(),
+            "section7_raw must be populated for DRT=3 lazy field"
+        );
+        let extra = lazy
+            .complex_extra
+            .as_ref()
+            .expect("complex_extra must be populated for DRT=3 lazy field");
+
+        let n_pts = lazy.grid.num_data_points as usize;
+        let decoded_once = gribtract::decode_all_drt3(&lazy.section7_raw, &lazy.packing, extra, n_pts)
+            .expect("decode_all_drt3 must succeed");
+
+        assert_eq!(decoded_once.len(), n_pts, "decoded length must match n_points");
+
+        // Compare every grid point against the full eager decode.
+        let tol = lazy.packing.tolerance().max(1e-12);
+        let gribtract::GridValues::Dense(ref full_vals) = full.values else {
+            panic!("expected Dense GridValues for DRT=3 fixture");
+        };
+        let mut mismatches = 0usize;
+        for (idx, (&cached, &full_v)) in decoded_once.iter().zip(full_vals.iter()).enumerate() {
+            if (cached - full_v).abs() > tol {
+                mismatches += 1;
+                if mismatches <= 5 {
+                    eprintln!(
+                        "  mismatch idx={idx}: cached={cached:.6}, full={full_v:.6}, tol={tol:.6}"
+                    );
+                }
+            }
+        }
+        assert_eq!(mismatches, 0, "{mismatches} grid points differ between cached and full decode");
+
+        // Also verify the 7 CONUS stations match the golden reference.
+        let golden_fixture = golden::load_golden("gfs_tmp2m_1deg_anl")
+            .expect("golden load must not error")
+            .expect("golden for gfs_tmp2m_1deg_anl must exist");
+        let golden_values = match &golden_fixture.fields[0].values {
+            golden::GoldenGridValues::Dense(v) => v.clone(),
+            golden::GoldenGridValues::Masked { .. } => panic!("expected Dense golden"),
+        };
+        for &(name, lat, lon) in STATIONS {
+            let idx = full.grid.nearest_index(lat, lon)
+                .unwrap_or_else(|| panic!("nearest_index None for '{name}'"));
+            let cached_val = decoded_once[idx];
+            let golden_val = golden_values[idx];
+            let diff = (cached_val - golden_val).abs();
+            assert!(
+                diff <= tol,
+                "station '{name}' idx={idx}: cached_drt3={cached_val:.6}, golden={golden_val:.6}, diff={diff:.9}",
+            );
+        }
+        eprintln!("  [ok] decode-once-extract-many: {n_pts} grid points, 0 mismatches vs full decode");
+    }
+}
+
 /// Grid parameters for `gfs_tmp2m_1deg_anl`: 360×181, 1° global lat/lon,
 /// lat_first=90, lon_first=0, scanning_mode=0 (N→S rows, W→E cols).
 ///

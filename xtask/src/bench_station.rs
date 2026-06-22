@@ -364,6 +364,206 @@ pub fn run_lazy_nearest(
     })
 }
 
+// ── DRT=2/3 cached bench (decode-once-extract-many) ──────────────────────────
+
+/// Bench the DRT=2/3 decode-once-extract-many path for nearest-point extraction.
+///
+/// For DRT=3 (complex packing with spatial differencing), true random access is
+/// impossible — the full grid must be decoded to obtain any single point.  The
+/// naive approach decodes the grid N times (once per station) per field.  This
+/// function implements the cached alternative: decode the full grid once per
+/// field, cache the `Vec<f64>`, then look up `values[idx]` for each station in
+/// O(1).  The speedup factor equals the number of stations (~20×).
+///
+/// Returns `None` if no DRT=2/3 lazy fields with raw data are present.
+///
+/// `lazy_fields` and `full_fields` must be aligned (same order, same grids).
+/// The geometry cache and the reference verification both derive from `full_fields`.
+pub fn run_lazy_drt3_cached(
+    lazy_fields: &[LazyField],
+    full_fields: &[Field],
+) -> Option<StationBenchResult> {
+    if lazy_fields.is_empty() || full_fields.is_empty() {
+        return None;
+    }
+
+    // Only run when there are DRT=2/3 lazy fields with raw bytes and complex extra.
+    let has_lazy_data = lazy_fields.iter().any(|lf| {
+        (lf.drt_template == 2 || lf.drt_template == 3)
+            && !lf.section7_raw.is_empty()
+            && lf.complex_extra.is_some()
+            && !lf.has_bitmap
+    });
+    if !has_lazy_data {
+        return None;
+    }
+
+    let cache = GeometryCache::build(full_fields);
+    let n_stations = STATIONS.len();
+    let n_fields = lazy_fields.len();
+
+    // NAIVE path: decode the full grid once per (field, station) pair — i.e.,
+    // n_stations full decodes per field.  This is the unoptimised baseline.
+    let extract_naive = |lfs: &[LazyField], c: &GeometryCache| -> usize {
+        let mut count = 0;
+        for (fi, lf) in lfs.iter().enumerate() {
+            if (lf.drt_template != 2 && lf.drt_template != 3)
+                || lf.has_bitmap
+                || lf.section7_raw.is_empty()
+            {
+                continue;
+            }
+            let Some(extra) = &lf.complex_extra else { continue };
+            let n_pts = lf.grid.num_data_points as usize;
+            for &idx_opt in &c.nearest[fi] {
+                let Some(idx) = idx_opt else { continue };
+                // Decode the whole grid just to get one point — the naive approach.
+                if let Ok(vals) =
+                    gribtract::decode_all_drt3(&lf.section7_raw, &lf.packing, extra, n_pts)
+                {
+                    if idx < vals.len() {
+                        count += 1;
+                    }
+                }
+            }
+        }
+        count
+    };
+
+    // CACHED path: decode each field's grid once, reuse across stations.
+    let extract_cached = |lfs: &[LazyField], c: &GeometryCache| -> usize {
+        let mut count = 0;
+        for (fi, lf) in lfs.iter().enumerate() {
+            if (lf.drt_template != 2 && lf.drt_template != 3)
+                || lf.has_bitmap
+                || lf.section7_raw.is_empty()
+            {
+                continue;
+            }
+            let Some(extra) = &lf.complex_extra else { continue };
+            let n_pts = lf.grid.num_data_points as usize;
+            // Decode the full grid ONCE for this field.
+            let Ok(decoded) =
+                gribtract::decode_all_drt3(&lf.section7_raw, &lf.packing, extra, n_pts)
+            else {
+                continue;
+            };
+            // Then look up each station in O(1).
+            for &idx_opt in &c.nearest[fi] {
+                let Some(idx) = idx_opt else { continue };
+                if idx < decoded.len() {
+                    count += 1;
+                }
+            }
+        }
+        count
+    };
+
+    // ── Benchmark the naive path ──────────────────────────────────────────────
+    let mut n_warmup = 0u32;
+    let t_warmup = Instant::now();
+    loop {
+        let _ = extract_naive(lazy_fields, &cache);
+        n_warmup += 1;
+        if t_warmup.elapsed().as_millis() >= 10 {
+            break;
+        }
+    }
+    let ns_naive = (t_warmup.elapsed().as_nanos() as f64 / n_warmup as f64).max(1.0);
+    let n_naive = ((200_000_000.0f64 / ns_naive).ceil() as u32).clamp(2, 10_000);
+    let t0 = Instant::now();
+    for _ in 0..n_naive {
+        let _ = extract_naive(lazy_fields, &cache);
+    }
+    let naive_ns_per_iter = t0.elapsed().as_nanos() as u64 / n_naive as u64;
+
+    // ── Benchmark the cached path ─────────────────────────────────────────────
+    let mut n_warmup2 = 0u32;
+    let t_warmup2 = Instant::now();
+    loop {
+        let _ = extract_cached(lazy_fields, &cache);
+        n_warmup2 += 1;
+        if t_warmup2.elapsed().as_millis() >= 10 {
+            break;
+        }
+    }
+    let ns_cached = (t_warmup2.elapsed().as_nanos() as f64 / n_warmup2 as f64).max(1.0);
+    let n_cached = ((200_000_000.0f64 / ns_cached).ceil() as u32).clamp(2, 10_000);
+    let t1 = Instant::now();
+    for _ in 0..n_cached {
+        let _ = extract_cached(lazy_fields, &cache);
+    }
+    let cached_ns_per_iter = t1.elapsed().as_nanos() as u64 / n_cached as u64;
+    let wall_ms = cached_ns_per_iter as f64 / 1_000_000.0;
+
+    // ── Correctness: compare cached vs full-grid decode at same indices ────────
+    let mut in_range = 0usize;
+    let mut matched = 0usize;
+    for (fi, lf) in lazy_fields.iter().enumerate() {
+        if (lf.drt_template != 2 && lf.drt_template != 3)
+            || lf.has_bitmap
+            || lf.section7_raw.is_empty()
+        {
+            continue;
+        }
+        let Some(extra) = &lf.complex_extra else { continue };
+        let n_pts = lf.grid.num_data_points as usize;
+        let Ok(decoded) =
+            gribtract::decode_all_drt3(&lf.section7_raw, &lf.packing, extra, n_pts)
+        else {
+            continue;
+        };
+        let tol = lf.packing.tolerance().max(1e-12);
+        for si in 0..n_stations {
+            let Some(idx) = cache.nearest[fi][si] else { continue };
+            if idx >= decoded.len() {
+                continue;
+            }
+            let cached_val = decoded[idx];
+            let Some(ref_val) = full_fields[fi].values.get_at(idx) else { continue };
+            in_range += 1;
+            if (cached_val - ref_val).abs() <= tol {
+                matched += 1;
+            }
+        }
+    }
+
+    let station_hours_per_sec = if cached_ns_per_iter > 0 && in_range > 0 {
+        in_range as f64 / (cached_ns_per_iter as f64 / 1_000_000_000.0)
+    } else {
+        0.0
+    };
+    let naive_shps = if naive_ns_per_iter > 0 && in_range > 0 {
+        in_range as f64 / (naive_ns_per_iter as f64 / 1_000_000_000.0)
+    } else {
+        0.0
+    };
+    let speedup = if naive_shps > 0.0 { station_hours_per_sec / naive_shps } else { 0.0 };
+    let agreement = if in_range > 0 { matched as f64 / in_range as f64 } else { 1.0 };
+
+    eprintln!(
+        "  [station-drt3-cached] {} fields × {} stations → {} in-range | \
+         {:.0} station-hours/s (cached) vs {:.0} (naive) | speedup={:.1}× | agreement={:.1}%",
+        n_fields,
+        n_stations,
+        in_range,
+        station_hours_per_sec,
+        naive_shps,
+        speedup,
+        agreement * 100.0,
+    );
+
+    Some(StationBenchResult {
+        interpolation: "drt3-cached-nearest".to_string(),
+        n_stations,
+        n_fields,
+        in_range,
+        wall_ms,
+        station_hours_per_sec,
+        agreement,
+    })
+}
+
 /// Verify extracted values against the reference (nearest-grid-point baseline).
 fn verify(fields: &[Field], mode: &str, cache: &GeometryCache) -> (usize, usize) {
     let mut in_range = 0usize;

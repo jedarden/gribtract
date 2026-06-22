@@ -134,6 +134,28 @@ pub struct Ensemble {
     pub number: i16,
 }
 
+// ── Complex packing extra (Section 5, DRT 2/3) ──────────────────────────────
+
+/// Group structure parameters from Section 5 template 5.2 / 5.3.
+///
+/// Stored in [`LazyField`] for DRT=2/3 fields so the caller can decode the
+/// full grid on demand via `decode_all_drt3`.  Only populated when the lazy
+/// path was used to parse the message.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ComplexExtra {
+    pub n_groups: u32,
+    pub ref_group_widths: u8,
+    pub bits_group_widths: u8,
+    pub ref_group_lengths: u32,
+    pub length_increment: u8,
+    pub true_last_group_length: u32,
+    pub bits_scaled_group_lengths: u8,
+    /// 0 = no spatial differencing (DRT=2), 1 = first-order, 2 = second-order (DRT=3).
+    pub order_spatial_diff: u8,
+    /// Number of octets per "seed" value in the Section 7 extra-octets block.
+    pub extra_octet_count: u8,
+}
+
 // ── Packing info (Section 5) — drives tolerance derivation ──────────────────
 
 /// Packing metadata extracted from the Data Representation Section header.
@@ -727,10 +749,15 @@ pub struct Field {
 /// A GRIB2 field with Section 7 data stored as raw bytes — not yet decoded.
 ///
 /// Used by the lazy point-extraction path.  The caller extracts individual
-/// grid points on demand via `decode_point_drt0` instead of decoding the full
-/// grid.  Only supported for DRT=0 (simple packing) without a bitmap; for
-/// other templates or bitmap fields `section7_raw` is empty and the lazy path
-/// returns `None`.
+/// grid points on demand:
+/// - DRT=0 (simple packing) without a bitmap: use [`decode_point_drt0`].
+/// - DRT=2/3 (complex packing, with or without spatial differencing) without a
+///   bitmap: use `decode_all_drt3`; the full grid must be decoded because DRT=3
+///   spatial differencing prevents true random access.  `complex_extra` carries
+///   the Section 5 group-structure parameters needed by that decoder.
+///
+/// For other templates or fields with a bitmap, `section7_raw` is empty and
+/// the lazy path returns `None`.
 #[derive(Debug, Clone)]
 pub struct LazyField {
     pub center: u16,
@@ -744,10 +771,18 @@ pub struct LazyField {
     pub gdt_template: u16,
     pub pdt_template: u16,
     pub drt_template: u16,
-    /// Raw Section 7 body bytes.  Non-empty only for DRT=0 without a bitmap.
+    /// Raw Section 7 body bytes.
+    ///
+    /// Non-empty for DRT=0, DRT=2, and DRT=3 fields without a bitmap.
+    /// Empty for all other templates or when a bitmap is present.
     pub section7_raw: Vec<u8>,
     /// True when the message has an active bitmap (lazy extraction unsupported).
     pub has_bitmap: bool,
+    /// Group-structure parameters from Section 5; populated for DRT=2/3 fields.
+    ///
+    /// Required to call `decode_all_drt3`.  `None` for DRT=0, DRT=40, DRT=41,
+    /// and bitmap fields.
+    pub complex_extra: Option<ComplexExtra>,
 }
 
 // ── Message ──────────────────────────────────────────────────────────────────

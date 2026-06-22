@@ -10,9 +10,9 @@
 
 use crate::error::{Error, Result};
 use crate::types::{
-    Ensemble, Field, ForecastTime, GaussianLatLonParams, GridDefinition, GridProjection,
-    GridValues, LazyField, LambertConformalParams, Level, PackingInfo, ParameterId,
-    PolarStereographicParams, ReferenceTime,
+    ComplexExtra, Ensemble, Field, ForecastTime, GaussianLatLonParams, GridDefinition,
+    GridProjection, GridValues, LazyField, LambertConformalParams, Level, PackingInfo,
+    ParameterId, PolarStereographicParams, ReferenceTime,
 };
 
 // ── Byte buffer reader ────────────────────────────────────────────────────────
@@ -118,21 +118,11 @@ impl<'a> Buf<'a> {
 
 // ── Extra parameters for DRT=2/3 (complex packing) ───────────────────────────
 
-/// Group structure parameters from Section 5 template 5.2 / 5.3.
-/// Only populated when decoding complex packing (DRT=2 or DRT=3).
-struct ComplexPackingExtra {
-    n_groups: u32,
-    ref_group_widths: u8,
-    bits_group_widths: u8,
-    ref_group_lengths: u32,
-    length_increment: u8,
-    true_last_group_length: u32,
-    bits_scaled_group_lengths: u8,
-    /// 0 = no spatial differencing (DRT=2), 1 = first order, 2 = second order (DRT=3).
-    order_spatial_diff: u8,
-    /// Number of octets per "seed" value in the Section 7 extra-octets block.
-    extra_octet_count: u8,
-}
+/// Private alias for the public `ComplexExtra` type.
+///
+/// Using the public type everywhere avoids a conversion step when building
+/// `LazyField`.  The public type is defined in `crate::types`.
+type ComplexPackingExtra = ComplexExtra;
 
 // ── Intermediate parsing state accumulated across sections ────────────────────
 
@@ -1304,10 +1294,37 @@ pub fn decode_point_drt0(body: &[u8], packing: &PackingInfo, idx: usize) -> Opti
     Some((r + x as f64 * two_e) / ten_d)
 }
 
+/// Decode all grid values from a DRT=2 or DRT=3 (complex packing) Section 7 body.
+///
+/// This is the public entry point for the "decode-once-extract-many" pattern:
+/// decode the full grid once and cache the `Vec<f64>`, then do O(1) index
+/// lookups for each station.  For DRT=3 (spatial differencing), random access
+/// is impossible without a full decode because each value depends on all prior
+/// values in the differencing reversal step.
+///
+/// `body` is the raw Section 7 body (from `LazyField::section7_raw`).
+/// `packing` is from `LazyField::packing`.
+/// `extra` is from `LazyField::complex_extra` (must be `Some` for DRT=2/3).
+/// `n_points` is `LazyField::grid.num_data_points as usize`.
+pub fn decode_all_drt3(
+    body: &[u8],
+    packing: &PackingInfo,
+    extra: &ComplexExtra,
+    n_points: usize,
+) -> Result<Vec<f64>> {
+    match decode_drt3(body, packing, extra, n_points)? {
+        GridValues::Dense(v) => Ok(v),
+        GridValues::Masked { values, .. } => Ok(values),
+    }
+}
+
 /// Decode all fields lazily — Section 7 data is stored as raw bytes.
 ///
-/// Only DRT=0 fields without a bitmap populate `section7_raw`.  Call
-/// [`decode_point_drt0`] to extract individual points on demand.
+/// DRT=0 fields without a bitmap: `section7_raw` is populated; use
+/// [`decode_point_drt0`] for random access.
+///
+/// DRT=2/3 fields without a bitmap: `section7_raw` and `complex_extra` are
+/// both populated; use [`decode_all_drt3`] to decode the full grid once.
 pub fn decode_bytes_lazy(bytes: &[u8]) -> Result<Vec<LazyField>> {
     let mut fields = Vec::new();
     let mut pos = 0;
@@ -1340,6 +1357,7 @@ struct LazyFieldBuilder {
     gdt_template: Option<u16>,
     packing: Option<PackingInfo>,
     drt_template: Option<u16>,
+    complex_extra: Option<ComplexPackingExtra>,
     has_bitmap: Option<bool>,
     section7_raw: Option<Vec<u8>>,
 }
@@ -1361,10 +1379,11 @@ impl LazyFieldBuilder {
         let drt_template = self.drt_template?;
         let has_bitmap = self.has_bitmap.unwrap_or(false);
         let section7_raw = self.section7_raw.unwrap_or_default();
+        let complex_extra = self.complex_extra;
         Some(LazyField {
             center, subcenter, parameter, forecast, level, ensemble,
             grid, packing, gdt_template, pdt_template, drt_template,
-            has_bitmap, section7_raw,
+            has_bitmap, section7_raw, complex_extra,
         })
     }
 }
@@ -1422,20 +1441,28 @@ fn decode_lazy_message(msg: &[u8], out: &mut Vec<LazyField>) -> Result<usize> {
                 builder.ensemble = Some(ens);
             }
             5 => {
-                // Parse only common packing header; complex extras ignored in lazy mode.
-                let (drt, packing, _extra) = parse_section5(sec_body)?;
+                // Store the full packing info including complex extras for DRT=2/3.
+                let (drt, packing, extra) = parse_section5(sec_body)?;
                 builder.drt_template = Some(drt);
                 builder.packing = Some(packing);
+                builder.complex_extra = extra;
             }
             6 => {
                 let has_bitmap = parse_section6(sec_body)?;
                 builder.has_bitmap = Some(has_bitmap);
             }
             7 => {
-                // Store raw bytes only for DRT=0 without a bitmap.
-                let drt0 = builder.drt_template == Some(0);
+                // Store raw bytes for DRT=0, DRT=2, and DRT=3 without a bitmap.
+                // DRT=0: single-point random access via decode_point_drt0.
+                // DRT=2/3: full-grid decode via decode_all_drt3 (spatial differencing
+                //          prevents true random access, so the full grid must be decoded).
+                let drt = builder.drt_template.unwrap_or(u16::MAX);
                 let no_bitmap = !builder.has_bitmap.unwrap_or(false);
-                let raw = if drt0 && no_bitmap { sec_body.to_vec() } else { Vec::new() };
+                let raw = if (drt == 0 || drt == 2 || drt == 3) && no_bitmap {
+                    sec_body.to_vec()
+                } else {
+                    Vec::new()
+                };
                 builder.section7_raw = Some(raw);
 
                 let next_builder = LazyFieldBuilder {
