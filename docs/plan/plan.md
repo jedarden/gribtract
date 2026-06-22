@@ -217,7 +217,7 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
   NOAA products). Pull in a Rust j2k/png path.
 - [x] **Phase 5 — Grid geometry breadth.** Lambert conformal (HRRR native), polar
   stereographic, Gaussian, rotated. Geometry must match for point asof-joins.
-- [ ] **Phase 6 — Ensembles + statistical products (GEFS).** Product templates for
+- [x] **Phase 6 — Ensembles + statistical products (GEFS).** Product templates for
   members and time-aggregated fields.
 - [ ] **Phase 7 — Publish + integrate.** crates.io, Python bindings, and the
   forecast-timeseries emitter consumed by a downstream backtest join.
