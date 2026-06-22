@@ -1286,11 +1286,30 @@ mod tests {
 
     #[test]
     fn gaussian_nearest_outside_returns_none() {
-        let g = test_gaussian_latlon_grid();
-        // North Pole is above La1=60°N — outside grid.
-        assert_eq!(g.nearest_index(90.0, 0.0), None);
-        // South Pole is below La2=60°S — outside grid.
-        assert_eq!(g.nearest_index(-90.0, 0.0), None);
+        // Use a narrow grid (La1=50°N, La2=30°N, 3 rows, di=90°, 4 cols)
+        // so that there are clearly out-of-range latitudes:
+        //   dlat = (30 − 50) / (3 − 1) = −10°
+        //   half-cell guard at +5° = 55°N boundary and 25°N boundary.
+        let narrow = GridDefinition {
+            template: 40,
+            num_data_points: 12,
+            nx: 4,
+            ny: 3,
+            lat_first: 50.0,
+            lon_first: 0.0,
+            lat_last: 30.0,
+            lon_last: 270.0,
+            di: 90.0,
+            dj: 0.0,
+            scanning_mode: 0x00,
+            resolution_flags: 0x30,
+            shape_of_earth: 6,
+            projection: GridProjection::GaussianLatLon(GaussianLatLonParams { n_parallels: 1 }),
+        };
+        // 90°N is 40° north of La1=50°N — well outside.
+        assert_eq!(narrow.nearest_index(90.0, 0.0), None, "90°N should be outside grid");
+        // 0°N is 30° south of La2=30°N — well outside.
+        assert_eq!(narrow.nearest_index(0.0, 0.0), None, "0°N should be outside grid");
     }
 
     #[test]
