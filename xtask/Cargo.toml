@@ -14,3 +14,4 @@ gribtract = { path = "../crates/gribtract" }
 gribtract-testutil = { path = "../crates/gribtract-testutil" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+ureq = { version = "2", features = ["tls"] }

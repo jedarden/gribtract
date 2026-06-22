@@ -1,5 +1,8 @@
 #![doc = "High-level GRIB2 decoder — message iterator, field selection, public API."]
 
+pub mod provider_probe;
+pub use provider_probe::{ProviderProbe, ProviderResult};
+
 pub use gribtract_core::types::{
     BilinearCorners, ComplexExtra, Ensemble, Field, ForecastTime, GaussianLatLonParams,
     GridDefinition, GridValues, LazyField, LambertConformalParams, Level, Message, PackingInfo,

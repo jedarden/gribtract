@@ -1,5 +1,6 @@
 mod bench;
 mod bench_station;
+mod probe_providers;
 
 fn main() {
     let raw_args: Vec<String> = std::env::args().skip(1).collect();
@@ -9,13 +10,14 @@ fn main() {
     match task {
         "bench" => bench::run(rest),
         "corpus" => eprintln!("xtask corpus: not yet implemented"),
+        "probe-providers" => probe_providers::run(rest),
         "" => {
-            eprintln!("usage: xtask <bench|corpus> [args...]");
+            eprintln!("usage: xtask <bench|corpus|probe-providers> [args...]");
             std::process::exit(1);
         }
         other => {
             eprintln!("unknown xtask: {other:?}");
-            eprintln!("available: bench, corpus");
+            eprintln!("available: bench, corpus, probe-providers");
             std::process::exit(1);
         }
     }
