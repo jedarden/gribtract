@@ -6,6 +6,9 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
+keywords = ["grib2", "grib", "weather", "noaa", "decoder"]
+categories = ["parser-implementations", "science", "encoding"]
+readme = "README.md"
 
 [dependencies]
 gribtract-core = { workspace = true }

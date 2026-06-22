@@ -6,6 +6,8 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
+keywords = ["grib2", "grib", "weather", "noaa", "cli"]
+categories = ["command-line-utilities", "science"]
 
 [[bin]]
 name = "gribtract"
