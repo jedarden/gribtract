@@ -4,12 +4,17 @@
 
 use std::collections::HashMap;
 use std::io::Write as _;
+use std::sync::mpsc::Sender;
 use std::time::Instant;
 
 use serde::{Deserialize, Serialize};
 
 use gribtract_testutil::{corpus, diff, golden};
 use crate::bench_station;
+
+/// Progress sender used by [`run_with_sender`] to stream log lines to callers
+/// (e.g. the live HTTP server for SSE streaming).
+pub type ProgressSender = Sender<String>;
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
@@ -82,7 +87,29 @@ struct TemplateAcc {
 
 // ── Entry point ───────────────────────────────────────────────────────────────
 
+/// Run the benchmark, writing progress to stderr only.
 pub fn run(args: &[String]) {
+    run_inner(args, None);
+}
+
+/// Run the benchmark, writing progress to stderr AND to `tx` as `String` lines.
+///
+/// Each `eprintln!`-style progress message is cloned and sent over `tx`.  The
+/// sender is dropped after the last message, closing the channel for the
+/// receiver.  Used by `xtask serve` to stream SSE events.
+pub fn run_with_sender(args: &[String], tx: ProgressSender) {
+    run_inner(args, Some(tx));
+}
+
+fn run_inner(args: &[String], tx: Option<ProgressSender>) {
+    macro_rules! progress {
+        ($($arg:tt)*) => {{
+            let msg = format!($($arg)*);
+            eprintln!("{msg}");
+            if let Some(ref t) = tx { let _ = t.send(msg); }
+        }};
+    }
+
     // --dashboard-only: re-render dashboard.html from existing bench-results.json/bench-history.jsonl
     if args.iter().any(|a| a == "--dashboard-only") {
         let bench_json = std::fs::read_to_string("bench-results.json")
@@ -91,7 +118,7 @@ pub fn run(args: &[String]) {
         let git_sha = get_git_sha();
         let html = render_dashboard(&bench_json, &history_csv, &git_sha);
         std::fs::write("dashboard.html", &html).expect("write dashboard.html");
-        eprintln!("dashboard.html regenerated from existing bench-results.json");
+        progress!("dashboard.html regenerated from existing bench-results.json");
         return;
     }
 
@@ -110,19 +137,19 @@ pub fn run(args: &[String]) {
         .map(|s| s.as_str())
         .unwrap_or("all");
 
-    eprintln!("xtask bench: corpus={corpus_name} workload={workload_filter}");
+    progress!("xtask bench: corpus={corpus_name} workload={workload_filter}");
 
     let host = collect_host_info();
-    eprintln!("  host: {} ({} cores, {} GB RAM)", host.cpu, host.cores, host.mem_gb);
+    progress!("  host: {} ({} cores, {} GB RAM)", host.cpu, host.cores, host.mem_gb);
 
     let git_sha = get_git_sha();
-    eprintln!("  git_sha: {git_sha}");
+    progress!("  git_sha: {git_sha}");
 
     let timestamp = get_timestamp();
 
     let fixtures = corpus::list_fixtures().expect("corpus manifest must load");
     let inline_fixtures: Vec<_> = fixtures.iter().filter(|f| f.storage == "inline").collect();
-    eprintln!("  {} inline fixture(s) to bench", inline_fixtures.len());
+    progress!("  {} inline fixture(s) to bench", inline_fixtures.len());
 
     let mut by_drt: HashMap<u16, TemplateAcc> = HashMap::new();
     let mut corpus_messages = 0u32;
@@ -136,7 +163,7 @@ pub fn run(args: &[String]) {
         let bytes = match corpus::load(&entry.id) {
             Ok(b) => b,
             Err(e) => {
-                eprintln!("  [skip] {}: {}", entry.id, e);
+                progress!("  [skip] {}: {}", entry.id, e);
                 continue;
             }
         };
@@ -145,7 +172,7 @@ pub fn run(args: &[String]) {
         let fields = match gribtract::decode(&bytes) {
             Ok(f) => f,
             Err(e) => {
-                eprintln!("  [decode-err] {}: {}", entry.id, e);
+                progress!("  [decode-err] {}: {}", entry.id, e);
                 corpus_messages += 1;
                 continue;
             }
@@ -225,7 +252,7 @@ pub fn run(args: &[String]) {
         acc.agree_matched += agree_matched;
 
         let per_s = 1_000_000_000.0 / wall_ns_per_decode as f64;
-        eprintln!(
+        progress!(
             "  [ok] {} — {:.1} MB/s ({:.0} µs/msg), {} grid pts, agreement {}/{}",
             entry.id,
             bytes.len() as f64 / 1_000_000.0 * per_s,
@@ -270,7 +297,7 @@ pub fn run(args: &[String]) {
     // ── Station-extract bench ─────────────────────────────────────────────────
     let run_station = !workload_filter.contains("full-grid");
     if run_station && !all_decoded_fields.is_empty() {
-        eprintln!("xtask bench: station-extract workload");
+        progress!("xtask bench: station-extract workload");
         let station_results = bench_station::run(&all_decoded_fields);
         for sr in &station_results {
             runs.push(BenchRun {
@@ -349,7 +376,7 @@ pub fn run(args: &[String]) {
     // ── Write bench-results.json ──────────────────────────────────────────────
     let json_pretty = serde_json::to_string_pretty(&result).expect("serialize BenchResult");
     std::fs::write("bench-results.json", &json_pretty).expect("write bench-results.json");
-    eprintln!("bench-results.json written ({} run entries)", result.runs.len());
+    progress!("bench-results.json written ({} run entries)", result.runs.len());
 
     // ── Append to bench-history.jsonl ─────────────────────────────────────────
     let json_line = serde_json::to_string(&result).expect("serialize BenchResult for history");
@@ -359,13 +386,13 @@ pub fn run(args: &[String]) {
         .open("bench-history.jsonl")
         .expect("open bench-history.jsonl");
     writeln!(history, "{json_line}").expect("write bench-history.jsonl");
-    eprintln!("bench-history.jsonl appended");
+    progress!("bench-history.jsonl appended");
 
     // ── Write dashboard.html ──────────────────────────────────────────────────
     let history_json = read_history_for_dashboard();
     let dashboard_html = render_dashboard(&json_pretty, &history_json, &git_sha);
     std::fs::write("dashboard.html", &dashboard_html).expect("write dashboard.html");
-    eprintln!("dashboard.html written");
+    progress!("dashboard.html written");
 
     // ── Summary ───────────────────────────────────────────────────────────────
     println!("=== xtask bench summary ===");
@@ -425,7 +452,7 @@ fn collect_host_info() -> HostInfo {
     HostInfo { cpu, cores, mem_gb }
 }
 
-fn get_git_sha() -> String {
+pub(crate) fn get_git_sha() -> String {
     std::process::Command::new("git")
         .args(["rev-parse", "HEAD"])
         .output()
@@ -445,7 +472,7 @@ fn get_timestamp() -> String {
         .unwrap_or_else(|| "unknown".to_string())
 }
 
-fn read_history_for_dashboard() -> String {
+pub(crate) fn read_history_for_dashboard() -> String {
     std::fs::read_to_string("bench-history.jsonl")
         .unwrap_or_default()
         .lines()
@@ -454,7 +481,10 @@ fn read_history_for_dashboard() -> String {
         .join(",\n")
 }
 
-fn render_dashboard(bench_json: &str, history_csv: &str, git_sha: &str) -> String {
+/// Render the static dashboard HTML from bench-results.json + history.
+///
+/// Also called by `xtask serve` when it needs a fresh page copy.
+pub(crate) fn render_dashboard(bench_json: &str, history_csv: &str, git_sha: &str) -> String {
     let short_sha = &git_sha[..git_sha.len().min(8)];
     let template = include_str!("dashboard_template.html");
     template
