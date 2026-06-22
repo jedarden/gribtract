@@ -277,7 +277,7 @@ pub fn compare_fixture(
 mod tests {
     use super::*;
     use gribtract_core::types::{
-        Field, ForecastTime, GridDefinition, GridValues, Level, PackingInfo,
+        Field, ForecastTime, GridDefinition, GridProjection, GridValues, Level, PackingInfo,
         ParameterId, ReferenceTime,
     };
     use crate::golden::{
@@ -308,7 +308,7 @@ mod tests {
                 template: 0, num_data_points: 4, nx: 2, ny: 2,
                 lat_first: 10.0, lon_first: 0.0, lat_last: 0.0, lon_last: 10.0,
                 di: 10.0, dj: 10.0, scanning_mode: 0, resolution_flags: 48,
-                shape_of_earth: 6,
+                shape_of_earth: 6, projection: GridProjection::LatLon,
             },
             values: GridValues::Dense(vec![270.0, 271.0, 272.0, 273.0]),
             gdt_template: 0,

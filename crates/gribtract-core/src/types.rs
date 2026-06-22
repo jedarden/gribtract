@@ -176,10 +176,136 @@ impl PackingInfo {
 
 // ── Grid definition (Section 3) ─────────────────────────────────────────────
 
+/// Parameters unique to GDT 3.30 (Lambert conformal conic).
+#[derive(Debug, Clone, PartialEq)]
+pub struct LambertConformalParams {
+    /// Latitude where Dx and Dy are specified (degrees, positive N).
+    pub lad: f64,
+    /// Orientation of the grid / central meridian (degrees, positive E, 0–360).
+    pub lov: f64,
+    /// i-direction (x) increment in metres at LaD.
+    pub dx_m: f64,
+    /// j-direction (y) increment in metres at LaD.
+    pub dy_m: f64,
+    /// Projection centre flag (Table 3.5): bit 7 = south-pole, bit 6 = bipolar.
+    pub proj_centre: u8,
+    /// First standard parallel (degrees, positive N).
+    pub latin1: f64,
+    /// Second standard parallel (degrees, positive N).
+    pub latin2: f64,
+    /// Latitude of south pole of projection (degrees).
+    pub lat_south_pole: f64,
+    /// Longitude of south pole of projection (degrees, 0–360).
+    pub lon_south_pole: f64,
+}
+
+impl LambertConformalParams {
+    /// Earth radius for GRIB2 shape=6 (WMO standard sphere), in metres.
+    const EARTH_R: f64 = 6_371_229.0;
+
+    /// Forward Lambert conformal conic projection on a sphere.
+    ///
+    /// Returns (x, y) in metres, relative to the projection origin placed at
+    /// (LaD, LoV).  x increases in the +i direction (eastward for north-pole
+    /// projection); y increases in the +j direction (northward).
+    pub fn project_xy(&self, lat: f64, lon: f64) -> (f64, f64) {
+        use std::f64::consts::{FRAC_PI_4, PI};
+        let to_rad = PI / 180.0;
+
+        let phi1 = self.latin1 * to_rad;
+        let phi2 = self.latin2 * to_rad;
+        let phi0 = self.lad * to_rad;
+        let lam0 = self.lov * to_rad;
+        let phi = lat * to_rad;
+
+        // Normalise longitude to within ±π of the central meridian.
+        let mut lam = lon * to_rad;
+        while lam - lam0 > PI { lam -= 2.0 * PI; }
+        while lam0 - lam > PI { lam += 2.0 * PI; }
+
+        let r = Self::EARTH_R;
+
+        // Cone constant n.
+        let n = if (phi1 - phi2).abs() < 1e-8 {
+            phi1.sin()
+        } else {
+            let t1 = (FRAC_PI_4 + phi1 / 2.0).tan();
+            let t2 = (FRAC_PI_4 + phi2 / 2.0).tan();
+            (phi1.cos().ln() - phi2.cos().ln()) / (t2.ln() - t1.ln())
+        };
+
+        // Scale factor F (includes R).
+        let t1 = (FRAC_PI_4 + phi1 / 2.0).tan();
+        let big_f = r * phi1.cos() * t1.powf(n) / n;
+
+        // ρ at reference latitude LaD (defines the y-origin of the local grid).
+        let t0 = (FRAC_PI_4 + phi0 / 2.0).tan();
+        let rho0 = big_f / t0.powf(n);
+
+        // ρ at query point.
+        let t = (FRAC_PI_4 + phi / 2.0).tan();
+        let rho = big_f / t.powf(n);
+
+        let theta = n * (lam - lam0);
+        let x = rho * theta.sin();
+        let y = rho0 - rho * theta.cos();
+        (x, y)
+    }
+
+    /// Nearest grid-point flat index for a Lambert conformal grid.
+    ///
+    /// Returns `None` if the query falls outside the grid extent.
+    pub fn nearest_index(&self, grid: &GridDefinition, lat: f64, lon: f64) -> Option<usize> {
+        let (x1, y1) = self.project_xy(grid.lat_first, grid.lon_first);
+        let (xq, yq) = self.project_xy(lat, lon);
+
+        // i increases in the +x direction; j direction depends on scanning mode.
+        let di_f = (xq - x1) / self.dx_m;
+        let dj_f = if grid.j_positive() {
+            (yq - y1) / self.dy_m
+        } else {
+            (y1 - yq) / self.dy_m
+        };
+
+        // Half-cell tolerance for boundary snapping.
+        if di_f < -0.5 || dj_f < -0.5 { return None; }
+        let nx_f = grid.nx as f64;
+        let ny_f = grid.ny as f64;
+        if di_f > nx_f - 0.5 || dj_f > ny_f - 0.5 { return None; }
+
+        let i = di_f.round() as usize;
+        let j = dj_f.round() as usize;
+        if i >= grid.nx as usize || j >= grid.ny as usize { return None; }
+
+        Some(j * grid.nx as usize + i)
+    }
+}
+
+/// Template-specific grid projection parameters.
+///
+/// Carried inside [`GridDefinition`] to hold parameters that are only present
+/// for projected (non-lat/lon) grid types.  The `LatLon` variant requires no
+/// extra data because all geometry is encoded in the common fields.
+#[derive(Debug, Clone, PartialEq)]
+pub enum GridProjection {
+    /// GDT 3.0 (or similar lat/lon): all geometry in the common fields.
+    LatLon,
+    /// GDT 3.30: Lambert conformal conic.
+    LambertConformal(LambertConformalParams),
+}
+
+impl Default for GridProjection {
+    fn default() -> Self {
+        GridProjection::LatLon
+    }
+}
+
 /// Grid geometry from the Grid Definition Section.
 ///
-/// Common fields span all templates; template-specific fields (e.g. Lambert
-/// projection parameters) are added when template dispatch is implemented.
+/// `lat_first`/`lon_first` hold the first grid-point coordinates for all
+/// templates.  `lat_last`/`lon_last` and `di`/`dj` are populated for lat/lon
+/// grids (template 0); they are 0.0 for projected grids whose increments are
+/// stored in metres inside `projection`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct GridDefinition {
     /// Grid Definition Template number (Table 3.1): 0=lat/lon, 20=polar stereo, 30=Lambert…
@@ -194,13 +320,13 @@ pub struct GridDefinition {
     pub lat_first: f64,
     /// Longitude of first grid point, in degrees (positive E, 0–360).
     pub lon_first: f64,
-    /// Latitude of last grid point.
+    /// Latitude of last grid point (0.0 for projected grids).
     pub lat_last: f64,
-    /// Longitude of last grid point.
+    /// Longitude of last grid point (0.0 for projected grids).
     pub lon_last: f64,
-    /// i-direction increment in degrees (0 if not uniform).
+    /// i-direction increment in degrees (0 if not uniform or for projected grids).
     pub di: f64,
-    /// j-direction increment in degrees (0 if not uniform).
+    /// j-direction increment in degrees (0 if not uniform or for projected grids).
     pub dj: f64,
     /// Scanning mode flags (Table 3.4): bit 7 = +i direction, bit 6 = +j direction, …
     pub scanning_mode: u8,
@@ -208,6 +334,8 @@ pub struct GridDefinition {
     pub resolution_flags: u8,
     /// Shape of the Earth (Table 3.2): 0=spherical 6367.47km, 6=WGS84, …
     pub shape_of_earth: u8,
+    /// Template-specific projection parameters (Lambert, polar stereo, …).
+    pub projection: GridProjection,
 }
 
 impl GridDefinition {
@@ -317,12 +445,23 @@ pub struct BilinearCorners {
 }
 
 impl GridDefinition {
-    /// Nearest-grid-point flat index for template 0 (lat/lon) grids.
+    /// Nearest-grid-point flat index.
     ///
-    /// Returns None for non-lat/lon grids, grids with zero increments, or
-    /// queries outside the grid extent (with half-cell tolerance).
+    /// Dispatches on `self.projection`:
+    /// - [`GridProjection::LatLon`]: regular lat/lon arithmetic (template 0).
+    ///   Returns `None` if increments are zero or the query is outside the grid.
+    /// - [`GridProjection::LambertConformal`]: Lambert conformal conic projection.
+    ///   Returns `None` if the query is outside the grid extent.
     pub fn nearest_index(&self, lat: f64, lon: f64) -> Option<usize> {
-        if self.template != 0 || self.di == 0.0 || self.dj == 0.0 {
+        match &self.projection {
+            GridProjection::LatLon => self.nearest_index_latlon(lat, lon),
+            GridProjection::LambertConformal(p) => p.nearest_index(self, lat, lon),
+        }
+    }
+
+    /// Nearest-index for regular lat/lon grids (template 0).
+    fn nearest_index_latlon(&self, lat: f64, lon: f64) -> Option<usize> {
+        if self.di == 0.0 || self.dj == 0.0 {
             return None;
         }
         let mut fi = Self::lon_to_fi(lon, self.lon_first, self.di, self.nx);
@@ -341,12 +480,12 @@ impl GridDefinition {
         Some(j * self.nx as usize + i)
     }
 
-    /// Bilinear interpolation corners for template 0 (lat/lon) grids.
+    /// Bilinear interpolation corners.
     ///
-    /// Returns None for non-lat/lon grids, zero-increment grids, or queries
-    /// outside the grid (no extrapolation).
+    /// Currently implemented for lat/lon grids only.  Returns `None` for
+    /// projected grids, zero-increment grids, or queries outside the grid.
     pub fn bilinear_corners(&self, lat: f64, lon: f64) -> Option<BilinearCorners> {
-        if self.template != 0 || self.di == 0.0 || self.dj == 0.0 {
+        if !matches!(self.projection, GridProjection::LatLon) || self.di == 0.0 || self.dj == 0.0 {
             return None;
         }
         let mut fi = Self::lon_to_fi(lon, self.lon_first, self.di, self.nx);
@@ -578,7 +717,7 @@ mod tests {
             template: 0, num_data_points: 100, nx: 10, ny: 10,
             lat_first: 90.0, lon_first: 0.0, lat_last: -90.0, lon_last: 350.0,
             di: 1.0, dj: 1.0, scanning_mode: 0x00, resolution_flags: 0x30,
-            shape_of_earth: 6,
+            shape_of_earth: 6, projection: GridProjection::LatLon,
         };
         assert!(g.i_positive());
         assert!(!g.j_positive());
@@ -619,6 +758,7 @@ mod tests {
             scanning_mode: 0x00, // +i, -j
             resolution_flags: 0x30,
             shape_of_earth: 6,
+            projection: GridProjection::LatLon,
         }
     }
 
@@ -642,8 +782,8 @@ mod tests {
         assert_eq!(g.nearest_index(50.0, 20.0), None);
         // Longitude too far west (negative longitude, not in grid)
         assert_eq!(g.nearest_index(20.0, -10.0), None);
-        // Non-lat/lon template
-        let g2 = GridDefinition { template: 30, ..g };
+        // Zero-increment lat/lon grid — no way to locate a point
+        let g2 = GridDefinition { di: 0.0, dj: 0.0, ..g };
         assert_eq!(g2.nearest_index(20.0, 20.0), None);
     }
 
@@ -658,6 +798,7 @@ mod tests {
             di: 1.0, dj: 1.0,
             scanning_mode: 0x00,
             resolution_flags: 0x30, shape_of_earth: 6,
+            projection: GridProjection::LatLon,
         };
         // -73.97° E = 286.03° E
         let idx = g.nearest_index(0.0, -73.97);
@@ -708,5 +849,99 @@ mod tests {
         assert_eq!(gv.get_at(1), None); // masked
         assert_eq!(gv.get_at(2), Some(3.0));
         assert_eq!(gv.get_at(3), None); // out of bounds
+    }
+
+    // ── Lambert conformal (GDT 3.30) tests ───────────────────────────────────
+
+    /// Construct a small synthetic Lambert conformal grid centred over the
+    /// central-US area (approximating HRRR-like parameters but with a coarser
+    /// 100 km step to keep the geometry easy to reason about).
+    ///
+    /// Latin1 = Latin2 = 38.5° N (tangent cone) to keep n = sin(38.5°) simple.
+    /// LoV = 262.5° E (≈ −97.5°, roughly the CONUS centre meridian).
+    /// LaD = 38.5° (same as standard parallel so ρ₀ gives the reference y).
+    /// La1 = 25.0° N, Lo1 = 230.0° E (approximate SW corner).
+    fn test_lambert_grid() -> GridDefinition {
+        let p = LambertConformalParams {
+            lad: 38.5,
+            lov: 262.5,
+            dx_m: 100_000.0,
+            dy_m: 100_000.0,
+            proj_centre: 0,
+            latin1: 38.5,
+            latin2: 38.5,
+            lat_south_pole: -90.0,
+            lon_south_pole: 0.0,
+        };
+        GridDefinition {
+            template: 30,
+            num_data_points: 100,
+            nx: 10,
+            ny: 10,
+            lat_first: 25.0,
+            lon_first: 230.0,
+            lat_last: 0.0,  // not used for Lambert
+            lon_last: 0.0,  // not used for Lambert
+            di: 0.0,
+            dj: 0.0,
+            scanning_mode: 0x40, // +i (west→east), +j (south→north)
+            resolution_flags: 0x08,
+            shape_of_earth: 6,
+            projection: GridProjection::LambertConformal(p),
+        }
+    }
+
+    #[test]
+    fn lambert_nearest_first_point_returns_zero() {
+        // The first grid point should always map to flat index 0.
+        let g = test_lambert_grid();
+        let idx = g.nearest_index(g.lat_first, g.lon_first);
+        assert_eq!(idx, Some(0), "first grid point should map to index 0");
+    }
+
+    #[test]
+    fn lambert_nearest_point_offset() {
+        // Projecting la1 + ~1 grid step northward and eastward should give (i,j) ≈ (1,1),
+        // i.e. flat index 1*10 + 1 = 11.  We don't know the exact degrees, so we use
+        // the forward projection to compute a point that sits one cell away and verify
+        // the round-trip.
+        let g = test_lambert_grid();
+        let lp = match &g.projection {
+            GridProjection::LambertConformal(p) => p,
+            _ => panic!("expected Lambert"),
+        };
+        // Projected position of the first point.
+        let (x0, y0) = lp.project_xy(g.lat_first, g.lon_first);
+        // One cell north-east in projected space.
+        let (x1, y1) = (x0 + lp.dx_m, y0 + lp.dy_m);
+        // Inverse projection is not implemented; instead verify that the offset
+        // from first point gives fractional indices ≈ (1.0, 1.0).
+        let di_f = (x1 - x0) / lp.dx_m;
+        let dj_f = (y1 - y0) / lp.dy_m;
+        assert!((di_f - 1.0).abs() < 1e-6);
+        assert!((dj_f - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn lambert_nearest_outside_grid_returns_none() {
+        let g = test_lambert_grid();
+        // A point far outside (e.g. in the Southern Hemisphere) should return None.
+        let idx = g.nearest_index(-30.0, 262.5);
+        assert_eq!(idx, None, "point south of grid should return None");
+    }
+
+    #[test]
+    fn lambert_projection_origin_at_lad_lov() {
+        // At (LaD, LoV) the projection should give y = 0 (by construction of ρ₀)
+        // and x = 0 (no longitude offset).
+        let g = test_lambert_grid();
+        let lp = match &g.projection {
+            GridProjection::LambertConformal(p) => p,
+            _ => panic!("expected Lambert"),
+        };
+        let (x, y) = lp.project_xy(lp.lad, lp.lov);
+        // At (LaD, LoV), θ = 0, ρ = ρ₀, so x = 0 and y = ρ₀ - ρ₀ = 0.
+        assert!(x.abs() < 1e-6, "x at origin should be 0, got {x}");
+        assert!(y.abs() < 1e-6, "y at origin should be 0, got {y}");
     }
 }

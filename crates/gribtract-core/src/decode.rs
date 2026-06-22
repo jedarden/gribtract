@@ -10,8 +10,8 @@
 
 use crate::error::{Error, Result};
 use crate::types::{
-    Ensemble, Field, ForecastTime, GridDefinition, GridValues, LazyField, Level, PackingInfo,
-    ParameterId, ReferenceTime,
+    Ensemble, Field, ForecastTime, GridDefinition, GridProjection, GridValues, LazyField,
+    LambertConformalParams, Level, PackingInfo, ParameterId, ReferenceTime,
 };
 
 // ── Byte buffer reader ────────────────────────────────────────────────────────
@@ -373,6 +373,10 @@ fn parse_section3(body: &[u8]) -> Result<(u16, GridDefinition)> {
             let grid = parse_gdt_0(&mut b, num_data_points)?;
             Ok((0, grid))
         }
+        30 => {
+            let grid = parse_gdt_30(&mut b, num_data_points)?;
+            Ok((30, grid))
+        }
         _ => Err(Error::NotImplemented),
     }
 }
@@ -418,6 +422,81 @@ fn parse_gdt_0(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
         scanning_mode,
         resolution_flags,
         shape_of_earth,
+        projection: GridProjection::LatLon,
+    })
+}
+
+/// Grid Definition Template 3.30: Lambert Conformal.
+///
+/// Byte layout (b starts at section octet 15 = first body byte after template number):
+///
+/// | Octets | Field |
+/// |--------|-------|
+/// | 15     | shape of earth |
+/// | 16–20  | earth radius scale + value (skipped) |
+/// | 21–25  | major-axis scale + value (skipped) |
+/// | 26–30  | minor-axis scale + value (skipped) |
+/// | 31–34  | Nx |
+/// | 35–38  | Ny |
+/// | 39–42  | La1 (signed microdegrees) |
+/// | 43–46  | Lo1 (unsigned microdegrees, 0–360) |
+/// | 47     | resolution/component flags |
+/// | 48–51  | LaD (signed microdegrees) |
+/// | 52–55  | LoV (unsigned microdegrees) |
+/// | 56–59  | Dx in metres |
+/// | 60–63  | Dy in metres |
+/// | 64     | projection centre flag |
+/// | 65     | scanning mode |
+/// | 66–69  | Latin1 (signed microdegrees) |
+/// | 70–73  | Latin2 (signed microdegrees) |
+/// | 74–77  | lat south pole (signed microdegrees) |
+/// | 78–81  | lon south pole (unsigned microdegrees) |
+fn parse_gdt_30(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
+    let shape_of_earth = b.read_u8()?;    // oct 15
+    b.skip(1 + 4)?;                       // oct 16–20: earth radius scale + value
+    b.skip(1 + 4)?;                       // oct 21–25: major axis
+    b.skip(1 + 4)?;                       // oct 26–30: minor axis
+
+    let nx = b.read_u32be()?;             // oct 31–34: Nx
+    let ny = b.read_u32be()?;             // oct 35–38: Ny
+
+    let lat_first = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 39–42: La1
+    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 43–46: Lo1
+    let resolution_flags = b.read_u8()?;  // oct 47
+
+    let lad = b.read_latlon_micro()? as f64 / 1_000_000.0;       // oct 48–51: LaD
+    let lov = b.read_longi_micro()? as f64 / 1_000_000.0;        // oct 52–55: LoV
+
+    let dx_m = b.read_u32be()? as f64;   // oct 56–59: Dx in metres
+    let dy_m = b.read_u32be()? as f64;   // oct 60–63: Dy in metres
+
+    let proj_centre = b.read_u8()?;       // oct 64
+    let scanning_mode = b.read_u8()?;     // oct 65
+
+    let latin1 = b.read_latlon_micro()? as f64 / 1_000_000.0;    // oct 66–69
+    let latin2 = b.read_latlon_micro()? as f64 / 1_000_000.0;    // oct 70–73
+    let lat_south_pole = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 74–77
+    let lon_south_pole = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 78–81
+
+    let projection = GridProjection::LambertConformal(LambertConformalParams {
+        lad, lov, dx_m, dy_m, proj_centre, latin1, latin2, lat_south_pole, lon_south_pole,
+    });
+
+    Ok(GridDefinition {
+        template: 30,
+        num_data_points,
+        nx,
+        ny,
+        lat_first,
+        lon_first,
+        lat_last: 0.0, // not stored in GDT 3.30; derive via projection if needed
+        lon_last: 0.0,
+        di: 0.0,       // increment in metres, stored in LambertConformalParams
+        dj: 0.0,
+        scanning_mode,
+        resolution_flags,
+        shape_of_earth,
+        projection,
     })
 }
 
