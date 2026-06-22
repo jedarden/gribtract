@@ -91,6 +91,32 @@
         "capture_date": "2026-06-22",
         "generated_by": "scripts/gen_grib2_pdt8.py (gribtract project)"
       }
+    },
+    {
+      "id": "gfswave_arctic_wind_drt40",
+      "path": "small/gfswave_arctic_wind_drt40.grib2",
+      "sha256": "50cc647b08467d945688d255fafde49b7a52b21263566c6767ce4ee68ef85a5a",
+      "size_bytes": 427269,
+      "storage": "inline",
+      "provenance": {
+        "source": "NOAA NCEP GFS Wave",
+        "description": "GFS Wave arctic 9km polar stereographic analysis (t00z f000), 2026-06-20 cycle. Single GRIB2 message: WIND (10m wind speed m/s) surface analysis. Template GDT=20 (polar stereographic)/PDT=0/DRT=40 (JPEG 2000 data compression, lossy J=0). Grid: 1012036 total points (polar stereographic). Section 5 n_packed=360052 (bitmap masks out land/ice points). Section 6: bitmap present (indicator=0), 1012036 bits. JPEG2000 codestream contains 360052 values for the 'present' (ocean) points. Sourced from noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260620/00/wave/gridded/gfswave.t00z.arctic.9km.f000.grib2 bytes 0-427268 (field 1). No eccodes golden generated (eccodes unavailable at capture time); golden pending generation on internal cluster.",
+        "capture_date": "2026-06-22",
+        "generated_by": "curl byte-range from noaa-gfs-bdp-pds.s3.amazonaws.com (gribtract project)"
+      }
+    },
+    {
+      "id": "mrms_carib_refl_drt41",
+      "path": "small/mrms_carib_refl_drt41.grib2",
+      "sha256": "4d922ace1e802fcf91baee615d1fd1250596edcb7d6d6b59d12c8093dfac7554",
+      "size_bytes": 28273,
+      "storage": "inline",
+      "provenance": {
+        "source": "NOAA MRMS Caribbean",
+        "description": "MRMS ReflectivityAtLowestAltitude Caribbean (00:00:55 UTC 2026-06-20). Single GRIB2 message: radar reflectivity (dBZ) at the lowest altitude scan. Template GDT=0 (lat/lon)/PDT=0/DRT=41 (PNG data compression). Grid: 4500000 points (lat/lon 3000x1500), no bitmap (indicator=255). Missing values are -999.0 dBZ (areas without radar coverage). Sourced from noaa-mrms-pds.s3.amazonaws.com/CARIB/ReflectivityAtLowestAltitude_00.50/20260620/MRMS_ReflectivityAtLowestAltitude_00.50_20260620-000055.grib2.gz (gunzipped). No eccodes golden generated (eccodes unavailable at capture time); golden pending generation on internal cluster.",
+        "capture_date": "2026-06-22",
+        "generated_by": "curl+gunzip from noaa-mrms-pds.s3.amazonaws.com (gribtract project)"
+      }
     }
   ],
   "_comment_large": "Fixtures with storage=remote live in tests/corpus/large/ (gitignored). The harness fetches them by sha256 from B2. Add a manifest entry here first, then seed the file.",

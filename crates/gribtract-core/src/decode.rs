@@ -145,8 +145,14 @@ struct FieldBuilder {
     packing: Option<PackingInfo>,
     drt_template: Option<u16>,
     complex_extra: Option<ComplexPackingExtra>,
+    /// Number of packed data values (Section 5 oct 6-9). May be less than
+    /// grid.num_data_points when a bitmap is present.
+    n_packed: Option<usize>,
     // From Section 6
     has_bitmap: Option<bool>,
+    /// Actual bitmap bytes (one bit per grid point, MSB-first). Present only
+    /// when Section 6 indicator == 0. Length == ceil(n_grid_points / 8).
+    bitmap: Option<Vec<u8>>,
     // From Section 7
     values: Option<GridValues>,
 }
@@ -279,21 +285,38 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
                 builder.ensemble = Some(ens);
             }
             5 => {
-                let (drt, packing, complex_extra) = parse_section5(sec_body)?;
+                let (drt, packing, complex_extra, n_packed) = parse_section5(sec_body)?;
                 builder.drt_template = Some(drt);
                 builder.packing = Some(packing);
                 builder.complex_extra = complex_extra;
+                builder.n_packed = Some(n_packed);
             }
             6 => {
-                let has_bitmap = parse_section6(sec_body)?;
+                let (has_bitmap, bitmap) = parse_section6(sec_body)?;
                 builder.has_bitmap = Some(has_bitmap);
+                builder.bitmap = bitmap;
             }
             7 => {
-                let n_points = builder.grid.as_ref().map(|g| g.num_data_points as usize).unwrap_or(0);
+                let n_grid = builder.grid.as_ref().map(|g| g.num_data_points as usize).unwrap_or(0);
+                let has_bitmap = builder.has_bitmap.unwrap_or(false);
+                // When a bitmap is present, Section 5 n_packed < n_grid. Use n_packed
+                // for the data unpackers (which only see the "present" subset).
+                let n_decode = if has_bitmap {
+                    builder.n_packed.unwrap_or(n_grid)
+                } else {
+                    n_grid
+                };
                 let packing = builder.packing.as_ref().ok_or(Error::NotImplemented)?;
                 let drt = builder.drt_template.unwrap_or(0);
-                let has_bitmap = builder.has_bitmap.unwrap_or(false);
-                let values = decode_section7(sec_body, packing, drt, builder.complex_extra.as_ref(), n_points, has_bitmap)?;
+                let packed_values = decode_section7(
+                    sec_body, packing, drt, builder.complex_extra.as_ref(), n_decode,
+                )?;
+                // Expand packed values into the full grid using the bitmap (if present).
+                let values = if has_bitmap {
+                    expand_bitmap(packed_values, &builder.bitmap, n_grid)
+                } else {
+                    packed_values
+                };
                 builder.values = Some(values);
 
                 // Complete field — flush the builder.
@@ -803,33 +826,33 @@ fn parse_pdt_11(
 
 // ── Section 5: Data Representation ───────────────────────────────────────────
 
-fn parse_section5(body: &[u8]) -> Result<(u16, PackingInfo, Option<ComplexPackingExtra>)> {
+fn parse_section5(body: &[u8]) -> Result<(u16, PackingInfo, Option<ComplexPackingExtra>, usize)> {
     let mut b = Buf::new(body);
-    let _n_values = b.read_u32be()?; // oct 6-9: number of packed values
-    let template = b.read_u16be()?;  // oct 10-11: DRT template number
+    let n_values = b.read_u32be()? as usize; // oct 6-9: number of packed values
+    let template = b.read_u16be()?;           // oct 10-11: DRT template number
 
     match template {
         0 => {
             let packing = parse_drt_common(&mut b)?;
-            Ok((0, packing, None))
+            Ok((0, packing, None, n_values))
         }
         2 => {
             let (packing, extra) = parse_drt_2(&mut b)?;
-            Ok((2, packing, Some(extra)))
+            Ok((2, packing, Some(extra), n_values))
         }
         3 => {
             let (packing, extra) = parse_drt_3(&mut b)?;
-            Ok((3, packing, Some(extra)))
+            Ok((3, packing, Some(extra), n_values))
         }
         40 => {
             // Template 5.40: JPEG 2000 data compression — same common header as DRT=0.
             let packing = parse_drt_common(&mut b)?;
-            Ok((40, packing, None))
+            Ok((40, packing, None, n_values))
         }
         41 => {
             // Template 5.41: PNG data compression — same common header as DRT=0.
             let packing = parse_drt_common(&mut b)?;
-            Ok((41, packing, None))
+            Ok((41, packing, None, n_values))
         }
         _ => Err(Error::NotImplemented),
     }
@@ -917,16 +940,74 @@ fn parse_drt_3(b: &mut Buf) -> Result<(PackingInfo, ComplexPackingExtra)> {
 
 // ── Section 6: Bit Map ────────────────────────────────────────────────────────
 
-/// Returns `true` if an actual bitmap follows (indicator == 0),
-/// `false` if indicator == 255 (no bitmap, all points present).
-fn parse_section6(body: &[u8]) -> Result<bool> {
+/// Parse Section 6 (Bit Map).
+///
+/// Returns `(has_bitmap, bitmap_bytes)`:
+/// - `has_bitmap=false, bitmap_bytes=None` when indicator == 255 (all points present).
+/// - `has_bitmap=true, bitmap_bytes=Some(bytes)` when indicator == 0: one bit per grid
+///   point, MSB-first packed, length = ceil(n_grid_points / 8).
+fn parse_section6(body: &[u8]) -> Result<(bool, Option<Vec<u8>>)> {
     let mut b = Buf::new(body);
     let indicator = b.read_u8()?; // oct 6
     match indicator {
-        255 => Ok(false),
-        0 => Ok(true),
+        255 => Ok((false, None)),
+        0 => {
+            // Remaining bytes are the bitmap (1 bit per grid point, MSB first).
+            let bitmap = body[1..].to_vec();
+            Ok((true, Some(bitmap)))
+        }
         _ => Err(Error::NotImplemented),
     }
+}
+
+// ── Bitmap expansion ─────────────────────────────────────────────────────────
+
+/// Expand a vector of packed (present-only) values into a full `n_grid`-length
+/// masked grid using the bitmap.
+///
+/// The bitmap is a packed MSB-first bit array (one bit per grid point). Where
+/// the bit is 1, the next value from `packed` is used; where 0, the grid point
+/// is absent (value = 0.0, present = false). Returns `GridValues::Masked` if
+/// a bitmap is provided and `n_packed < n_grid`, otherwise returns the input
+/// as a `Dense` grid.
+fn expand_bitmap(
+    packed: GridValues,
+    bitmap: &Option<Vec<u8>>,
+    n_grid: usize,
+) -> GridValues {
+    let bm = match bitmap {
+        Some(bm) => bm,
+        None => return packed, // no bitmap — pass through
+    };
+
+    let packed_vals = match packed {
+        GridValues::Dense(v) => v,
+        other => return other, // already masked somehow — pass through
+    };
+
+    if packed_vals.len() == n_grid {
+        // The packed count already matches the grid — no expansion needed.
+        return GridValues::Dense(packed_vals);
+    }
+
+    let mut values = vec![0.0f64; n_grid];
+    let mut present = vec![false; n_grid];
+    let mut packed_idx = 0usize;
+
+    for grid_idx in 0..n_grid {
+        let byte = grid_idx / 8;
+        let bit = 7 - (grid_idx % 8); // MSB first
+        let is_present = byte < bm.len() && (bm[byte] >> bit) & 1 == 1;
+        if is_present {
+            if packed_idx < packed_vals.len() {
+                values[grid_idx] = packed_vals[packed_idx];
+                packed_idx += 1;
+            }
+            present[grid_idx] = true;
+        }
+    }
+
+    GridValues::Masked { values, present }
 }
 
 // ── Section 7: Data ───────────────────────────────────────────────────────────
@@ -937,7 +1018,6 @@ fn decode_section7(
     drt: u16,
     complex_extra: Option<&ComplexPackingExtra>,
     n_points: usize,
-    _has_bitmap: bool,
 ) -> Result<GridValues> {
     if let Some(extra) = complex_extra {
         return decode_drt3(body, packing, extra, n_points);
@@ -1472,13 +1552,13 @@ fn decode_lazy_message(msg: &[u8], out: &mut Vec<LazyField>) -> Result<usize> {
             }
             5 => {
                 // Store the full packing info including complex extras for DRT=2/3.
-                let (drt, packing, extra) = parse_section5(sec_body)?;
+                let (drt, packing, extra, _n_packed) = parse_section5(sec_body)?;
                 builder.drt_template = Some(drt);
                 builder.packing = Some(packing);
                 builder.complex_extra = extra;
             }
             6 => {
-                let has_bitmap = parse_section6(sec_body)?;
+                let (has_bitmap, _bitmap) = parse_section6(sec_body)?;
                 builder.has_bitmap = Some(has_bitmap);
             }
             7 => {
@@ -1573,7 +1653,7 @@ mod tests {
         };
         let data: Vec<u8> = (0u8..25).collect();
         // DRT=0: no complex extra
-        let values = decode_section7(&data, &packing, 0, None, 25, false).unwrap();
+        let values = decode_section7(&data, &packing, 0, None, 25).unwrap();
         match values {
             GridValues::Dense(v) => {
                 assert_eq!(v.len(), 25);
@@ -1596,7 +1676,7 @@ mod tests {
             original_field_type: 0,
         };
         let data: Vec<u8> = (0u8..25).collect();
-        let full = decode_section7(&data, &packing, 0, None, 25, false).unwrap();
+        let full = decode_section7(&data, &packing, 0, None, 25).unwrap();
         let GridValues::Dense(full_vals) = full else { panic!() };
 
         for (idx, &full_val) in full_vals.iter().enumerate().take(25) {
