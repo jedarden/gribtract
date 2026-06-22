@@ -414,7 +414,7 @@ mod tests {
             output.rankings.get("gfs").and_then(|v| v.first()).map(|s| s.as_str()),
             Some("noaa-s3")
         );
-        assert!(output.rankings.get("hrrr").is_none());
+        assert!(!output.rankings.contains_key("hrrr"));
     }
 
     #[test]
