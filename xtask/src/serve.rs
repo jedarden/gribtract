@@ -4,8 +4,8 @@
 //!  - `GET /`                → dashboard HTML with a "Run benchmark" button
 //!  - `GET /bench-results.json` → current bench-results.json on disk
 //!  - `POST /run`            → trigger a full `xtask bench` run; response is an
-//!                             SSE stream of progress messages followed by a
-//!                             `done` event that carries the updated JSON.
+//!    SSE stream of progress messages followed by a
+//!    `done` event that carries the updated JSON.
 //!
 //! One connection is handled at a time — this is a local dev tool only.
 

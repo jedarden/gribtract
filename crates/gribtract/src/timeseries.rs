@@ -247,6 +247,7 @@ mod tests {
         ParameterId, ReferenceTime,
     };
 
+    #[allow(clippy::too_many_arguments)]
     fn make_field(
         discipline: u8,
         category: u8,
