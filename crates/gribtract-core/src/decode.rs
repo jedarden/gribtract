@@ -1207,37 +1207,60 @@ fn decode_drt3(
         return Err(Error::TooShort { needed: n_points, got: packed.len() });
     }
 
-    // 6. Reconstruct original integers via spatial differencing.
-    //    For order >= 1 the packed sub-array holds differences, not originals.
-    //    Seed values (ival1, ival2) restore the first 1 or 2 originals; minsd
-    //    is the minimum difference subtracted by the encoder to keep values ≥ 0.
-    //    For order=0 (DRT=2) the packed values are already the original integers.
-    if order >= 1 {
-        packed[0] = ival1;
-    }
-    if order >= 2 {
-        packed[1] = ival2;
-    }
-
-    if order == 1 {
-        for i in 1..n_points {
-            let delta = packed[i] + minsd;
-            packed[i] = packed[i - 1] + delta;
-        }
-    } else if order == 2 {
-        let mut delta = packed[1] - packed[0]; // first difference at position 1
-        for i in 2..n_points {
-            let second_diff = packed[i] + minsd;
-            delta += second_diff;
-            packed[i] = packed[i - 1] + delta;
-        }
-    }
-
-    // 7. Apply packing formula: Y = (R + X × 2^E) / 10^D.
+    // 6+7. Reconstruct integers via spatial differencing and apply the packing
+    //    formula in a single combined pass (Attempt 5 in parse-speed-log.md).
+    //
+    //    Previously: two separate O(n) passes — in-place spatial diff over `packed`
+    //    (writing i64), then a scaling pass into `values` (reading i64, writing f64).
+    //    For a 65 K-point field each pass reads/writes ~520 KB; with two passes the
+    //    vector is read twice from L3/RAM after it exceeds L2.
+    //
+    //    Now: one combined pass reads each `packed[i]` exactly once, applies the
+    //    running-sum state inline, and immediately writes the scaled f64 to `values`.
+    //    The `packed` Vec is never mutated after construction; `values` is filled in
+    //    a single sequential write — friendlier for the prefetcher.
+    //
+    //    Seed values (ival1, ival2) are emitted directly from the seed variables
+    //    rather than by overwriting packed[0..order], so no in-place writes happen.
     let r = packing.reference_value as f64;
     let two_e = 2f64.powi(packing.binary_scale_factor as i32);
     let ten_d = 10f64.powi(packing.decimal_scale_factor as i32);
-    let values: Vec<f64> = packed.iter().map(|&x| (r + x as f64 * two_e) / ten_d).collect();
+    let mut values = Vec::with_capacity(n_points);
+
+    if order == 0 {
+        // DRT=2: no spatial differencing — scale directly.
+        for &x in &packed {
+            values.push((r + x as f64 * two_e) / ten_d);
+        }
+    } else if order == 1 {
+        // Position 0 is the seed ival1; packed[1..] hold first-order differences
+        // (with minsd subtracted by the encoder to keep them non-negative).
+        if !packed.is_empty() {
+            values.push((r + ival1 as f64 * two_e) / ten_d);
+        }
+        let mut prev = ival1;
+        for i in 1..packed.len() {
+            prev += packed[i] + minsd;
+            values.push((r + prev as f64 * two_e) / ten_d);
+        }
+    } else if order == 2 {
+        // Positions 0 and 1 are seeds ival1/ival2; packed[2..] hold second-order
+        // differences. The first-order difference at position 1 is ival2 − ival1.
+        if !packed.is_empty() {
+            values.push((r + ival1 as f64 * two_e) / ten_d);
+        }
+        if packed.len() >= 2 {
+            values.push((r + ival2 as f64 * two_e) / ten_d);
+        }
+        let mut delta = ival2 - ival1; // first-order diff at position 1
+        let mut prev = ival2;
+        for i in 2..packed.len() {
+            let second_diff = packed[i] + minsd;
+            delta += second_diff;
+            prev += delta;
+            values.push((r + prev as f64 * two_e) / ten_d);
+        }
+    }
 
     Ok(GridValues::Dense(values))
 }

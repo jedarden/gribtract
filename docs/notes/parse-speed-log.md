@@ -146,3 +146,46 @@ be vectorized and is O(n_points).  Possible next attempts:
   one pass (saves one O(n) allocation and scan).
 - Increase group-level parallelism if the GRIB2 encoder writes independent group
   blocks (format investigation needed).
+
+## Attempt 5: Merge spatial-diff pass and f64-scaling pass into one combined loop
+
+**Technique:** `decode_drt3` previously executed two separate O(n) passes after
+bit extraction:
+
+1. In-place spatial-differencing over `packed: Vec<i64>` (reading and writing each element).
+2. A separate scaling pass (`packed.iter().map(|&x| (r + x as f64 * two_e) / ten_d)`)
+   that read each element a second time and wrote to `values: Vec<f64>`.
+
+For a 65 K-point GFS field (`packed` ≈ 520 KB), `packed` exceeds a typical 256 KB L2
+cache, so both passes read from L3/RAM.  The merge eliminates the second pass:
+
+- For `order == 0` (DRT=2): one `.iter()` loop — no change in complexity.
+- For `order == 1`/`order == 2`: seed values (ival1, ival2) are emitted directly
+  from the seed variables rather than overwriting `packed[0..order]`, then each
+  subsequent `packed[i]` is read exactly once, the running-sum state is updated
+  inline, and the final scaled `f64` is pushed to `values`.  `packed` is never
+  mutated after construction.
+
+**Result (measured via `cargo run --manifest-path xtask/Cargo.toml --release -- bench`):**
+- DRT=3 (GFS fixture, 65 K-point field): **~128–130 MB/s vs 109.1 MB/s (Attempt-4 baseline) → +17–19%**
+  (two consecutive runs: 127.1 MB/s terminal, 129.9 MB/s bench-results.json; run-to-run variation ±2%).
+- Compared to pre-windowed baseline (92.8 MB/s): +38–40% cumulative (Attempts 4+5 combined).
+- Agreement: 100% — no correctness regression (all tests pass; 100% agreement on DRT=3).
+
+**Why it worked:** The in-place spatial-diff pass wrote ~520 KB of i64 data back to
+the same Vec, then the scaling pass read it all again.  With two passes, the CPU
+fetched `packed` twice from L3.  One combined pass fetches it once; the write-back
+of the intermediate i64 values is eliminated entirely.
+
+**Code kept:** combined spatial-diff + scale loop in `decode_drt3`
+(`crates/gribtract-core/src/decode.rs`).  The `packed` Vec remains (bit
+extraction requires the intermediate buffer), but its post-construction write path
+is removed.
+
+**Next headroom:** The remaining bottleneck in `decode_drt3` is likely:
+- The bit-extraction inner loop itself (`extract_group_windowed` refill loop).
+- The spatial-diff running sum, which has a strict sequential dependency and
+  cannot be SIMD-parallelized directly.
+- Eliminating `packed` entirely (streaming from bit extraction directly to f64)
+  would save the ~520 KB allocation and the single remaining read pass over it —
+  feasible but requires restructuring the group loop to track diff state inline.
