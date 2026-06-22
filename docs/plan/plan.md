@@ -194,7 +194,7 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
   product metadata. Match all non-value fields exactly for GFS surface temp.
 - [x] **Phase 2 — Simple packing (5.0) + lat/lon grid (3.0).** First end-to-end
   numeric agreement on the most common GFS/NBM fields.
-- [ ] **Phase 2b — Proof-of-speed dashboard (wired in here, updated forever after).**
+- [x] **Phase 2b — Proof-of-speed dashboard (wired in here, updated forever after).**
   Benchmark harness emits `bench-results.json` (throughput + agreement, vs
   eccodes/wgrib2); self-contained HTML dashboard renders it with a live `--serve`
   mode. From here on, every phase's work must keep the dashboard green and current.
@@ -211,7 +211,7 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
   gates speed; a faster path that changes a value is a regression, not progress.
   See `docs/notes/station-extraction-benchmark.md`. This track runs in parallel with
   the phases below and is never checked off.
-- [ ] **Phase 3 — Complex packing (5.2/5.3) + spatial differencing.** Unlocks most
+- [x] **Phase 3 — Complex packing (5.2/5.3) + spatial differencing.** Unlocks most
   HRRR fields. The numerically trickiest unpacker.
 - [ ] **Phase 4 — JPEG2000 (5.40) + PNG (5.41).** Compressed grids (common in some
   NOAA products). Pull in a Rust j2k/png path.
