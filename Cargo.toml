@@ -7,6 +7,16 @@ members = [
     "crates/gribtract-py",
     "xtask",
 ]
+# gribtract-py requires Python headers (PyO3). Exclude it from the default
+# workspace build so `cargo test` / `cargo check` (used in CI without Python)
+# don't fail on it. Build explicitly with `-p gribtract-py` or via maturin.
+default-members = [
+    "crates/gribtract-core",
+    "crates/gribtract",
+    "crates/gribtract-cli",
+    "crates/gribtract-testutil",
+    "xtask",
+]
 resolver = "2"
 
 [workspace.package]
