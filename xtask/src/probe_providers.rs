@@ -46,13 +46,6 @@ pub struct ProbeOutput {
     pub rankings: HashMap<String, Vec<String>>,
 }
 
-impl ProbeOutput {
-    /// Best provider for `model`, or `None` if no successful probe exists.
-    pub fn best_provider(&self, model: &str) -> Option<&str> {
-        self.rankings.get(model)?.first().map(|s| s.as_str())
-    }
-}
-
 // ── Provider catalogue ────────────────────────────────────────────────────────
 
 struct ProviderSpec {
@@ -194,7 +187,7 @@ fn probe_url(model: &str, provider: &str, url: &str, verbose: bool) -> ProviderR
         }
         Ok(resp) => {
             let status = resp.status();
-            if status < 200 || status >= 300 {
+            if !(200..300).contains(&status) {
                 let err = format!("HTTP {status}");
                 if verbose {
                     eprintln!("  [http-err] {model}/{provider}: {err}");
@@ -406,7 +399,7 @@ mod tests {
     }
 
     #[test]
-    fn probe_output_best_provider() {
+    fn probe_output_rankings() {
         let mut rankings = HashMap::new();
         rankings.insert("gfs".to_string(), vec!["noaa-s3".to_string(), "gcs".to_string()]);
         let output = ProbeOutput {
@@ -415,8 +408,13 @@ mod tests {
             results: vec![],
             rankings,
         };
-        assert_eq!(output.best_provider("gfs"), Some("noaa-s3"));
-        assert_eq!(output.best_provider("hrrr"), None);
+        // Access rankings directly (ProbeOutput is the xtask-local write struct;
+        // the runtime best_provider API lives in gribtract::ProviderProbe).
+        assert_eq!(
+            output.rankings.get("gfs").and_then(|v| v.first()).map(|s| s.as_str()),
+            Some("noaa-s3")
+        );
+        assert!(output.rankings.get("hrrr").is_none());
     }
 
     #[test]
