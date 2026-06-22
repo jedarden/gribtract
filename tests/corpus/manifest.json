@@ -65,6 +65,19 @@
         "capture_date": "2026-06-21",
         "generated_by": "scripts/gen_grib2_drt41.py (gribtract project)"
       }
+    },
+    {
+      "id": "pdt1_ensemble_3x2",
+      "path": "small/pdt1_ensemble_3x2.grib2",
+      "sha256": "efc2bd63db399e592419c1ef1a8f780bb93e78be8a1954e1900e19789350b0fa",
+      "size_bytes": 188,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 PDT=1 fixture: individual ensemble member forecast. 3x2 lat/lon grid (30-20N, 0-20E, 10deg spacing). Section 0 discipline=0 (meteorological), edition=2. Section 1: center=7 (US NCEP), start-of-forecast (significance=1), 2024-01-15T00:00:00Z. Section 3 template 3.0 (lat/lon), shape=6 (WGS84), Ni=3, Nj=2. Section 4 template 4.1 (individual ensemble member): discipline=0/cat=0/num=0 (temperature K), level type=100 (isobaric), 500 hPa, forecast_offset=6h. Ensemble: type=2 (negatively perturbed), perturbation_number=3, n_ensemble=20. Section 5 template 5.0 (simple packing): R=250.0, E=0, D=0, nbits=8. Section 6: no bitmap. Section 7: 6 packed bytes X=0..5, unpacked values = 250.0+X K.",
+        "capture_date": "2026-06-21",
+        "generated_by": "scripts/gen_grib2_pdt1.py (gribtract project)"
+      }
     }
   ],
   "_comment_large": "Fixtures with storage=remote live in tests/corpus/large/ (gitignored). The harness fetches them by sha256 from B2. Add a manifest entry here first, then seed the file.",

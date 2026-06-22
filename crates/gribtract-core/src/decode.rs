@@ -656,15 +656,30 @@ fn parse_section4(
             let (param, fore, lvl, ens) = parse_pdt_0(&mut b, discipline)?;
             Ok((0, param, fore, lvl, ens))
         }
+        1 => {
+            let (param, fore, lvl, ens) = parse_pdt_1(&mut b, discipline)?;
+            Ok((1, param, fore, lvl, ens))
+        }
+        8 => {
+            let (param, fore, lvl, ens) = parse_pdt_8(&mut b, discipline)?;
+            Ok((8, param, fore, lvl, ens))
+        }
+        11 => {
+            let (param, fore, lvl, ens) = parse_pdt_11(&mut b, discipline)?;
+            Ok((11, param, fore, lvl, ens))
+        }
         _ => Err(Error::NotImplemented),
     }
 }
 
-/// Product Definition Template 4.0: Analysis or forecast at horizontal level.
-fn parse_pdt_0(
+/// Parse the common PDT header fields shared by templates 4.0, 4.1, 4.8, 4.11.
+///
+/// Reads octets 10–34 (parameter, time, and level fields).  The caller reads
+/// any template-specific tail octets after calling this function.
+fn parse_pdt_common_header(
     b: &mut Buf,
     discipline: u8,
-) -> Result<(ParameterId, ForecastTime, Level, Option<Ensemble>)> {
+) -> Result<(ParameterId, ForecastTime, Level)> {
     let category = b.read_u8()?;  // oct 10
     let number = b.read_u8()?;    // oct 11
     b.skip(1)?; // generating process type (oct 12)
@@ -672,16 +687,16 @@ fn parse_pdt_0(
     b.skip(1)?; // analysis/forecast generating process id (oct 14)
     b.skip(2)?; // hours of cutoff after reference time (oct 15-16)
     b.skip(1)?; // minutes of cutoff (oct 17)
-    let time_range_unit = b.read_u8()?;   // oct 18
+    let time_range_unit = b.read_u8()?;    // oct 18
     let forecast_offset = b.read_u32be()?; // oct 19-22
 
-    let type1 = b.read_u8()?;          // oct 23
-    let scale_factor1 = b.read_i8()?;  // oct 24
-    let scaled_value1 = b.read_u32be()? as i32; // oct 25-28
+    let type1 = b.read_u8()?;                     // oct 23
+    let scale_factor1 = b.read_i8()?;             // oct 24
+    let scaled_value1 = b.read_u32be()? as i32;   // oct 25-28
 
-    let raw_type2 = b.read_u8()?;           // oct 29
-    let raw_scale_factor2 = b.read_i8()?;   // oct 30
-    let raw_scaled_value2 = b.read_u32be()? as i32; // oct 31-34
+    let raw_type2 = b.read_u8()?;                     // oct 29
+    let raw_scale_factor2 = b.read_i8()?;             // oct 30
+    let raw_scaled_value2 = b.read_u32be()? as i32;   // oct 31-34
 
     // When second surface type is 255 (missing), zero out its scale/value
     // to match eccodes behavior.
@@ -702,7 +717,98 @@ fn parse_pdt_0(
     };
     let lvl = Level { type1, scale_factor1, scaled_value1, type2, scale_factor2, scaled_value2 };
 
+    Ok((param, fore, lvl))
+}
+
+/// Product Definition Template 4.0: Analysis or forecast at horizontal level.
+fn parse_pdt_0(
+    b: &mut Buf,
+    discipline: u8,
+) -> Result<(ParameterId, ForecastTime, Level, Option<Ensemble>)> {
+    let (param, fore, lvl) = parse_pdt_common_header(b, discipline)?;
     Ok((param, fore, lvl, None))
+}
+
+/// Product Definition Template 4.1: Individual ensemble forecast, control and
+/// perturbed, at a horizontal level at a point in time.
+///
+/// WMO GRIB2 Table 4.1:
+/// - Octs 10–34: common header (same as PDT 4.0)
+/// - Oct 35: type of ensemble forecast (Table 4.6)
+/// - Oct 36: perturbation number
+/// - Oct 37: number of forecasts in ensemble
+fn parse_pdt_1(
+    b: &mut Buf,
+    discipline: u8,
+) -> Result<(ParameterId, ForecastTime, Level, Option<Ensemble>)> {
+    let (param, fore, lvl) = parse_pdt_common_header(b, discipline)?;
+
+    let member_type = b.read_u8()?;          // oct 35: Table 4.6
+    let perturbation_number = b.read_u8()?;  // oct 36
+    let _n_ensemble = b.read_u8()?;          // oct 37: number in ensemble (unused by harness)
+
+    let ens = Ensemble { member_type, number: perturbation_number as i16 };
+    Ok((param, fore, lvl, Some(ens)))
+}
+
+/// Product Definition Template 4.8: Average, accumulation, extreme values or
+/// other statistically-processed values at a horizontal level in a continuous
+/// or non-continuous time interval.
+///
+/// WMO GRIB2 Table 4.8:
+/// - Octs 10–34: common header (same as PDT 4.0)
+/// - Oct 35: year (u16), month, day, hour, minute, second of end of interval
+/// - Oct 41: number of time range specifications (n)
+/// - Octs 42 onward: n × 12-byte time range specifications (skipped)
+///
+/// Only the common header fields are surfaced; the statistical window
+/// information is not yet modelled in `ForecastTime`.
+fn parse_pdt_8(
+    b: &mut Buf,
+    discipline: u8,
+) -> Result<(ParameterId, ForecastTime, Level, Option<Ensemble>)> {
+    let (param, fore, lvl) = parse_pdt_common_header(b, discipline)?;
+
+    // End-of-interval timestamp and time-range specs: skip entirely.
+    // Oct 35-40: end time (year u16 + month + day + hour + min + sec = 7 bytes)
+    b.skip(7)?;
+    // Oct 41: number of time range specs
+    let n_ranges = b.read_u8()? as usize;
+    // Each spec is 12 bytes.
+    b.skip(12 * n_ranges)?;
+
+    Ok((param, fore, lvl, None))
+}
+
+/// Product Definition Template 4.11: Individual ensemble member +
+/// time-processed statistical product at a horizontal level.
+///
+/// WMO GRIB2 Table 4.11:
+/// - Octs 10–34: common header (same as PDT 4.0)
+/// - Oct 35: type of ensemble forecast (Table 4.6)
+/// - Oct 36: perturbation number
+/// - Oct 37: number of forecasts in ensemble
+/// - Oct 38-43: end-of-interval timestamp (year u16 + month + day + hour + min + sec)
+/// - Oct 44: number of time range specifications (n)
+/// - Octs 45+: n × 12-byte time range specs (skipped)
+fn parse_pdt_11(
+    b: &mut Buf,
+    discipline: u8,
+) -> Result<(ParameterId, ForecastTime, Level, Option<Ensemble>)> {
+    let (param, fore, lvl) = parse_pdt_common_header(b, discipline)?;
+
+    let member_type = b.read_u8()?;          // oct 35
+    let perturbation_number = b.read_u8()?;  // oct 36
+    let _n_ensemble = b.read_u8()?;          // oct 37
+
+    // Oct 38-43: end-of-interval timestamp (7 bytes: year u16 + month + day + hour + min + sec)
+    b.skip(7)?;
+    // Oct 44: number of time range specs
+    let n_ranges = b.read_u8()? as usize;
+    b.skip(12 * n_ranges)?;
+
+    let ens = Ensemble { member_type, number: perturbation_number as i16 };
+    Ok((param, fore, lvl, Some(ens)))
 }
 
 // ── Section 5: Data Representation ───────────────────────────────────────────
