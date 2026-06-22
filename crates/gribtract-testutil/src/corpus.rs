@@ -26,6 +26,11 @@ pub struct FixtureEntry {
     pub sha256: String,
     pub size_bytes: u64,
     pub storage: String,
+    /// Optional explicit download URL for storage=remote fixtures.
+    /// If absent, the fetch command derives the URL from env vars
+    /// GRIBTRACT_B2_ENDPOINT and GRIBTRACT_B2_BUCKET using the sha256 as the key.
+    #[serde(default)]
+    pub url: Option<String>,
 }
 
 /// Locate the `tests/corpus/` directory for this workspace.

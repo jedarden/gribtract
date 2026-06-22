@@ -1,5 +1,6 @@
 mod bench;
 mod bench_station;
+mod corpus;
 mod probe_providers;
 
 fn main() {
@@ -9,10 +10,14 @@ fn main() {
 
     match task {
         "bench" => bench::run(rest),
-        "corpus" => eprintln!("xtask corpus: not yet implemented"),
+        "corpus" => corpus::run(rest),
         "probe-providers" => probe_providers::run(rest),
         "" => {
             eprintln!("usage: xtask <bench|corpus|probe-providers> [args...]");
+            eprintln!("  bench              measure decode throughput → bench-results.json + dashboard.html");
+            eprintln!("  corpus list        print all fixtures with storage type and local presence");
+            eprintln!("  corpus fetch       download remote fixtures from B2 by sha256");
+            eprintln!("  probe-providers    probe NOAA provider latency → provider-probe.json");
             std::process::exit(1);
         }
         other => {
