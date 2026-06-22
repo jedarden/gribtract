@@ -377,6 +377,57 @@ impl PolarStereographicParams {
     }
 }
 
+/// Parameters unique to GDT 3.40 (Gaussian Latitude/Longitude).
+///
+/// A Gaussian grid has **uniform longitude** spacing but **non-uniform latitude**
+/// spacing — the latitudes are the zeros of the associated Legendre polynomial
+/// P_N(sin φ) between the equator and the pole.  The parameter N is the number
+/// of latitude circles from the pole to the equator; the grid has 2N parallels
+/// (or 2N+1 if the poles are included, depending on the implementation).
+///
+/// For nearest-point queries the latitudes are approximated as linearly spaced
+/// between La1 and La2 (equal to the true Gaussian latitudes at the corners).
+/// True Gaussian quadrature placement would require computing the zeros of
+/// Legendre polynomials — a valid follow-up optimisation once a real fixture
+/// exercises this path.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GaussianLatLonParams {
+    /// N — number of parallels between the Pole and the Equator.
+    pub n_parallels: u32,
+}
+
+impl GaussianLatLonParams {
+    /// Nearest-grid-point flat index for a Gaussian lat/lon grid.
+    ///
+    /// Longitude is uniform (Di stored in the common `di` field).
+    /// Latitude is approximated as uniform between La1 and La2
+    /// (Nj steps), which is exact at the corners and a close approximation
+    /// elsewhere.  Returns `None` if the query is outside the grid extent.
+    pub fn nearest_index(&self, grid: &GridDefinition, lat: f64, lon: f64) -> Option<usize> {
+        if grid.di == 0.0 { return None; }
+        let nj = grid.ny as f64;
+        if nj <= 1.0 { return None; }
+
+        // Longitude: same uniform arithmetic as GDT 3.0.
+        let mut fi = GridDefinition::lon_to_fi(lon, grid.lon_first, grid.di, grid.nx);
+        let nx_f = grid.nx as f64;
+        if fi < -0.5 { fi += 360.0 / grid.di; }
+        else if fi > nx_f - 0.5 { fi -= 360.0 / grid.di; }
+        if fi < -0.5 || fi > nx_f - 0.5 { return None; }
+
+        // Latitude: approximate as uniform between La1 and La2.
+        let dlat = (grid.lat_last - grid.lat_first) / (nj - 1.0);
+        if dlat.abs() < 1e-12 { return None; }
+        let fj = (lat - grid.lat_first) / dlat;
+        if fj < -0.5 || fj > nj - 0.5 { return None; }
+
+        let i = fi.round() as usize;
+        let j = fj.round() as usize;
+        if i >= grid.nx as usize || j >= grid.ny as usize { return None; }
+        Some(j * grid.nx as usize + i)
+    }
+}
+
 /// Template-specific grid projection parameters.
 ///
 /// Carried inside [`GridDefinition`] to hold parameters that are only present
@@ -390,6 +441,8 @@ pub enum GridProjection {
     PolarStereographic(PolarStereographicParams),
     /// GDT 3.30: Lambert conformal conic.
     LambertConformal(LambertConformalParams),
+    /// GDT 3.40: Gaussian latitude/longitude.
+    GaussianLatLon(GaussianLatLonParams),
 }
 
 impl Default for GridProjection {
@@ -557,6 +610,7 @@ impl GridDefinition {
             GridProjection::LatLon => self.nearest_index_latlon(lat, lon),
             GridProjection::PolarStereographic(p) => p.nearest_index(self, lat, lon),
             GridProjection::LambertConformal(p) => p.nearest_index(self, lat, lon),
+            GridProjection::GaussianLatLon(p) => p.nearest_index(self, lat, lon),
         }
     }
 
@@ -1173,5 +1227,79 @@ mod tests {
         let (_x80, y80) = pp.project_xy(80.0, pp.lov);
         assert!(y60 > y30, "y should increase northward: y30={y30}, y60={y60}");
         assert!(y80 > y60, "y should increase northward: y60={y60}, y80={y80}");
+    }
+
+    // ── Gaussian lat/lon (GDT 3.40) tests ────────────────────────────────────
+
+    /// Construct a small synthetic Gaussian lat/lon grid.
+    ///
+    /// 4 columns (Di=90°) × 3 rows (N=1 parallel → 2 hemispheric parallels).
+    /// La1=60°N, Lo1=0°E, La2=60°S, Lo2=270°E.
+    /// Scanning mode 0x00: +i (west→east), −j (north→south, row 0 = 60°N).
+    fn test_gaussian_latlon_grid() -> GridDefinition {
+        GridDefinition {
+            template: 40,
+            num_data_points: 12,
+            nx: 4,
+            ny: 3,
+            lat_first: 60.0,
+            lon_first: 0.0,
+            lat_last: -60.0,
+            lon_last: 270.0,
+            di: 90.0,
+            dj: 0.0,        // not stored in GDT 3.40; N below replaces it
+            scanning_mode: 0x00,  // +i, -j
+            resolution_flags: 0x30,
+            shape_of_earth: 6,
+            projection: GridProjection::GaussianLatLon(GaussianLatLonParams { n_parallels: 1 }),
+        }
+    }
+
+    #[test]
+    fn gaussian_nearest_first_point_returns_zero() {
+        // (La1, Lo1) = (60°N, 0°E) → i=0, j=0 → flat index 0.
+        let g = test_gaussian_latlon_grid();
+        let idx = g.nearest_index(g.lat_first, g.lon_first);
+        assert_eq!(idx, Some(0), "first grid point should map to index 0");
+    }
+
+    #[test]
+    fn gaussian_nearest_last_point_returns_n_minus_1() {
+        // (La2, Lo2) = (60°S, 270°E) → i=3, j=2 → flat index 3*4+3 ...
+        // Actually j=2 means row index 2, i=3 means col 3: idx = 2*4 + 3 = 11.
+        let g = test_gaussian_latlon_grid();
+        let idx = g.nearest_index(g.lat_last, g.lon_last);
+        let n = g.num_data_points as usize;
+        assert_eq!(idx, Some(n - 1), "last grid point should map to index {}", n - 1);
+    }
+
+    #[test]
+    fn gaussian_nearest_equator_center_longitude() {
+        // Equator (lat=0), centre col (lon=180°E = col 2, row 1 for our 3-row grid)
+        // fj = (0 - 60) / (-60-60)/(3-1) = (0-60)/(-60) = 1.0 → j=1
+        // fi = (180 - 0) / 90 = 2.0 → i=2
+        // idx = 1*4 + 2 = 6
+        let g = test_gaussian_latlon_grid();
+        let idx = g.nearest_index(0.0, 180.0);
+        assert_eq!(idx, Some(6), "equator centre should map to index 6");
+    }
+
+    #[test]
+    fn gaussian_nearest_outside_returns_none() {
+        let g = test_gaussian_latlon_grid();
+        // North Pole is above La1=60°N — outside grid.
+        assert_eq!(g.nearest_index(90.0, 0.0), None);
+        // South Pole is below La2=60°S — outside grid.
+        assert_eq!(g.nearest_index(-90.0, 0.0), None);
+    }
+
+    #[test]
+    fn gaussian_nearest_negative_lon_normalized() {
+        // -180° → 180°E, same as positive 180° → col 2, row 0 → idx 2.
+        let g = test_gaussian_latlon_grid();
+        let idx_pos = g.nearest_index(60.0, 180.0);
+        let idx_neg = g.nearest_index(60.0, -180.0);
+        assert_eq!(idx_pos, Some(2));
+        assert_eq!(idx_pos, idx_neg, "-180° should resolve the same as +180°");
     }
 }

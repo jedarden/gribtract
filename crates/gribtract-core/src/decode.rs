@@ -10,9 +10,9 @@
 
 use crate::error::{Error, Result};
 use crate::types::{
-    Ensemble, Field, ForecastTime, GridDefinition, GridProjection, GridValues, LazyField,
-    LambertConformalParams, Level, PackingInfo, ParameterId, PolarStereographicParams,
-    ReferenceTime,
+    Ensemble, Field, ForecastTime, GaussianLatLonParams, GridDefinition, GridProjection,
+    GridValues, LazyField, LambertConformalParams, Level, PackingInfo, ParameterId,
+    PolarStereographicParams, ReferenceTime,
 };
 
 // ── Byte buffer reader ────────────────────────────────────────────────────────
@@ -382,6 +382,10 @@ fn parse_section3(body: &[u8]) -> Result<(u16, GridDefinition)> {
             let grid = parse_gdt_30(&mut b, num_data_points)?;
             Ok((30, grid))
         }
+        40 => {
+            let grid = parse_gdt_40(&mut b, num_data_points)?;
+            Ok((40, grid))
+        }
         _ => Err(Error::NotImplemented),
     }
 }
@@ -563,6 +567,73 @@ fn parse_gdt_30(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
         lon_last: 0.0,
         di: 0.0,       // increment in metres, stored in LambertConformalParams
         dj: 0.0,
+        scanning_mode,
+        resolution_flags,
+        shape_of_earth,
+        projection,
+    })
+}
+
+/// Grid Definition Template 3.40: Gaussian Latitude/Longitude.
+///
+/// Byte layout (b starts at section octet 15 = first body byte after template number):
+///
+/// | Octets | Field |
+/// |--------|-------|
+/// | 15     | shape of earth |
+/// | 16–20  | earth radius scale + value (skipped) |
+/// | 21–25  | major-axis scale + value (skipped) |
+/// | 26–30  | minor-axis scale + value (skipped) |
+/// | 31–34  | Nx (Ni) |
+/// | 35–38  | Ny (Nj) |
+/// | 39–42  | basic angle (skipped) |
+/// | 43–46  | basic angle subdivisions (skipped) |
+/// | 47–50  | La1 (signed microdegrees) |
+/// | 51–54  | Lo1 (unsigned microdegrees, 0–360) |
+/// | 55     | resolution/component flags |
+/// | 56–59  | La2 (signed microdegrees) |
+/// | 60–63  | Lo2 (unsigned microdegrees, 0–360) |
+/// | 64–67  | Di (unsigned microdegrees/1e6) |
+/// | 68–71  | N (number of parallels between pole and equator) |
+/// | 72     | scanning mode |
+///
+/// GDT 3.40 differs from GDT 3.0 only in octets 68–71: these hold N (a raw
+/// unsigned 32-bit integer, not scaled) instead of Dj.  Dj is left as 0.0.
+fn parse_gdt_40(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
+    let shape_of_earth = b.read_u8()?;    // oct 15
+    b.skip(1 + 4)?;                       // oct 16–20: earth radius scale + value
+    b.skip(1 + 4)?;                       // oct 21–25: major axis
+    b.skip(1 + 4)?;                       // oct 26–30: minor axis
+
+    let nx = b.read_u32be()?;             // oct 31–34
+    let ny = b.read_u32be()?;             // oct 35–38
+
+    b.skip(4)?;                           // oct 39–42: basic angle
+    b.skip(4)?;                           // oct 43–46: subdivisions
+
+    let lat_first = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 47–50
+    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 51–54
+    let resolution_flags = b.read_u8()?;  // oct 55
+    let lat_last  = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 56–59
+    let lon_last  = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 60–63
+
+    let di        = b.read_u32be()? as f64 / 1_000_000.0;        // oct 64–67
+    let n_parallels = b.read_u32be()?;                            // oct 68–71 (N, not Dj)
+    let scanning_mode = b.read_u8()?;     // oct 72
+
+    let projection = GridProjection::GaussianLatLon(GaussianLatLonParams { n_parallels });
+
+    Ok(GridDefinition {
+        template: 40,
+        num_data_points,
+        nx,
+        ny,
+        lat_first,
+        lon_first,
+        lat_last,
+        lon_last,
+        di,
+        dj: 0.0,   // not stored in GDT 3.40; N replaces Dj
         scanning_mode,
         resolution_flags,
         shape_of_earth,
