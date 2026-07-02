@@ -189,3 +189,43 @@ is removed.
 - Eliminating `packed` entirely (streaming from bit extraction directly to f64)
   would save the ~520 KB allocation and the single remaining read pass over it —
   feasible but requires restructuring the group loop to track diff state inline.
+
+---
+
+## Attempt 6: Per-width specialized group extractors for DRT=3
+
+**Technique:** Add branch-free specialized extractors for common group widths
+(w=4, 8, 12, 16) that avoid the generic `extract_group_windowed`'s while-loop
+refill by loading exact byte counts per iteration. A dispatch function
+`extract_group_specialized` checks `w` and calls the appropriate specialization,
+falling back to the generic windowed extractor for other widths.
+
+- w=4: Load 1 byte every 2 values (1 byte = 2×4-bit values)
+- w=8: Direct byte reads with alignment handling for non-byte-aligned starts
+- w=12: Load 2 bytes per value (12 bits = 1.5 bytes)
+- w=16: Load 2 bytes per value
+
+**Result:**
+- No measurable performance difference (within run-to-run variance).
+- With specialized extractors: ~25.0–25.6 MB/s (avg 25.2 MB/s) on DRT=3 GFS fixture
+- Without specialized (generic only): ~24.8–25.6 MB/s (avg 25.3 MB/s) on same fixture
+- Agreement: 100% — no correctness regression.
+
+**Why it failed (no improvement):** The generic `extract_group_windowed` is already
+highly optimized — the while-loop refill runs at most `ceil(w/8) ≤ 2` iterations
+per element for w≤16, and the branch predictor learns the pattern quickly within
+each group. The specialized versions eliminate this loop, but the overhead of the
+dispatch (`match w`) and the duplicated code (instruction cache pressure) offset
+any gains. The bit-extraction inner loop is no longer the bottleneck after Attempts
+4 and 5; the spatial-differencing running sum and the final f64 scaling dominate.
+
+**Reverted:** Specialized extractor functions (`extract_group_w4`, `extract_group_w8`,
+`extract_group_w12`, `extract_group_w16`) and the dispatch function
+`extract_group_specialized` removed. The generic `extract_group_windowed` path
+remains as the sole extractor.
+
+**Alternative not attempted:** SIMD intrinsics (`std::arch` with `#[target_feature]`)
+would require AVX2+ and a separate code path — the effort is not justified given
+that bit extraction is no longer the bottleneck. The next meaningful speedup
+requires addressing the spatial-differencing sequential dependency or eliminating
+the `packed` intermediate allocation.
