@@ -229,3 +229,52 @@ would require AVX2+ and a separate code path — the effort is not justified giv
 that bit extraction is no longer the bottleneck. The next meaningful speedup
 requires addressing the spatial-differencing sequential dependency or eliminating
 the `packed` intermediate allocation.
+
+---
+
+## Attempt 7: Verification of specialized extractor correctness (2026-07-02)
+
+**Technique:** Run the test suite to verify the specialized extractors implemented
+in Attempt 6 are producing correct results.
+
+**Result:**
+- Test `extract_group_specialized_matches_generic` **FAILED**
+- Specialized w=4 extractor produces `[13, 13, 13, 14, 13, 15, ...]` instead of
+  the correct `[13, 13, 13, 13, 13, 13, ...]` for data=[0,1,2,3,...]
+- Root cause: Buffer initialization bug
+
+**Bug analysis:**
+The generic windowed extractor maintains a left-alignment invariant by loading
+bytes with `buf |= (data[byte_pos] as u64) << (56 - buf_bits)`, which places
+each new byte at the next available MSB position. The specialized w=4 extractor
+breaks this invariant by initializing with:
+```rust
+let mut buf = if byte_pos < data.len() { data[byte_pos] as u64 } else { 0 };
+```
+This places the first byte in the LSB position (bits 0-7) instead of MSB
+(bits 56-63), causing all subsequent extractions to read from the wrong bit
+positions.
+
+**Why this matters:** Correctness gates speed per the plan rules — "100%
+differential agreement must hold; a faster path that changes any value is a
+regression." The specialized extractors are unusable in their current state.
+
+**Resolution:** The specialized extractors (w=4, w=8, w=12, w=16) and the dispatch
+function `extract_group_specialized` have been removed from `decode.rs`. The
+code now uses only the generic `extract_group_windowed` function, which:
+1. Is verified correct by the test suite (100% agreement on all fixtures)
+2. Already incorporates the optimizations from Attempts 4 and 5 (+38–40% vs pre-windowed baseline)
+3. Has no correctness bugs
+
+**Code removed:** Lines 1370-1563 in `crates/gribtract-core/src/decode.rs`
+(`extract_group_w4`, `extract_group_w8`, `extract_group_w12`, `extract_group_w16`,
+`extract_group_specialized`).
+
+**Alternative not pursued:** Fixing the specialized extractors would require
+either:
+1. Duplicating the generic loader macro in each specialization (high maintenance burden)
+2. Extracting the loader logic into a shared helper (adds function call overhead)
+
+Given that Attempt 6 already found no measurable performance benefit from the
+specialized versions, the effort is not justified. The generic windowed extractor
+remains fast and correct.

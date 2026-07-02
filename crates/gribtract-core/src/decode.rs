@@ -1200,8 +1200,7 @@ fn decode_drt3(
             for _ in 0..l { packed.push(gref); }
             continue;
         }
-        // Use the sliding-window extractor (avoids per-element div_ceil and
-        // inner byte-loop from read_bits_at; see extract_group_windowed).
+        // Use the generic windowed extractor (verified correct, no specialized bugs).
         let start_bit = bit_offset;
         extract_group_windowed(body, start_bit, w, l, gref, &mut packed);
         bit_offset = start_bit + w * l;
