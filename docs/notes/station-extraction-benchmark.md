@@ -91,5 +91,5 @@ fine; the correctness gate + dashboard keep every attempt honest. Candidate angl
 - [x] Nearest and bilinear modes, each verified against full-grid decode at the points.
 - [ ] Dashboard view: `stations × hours / sec` over commits, with the agreement
   companion.
-- [ ] A short `notes/` running log of techniques tried — including the ones that
+- [x] A short `notes/` running log of techniques tried — including the ones that
   *didn't* help and why — so the loop doesn't re-walk dead ends.

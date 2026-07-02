@@ -23,7 +23,7 @@ repeat.*
    factors), not a magic epsilon. The tolerance policy is documented and tested.
 4. **Every disagreement becomes a permanent fixture.** Monotonic improvement; the
    regression ratchet is the whole point.
-5. **Sub-minute verify.** `cargo test` (local, cgroup-limited or iad-ci) must run
+5. **Sub-minute verify.** `cargo test` (local, cgroup-limited or CI) must run
    the full differential suite fast enough to drive an unattended loop. Large
    corpora are sharded/sampled in the fast path, exhaustive in CI.
 
@@ -58,8 +58,11 @@ repeat.*
 - `crates/gribtract-core` — section parsing, template dispatch, unpacking. No I/O.
 - `crates/gribtract` — high-level message iterator, field selection, public API.
 - `crates/gribtract-cli` — `gribtract decode|list|dump` (JSON/CSV out).
+- `crates/gribtract-testutil` — shared test utilities and fixtures for differential testing.
+- `crates/gribtract-py` — Python bindings via PyO3.
+- `crates/gribtract-fetch` — HTTP byte-range fetching for GRIB2 files with provider probing.
 - `xtask` — corpus management, reference-decoder runner, tolerance reports.
-- `tests/` — differential conformance suite + proptest/fuzz roundtrip.
+- `crates/gribtract/tests/` — differential conformance suite (differential.rs, station_extraction.rs).
 
 ## Components
 
@@ -186,10 +189,10 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
 ## Implementation Phases
 
 - [x] **Phase 0 — Oracle harness first.** Stand up the corpus loader, the
-  eccodes/wgrib2 reference runner (on an internal cluster where the toolchain +
-  files live; not the VPS), the field-by-field comparator, and the tolerance
-  policy. Wire `cargo test` to run a sampled differential suite. *Deliverable: a
-  failing-but-green-framework that can score any decoder against the corpus.*
+  eccodes/wgrib2 reference runner (on a host with the reference toolchain installed),
+  the field-by-field comparator, and the tolerance policy. Wire `cargo test` to run
+  a sampled differential suite. *Deliverable: a failing-but-green-framework that
+  can score any decoder against the corpus.*
 - [x] **Phase 1 — Framing + metadata.** Section 0–8 split, identification/grid/
   product metadata. Match all non-value fields exactly for GFS surface temp.
 - [x] **Phase 2 — Simple packing (5.0) + lat/lon grid (3.0).** First end-to-end
@@ -220,7 +223,7 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
 - [x] **Phase 6 — Ensembles + statistical products (GEFS).** Product templates for
   members and time-aggregated fields.
 - [x] **Phase 7 — Publish + integrate.** crates.io, Python bindings, and the
-  forecast-timeseries emitter consumed by a downstream backtest join.
+  forecast-timeseries emitter consumed by downstream time-series analysis.
   Includes the **provider probe** (`xtask probe-providers` + runtime `ProviderProbe`):
   each candidate provider for each model is probed at startup (`.idx` fetch + one
   range request); results cached to `provider-probe.json` with a 24h TTL. See the
@@ -260,6 +263,6 @@ the obvious next pick, advancing this track is always valid work.
 - **JPEG2000 in Rust:** is there a pure-Rust J2K decoder of sufficient fidelity,
   or is a vetted FFI dependency acceptable for template 5.40 only?
 - **Where the reference runs:** the differential harness needs the C toolchain;
-  run it on the internal cluster (has files + toolchain), not the VPS. CI wiring TBD.
+  run it on a host with the reference toolchain installed. CI wiring TBD.
 - **Scope of metadata naming:** ship a parameter/level name table, or expose raw
   numeric ids and leave naming to the consumer initially?

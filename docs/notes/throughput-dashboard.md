@@ -53,7 +53,7 @@ offline view; live mode is the proof on demand.
 
 - Anyone can run `xtask bench --corpus <name>` and regenerate `bench-results.json`;
   the dashboard renders identically. No hidden state.
-- CI (iad-ci) runs the benchmark on a pinned runner and publishes the dashboard as
+- CI runs the benchmark on a pinned runner and publishes the dashboard as
   a build artifact, so the trend line has a stable-hardware baseline alongside
   dev-box runs (each tagged by `host`, so they're never conflated).
 - Self-contained: single HTML file + the JSON; no external CDN at runtime (vendor
