@@ -33,9 +33,10 @@ jpeg2000 = ["jpeg2k"]
 **Current README (line 173-174):**
 ```bash
 # Run benchmarks and regenerate bench-results.json
-cargo run --bin xtask -- bench
+cargo xtask bench
 ```
 **Verified:** Command runs successfully and produces `bench-results.json`
+(Uses cargo alias: `xtask = "run --bin xtask --"` in `.cargo/config.toml`)
 
 **Result:** ✅ Correct command documented (not `cargo bench`)
 
