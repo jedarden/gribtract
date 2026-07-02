@@ -171,10 +171,10 @@ A self-contained benchmark dashboard (`dashboard.html`) tracks decode throughput
 
 ```bash
 # Run benchmarks and regenerate bench-results.json
-cargo run --bin xtask -- bench
+cargo xtask bench
 
 # Serve the live dashboard with streaming benchmark updates
-cargo run --bin xtask -- serve
+cargo xtask serve
 ```
 
 ## Building
