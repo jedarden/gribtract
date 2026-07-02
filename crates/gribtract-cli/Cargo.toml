@@ -14,7 +14,10 @@ name = "gribtract"
 path = "src/main.rs"
 
 [dependencies]
-gribtract = { workspace = true }
+gribtract = { workspace = true, default-features = false }
 clap = { version = "4.5", features = ["derive"] }
 serde_json = { workspace = true }
 anyhow = "1.0"
+
+[features]
+jpeg2000 = ["gribtract/jpeg2000"]

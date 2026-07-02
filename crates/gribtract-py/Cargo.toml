@@ -12,6 +12,9 @@ name = "gribtract"
 crate-type = ["cdylib"]
 
 [dependencies]
-gribtract-core = { path = "../gribtract-core", version = "0.1.0" }
-gribtract = { path = "../gribtract", version = "0.1.0" }
+gribtract-core = { path = "../gribtract-core", version = "0.1.0", default-features = false }
+gribtract = { path = "../gribtract", version = "0.1.0", default-features = false }
 pyo3 = { version = "0.22", features = ["extension-module"] }
+
+[features]
+jpeg2000 = ["gribtract-core/jpeg2000", "gribtract/jpeg2000"]

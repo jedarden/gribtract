@@ -360,6 +360,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "jpeg2000")]
     fn decode_drt40_jpeg2000_returns_fields() {
         let path = corpus_path("drt40_j2k_3x2.grib2");
         let data = std::fs::read(&path)

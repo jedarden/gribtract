@@ -11,9 +11,13 @@ categories = ["parser-implementations", "science", "encoding"]
 readme = "README.md"
 
 [dependencies]
-gribtract-core = { workspace = true }
+gribtract-core = { workspace = true, default-features = false }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
 [dev-dependencies]
 gribtract-testutil.workspace = true
+
+[features]
+# Re-export jpeg2000 feature from gribtract-core for test cfg checks
+jpeg2000 = ["gribtract-core/jpeg2000"]
