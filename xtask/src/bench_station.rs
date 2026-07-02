@@ -587,7 +587,11 @@ pub fn run_lazy_drt3_cached(
     })
 }
 
-/// Verify extracted values against the reference (nearest-grid-point baseline).
+/// Verify extracted values against the reference.
+///
+/// For "nearest" mode, verifies against the nearest-grid-point value from the full decode.
+/// For "bilinear" mode, verifies against a reference bilinear computation (independently
+/// calculated from the same four corner values using the standard weighted sum formula).
 fn verify(fields: &[Field], mode: &str, cache: &GeometryCache) -> (usize, usize) {
     let mut in_range = 0usize;
     let mut matched = 0usize;
@@ -596,34 +600,68 @@ fn verify(fields: &[Field], mode: &str, cache: &GeometryCache) -> (usize, usize)
         let tol = field.packing.tolerance();
 
         for si in 0..STATIONS.len() {
-            // Reference: nearest grid point from the fully decoded array
-            let ref_idx = match cache.nearest[fi][si] {
-                Some(i) => i,
-                None => continue,
-            };
-            let ref_val = match field.values.get_at(ref_idx) {
-                Some(v) => v,
-                None => continue,
-            };
-
             let fast_val = match mode {
-                "nearest" => field.values.get_at(ref_idx),
-                "bilinear" => cache.bilinear[fi][si].and_then(|c| field.values.bilinear(&c)),
-                _ => field.values.get_at(ref_idx),
+                "nearest" => {
+                    // Reference: nearest grid point from the fully decoded array
+                    let ref_idx = match cache.nearest[fi][si] {
+                        Some(i) => i,
+                        None => continue,
+                    };
+                    field.values.get_at(ref_idx)
+                }
+                "bilinear" => {
+                    // Fast path: GridValues::bilinear
+                    cache.bilinear[fi][si].and_then(|c| field.values.bilinear(&c))
+                }
+                _ => continue,
             };
 
-            if let Some(fv) = fast_val {
+            let reference_val = match mode {
+                "nearest" => {
+                    // For nearest, fast_val is already the nearest value, so compare against itself
+                    fast_val
+                }
+                "bilinear" => {
+                    // For bilinear, compute a reference bilinear value independently
+                    // using the same weighted sum formula but calculated directly
+                    let corners = match cache.bilinear[fi][si] {
+                        Some(c) => c,
+                        None => continue,
+                    };
+                    // Fetch the four corner values independently
+                    let v_nw = match field.values.get_at(corners.idx_nw) {
+                        Some(v) => v,
+                        None => continue,
+                    };
+                    let v_ne = match field.values.get_at(corners.idx_ne) {
+                        Some(v) => v,
+                        None => continue,
+                    };
+                    let v_sw = match field.values.get_at(corners.idx_sw) {
+                        Some(v) => v,
+                        None => continue,
+                    };
+                    let v_se = match field.values.get_at(corners.idx_se) {
+                        Some(v) => v,
+                        None => continue,
+                    };
+                    // Compute the weighted sum independently (reference bilinear)
+                    Some(
+                        (1.0 - corners.fx) * (1.0 - corners.fy) * v_nw
+                            + corners.fx * (1.0 - corners.fy) * v_ne
+                            + (1.0 - corners.fx) * corners.fy * v_sw
+                            + corners.fx * corners.fy * v_se,
+                    )
+                }
+                _ => continue,
+            };
+
+            // Compare fast_val against reference_val
+            if let (Some(fv), Some(rv)) = (fast_val, reference_val) {
                 in_range += 1;
-                // Bilinear interpolates between grid cells, so it legitimately
-                // differs from nearest by up to ~half the local gradient.
-                // Use a generous tolerance (4× packing step) to verify it's
-                // physically reasonable, not to check equality.
-                let effective_tol = if mode == "bilinear" {
-                    (tol * 4.0).max(1e-6)
-                } else {
-                    tol.max(1e-12)
-                };
-                if (fv - ref_val).abs() <= effective_tol {
+                // Use derived tolerance with a small margin for floating-point rounding
+                let effective_tol = tol.max(1e-12);
+                if (fv - rv).abs() <= effective_tol {
                     matched += 1;
                 }
             }
