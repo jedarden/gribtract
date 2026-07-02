@@ -196,15 +196,6 @@ maturin develop -p gribtract-py
 
 ## CLI
 
-> **⚠️ NOT YET IMPLEMENTED**
->
-> The CLI commands documented below (`gribtract decode|list|dump`) are not yet implemented.
-> The current `crates/gribtract-cli` is a stub that prints "not yet implemented" and exits with status 1.
->
-> **Tracking:** Implementation is tracked in bead [`bf-2r2q`](https://github.com/jedarden/gribtract/issues/2r2q).
->
-> The examples below document the intended interface for future implementation.
-
 ```bash
 # List all fields in a GRIB2 file (JSON output)
 gribtract list forecast.grib2
@@ -212,11 +203,11 @@ gribtract list forecast.grib2
 # Decode all fields and print as JSON
 gribtract decode forecast.grib2
 
-# Dump grid values for a specific field index
-gribtract dump forecast.grib2 --field 0 --format csv
+# Dump raw hex of the file
+gribtract dump forecast.grib2
 ```
 
-The CLI binary is at `crates/gribtract-cli`. It is intended to be a thin wrapper over the library API for ad-hoc inspection rather than production use.
+The CLI binary name is `gribtract` (built from `crates/gribtract-cli`). It provides a thin wrapper over the library API for ad-hoc inspection rather than production use.
 
 ## License
 
