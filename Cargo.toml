@@ -5,6 +5,7 @@ members = [
     "crates/gribtract-cli",
     "crates/gribtract-testutil",
     "crates/gribtract-py",
+    "crates/gribtract-fetch",
     "xtask",
 ]
 # gribtract-py requires Python headers (PyO3). Exclude it from the default
@@ -15,6 +16,7 @@ default-members = [
     "crates/gribtract",
     "crates/gribtract-cli",
     "crates/gribtract-testutil",
+    "crates/gribtract-fetch",
     "xtask",
 ]
 resolver = "2"
@@ -30,6 +32,7 @@ rust-version = "1.75"
 gribtract-core = { path = "crates/gribtract-core", version = "0.1.0" }
 gribtract = { path = "crates/gribtract", version = "0.1.0" }
 gribtract-testutil = { path = "crates/gribtract-testutil", version = "0.1.0" }
+gribtract-fetch = { path = "crates/gribtract-fetch", version = "0.1.0" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"

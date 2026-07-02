@@ -24,6 +24,14 @@ fn differential_coverage_report() {
             continue;
         }
 
+        // Skip DRT=40 (JPEG2000) fixtures when jpeg2000 feature is disabled
+        #[cfg(not(feature = "jpeg2000"))]
+        if entry.id.contains("drt40") {
+            eprintln!("  [skip-drt40-no-feature] {}", entry.id);
+            report.fixtures_no_golden += 1; // Count as skipped, not failed
+            continue;
+        }
+
         report.fixtures_total += 1;
 
         // Load golden reference — absence is not an error at this phase.

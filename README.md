@@ -2,7 +2,7 @@
 
 A pure-Rust GRIB2 decoder — decodes NOAA/WMO GRIB2 messages into typed fields and gridded numeric data, verified field-by-field against eccodes/wgrib2.
 
-No C dependencies. No shelling out to `wgrib2`. No FFI wrappers.
+No C dependencies for core GRIB2 decoding (DRT 5.0, 5.2, 5.3, 5.41). No shelling out to `wgrib2`. JPEG2000 (DRT 5.40) requires the optional `jpeg2000` feature, which pulls in `openjpeg-sys` (C FFI).
 
 ## What is GRIB2?
 
@@ -16,7 +16,7 @@ gribtract is a native Rust alternative.
 
 ## Features
 
-- **Pure Rust** — no C toolchain, no FFI, no system dependencies beyond the OS
+- **Pure Rust for core formats** — no C toolchain or FFI for DRT 5.0, 5.2, 5.3, 5.41 (simple, complex, complex+spatial differencing, PNG). JPEG2000 (DRT 5.40) requires the optional `jpeg2000` feature, which uses `openjpeg-sys` (C FFI)
 - **Typed output** — decoded fields carry structured metadata: parameter ID, level, forecast time, grid geometry
 - **Multiple packing formats** — DRT 5.0 (simple), 5.2 (complex), 5.3 (complex+spatial differencing), 5.40 (JPEG2000), 5.41 (PNG)
 - **Multiple grid projections** — lat/lon (GDT 3.0), polar stereographic (3.20), Lambert conformal (3.30), Gaussian (3.40)
@@ -171,10 +171,10 @@ A self-contained benchmark dashboard (`dashboard.html`) tracks decode throughput
 
 ```bash
 # Run benchmarks and regenerate bench-results.json
-cargo bench
+cargo run --bin xtask -- bench
 
 # Serve the live dashboard with streaming benchmark updates
-cargo xtask serve
+cargo run --bin xtask -- serve
 ```
 
 ## Building

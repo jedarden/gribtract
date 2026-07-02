@@ -90,7 +90,7 @@ within derived tolerance, emits a per-template coverage + agreement report.
 A self-contained HTML dashboard that **proves gribtract decodes at the claimed
 speed, on real files, reproducibly** — and shows it next to correctness so speed
 is never claimed without proof of a correct decode. Fed by a machine-readable
-`bench-results.json` emitted by the benchmark harness (`cargo bench` / xtask),
+`bench-results.json` emitted by the benchmark harness (`cargo run --bin xtask -- bench`),
 never hand-edited. See `docs/notes/throughput-dashboard.md` for the full spec.
 This is the artifact that answers "is it actually working at that speed?" — it is
 a deliverable, not an afterthought, and is wired in early (Phase 2) so every later

@@ -11,7 +11,11 @@ categories = ["parser-implementations", "science", "encoding"]
 readme = "README.md"
 
 [dependencies]
-jpeg2k = { version = "0.10", default-features = false, features = ["openjpeg-sys"] }
+jpeg2k = { version = "0.10", default-features = false, features = ["openjpeg-sys"], optional = true }
 png = "0.18"
+
+[features]
+default = []
+jpeg2000 = ["jpeg2k"]
 
 [dev-dependencies]

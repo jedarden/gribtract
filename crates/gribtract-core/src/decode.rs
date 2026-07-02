@@ -1024,7 +1024,10 @@ fn decode_section7(
     }
 
     if drt == 40 {
+        #[cfg(feature = "jpeg2000")]
         return decode_drt40(body, packing, n_points);
+        #[cfg(not(feature = "jpeg2000"))]
+        return Err(Error::NotImplemented);
     }
 
     if drt == 41 {
@@ -1057,6 +1060,7 @@ fn decode_section7(
 ///
 /// Section 7 contains a JPEG 2000 codestream (J2K) or JP2 container. The first
 /// component carries packed integers X; decoded values follow: Y = (R + X × 2^E) / 10^D.
+#[cfg(feature = "jpeg2000")]
 fn decode_drt40(body: &[u8], packing: &PackingInfo, n_points: usize) -> Result<GridValues> {
     let img = jpeg2k::Image::from_bytes(body)
         .map_err(|_| Error::InvalidData("JPEG2000 decode failed"))?;

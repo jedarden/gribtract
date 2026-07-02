@@ -14,7 +14,7 @@ throughput + green agreement, or it's flagged.
 ## Data source — reproducible, never hand-edited
 
 The dashboard is a pure renderer over `bench-results.json`, emitted by the
-benchmark harness (`cargo bench` via Criterion, orchestrated by `xtask bench`).
+benchmark harness (`cargo run --bin xtask -- bench`).
 Each record carries provenance so any number is attributable and repeatable:
 
 - `git_sha`, `timestamp`

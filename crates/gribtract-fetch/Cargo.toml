@@ -1,0 +1,29 @@
+[package]
+name = "gribtract-fetch"
+description = "HTTP byte-range fetching for NOAA GRIB2 data from S3, GCS, and NOMADS"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+keywords = ["grib2", "grib", "weather", "noaa", "http"]
+categories = ["science", "web-programming::http-client"]
+readme = "README.md"
+
+[dependencies]
+reqwest = { version = "0.12", features = ["rustls-tls"], default-features = false }
+thiserror = "2"
+tokio = { version = "1", features = ["time"], optional = true }
+serde = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
+url = "2"
+bytes = "1"
+chrono = { version = "0.4", optional = true }
+
+[features]
+default = []
+async = ["tokio", "reqwest/__tls"]
+probe = ["serde", "serde_json", "async", "chrono"]
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
