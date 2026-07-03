@@ -42,7 +42,7 @@ https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20240601/conus/hrrr.t12z.wrfsfcf
 - **DRT=3 Consistency:** 139/170 messages (~82% of analysis file; forecast files show ~100%)
 
 **Access Verification:**
-- **HTTP Status:** 200 OK (tested 2026-07-03 at 10:17 UTC)
+- **HTTP Status:** 200 OK (tested 2026-07-03 at 10:17 UTC and 2026-07-03 at ~11:30 UTC)
 - **Last-Modified:** June 1, 2024, 12:50:44 UTC
 - **Authentication:** None required (public S3 bucket)
 
