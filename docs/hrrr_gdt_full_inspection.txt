@@ -1,0 +1,369 @@
+Error processing line 4 of /home/coding/.local/lib/python3.13/site-packages/_cuda_bindings_redirector.pth:
+
+  Traceback (most recent call last):
+    File "<frozen site>", line 213, in addpackage
+    File "<string>", line 1, in <module>
+    File "/home/coding/.local/lib/python3.13/site-packages/_cuda_bindings_redirector.py", line 9, in <module>
+      import cuda
+  ModuleNotFoundError: No module named 'cuda'
+
+Remainder of file ignored
+
+======================================================================
+FILE: /home/coding/gribtract/hrrr_sample_20260703.grib2
+======================================================================
+Message   1: 3.30 ✓, DRT=3 ✓, param=260390, name=Maximum/Composite radar reflectivity
+            grid_type=lambert, size=1799x1059
+Message   2: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message   3: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message   4: 3.30 ✓, DRT=3 ✓, param=260136, name=Vertically-integrated liquid
+            grid_type=lambert, size=1799x1059
+Message   5: 3.30 ✓, DRT=3 ✓, param=3020, name=Visibility
+            grid_type=lambert, size=1799x1059
+Message   6: 3.30 ✓, DRT=3 ✓, param=260389, name=Derived radar reflectivity
+            grid_type=lambert, size=1799x1059
+Message   7: 3.30 ✓, DRT=3 ✓, param=260389, name=Derived radar reflectivity
+            grid_type=lambert, size=1799x1059
+Message   8: 3.30 ✓, DRT=3 ✓, param=260389, name=Derived radar reflectivity
+            grid_type=lambert, size=1799x1059
+Message   9: 3.30 ✓, DRT=3 ✓, param=260065, name=Wind speed (gust)
+            grid_type=lambert, size=1799x1059
+Message  10: 3.30 ✓, DRT=3 ✓, param=131, name=U component of wind
+            grid_type=lambert, size=1799x1059
+Message  11: 3.30 ✓, DRT=3 ✓, param=132, name=V component of wind
+            grid_type=lambert, size=1799x1059
+Message  12: 3.30 ✓, DRT=3 ✓, param=131, name=U component of wind
+            grid_type=lambert, size=1799x1059
+Message  13: 3.30 ✓, DRT=3 ✓, param=132, name=V component of wind
+            grid_type=lambert, size=1799x1059
+Message  14: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message  15: 3.30 ✓, DRT=3 ✓, param=130, name=Temperature
+            grid_type=lambert, size=1799x1059
+Message  16: 3.30 ✓, DRT=3 ✓, param=3017, name=Dew point temperature
+            grid_type=lambert, size=1799x1059
+Message  17: 3.30 ✓, DRT=3 ✓, param=131, name=U component of wind
+            grid_type=lambert, size=1799x1059
+Message  18: 3.30 ✓, DRT=3 ✓, param=132, name=V component of wind
+            grid_type=lambert, size=1799x1059
+Message  19: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message  20: 3.30 ✓, DRT=3 ✓, param=130, name=Temperature
+            grid_type=lambert, size=1799x1059
+Message  21: 3.30 ✓, DRT=3 ✓, param=3017, name=Dew point temperature
+            grid_type=lambert, size=1799x1059
+Message  22: 3.30 ✓, DRT=3 ✓, param=260238, name=Geometric vertical velocity
+            grid_type=lambert, size=1799x1059
+Message  23: 3.30 ✓, DRT=3 ✓, param=131, name=U component of wind
+            grid_type=lambert, size=1799x1059
+Message  24: 3.30 ✓, DRT=3 ✓, param=132, name=V component of wind
+            grid_type=lambert, size=1799x1059
+Message  25: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message  26: 3.30 ✓, DRT=3 ✓, param=130, name=Temperature
+            grid_type=lambert, size=1799x1059
+Message  27: 3.30 ✓, DRT=3 ✓, param=3017, name=Dew point temperature
+            grid_type=lambert, size=1799x1059
+Message  28: 3.30 ✓, DRT=3 ✓, param=131, name=U component of wind
+            grid_type=lambert, size=1799x1059
+Message  29: 3.30 ✓, DRT=3 ✓, param=132, name=V component of wind
+            grid_type=lambert, size=1799x1059
+Message  30: 3.30 ✓, DRT=3 ✓, param=130, name=Temperature
+            grid_type=lambert, size=1799x1059
+Message  31: 3.30 ✓, DRT=3 ✓, param=3017, name=Dew point temperature
+            grid_type=lambert, size=1799x1059
+Message  32: 3.30 ✓, DRT=3 ✓, param=131, name=U component of wind
+            grid_type=lambert, size=1799x1059
+Message  33: 3.30 ✓, DRT=3 ✓, param=132, name=V component of wind
+            grid_type=lambert, size=1799x1059
+Message  34: 3.30 ✓, DRT=3 ✓, param=130, name=Temperature
+            grid_type=lambert, size=1799x1059
+Message  35: 3.30 ✓, DRT=3 ✓, param=3017, name=Dew point temperature
+            grid_type=lambert, size=1799x1059
+Message  36: 3.30 ✓, DRT=3 ✓, param=131, name=U component of wind
+            grid_type=lambert, size=1799x1059
+Message  37: 3.30 ✓, DRT=3 ✓, param=132, name=V component of wind
+            grid_type=lambert, size=1799x1059
+Message  38: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  39: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  40: 3.30 ✓, DRT=3 ✓, param=260238, name=Geometric vertical velocity
+            grid_type=lambert, size=1799x1059
+Message  41: 3.30 ✓, DRT=3 ✓, param=260323, name=MSLP (MAPS System Reduction)
+            grid_type=lambert, size=1799x1059
+Message  42: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message  43: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  44: 3.30 ✓, DRT=3 ✓, param=260389, name=Derived radar reflectivity
+            grid_type=lambert, size=1799x1059
+Message  45: 3.30 ✓, DRT=0, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  46: 3.30 ✓, DRT=0, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  47: 3.30 ✓, DRT=0, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  48: 3.30 ✓, DRT=0, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  49: 3.30 ✓, DRT=0, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  50: 3.30 ✓, DRT=0, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  51: 3.30 ✓, DRT=0, param=237138, name=Time-maximum vorticity (relative)
+            grid_type=lambert, size=1799x1059
+Message  52: 3.30 ✓, DRT=0, param=237138, name=Time-maximum vorticity (relative)
+            grid_type=lambert, size=1799x1059
+Message  53: 3.30 ✓, DRT=3 ✓, param=260027, name=Hail
+            grid_type=lambert, size=1799x1059
+Message  54: 3.30 ✓, DRT=3 ✓, param=260027, name=Hail
+            grid_type=lambert, size=1799x1059
+Message  55: 3.30 ✓, DRT=0, param=260027, name=Hail
+            grid_type=lambert, size=1799x1059
+Message  56: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  57: 3.30 ✓, DRT=0, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  58: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  59: 3.30 ✓, DRT=0, param=260391, name=Lightning
+            grid_type=lambert, size=1799x1059
+Message  60: 3.30 ✓, DRT=3 ✓, param=131, name=U component of wind
+            grid_type=lambert, size=1799x1059
+Message  61: 3.30 ✓, DRT=3 ✓, param=132, name=V component of wind
+            grid_type=lambert, size=1799x1059
+Message  62: 3.30 ✓, DRT=3 ✓, param=134, name=Surface pressure
+            grid_type=lambert, size=1799x1059
+Message  63: 3.30 ✓, DRT=3 ✓, param=228002, name=Orography
+            grid_type=lambert, size=1799x1059
+Message  64: 3.30 ✓, DRT=3 ✓, param=130, name=Temperature
+            grid_type=lambert, size=1799x1059
+Message  65: 3.30 ✓, DRT=0, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  66: 3.30 ✓, DRT=3 ✓, param=260187, name=Moisture availability
+            grid_type=lambert, size=1799x1059
+Message  67: 3.30 ✓, DRT=3 ✓, param=260189, name=Plant canopy surface water
+            grid_type=lambert, size=1799x1059
+Message  68: 3.30 ✓, DRT=3 ✓, param=260056, name=Water equivalent of accumulated snow depth (deprecated)
+            grid_type=lambert, size=1799x1059
+Message  69: 3.30 ✓, DRT=3 ✓, param=260038, name=Snow cover
+            grid_type=lambert, size=1799x1059
+Message  70: 3.30 ✓, DRT=3 ✓, param=3066, name=Snow depth
+            grid_type=lambert, size=1799x1059
+Message  71: 3.30 ✓, DRT=3 ✓, param=167, name=2 metre temperature
+            grid_type=lambert, size=1799x1059
+Message  72: 3.30 ✓, DRT=3 ✓, param=3, name=Potential temperature
+            grid_type=lambert, size=1799x1059
+Message  73: 3.30 ✓, DRT=3 ✓, param=174096, name=2 metre specific humidity
+            grid_type=lambert, size=1799x1059
+Message  74: 3.30 ✓, DRT=3 ✓, param=168, name=2 metre dewpoint temperature
+            grid_type=lambert, size=1799x1059
+Message  75: 3.30 ✓, DRT=3 ✓, param=260242, name=2 metre relative humidity
+            grid_type=lambert, size=1799x1059
+Message  76: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  77: 3.30 ✓, DRT=0, param=165, name=10 metre U wind component
+            grid_type=lambert, size=1799x1059
+Message  78: 3.30 ✓, DRT=0, param=166, name=10 metre V wind component
+            grid_type=lambert, size=1799x1059
+Message  79: 3.30 ✓, DRT=3 ✓, param=237207, name=Time-maximum 10 metre wind speed
+            grid_type=lambert, size=1799x1059
+Message  80: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  81: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  82: 3.30 ✓, DRT=0, param=260035, name=Percent frozen precipitation
+            grid_type=lambert, size=1799x1059
+Message  83: 3.30 ✓, DRT=0, param=3059, name=Precipitation rate
+            grid_type=lambert, size=1799x1059
+Message  84: 3.30 ✓, DRT=0, param=228228, name=Total Precipitation
+            grid_type=lambert, size=1799x1059
+Message  85: 3.30 ✓, DRT=0, param=260056, name=Water equivalent of accumulated snow depth (deprecated)
+            grid_type=lambert, size=1799x1059
+Message  86: 3.30 ✓, DRT=0, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message  87: 3.30 ✓, DRT=3 ✓, param=260288, name=Freezing Rain
+            grid_type=lambert, size=1799x1059
+Message  88: 3.30 ✓, DRT=0, param=260175, name=Storm surface runoff
+            grid_type=lambert, size=1799x1059
+Message  89: 3.30 ✓, DRT=0, param=260174, name=Baseflow-groundwater runoff
+            grid_type=lambert, size=1799x1059
+Message  90: 3.30 ✓, DRT=0, param=260032, name=Categorical snow
+            grid_type=lambert, size=1799x1059
+Message  91: 3.30 ✓, DRT=0, param=260031, name=Categorical ice pellets
+            grid_type=lambert, size=1799x1059
+Message  92: 3.30 ✓, DRT=0, param=260030, name=Categorical freezing rain
+            grid_type=lambert, size=1799x1059
+Message  93: 3.30 ✓, DRT=0, param=260029, name=Categorical rain
+            grid_type=lambert, size=1799x1059
+Message  94: 3.30 ✓, DRT=3 ✓, param=244, name=Forecast surface roughness
+            grid_type=lambert, size=1799x1059
+Message  95: 3.30 ✓, DRT=3 ✓, param=260073, name=Frictional velocity
+            grid_type=lambert, size=1799x1059
+Message  96: 3.30 ✓, DRT=3 ✓, param=231, name=Instantaneous surface sensible heat net flux
+            grid_type=lambert, size=1799x1059
+Message  97: 3.30 ✓, DRT=3 ✓, param=260002, name=Surface latent heat net flux
+            grid_type=lambert, size=1799x1059
+Message  98: 3.30 ✓, DRT=3 ✓, param=260180, name=Vegetation
+            grid_type=lambert, size=1799x1059
+Message  99: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 100: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 101: 3.30 ✓, DRT=3 ✓, param=260373, name=Leaf Area Index
+            grid_type=lambert, size=1799x1059
+Message 102: 3.30 ✓, DRT=3 ✓, param=260186, name=Ground heat flux
+            grid_type=lambert, size=1799x1059
+Message 103: 3.30 ✓, DRT=3 ✓, param=260439, name=Vegetation Type
+            grid_type=lambert, size=1799x1059
+Message 104: 3.30 ✓, DRT=3 ✓, param=260127, name=Surface lifted index
+            grid_type=lambert, size=1799x1059
+Message 105: 3.30 ✓, DRT=3 ✓, param=59, name=Convective available potential energy
+            grid_type=lambert, size=1799x1059
+Message 106: 3.30 ✓, DRT=3 ✓, param=228001, name=Convective inhibition
+            grid_type=lambert, size=1799x1059
+Message 107: 3.30 ✓, DRT=3 ✓, param=3054, name=Precipitable water
+            grid_type=lambert, size=1799x1059
+Message 108: 3.30 ✓, DRT=0, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 109: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 110: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 111: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 112: 3.30 ✓, DRT=3 ✓, param=228164, name=Total Cloud Cover
+            grid_type=lambert, size=1799x1059
+Message 113: 3.30 ✓, DRT=3 ✓, param=3073, name=Low cloud cover
+            grid_type=lambert, size=1799x1059
+Message 114: 3.30 ✓, DRT=3 ✓, param=3074, name=Medium cloud cover
+            grid_type=lambert, size=1799x1059
+Message 115: 3.30 ✓, DRT=3 ✓, param=3075, name=High cloud cover
+            grid_type=lambert, size=1799x1059
+Message 116: 3.30 ✓, DRT=3 ✓, param=228164, name=Total Cloud Cover
+            grid_type=lambert, size=1799x1059
+Message 117: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message 118: 3.30 ✓, DRT=0, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message 119: 3.30 ✓, DRT=3 ✓, param=231045, name=Pressure at cloud base
+            grid_type=lambert, size=1799x1059
+Message 120: 3.30 ✓, DRT=3 ✓, param=54, name=Pressure
+            grid_type=lambert, size=1799x1059
+Message 121: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message 122: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 123: 3.30 ✓, DRT=3 ✓, param=260087, name=Surface downward short-wave radiation flux
+            grid_type=lambert, size=1799x1059
+Message 124: 3.30 ✓, DRT=3 ✓, param=260097, name=Surface downward long-wave radiation flux
+            grid_type=lambert, size=1799x1059
+Message 125: 3.30 ✓, DRT=3 ✓, param=260088, name=Surface upward short-wave radiation flux
+            grid_type=lambert, size=1799x1059
+Message 126: 3.30 ✓, DRT=3 ✓, param=260098, name=Surface upward long-wave radiation flux
+            grid_type=lambert, size=1799x1059
+Message 127: 3.30 ✓, DRT=3 ✓, param=260345, name=Cloud Forcing Net Solar Flux
+            grid_type=lambert, size=1799x1059
+Message 128: 3.30 ✓, DRT=3 ✓, param=260346, name=Visible Beam Downward Solar Flux
+            grid_type=lambert, size=1799x1059
+Message 129: 3.30 ✓, DRT=3 ✓, param=260347, name=Visible Diffuse Downward Solar Flux
+            grid_type=lambert, size=1799x1059
+Message 130: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 131: 3.30 ✓, DRT=3 ✓, param=260125, name=Storm relative helicity
+            grid_type=lambert, size=1799x1059
+Message 132: 3.30 ✓, DRT=3 ✓, param=260125, name=Storm relative helicity
+            grid_type=lambert, size=1799x1059
+Message 133: 3.30 ✓, DRT=3 ✓, param=260070, name=U-component storm motion
+            grid_type=lambert, size=1799x1059
+Message 134: 3.30 ✓, DRT=3 ✓, param=260071, name=V-component storm motion
+            grid_type=lambert, size=1799x1059
+Message 135: 3.30 ✓, DRT=0, param=3045, name=Vertical u-component shear
+            grid_type=lambert, size=1799x1059
+Message 136: 3.30 ✓, DRT=0, param=3046, name=Vertical v-component shear
+            grid_type=lambert, size=1799x1059
+Message 137: 3.30 ✓, DRT=0, param=3045, name=Vertical u-component shear
+            grid_type=lambert, size=1799x1059
+Message 138: 3.30 ✓, DRT=0, param=3046, name=Vertical v-component shear
+            grid_type=lambert, size=1799x1059
+Message 139: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message 140: 3.30 ✓, DRT=3 ✓, param=157, name=Relative humidity
+            grid_type=lambert, size=1799x1059
+Message 141: 3.30 ✓, DRT=3 ✓, param=54, name=Pressure
+            grid_type=lambert, size=1799x1059
+Message 142: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message 143: 3.30 ✓, DRT=3 ✓, param=157, name=Relative humidity
+            grid_type=lambert, size=1799x1059
+Message 144: 3.30 ✓, DRT=3 ✓, param=54, name=Pressure
+            grid_type=lambert, size=1799x1059
+Message 145: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message 146: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message 147: 3.30 ✓, DRT=3 ✓, param=260128, name=Best (4-layer) lifted index
+            grid_type=lambert, size=1799x1059
+Message 148: 3.30 ✓, DRT=3 ✓, param=59, name=Convective available potential energy
+            grid_type=lambert, size=1799x1059
+Message 149: 3.30 ✓, DRT=3 ✓, param=228001, name=Convective inhibition
+            grid_type=lambert, size=1799x1059
+Message 150: 3.30 ✓, DRT=3 ✓, param=159, name=Boundary layer height
+            grid_type=lambert, size=1799x1059
+Message 151: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message 152: 3.30 ✓, DRT=3 ✓, param=59, name=Convective available potential energy
+            grid_type=lambert, size=1799x1059
+Message 153: 3.30 ✓, DRT=3 ✓, param=228001, name=Convective inhibition
+            grid_type=lambert, size=1799x1059
+Message 154: 3.30 ✓, DRT=3 ✓, param=59, name=Convective available potential energy
+            grid_type=lambert, size=1799x1059
+Message 155: 3.30 ✓, DRT=3 ✓, param=228001, name=Convective inhibition
+            grid_type=lambert, size=1799x1059
+Message 156: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message 157: 3.30 ✓, DRT=3 ✓, param=260325, name=Pressure of level from which parcel was lifted
+            grid_type=lambert, size=1799x1059
+Message 158: 3.30 ✓, DRT=3 ✓, param=59, name=Convective available potential energy
+            grid_type=lambert, size=1799x1059
+Message 159: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message 160: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 161: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 162: 3.30 ✓, DRT=3 ✓, param=260330, name=Layer Thickness
+            grid_type=lambert, size=1799x1059
+Message 163: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 164: 3.30 ✓, DRT=3 ✓, param=0, name=unknown
+            grid_type=lambert, size=1799x1059
+Message 165: 3.30 ✓, DRT=3 ✓, param=172, name=Land-sea mask
+            grid_type=lambert, size=1799x1059
+Message 166: 3.30 ✓, DRT=3 ✓, param=31, name=Sea ice area fraction
+            grid_type=lambert, size=1799x1059
+Message 167: 3.30 ✓, DRT=3 ✓, param=7001305, name=Simulated Brightness Temperature for GOES 12, Channel 3
+            grid_type=lambert, size=1799x1059
+Message 168: 3.30 ✓, DRT=3 ✓, param=7001306, name=Simulated Brightness Temperature for GOES 12, Channel 4
+            grid_type=lambert, size=1799x1059
+Message 169: 3.30 ✓, DRT=3 ✓, param=7001301, name=Simulated Brightness Temperature for GOES 11, Channel 3
+            grid_type=lambert, size=1799x1059
+Message 170: 3.30 ✓, DRT=3 ✓, param=7001302, name=Simulated Brightness Temperature for GOES 11, Channel 4
+            grid_type=lambert, size=1799x1059
+
+----------------------------------------------------------------------
+SUMMARY:
+  Total messages: 170
+  GDT 3.30 (Lambert Conformal): 170/170 (100.0%)
+  DRT=3 (Complex Packing): 139/170 (81.8%)
+  ⚠️  Non-DRT=3 messages: 31
+======================================================================
+
+======================================================================
+NOTES:
+  - GDT=30 corresponds to GDT 3.30 (Lambert Conformal Conic)
+  - DRT=3 corresponds to Data Representation Template 3 (Complex packing)
+  - These files contain multiple messages, one per parameter/level
+======================================================================
