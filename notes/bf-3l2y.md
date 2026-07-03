@@ -1,7 +1,7 @@
 # NOAA Regional Model GRIB2 Archives Research
 
-**Bead:** bf-3l2y  
-**Date:** 2025-07-02  
+**Bead:** bf-3l2y
+**Date:** 2026-07-02
 **Task:** Research NOAA's public GRIB2 archives for regional weather models
 
 ## Summary
@@ -27,7 +27,9 @@ This document catalogs NOAA regional models that use GRIB2 encoding with Grid De
 
 **Run Schedule:**
 - **Hourly** model runs (00Z, 01Z, 02Z, ..., 23Z)
-- Forecast duration: 18-48 hours
+- Forecast duration: 
+  - All hourly cycles: 18 hours
+  - Extended 00Z, 06Z, 12Z, 18Z cycles: 48 hours
 - Sub-hourly output available every 15 minutes within each hour
 
 **File Naming Convention:**
@@ -35,9 +37,10 @@ This document catalogs NOAA regional models that use GRIB2 encoding with Grid De
 - Pressure: `hrrr.t[HH]z.wrfprsf[00-48].grib2`
 
 **Typical File Sizes:**
-- Surface fields: ~100 MB per file
-- Pressure fields: ~120 MB per file
+- Surface fields (wrfsfcf): >100 MB per file
+- Pressure fields (wrfprsf): >380 MB per file
 - Full day of pressure analyses: >9 GB
+- Complete 18-hour forecast cycle: ~500 MB total
 
 **Access Method:** HTTPS (public)
 

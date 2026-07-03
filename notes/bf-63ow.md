@@ -67,6 +67,12 @@ All three models use GRIB2 Grid Definition Template 3.30 (Lambert Conformal Coni
 
 ### Archive Locations
 
+#### AWS Open Data Registry
+- **S3 Bucket**: `s3://noaa-nam-pds/`
+- **HTTPS**: `https://noaa-nam-pds.s3.amazonaws.com/`
+- **Registry Page**: https://registry.opendata.aws/noaa-nam/
+- **Path Structure**: `nam.YYYYMMDD/nam.tCCz.{product}XX.tm00.grib2`
+
 #### NCEP FTP/HTTPS
 - **Products Page**: https://www.nco.ncep.noaa.gov/pmb/products/nam/
 - **Protocol**: GRIB2 via FTP and HTTPS
@@ -118,6 +124,15 @@ All three models use GRIB2 Grid Definition Template 3.30 (Lambert Conformal Coni
 - **WRF Native**: `rap.tCCz.wrfnatfFF.grib2`
 - **WRF MSL**: `rap.tCCz.wrfmslfFF.grib2`
 
+### File Sizes
+- **NAM awphys**: ~56 MB per file (e.g., `nam.t00z.awphys00.tm00.grib2` ≈ 59 MB)
+- **RAP**: Varies by product (typically smaller than HRRR/NAM due to 13km resolution)
+
+### Retention Policy
+- AWS archives: Historical data available (varies by model)
+- NCEP servers: Typically 30-90 days retention
+- No explicit long-term retention limit documented for AWS
+
 ---
 
 ## GRIB2 Technical Details
@@ -150,7 +165,12 @@ All three models use GRIB2 Grid Definition Template 3.30 (Lambert Conformal Coni
 # HRRR from AWS (most accessible)
 aws s3 ls s3://noaa-hrrr-bdp-pds/hrrr.20250701/conus/
 
-# NAM from NCEP
+# NAM from AWS S3
+aws s3 ls s3://noaa-nam-pds/nam.20250701/
+# Or via HTTPS
+curl -O https://noaa-nam-pds.s3.amazonaws.com/nam.20250701/nam.t00z.awphys00.tm00.grib2
+
+# NAM from NCEP (alternative)
 wget https://www.nco.ncep.noaa.gov/pmb/products/nam/nam.t00z.conusnest.hiresf00.tm00.grib2
 
 # RAP from AWS
