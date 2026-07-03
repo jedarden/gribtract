@@ -1,0 +1,27 @@
+============================================================
+GRIB2 Grid Definition Template Inspection
+============================================================
+File: /home/coding/gribtract/hrrr_sample_20260703.grib2
+
+Grid Definition Template (GDT): 30
+Template designation: 3.30
+Template Name: Lambert Conformal Conic
+
+Grid Type: lambert
+Centre: kwbc
+Parameter: Maximum/Composite radar reflectivity (refc)
+
+Grid Dimensions:
+  Ni (x-direction): 1799
+  Nj (y-direction): 1059
+
+Grid Extent:
+  First point: (21.1381, 237.2805)
+  Last point: (not available)
+
+Lambert Conformal Parameters:
+  LaD (Latitude of Diana): 38.5000
+  LoV (Longitude of meridian): 262.5000
+  Latin1 (First latitude): 38.5000
+  Latin2 (Second latitude): 38.5000
+============================================================
