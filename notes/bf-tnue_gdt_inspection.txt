@@ -1,0 +1,19 @@
+# GRIB2 Grid Definition Template Inspection
+# File: /home/coding/gribtract/hrrr_sample_20260703.grib2
+# Tool: Python eccodes library
+
+Grid Definition Template (GDT): 30
+  - GDT 3.30 (Lambert Conformal Conic)
+
+Grid Type: lambert
+Grid Dimensions: Ni=1799 x Nj=1059
+
+Lambert Conformal Conic Projection Parameters:
+  Latin1 (First standard parallel): 38.5000°
+  Latin2 (Second standard parallel): 38.5000°
+  LaD (Latitude of origin/D): 38.5000°
+  LoV (Longitude of central meridian/V): 262.5000°
+  First grid point: (21.138123°, 237.280472°)
+
+# GDT 3.30 is the standard Lambert Conformal Conic projection
+# used by NCEP models including HRRR and NAM CONUS.
