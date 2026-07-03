@@ -289,3 +289,50 @@ https://api.mesowest.utah.edu/archive/HRRR/oper/sfc/20170405/hrrr.t14z.wrfsfcf00
 
 **Research Completed:** 2026-07-03
 **Task ID:** bf-37kc
+
+---
+
+## Additional Sources from Web Research
+
+### NOAA NAM AWS Registry
+- **Registry Page:** https://registry.opendata.aws/noaa-nam/
+- **S3 Bucket:** `s3://noaa-nam-pds`
+- Contains NAM (North American Mesoscale) data in GRIB2 format
+- Lambert Conformal Conic projection for CONUS domain
+
+### Additional NOAA AWS Resources
+- **Complete NOAA Dataset List:** https://www.noaa.gov/nodd/datasets
+- **AWS Blog on Weather Forecasts:** https://aws.amazon.com/blogs/publicsector/making-weather-forecasts-accessible-serverless-infrastructure-open-data-aws/
+
+### NOAANCEI (AIRS - Archive Information Request System)
+- **GFS GRIB-2 Direct Access:** https://www.ncei.noaa.gov/has/HAS.DsSelect?datasetname=GFSGRB24
+- **Request System:** https://www.ncei.noaa.gov/has/HAS.DsSelect
+
+### NOAA READY Gridded Data Archives
+- **Website:** https://www.ready.noaa.gov/archives.php
+- NCEP model output reprocessed with 1-byte packing
+
+### NASA Technical Reference
+- **HRRR 3D Numerical Weather Data:** https://ntrs.nasa.gov/api/citations/20160009371/downloads/20160009371.pdf
+- Documents HRRR Lambert Conformal projection parameters
+
+### GRIB2 Grid Definition Templates
+- **NCEP PMB Documentation:** https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_table3-1.shtml
+- **Template 3.30:** Standard Lambert Conformal
+- **Template 3.33:** Lambert Conformal with Modelling Subdomains
+
+### Grid Documentation
+- **NCEP Grid Introduction:** https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/grib2/intro_grids.doc
+- **WMO GRIB2 Templates:** https://github.com/wmo-im/GRIB2
+
+### Educational Resources
+- **University of Oklahoma Download Guide:** https://twister.caps.ou.edu/METR3334/GFS_data/DownloadingModelDataFromNcepServer.pdf
+- **NCAR WRF Free Data:** https://www2.mmm.ucar.edu/wrf/users/download/free_data.html
+- **University of Oklahoma Meteorological Data Sources:** https://twister.caps.ou.edu/MeteorologicalDataSources.html
+
+### Python Tools
+- **Herbie Documentation:** https://herbie.readthedocs.io/en/latest/user_guide/background/data_sources.html
+
+### Additional Services
+- **NOAA/NWS FTP/HTTP Documentation:** https://www.weather.gov/tg/dataprod
+- **HRRR Official:** https://rapidrefresh.noaa.gov/hrrr/
