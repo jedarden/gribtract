@@ -52,7 +52,7 @@ Models available: `gfs_0p25`, `nam`, `gdas`, and others
 - [GRIB Filter Help](https://nomads.ncep.noaa.gov/info.php?page=gribfilter)
 - [OPeNDAP to GRIB Filter Migration](https://nomads.ncep.noaa.gov/info.php?page=opendap_grib_migration)
 
-**Rate Limits:** Not explicitly documented, but fair use policy applies
+**Rate Limits:** Throttling changes implemented as of April 2021 affecting GFS, HRRR, NAM, and other models. AWS S3 is recommended as an alternative for bulk downloads to avoid NOMADS throttling.
 
 ---
 
@@ -76,13 +76,31 @@ aws s3 ls --no-sign-request s3://noaa-gfs-bdp-pds/
 aws s3 ls --no-sign-request s3://noaa-nbm-grib2-pds/
 ```
 
-#### NOAA HRRR (High-Resolution Rapid Refresh)
-**Registry:** https://registry.opendata.aws/noaa-hrrr-pds/
-**S3 Bucket:** `s3://noaa-hrrr-pds`
+#### NOAA RAP (Rapid Refresh)
+**Registry:** https://registry.opendata.aws/noaa-rap/
+**S3 Bucket:** `s3://noaa-rap-bdp-pds`
+**AWS Marketplace:** https://aws.amazon.com/marketplace/pp/prodview-cudzt5ffcconu
+**Official NOAA:** https://rapidrefresh.noaa.gov/
+**Azure Alternative:** https://noaarap.blob.core.windows.net/rap
 
 **AWS CLI access:**
 ```bash
-aws s3 ls --no-sign-request s3://noaa-hrrr-pds/
+aws s3 ls --no-sign-request s3://noaa-rap-bdp-pds/
+```
+
+#### NOAA HRRR (High-Resolution Rapid Refresh)
+**Registry:** https://registry.opendata.aws/noaa-hrrr-pds/
+**S3 Bucket:** `s3://noaa-hrrr-bdp-pds`
+
+**Path Pattern:**
+```
+s3://noaa-hrrr-bdp-pds/hrrr.YYYYMMDD/conus/hrrr.tCCz.wrfsfcfXX.grib2
+https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20210701/conus/hrrr.t12z.wrfsfcf06.grib2
+```
+
+**AWS CLI access:**
+```bash
+aws s3 ls --no-sign-request s3://noaa-hrrr-bdp-pds/
 ```
 
 **Authentication:** None required - use `--no-sign-request` flag
@@ -98,6 +116,7 @@ aws s3 ls --no-sign-request s3://noaa-hrrr-pds/
 - [AWS Registry of Open Data - NOAA](https://registry.opendata.aws/collab/noaa/)
 - [NCEI: NOAA Expands Big Data Access](https://www.ncei.noaa.gov/news/noaa-expands-big-data-access)
 - [AWS Blog: NOAA Big Data Project](https://aws.amazon.com/blogs/aws/announcing-the-noaa-big-data-project/)
+- [GFS Quickstart Notebook](https://github.com/aws-samples/aws-opendata-samples/blob/main/notebooks/noaa-gfs/noaa_gfs_quickstart.ipynb)
 
 ---
 
@@ -131,6 +150,7 @@ https://api.mesowest.utah.edu/archive/HRRR/oper/sfc/20170405/hrrr.t14z.wrfsfcf00
 **Authentication:** Registration required at http://hrrr.chpc.utah.edu/
 
 **Web Interface:** https://home.chpc.utah.edu/~u0553130/Brian_Blaylock/cgi-bin/hrrr_download.cgi
+**Documentation/FAQ:** https://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_FAQ.html
 
 **Python Package:** [hrrrb](https://pypi.org/project/hrrrb/0.0.3/) for programmatic download
 
@@ -138,7 +158,22 @@ https://api.mesowest.utah.edu/archive/HRRR/oper/sfc/20170405/hrrr.t14z.wrfsfcf00
 
 ---
 
-### 4. NCEI (National Centers for Environmental Information)
+### 5. Microsoft Planetary Computer (Azure)
+
+**Base URL:** https://planetarycomputer.microsoft.com/dataset/storage/noaa-hrrr
+
+**Dataset:** NOAA HRRR
+
+**Access Method:** Azure Blob Storage (alternative to AWS for HRRR data)
+
+**Authentication:** None required for public access
+
+**Documentation:**
+- [Microsoft Planetary Computer - NOAA HRRR](https://planetarycomputer.microsoft.com/dataset/storage/noaa-hrrr)
+
+---
+
+### 6. NCEI (National Centers for Environmental Information)
 
 **Base URLs:**
 - Data Access Search: https://www.ncei.noaa.gov/access/search/index
@@ -160,6 +195,21 @@ https://api.mesowest.utah.edu/archive/HRRR/oper/sfc/20170405/hrrr.t14z.wrfsfcf00
 - Geophysical data
 
 **Note:** NCEI manages over 37 petabytes of environmental data
+
+#### NCEI AIRS (Archive Information Request System)
+**Direct Access:**
+- **GFS GRIB-2:** https://www.ncei.noaa.gov/has/HAS.DsSelect?datasetname=GFSGRB24
+- **Dataset Search:** https://www.ncei.noaa.gov/access/search/dataset-search
+- **Request System:** https://www.ncei.noaa.gov/has/HAS.DsSelect
+
+**Models Available:**
+- GDAS (Global Data Assimilation System) - https://www.ncei.noaa.gov/products/weather-climate-models/global-data-assimilation
+- CFS (Climate Forecast System)
+- NDFD (National Digital Forecast Database) - https://www.ncei.noaa.gov/products/weather-climate-models/national-digital-forecast-database
+
+**Additional Services:**
+- **THREDDS Catalog:** https://www.ncei.noaa.gov/access/distributed-data-access - Catalog-based access to GRIB files with subsetting capabilities
+- **OPeNDAP/THREDDS:** For distributed data access and subsetting
 
 **Documentation:**
 - [NCEI Data Access Portal](https://www.ncei.noaa.gov/access)
@@ -211,6 +261,7 @@ https://api.mesowest.utah.edu/archive/HRRR/oper/sfc/20170405/hrrr.t14z.wrfsfcf00
 - **rNOMADS** - functions like `GribGrab()` and `ArchiveGribGrab()`
 
 ### Python
+- **Herbie** - https://herbie.readthedocs.io/ - Downloads GRIB2 files from 15+ weather models (HRRR, GFS, RAP, GEFS, ECMWF) with smart download capabilities and multi-source fallback
 - **hrrrb** - for HRRR downloads
 - **cfgrib** - GRIB2 reader (requires ECCODES)
 - **pygrib** - GRIB2 interface (requires GRIB_API)
