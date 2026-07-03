@@ -1,15 +1,15 @@
 {
-  "bead_id": "bf-5c42",
+  "bead_id": "bf-45h5",
   "agent": "claude-code-glm47",
   "provider": "anthropic",
   "model": "glm-4.7",
   "exit_code": 0,
   "outcome": "success",
-  "duration_ms": 350245,
+  "duration_ms": 334625,
   "input_tokens": null,
   "output_tokens": null,
   "cost_usd": null,
-  "captured_at": "2026-07-03T12:31:40.158108648Z",
+  "captured_at": "2026-07-03T12:15:49.520200324Z",
   "trace_format": "claude_json",
   "pruned": false,
   "template_version": null
