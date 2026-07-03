@@ -1392,51 +1392,42 @@ fn extract_group_specialized(
 /// Specialized extractor for w=4 (2 values per byte).
 ///
 /// Loads exactly ceil(count/2) bytes and extracts 4-bit values without refill loop.
+/// Only handles byte-aligned case (skip=0). Falls back to windowed for misaligned data.
 fn extract_group_w4(data: &[u8], start_bit: usize, count: usize, gref: i64, out: &mut Vec<i64>) {
+    if count == 0 {
+        return;
+    }
+
     let byte_pos = start_bit / 8;
     let skip = start_bit % 8;
-    let n_pairs = (count + 1) / 2;
-    let bytes_needed = n_pairs + if skip > 0 { 1 } else { 0 };
 
-    if byte_pos + bytes_needed > data.len() {
-        // Fall back to generic extractor for malformed data
+    // Only handle byte-aligned case
+    if skip != 0 {
         extract_group_windowed(data, start_bit, 4, count, gref, out);
         return;
     }
 
-    let mut buf: u64 = 0;
-    let mut buf_bits: usize = 0;
-    let mut loaded_bytes = 0;
+    let bytes_needed = (count + 1) / 2;
 
-    // Load initial bytes (up to 7 at a time to keep buf_bits <= 56)
-    let initial_load = bytes_needed.min(7);
-    for i in 0..initial_load {
-        buf |= (data[byte_pos + i] as u64) << (56 - buf_bits);
-        buf_bits += 8;
-        loaded_bytes += 1;
+    if byte_pos + bytes_needed > data.len() {
+        extract_group_windowed(data, start_bit, 4, count, gref, out);
+        return;
     }
 
-    // Discard skip bits
-    if skip > 0 {
-        buf <<= skip;
-        buf_bits -= skip;
+    let pairs = count / 2;
+    let has_remainder = count % 2 == 1;
+
+    // Byte-aligned: 2 values per byte
+    for i in 0..pairs {
+        let byte = data[byte_pos + i] as u64;
+        out.push(gref + ((byte >> 4) & 0xF) as i64);
+        out.push(gref + (byte & 0xF) as i64);
     }
 
-    let mask = 0xFu64;
-    for _ in 0..count {
-        while buf_bits < 4 {
-            if byte_pos + loaded_bytes < data.len() {
-                buf |= (data[byte_pos + loaded_bytes] as u64) << (56 - buf_bits);
-                buf_bits += 8;
-                loaded_bytes += 1;
-            } else {
-                break;
-            }
-        }
-        let v = (buf >> 60) & mask;
-        buf <<= 4;
-        buf_bits -= 4;
-        out.push(gref + v as i64);
+    // Handle final odd value if present
+    if has_remainder {
+        let byte = data[byte_pos + pairs] as u64;
+        out.push(gref + ((byte >> 4) & 0xF) as i64);
     }
 }
 
@@ -1444,48 +1435,29 @@ fn extract_group_w4(data: &[u8], start_bit: usize, count: usize, gref: i64, out:
 ///
 /// Loads exactly count bytes and extracts 8-bit values without refill loop.
 fn extract_group_w8(data: &[u8], start_bit: usize, count: usize, gref: i64, out: &mut Vec<i64>) {
+    if count == 0 {
+        return;
+    }
+
     let byte_pos = start_bit / 8;
     let skip = start_bit % 8;
-    let bytes_needed = count + if skip > 0 { 1 } else { 0 };
+
+    // Only handle byte-aligned case
+    if skip != 0 {
+        extract_group_windowed(data, start_bit, 8, count, gref, out);
+        return;
+    }
+
+    let bytes_needed = count;
 
     if byte_pos + bytes_needed > data.len() {
         extract_group_windowed(data, start_bit, 8, count, gref, out);
         return;
     }
 
-    let mut buf: u64 = 0;
-    let mut buf_bits: usize = 0;
-    let mut loaded_bytes = 0;
-
-    // Load initial bytes (up to 7 at a time)
-    let initial_load = bytes_needed.min(7);
-    for i in 0..initial_load {
-        buf |= (data[byte_pos + i] as u64) << (56 - buf_bits);
-        buf_bits += 8;
-        loaded_bytes += 1;
-    }
-
-    // Discard skip bits
-    if skip > 0 {
-        buf <<= skip;
-        buf_bits -= skip;
-    }
-
-    let mask = 0xFFu64;
-    for _ in 0..count {
-        while buf_bits < 8 {
-            if byte_pos + loaded_bytes < data.len() {
-                buf |= (data[byte_pos + loaded_bytes] as u64) << (56 - buf_bits);
-                buf_bits += 8;
-                loaded_bytes += 1;
-            } else {
-                break;
-            }
-        }
-        let v = (buf >> 56) & mask;
-        buf <<= 8;
-        buf_bits -= 8;
-        out.push(gref + v as i64);
+    // Byte-aligned: 1 value per byte
+    for i in 0..count {
+        out.push(gref + data[byte_pos + i] as i64);
     }
 }
 
@@ -1493,47 +1465,67 @@ fn extract_group_w8(data: &[u8], start_bit: usize, count: usize, gref: i64, out:
 ///
 /// Loads exactly ceil(count * 3 / 2) bytes and extracts 12-bit values without refill loop.
 fn extract_group_w12(data: &[u8], start_bit: usize, count: usize, gref: i64, out: &mut Vec<i64>) {
+    if count == 0 {
+        return;
+    }
+
     let byte_pos = start_bit / 8;
     let skip = start_bit % 8;
-    let bytes_needed = (count * 3 + 1) / 2 + if skip > 0 { 2 } else { 0 };
+
+    // Only handle byte-aligned case (skip=0) or skip=4 (aligns after first value)
+    if skip != 0 && skip != 4 {
+        extract_group_windowed(data, start_bit, 12, count, gref, out);
+        return;
+    }
+
+    let bytes_needed = if skip == 0 {
+        (count * 12).div_ceil(8)
+    } else {
+        // skip=4: first value consumes bits 4-15 (2 bytes), then byte-aligned
+        2 + ((count - 1) * 12).div_ceil(8)
+    };
 
     if byte_pos + bytes_needed > data.len() {
         extract_group_windowed(data, start_bit, 12, count, gref, out);
         return;
     }
 
-    let mut buf: u64 = 0;
-    let mut buf_bits: usize = 0;
-    let mut loaded_bytes = 0;
+    let mut i = 0usize;
+    let mut pos = byte_pos;
 
-    // Load initial bytes (up to 7 at a time)
-    let initial_load = bytes_needed.min(7);
-    for i in 0..initial_load {
-        buf |= (data[byte_pos + i] as u64) << (56 - buf_bits);
-        buf_bits += 8;
-        loaded_bytes += 1;
+    // Handle skip=4: first value spans 2 bytes (bits 4-15)
+    if skip == 4 {
+        let b0 = data[pos] as u64;
+        let b1 = data[pos + 1] as u64;
+        // First 12-bit value: low 4 bits of b0 + high 8 bits of b1
+        let v = (((b0 & 0xF) << 8) | b1) & 0xFFF;
+        out.push(gref + v as i64);
+        i += 1;
+        pos += 2; // Now byte-aligned
     }
 
-    // Discard skip bits
-    if skip > 0 {
-        buf <<= skip;
-        buf_bits -= skip;
+    // Remaining values are byte-aligned: 2 values per 3 bytes
+    let pairs = (count - i) / 2;
+    let has_remainder = (count - i) % 2 == 1;
+
+    for _ in 0..pairs {
+        let b0 = data[pos] as u64;
+        let b1 = data[pos + 1] as u64;
+        let b2 = data[pos + 2] as u64;
+        // First 12-bit value: high 4 bits of b0 + all 8 bits of b1
+        let v1 = ((b0 << 4) | (b1 >> 4)) & 0xFFF;
+        // Second 12-bit value: low 4 bits of b1 + all 8 bits of b2
+        let v2 = (((b1 & 0xF) << 8) | b2) & 0xFFF;
+        out.push(gref + v1 as i64);
+        out.push(gref + v2 as i64);
+        pos += 3;
     }
 
-    let mask = 0xFFFu64;
-    for _ in 0..count {
-        while buf_bits < 12 {
-            if byte_pos + loaded_bytes < data.len() {
-                buf |= (data[byte_pos + loaded_bytes] as u64) << (56 - buf_bits);
-                buf_bits += 8;
-                loaded_bytes += 1;
-            } else {
-                break;
-            }
-        }
-        let v = (buf >> 52) & mask;
-        buf <<= 12;
-        buf_bits -= 12;
+    // Handle final odd value if present
+    if has_remainder {
+        let b0 = data[pos] as u64;
+        let b1 = data[pos + 1] as u64;
+        let v = ((b0 << 4) | (b1 >> 4)) & 0xFFF;
         out.push(gref + v as i64);
     }
 }
@@ -1542,47 +1534,31 @@ fn extract_group_w12(data: &[u8], start_bit: usize, count: usize, gref: i64, out
 ///
 /// Loads exactly count * 2 bytes and extracts 16-bit values without refill loop.
 fn extract_group_w16(data: &[u8], start_bit: usize, count: usize, gref: i64, out: &mut Vec<i64>) {
+    if count == 0 {
+        return;
+    }
+
     let byte_pos = start_bit / 8;
     let skip = start_bit % 8;
-    let bytes_needed = count * 2 + if skip > 0 { 2 } else { 0 };
+
+    // Only handle byte-aligned case
+    if skip != 0 {
+        extract_group_windowed(data, start_bit, 16, count, gref, out);
+        return;
+    }
+
+    let bytes_needed = count * 2;
 
     if byte_pos + bytes_needed > data.len() {
         extract_group_windowed(data, start_bit, 16, count, gref, out);
         return;
     }
 
-    let mut buf: u64 = 0;
-    let mut buf_bits: usize = 0;
-    let mut loaded_bytes = 0;
-
-    // Load initial bytes (up to 7 at a time)
-    let initial_load = bytes_needed.min(7);
-    for i in 0..initial_load {
-        buf |= (data[byte_pos + i] as u64) << (56 - buf_bits);
-        buf_bits += 8;
-        loaded_bytes += 1;
-    }
-
-    // Discard skip bits
-    if skip > 0 {
-        buf <<= skip;
-        buf_bits -= skip;
-    }
-
-    let mask = 0xFFFFu64;
-    for _ in 0..count {
-        while buf_bits < 16 {
-            if byte_pos + loaded_bytes < data.len() {
-                buf |= (data[byte_pos + loaded_bytes] as u64) << (56 - buf_bits);
-                buf_bits += 8;
-                loaded_bytes += 1;
-            } else {
-                break;
-            }
-        }
-        let v = (buf >> 48) & mask;
-        buf <<= 16;
-        buf_bits -= 16;
+    // Byte-aligned: 1 value per 2 bytes (big-endian)
+    for i in 0..count {
+        let b0 = data[byte_pos + i * 2] as u64;
+        let b1 = data[byte_pos + i * 2 + 1] as u64;
+        let v = (b0 << 8) | b1;
         out.push(gref + v as i64);
     }
 }
