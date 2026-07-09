@@ -1,9 +1,8 @@
 //! Differential harness: decodes every inline corpus fixture and compares
 //! against its golden reference output.
 //!
-//! Passes at 0% agreement — the framework is wired but the decoder is not yet
-//! implemented. Future phases drive the agreement percentage up; the ratchet
-//! assertion below must be tightened as each template is implemented.
+//! Agreement percentage is driven by template implementation progress. The
+//! ratchet assertion below must be tightened as each template is implemented.
 
 use gribtract_testutil::corpus;
 use gribtract_testutil::diff::{compare_fixture, CoverageReport};
@@ -28,7 +27,7 @@ fn differential_coverage_report() {
         #[cfg(not(feature = "jpeg2000"))]
         if entry.id.contains("drt40") {
             eprintln!("  [skip-drt40-no-feature] {}", entry.id);
-            report.fixtures_no_golden += 1; // Count as skipped, not failed
+            report.fixtures_skipped_feature += 1;
             continue;
         }
 

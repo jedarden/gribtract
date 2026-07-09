@@ -60,6 +60,10 @@ pub struct CoverageReport {
     pub fixtures_matched: usize,
     pub fixtures_decode_error: usize,
     pub fixtures_no_golden: usize,
+    /// Fixtures skipped due to missing compile-time features (e.g., jpeg2000).
+    /// These are NOT subtracted from fixtures_total when computing comparable,
+    /// because they were never added to fixtures_total in the first place.
+    pub fixtures_skipped_feature: usize,
     /// (gdt_template, pdt_template, drt_template) → stat
     pub by_template: HashMap<(u16, u16, u16), TemplateStat>,
 }
@@ -77,10 +81,11 @@ impl CoverageReport {
         let comparable = self.fixtures_total.saturating_sub(self.fixtures_no_golden);
         println!("=== Differential Harness Coverage ===");
         println!(
-            "Fixtures : {} total  ({} comparable, {} no-golden)",
+            "Fixtures : {} total  ({} comparable, {} no-golden, {} skipped-feature)",
             self.fixtures_total,
             comparable,
-            self.fixtures_no_golden
+            self.fixtures_no_golden,
+            self.fixtures_skipped_feature
         );
         println!("  matched      : {}", self.fixtures_matched);
         println!("  decode errors: {}", self.fixtures_decode_error);
@@ -412,5 +417,60 @@ mod tests {
     fn zero_agreement_pct_when_no_comparable() {
         let report = CoverageReport::default();
         assert_eq!(report.agreement_pct(), 0.0);
+    }
+
+    #[test]
+    fn agreement_pct_never_exceeds_100_percent() {
+        // Test with only feature-skipped fixtures (should be 0%)
+        let report_skipped = CoverageReport {
+            fixtures_total: 0,
+            fixtures_matched: 0,
+            fixtures_no_golden: 0,
+            fixtures_skipped_feature: 2,
+            ..Default::default()
+        };
+        assert_eq!(report_skipped.agreement_pct(), 0.0);
+
+        // Test with realistic mix: 9 inline fixtures total
+        // - 2 skipped due to missing jpeg2000 feature (not in fixtures_total)
+        // - 1 has no golden reference
+        // - 6 processed and matched
+        // - 0 processed and failed
+        let report = CoverageReport {
+            fixtures_total: 7,  // 7 actually processed (9 - 2 skipped)
+            fixtures_matched: 6,
+            fixtures_no_golden: 1,
+            fixtures_skipped_feature: 2,
+            ..Default::default()
+        };
+        // comparable = 7 - 1 = 6; matched = 6; 6/6 = 100%
+        let expected = 100.0 * 6.0 / 6.0;
+        assert!((report.agreement_pct() - expected).abs() < 0.01);
+        assert!(report.agreement_pct() <= 100.0);
+
+        // Test edge case: matched can't exceed comparable
+        let report = CoverageReport {
+            fixtures_total: 5,
+            fixtures_matched: 4,
+            fixtures_no_golden: 1,
+            fixtures_skipped_feature: 3,
+            ..Default::default()
+        };
+        // comparable = 5 - 1 = 4; matched = 4; 4/4 = 100%
+        assert_eq!(report.agreement_pct(), 100.0);
+
+        // Test with some failures
+        let report = CoverageReport {
+            fixtures_total: 10,
+            fixtures_matched: 5,
+            fixtures_no_golden: 2,
+            fixtures_skipped_feature: 1,
+            fixtures_decode_error: 3,
+            ..Default::default()
+        };
+        // comparable = 10 - 2 = 8; matched = 5; 5/8 = 62.5%
+        let expected = 100.0 * 5.0 / 8.0;
+        assert!((report.agreement_pct() - expected).abs() < 0.01);
+        assert!(report.agreement_pct() < 100.0);
     }
 }
