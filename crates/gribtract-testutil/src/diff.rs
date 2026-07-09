@@ -61,8 +61,8 @@ pub struct CoverageReport {
     pub fixtures_decode_error: usize,
     pub fixtures_no_golden: usize,
     /// Fixtures skipped due to missing compile-time features (e.g., jpeg2000).
-    /// These are NOT subtracted from fixtures_total when computing comparable,
-    /// because they were never added to fixtures_total in the first place.
+    /// These are counted in fixtures_total but excluded from the comparable
+    /// count when computing agreement percentage.
     pub fixtures_skipped_feature: usize,
     /// (gdt_template, pdt_template, drt_template) → stat
     pub by_template: HashMap<(u16, u16, u16), TemplateStat>,
@@ -70,7 +70,11 @@ pub struct CoverageReport {
 
 impl CoverageReport {
     pub fn agreement_pct(&self) -> f64 {
-        let denom = self.fixtures_total.saturating_sub(self.fixtures_no_golden);
+        // Comparable fixtures are those that were actually compared:
+        // total - (no golden) - (skipped due to missing features)
+        let denom = self.fixtures_total
+            .saturating_sub(self.fixtures_no_golden)
+            .saturating_sub(self.fixtures_skipped_feature);
         if denom == 0 {
             return 0.0;
         }
@@ -78,7 +82,11 @@ impl CoverageReport {
     }
 
     pub fn print_report(&self) {
-        let comparable = self.fixtures_total.saturating_sub(self.fixtures_no_golden);
+        // Comparable fixtures are those that were actually compared:
+        // total - (no golden) - (skipped due to missing features)
+        let comparable = self.fixtures_total
+            .saturating_sub(self.fixtures_no_golden)
+            .saturating_sub(self.fixtures_skipped_feature);
         println!("=== Differential Harness Coverage ===");
         println!(
             "Fixtures : {} total  ({} comparable, {} no-golden, {} skipped-feature)",
@@ -423,7 +431,7 @@ mod tests {
     fn agreement_pct_never_exceeds_100_percent() {
         // Test with only feature-skipped fixtures (should be 0%)
         let report_skipped = CoverageReport {
-            fixtures_total: 0,
+            fixtures_total: 2,
             fixtures_matched: 0,
             fixtures_no_golden: 0,
             fixtures_skipped_feature: 2,
@@ -432,43 +440,43 @@ mod tests {
         assert_eq!(report_skipped.agreement_pct(), 0.0);
 
         // Test with realistic mix: 9 inline fixtures total
-        // - 2 skipped due to missing jpeg2000 feature (not in fixtures_total)
+        // - 2 skipped due to missing jpeg2000 feature (now counted in fixtures_total)
         // - 1 has no golden reference
         // - 6 processed and matched
         // - 0 processed and failed
         let report = CoverageReport {
-            fixtures_total: 7,  // 7 actually processed (9 - 2 skipped)
+            fixtures_total: 9,  // all inline fixtures
             fixtures_matched: 6,
             fixtures_no_golden: 1,
             fixtures_skipped_feature: 2,
             ..Default::default()
         };
-        // comparable = 7 - 1 = 6; matched = 6; 6/6 = 100%
+        // comparable = 9 - 1 - 2 = 6; matched = 6; 6/6 = 100%
         let expected = 100.0 * 6.0 / 6.0;
         assert!((report.agreement_pct() - expected).abs() < 0.01);
         assert!(report.agreement_pct() <= 100.0);
 
         // Test edge case: matched can't exceed comparable
         let report = CoverageReport {
-            fixtures_total: 5,
+            fixtures_total: 8,
             fixtures_matched: 4,
             fixtures_no_golden: 1,
             fixtures_skipped_feature: 3,
             ..Default::default()
         };
-        // comparable = 5 - 1 = 4; matched = 4; 4/4 = 100%
+        // comparable = 8 - 1 - 3 = 4; matched = 4; 4/4 = 100%
         assert_eq!(report.agreement_pct(), 100.0);
 
         // Test with some failures
         let report = CoverageReport {
-            fixtures_total: 10,
+            fixtures_total: 11,
             fixtures_matched: 5,
             fixtures_no_golden: 2,
             fixtures_skipped_feature: 1,
             fixtures_decode_error: 3,
             ..Default::default()
         };
-        // comparable = 10 - 2 = 8; matched = 5; 5/8 = 62.5%
+        // comparable = 11 - 2 - 1 = 8; matched = 5; 5/8 = 62.5%
         let expected = 100.0 * 5.0 / 8.0;
         assert!((report.agreement_pct() - expected).abs() < 0.01);
         assert!(report.agreement_pct() < 100.0);
