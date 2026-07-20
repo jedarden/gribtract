@@ -266,3 +266,105 @@ the obvious next pick, advancing this track is always valid work.
   run it on a host with the reference toolchain installed. CI wiring TBD.
 - **Scope of metadata naming:** ship a parameter/level name table, or expose raw
   numeric ids and leave naming to the consumer initially?
+
+## ADR-1: 2026-07-20 — Add a wasm32 build target and a public, client-side interactive decode demo
+
+### Context
+
+gribtract's core value proposition, stated in the README, is "no C toolchain, no
+FFI" for the default build (DRT 5.0/5.2/5.3/5.41 — JPEG2000 is the one deliberate,
+feature-gated exception). `gribtract-core` is already described in
+`docs/plan/plan.md` as "no_std-friendly where able" and has zero I/O dependencies —
+it takes `&[u8]` in, returns typed `Field`s out.
+
+Despite that, the only way anyone can currently *experience* gribtract is `git
+clone` + `cargo build`. The repo is public (6 GitHub stargazers as of 2026-07-20),
+not yet published to crates.io (`bf-1pyo` closed its dry-run work but the actual
+`cargo publish` step is blocked on a maintainer-held crates.io token that does not
+exist on this box — flagged as a blocker below, not solved by this ADR), and the
+proof-of-speed dashboard (`dashboard.html` + `bench-results.json`, see "Throughput &
+proof-of-speed dashboard" above) only renders locally via `cargo xtask serve`. For a
+project trying to earn adoption, "clone a Rust workspace and compile it" is a lot to
+ask of someone evaluating whether gribtract solves their problem. There is currently
+no zero-install way to hand someone a `.grib2` file's worth of proof that this
+works.
+
+Meanwhile, decode is demonstrably fast and self-contained (100+ MB/s on simple
+packing per `bench-results.json`, all reference-decoder-verified) and the crate
+boundary (`gribtract-core` → `gribtract`) already separates the pure-computation
+path from I/O concerns (`gribtract-fetch`) and from platform-specific bindings
+(`gribtract-py`). WebAssembly is a natural next target: it is, by construction, the
+strictest possible "no C toolchain, no FFI, no host filesystem" execution
+environment — running gribtract-core in a browser tab is not just a demo gimmick,
+it is a forcing function that structurally enforces the project's core claim.
+
+### Decision
+
+Add `wasm32-unknown-unknown` as a first-class, CI-checked build target for
+`gribtract-core` and `gribtract` (the pure-compute crates only — `gribtract-fetch`
+and `gribtract-py` are explicitly out of scope for wasm), via a new thin wrapper
+crate `crates/gribtract-wasm` (wasm-bindgen bindings exposing `decode(bytes: &[u8])
+-> JsValue` and a lazy point-extraction call). Ship a small, self-contained static
+HTML page — same "no external CDN at runtime, opens offline" rule already
+established for `dashboard.html` in `docs/notes/throughput-dashboard.md` — that lets
+a visitor drag a `.grib2` file onto the page and see it decoded live in their
+browser: a field inventory table plus a simple canvas heatmap of one selected
+field's grid. No server, no upload, no install. This becomes the project's public
+front door: the README's and repo's primary "try it" link, replacing "clone and
+`cargo build --release`" as the first thing an evaluator is asked to do.
+
+This is implemented as follow-on beads (see below), not in this commit — this ADR
+records the decision to take the dependency-shape and target-support hit, and why.
+
+### Alternatives Considered
+
+1. **Status quo — Rust crate + CLI only.** Zero extra maintenance surface. Rejected
+   as insufficient for a public repo trying to earn adoption before it is even on
+   crates.io: the only path to "does this work for my file?" is a full Rust
+   toolchain and a `cargo build`, which is a high floor for a first impression.
+2. **Host only the existing proof-of-speed dashboard publicly, skip wasm.** Cheaper
+   — reuses `dashboard.html` as-is, and does prove the speed claim publicly. But it
+   is a *report*, not a *demo*: a visitor still cannot bring their own file and see
+   it decoded. Complementary, not a substitute — filed as its own bead
+   (`artifact-improvement`, "publish the proof-of-speed dashboard as a live site")
+   rather than folded into this decision.
+3. **Server-side decode API (upload a file, get JSON back) instead of client-side
+   wasm.** Rejected: reintroduces a server, hosting cost, and an upload/attack
+   surface for a project whose entire selling point is "no dependencies, runs
+   anywhere." Client-side wasm keeps decode fully in the visitor's browser — zero
+   backend, zero file upload, consistent with "pure-Rust, no C toolchain" extended
+   one step further to "no server, either."
+4. **Lead with the Python bindings (`gribtract-py`, already planned for Phase 7) as
+   the primary "try it" path instead.** Rejected as the *primary* surface — `pip
+   install` + a Python runtime is still real friction compared to a link that opens
+   in any browser. The PyO3 bindings remain valuable as a separate, already-planned
+   deliverable; they don't substitute for a zero-install public demo.
+
+### Consequences
+
+- New crate `crates/gribtract-wasm` added to the workspace (wasm-bindgen dependency,
+  `cdylib` crate-type, mirroring the existing `gribtract-py` pattern of an
+  optional/non-default workspace member so default `cargo build`/`cargo test`
+  behavior is unaffected).
+- `wasm32-unknown-unknown` becomes a second target the differential-harness
+  contract implicitly protects: `gribtract-core`'s "no_std-friendly where able"
+  note goes from aspirational to load-bearing. Any future dependency added to
+  `gribtract-core` or `gribtract` that breaks a `cargo build --target
+  wasm32-unknown-unknown -p gribtract` check is a regression, the same way a
+  differential-agreement drop is a regression.
+- Wasm binary size becomes a metric worth tracking (small today given
+  `gribtract-core`'s minimal dependency footprint) — a follow-on bead should add a
+  size check alongside the existing throughput/agreement metrics so it doesn't
+  silently creep.
+- Does **not** touch the correctness oracle or the Phase 2c parse-speed track: the
+  wasm target compiles the same `gribtract-core` source the differential harness
+  already verifies, so existing agreement guarantees carry over unchanged. Nothing
+  in this ADR competes with or duplicates the open corpus-expansion or parse-speed
+  beads already tracked.
+- New public-facing artifact (the demo page) needs a hosting decision (static
+  Cloudflare Pages project, in the same family as other `jedarden.com` properties,
+  vs. a GitHub Pages build off the public mirror) — left to the implementation
+  bead, not decided here.
+- Follow-on work, filed as beads referencing this ADR: build the `gribtract-wasm`
+  crate itself; build and host the drag-and-drop demo page; decide and wire the
+  hosting/CI path once built.
