@@ -117,6 +117,20 @@
         "capture_date": "2026-06-22",
         "generated_by": "curl+gunzip from noaa-mrms-pds.s3.amazonaws.com (gribtract project)"
       }
+    },
+    {
+      "id": "nam_awip12_lambert_drt3",
+      "path": "large/nam.t00z.awip1200.tm00.grib2",
+      "sha256": "b022c093603e67ebcc006a8e50cb30610bf4e3ce7d6609733d9949b5add6bf2c",
+      "size_bytes": 26364442,
+      "storage": "remote",
+      "url": "https://noaa-nam-pds.s3.amazonaws.com/nam.20250115/nam.t00z.awip1200.tm00.grib2",
+      "provenance": {
+        "source": "NOAA NAM awip12 (NCEP Grid 218, Lambert Conformal)",
+        "description": "NAM (North American Mesoscale) awip12 analysis, run 2025-01-15 00z, forecast hour F00. 196 GRIB2 messages, ALL GDT 3.30 (Lambert Conformal Conic) + DRT 3 (template 5.3: complex packing with 2nd-order spatial differencing). NCEP Grid 218: Nx=614, Ny=428 (262792 points), La1=12.19N/Lo1=226.541E, LaD=25N, LoV=265E, Latin1=Latin2=25N, Dx=Dy=12.191 km, scanningMode=0x40, bitsPerValue=15, centre=kwbc (NCEP). eccodes 2.41.0 decodes all 196 messages cleanly (ground-truth verifier). Sourced from noaa-nam-pds S3 (AWS Open Data, public, no auth, Accept-Ranges: bytes). NOTE: gribtract's own DRT=3 unpacker is not yet implemented (fails with 'buffer too short'), so this is a target fixture for DRT=3 + Lambert-conformal decoder coverage, not yet run inline — storage=remote because the 25.1 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-22",
+        "generated_by": "curl from noaa-nam-pds.s3.amazonaws.com; verified by eccodes 2.41.0 (gribtract project)"
+      }
     }
   ],
   "_comment_large": "Fixtures with storage=remote live in tests/corpus/large/ (gitignored). The harness fetches them by sha256 from B2. Add a manifest entry here first, then seed the file.",
