@@ -2078,6 +2078,53 @@ mod tests {
         }
     }
 
+    /// Cross-validate the specialized group extractors against the generic
+    /// windowed extractor.
+    ///
+    /// For every (skip, width, count) in the matrix below, the specialized
+    /// dispatcher must produce element-for-element identical output to the
+    /// reference [`extract_group_windowed`]. This guards the DRT=3 performance
+    /// specialisations (w = 4/8/12/16) against correctness regressions — e.g. a
+    /// buffer-initialisation or bit-alignment bug that silently changes a value
+    /// (or even the output length) without raising any other test.
+    #[test]
+    fn extract_group_specialized_matches_generic() {
+        // Deterministic high-entropy buffer long enough for the worst case
+        // (skip=7, w=16, count=20 → 7 + 320 = 327 bits → 41 bytes).
+        // A pseudo-random (xorshift32) stream is used rather than a simple
+        // incrementing counter: every nibble and bit position must take on
+        // varied values, otherwise a bug that only corrupts e.g. the high
+        // nibble of small byte values can be silently masked.
+        let mut data = Vec::with_capacity(256);
+        let mut x: u32 = 0x1234_5678;
+        for _ in 0..256 {
+            x ^= x << 13;
+            x ^= x >> 17;
+            x ^= x << 5;
+            data.push((x & 0xFF) as u8);
+        }
+        let gref = 7i64;
+
+        for skip in 0..=7usize {
+            for &w in &[4usize, 8, 12, 16] {
+                for count in 1..=20usize {
+                    let mut specialized = Vec::with_capacity(count);
+                    extract_group_specialized(&data, skip, w, count, gref, &mut specialized);
+
+                    let mut generic = Vec::with_capacity(count);
+                    extract_group_windowed(&data, skip, w, count, gref, &mut generic);
+
+                    assert_eq!(
+                        specialized, generic,
+                        "skip={skip} w={w} count={count}: specialized differs from generic \
+                         (len sp={}, gen={})",
+                        specialized.len(),
+                        generic.len(),
+                    );
+                }
+            }
+        }
+    }
 
     #[test]
     fn decode_bytes_lazy_matches_decode_bytes() {
