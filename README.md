@@ -1,53 +1,91 @@
-# gribtract
+# 🌦️ gribtract
 
-A pure-Rust GRIB2 decoder — decodes NOAA/WMO GRIB2 messages into typed fields and gridded numeric data, verified field-by-field against eccodes/wgrib2.
+**A pure-Rust GRIB2 decoder** — turn NOAA/WMO weather model output into typed fields and gridded numbers, verified field-by-field against eccodes/wgrib2.
 
-No C dependencies for core GRIB2 decoding (DRT 5.0, 5.2, 5.3, 5.41). No shelling out to `wgrib2`. JPEG2000 (DRT 5.40) requires the optional `jpeg2000` feature, which pulls in `openjpeg-sys` (C FFI).
+![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)
+![Rust 1.75+](https://img.shields.io/badge/rust-1.75%2B-orange.svg)
 
-## What is GRIB2?
+No C toolchain. No FFI. No shelling out to `wgrib2`. Core decoding (DRT 5.0 / 5.2 / 5.3 / 5.41) is 100% Rust — JPEG2000 (DRT 5.40) is the one optional feature that pulls in a C dependency (`openjpeg-sys`).
 
-GRIB2 (GRIdded Binary, Edition 2) is the binary file format used by NOAA, ECMWF, and other national weather services to distribute model output — temperature, wind, precipitation, pressure fields on global and regional grids. It is the primary output format for GFS, HRRR, NBM, GEFS, NAM, and similar NWP (numerical weather prediction) products.
+---
 
-Decoding GRIB2 requires handling: multi-section message framing, grid geometry definitions (lat/lon, Lambert conformal, polar stereographic, Gaussian), parameter tables indexed by discipline/category/number, five or more data packing algorithms (simple, complex, spatial-differencing, JPEG2000, PNG), and bitmaps for missing-value masking.
+## 🚀 Quickstart
 
-The standard tools (`wgrib2`, `eccodes`) are C programs and libraries. If you need to decode GRIB2 in a Rust project, your options have been to shell out to them, call their C APIs through FFI, or skip decoded values and work with raw bytes.
+```bash
+# 1. Install the CLI
+cargo install --git https://github.com/jedarden/gribtract gribtract-cli
 
-gribtract is a native Rust alternative.
+# 2. Grab a real forecast file from NOAA's public S3 bucket (no auth needed)
+curl -O "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.$(date -u +%Y%m%d)/conus/hrrr.t00z.wrfsfcf01.grib2"
 
-## Features
+# 3. See what's inside
+gribtract list hrrr.t00z.wrfsfcf01.grib2
 
-- **Pure Rust for core formats** — no C toolchain or FFI for DRT 5.0, 5.2, 5.3, 5.41 (simple, complex, complex+spatial differencing, PNG). JPEG2000 (DRT 5.40) requires the optional `jpeg2000` feature, which uses `openjpeg-sys` (C FFI)
-- **Typed output** — decoded fields carry structured metadata: parameter ID, level, forecast time, grid geometry
-- **Multiple packing formats** — DRT 5.0 (simple), 5.2 (complex), 5.3 (complex+spatial differencing), 5.40 (JPEG2000), 5.41 (PNG)
-- **Multiple grid projections** — lat/lon (GDT 3.0), polar stereographic (3.20), Lambert conformal (3.30), Gaussian (3.40)
-- **Lazy decode path** — parse headers and defer grid data; extract individual grid points in O(1) for DRT=0 fields without full decode
-- **Timeseries extractor** — given a decoded GRIB2 message set, extract per-station forecasts for a list of lat/lon coordinates
-- **Python bindings** — `gribtract-py` (PyO3) exposes the Rust decoder to Python
-- **Oracle-gated correctness** — every release is verified against eccodes/wgrib2 over a corpus of real NOAA files
+# 4. Decode everything to JSON
+gribtract decode hrrr.t00z.wrfsfcf01.grib2
+```
 
-## Crate Layout
+Or as a library:
+
+```toml
+[dependencies]
+gribtract = { git = "https://github.com/jedarden/gribtract" }
+```
+
+```rust
+let bytes = std::fs::read("hrrr.t00z.wrfsfcf01.grib2")?;
+for field in gribtract::decode(&bytes)? {
+    println!(
+        "param={}/{}/{}  level={}  +{}h",
+        field.parameter.discipline,
+        field.parameter.category,
+        field.parameter.number,
+        field.level.value1(),
+        field.forecast_time.offset_seconds() / 3600,
+    );
+}
+```
+
+---
+
+## 🤔 What is GRIB2?
+
+GRIB2 (GRIdded Binary, Edition 2) is the binary format used by NOAA, ECMWF, and other national weather services to distribute model output — temperature, wind, precipitation, pressure fields on global and regional grids. It's the primary output format for **GFS, HRRR, NBM, GEFS, NAM**, and similar numerical weather prediction products.
+
+Decoding it means handling multi-section message framing, four grid geometries, parameter tables indexed by discipline/category/number, five data-packing algorithms, and bitmaps for missing-value masking.
+
+The standard tools (`wgrib2`, `eccodes`) are C programs. If you need decoded GRIB2 values in a Rust project, your options were: shell out, bind through FFI, or give up and parse bytes yourself.
+
+**gribtract is the native Rust alternative.**
+
+## ✨ Features
+
+- 🦀 **Pure Rust core** — no C toolchain or FFI for simple, complex, complex+spatial-differencing, and PNG packing (DRT 5.0 / 5.2 / 5.3 / 5.41); JPEG2000 (5.40) available behind the optional `jpeg2000` feature
+- 🏷️ **Typed output** — every decoded field carries structured metadata: parameter ID, level, forecast time, grid geometry
+- 🗺️ **Four grid projections** — lat/lon (GDT 3.0), polar stereographic (3.20), Lambert conformal (3.30), Gaussian (3.40)
+- ⚡ **Lazy decode path** — parse headers only, defer grid data; extract single grid points in **O(1)** for DRT=0 fields without decoding the full grid
+- 📈 **Timeseries extractor** — pull per-station forecast series for a list of lat/lon coordinates in one call
+- 🌐 **Byte-range fetching** — `gribtract-fetch` downloads GRIB2 (or slices of it) from NOAA S3, GCS, and NOMADS over HTTP range requests
+- 🐍 **Python bindings** — `gribtract-py` (PyO3) exposes the decoder to Python
+- ✅ **Oracle-gated correctness** — every release is verified against eccodes/wgrib2 over a corpus of real NOAA files; agreement can only ratchet up
+
+## 📦 Crate Layout
 
 ```
 gribtract/
 ├── crates/
-│   ├── gribtract-core     # Section parser, template decoders, unpacking. No I/O.
-│   ├── gribtract          # High-level API: message iterator, field selection, timeseries
-│   ├── gribtract-cli      # `gribtract decode|list|dump` command-line tool
-│   ├── gribtract-py       # Python bindings via PyO3 (excluded from default build)
-│   └── gribtract-testutil # Differential harness utilities: corpus, golden, diff
-└── xtask                  # Corpus management, reference-decoder runner, bench dashboard
+│   ├── gribtract-core      # 🔩 Section parser, template decoders, unpacking. No I/O.
+│   ├── gribtract           # 📚 High-level API: message iterator, field selection, timeseries
+│   ├── gribtract-cli       # 💻 `gribtract decode|list|dump` command-line tool
+│   ├── gribtract-fetch     # 🌐 HTTP byte-range fetching from S3 / GCS / NOMADS
+│   ├── gribtract-py        # 🐍 Python bindings via PyO3 (excluded from default build)
+│   └── gribtract-testutil  # 🧪 Differential harness: corpus, golden fixtures, diff
+└── xtask                   # 🛠️ Corpus management, reference-decoder runner, bench dashboard
 ```
 
-`gribtract-core` is the zero-dependency parsing core. `gribtract` is the crate you depend on for library use. `gribtract-cli` provides a standalone binary.
+`gribtract-core` is the zero-dependency parsing core. `gribtract` is the crate you depend on for library use. `gribtract-cli` builds the standalone `gribtract` binary.
 
-## Usage
-
-Add to `Cargo.toml`:
-
-```toml
-[dependencies]
-gribtract = "0.1"
-```
+## 📖 Usage
 
 ### Decode all fields from a GRIB2 file
 
@@ -69,7 +107,7 @@ for field in &fields {
 }
 ```
 
-### Extract a single grid point (DRT=0, O(1))
+### Extract a single grid point — O(1), no full decode
 
 ```rust
 use gribtract::{decode_lazy, decode_point_drt0};
@@ -77,10 +115,9 @@ use gribtract::{decode_lazy, decode_point_drt0};
 let fields = gribtract::decode_lazy(&bytes)?;
 for lf in &fields {
     if let Some(body) = &lf.section7_raw {
-        // idx is the flat grid index for your target lat/lon
-        let idx = lf.grid.nearest_index(40.64, -73.78)?;
+        let idx = lf.grid.nearest_index(40.64, -73.78)?; // JFK
         if let Some(value) = decode_point_drt0(body, &lf.packing, idx) {
-            println!("value at JFK: {}", value);
+            println!("value at JFK: {value}");
         }
     }
 }
@@ -96,9 +133,9 @@ let request = TimeseriesRequest {
     parameter: ParameterRecord { discipline: 0, category: 0, number: 0 },
     level_type1: 103,
     stations: vec![
-        Station { id: "JFK".into(),  lat: 40.64,  lon: -73.78  },
-        Station { id: "ORD".into(),  lat: 41.979, lon: -87.905 },
-        Station { id: "LAX".into(),  lat: 33.943, lon: -118.408 },
+        Station { id: "JFK".into(), lat: 40.64,  lon: -73.78  },
+        Station { id: "ORD".into(), lat: 41.979, lon: -87.905 },
+        Station { id: "LAX".into(), lat: 33.943, lon: -118.408 },
     ],
 };
 
@@ -106,16 +143,16 @@ let fields = gribtract::decode(&bytes)?;
 let ts = extract_timeseries(&fields, &request);
 
 for (station, rows) in &ts.stations {
-    println!("Station: {}", station);
+    println!("Station: {station}");
     for row in rows {
         println!("  forecast hour {}: {:?}", row.forecast_hour, row.value);
     }
 }
 ```
 
-### Decode a DRT=3 (complex+spatial differencing) grid — extract many stations
+### Decode a DRT=3 grid (complex + spatial differencing) — extract many stations
 
-DRT=3 requires a full sequential decode; random access is not possible. The recommended pattern is decode-once-extract-many:
+DRT=3 requires a full sequential decode; random access isn't possible. The recommended pattern is **decode once, extract many**:
 
 ```rust
 use gribtract::{decode_lazy, decode_all_drt3};
@@ -126,7 +163,7 @@ for lf in &lazy_fields {
         let n = lf.grid.num_data_points as usize;
         let grid: Vec<f64> = decode_all_drt3(body, &lf.packing, extra, n)?;
 
-        // Now extract any number of stations by index in O(1) each
+        // Now extract any number of stations by index, O(1) each
         for (lat, lon) in &station_coords {
             let idx = lf.grid.nearest_index(*lat, *lon)?;
             println!("value: {}", grid[idx]);
@@ -135,51 +172,59 @@ for lf in &lazy_fields {
 }
 ```
 
-## The Correctness Oracle
+### 🐍 Python
 
-gribtract is built **oracle-first**: correctness is defined as agreement with eccodes/wgrib2, not as passing hand-written unit tests.
+```bash
+pip install maturin
+maturin develop -p gribtract-py
+```
 
-The differential harness in `gribtract-testutil` runs both decoders over a corpus of real NOAA GRIB2 files (GFS, HRRR, NBM, GEFS), then compares:
+```python
+import gribtract
 
-- **Metadata exactly** — center, parameter ID, level, forecast time, grid geometry
-- **Grid values within derived tolerance** — tolerance is computed from the packing template's own scale factors, not an arbitrary epsilon
+fields = gribtract.decode(open("hrrr.t00z.wrfsfcf01.grib2", "rb").read())
+for f in fields:
+    print(f.parameter, f.level, f.forecast_hour)
+```
 
-Any message where gribtract disagrees with the reference decoder becomes a permanent regression fixture. The agreement percentage can only increase; there is no mechanism to silently remove a covered template.
+## 🔬 The Correctness Oracle
+
+gribtract is built **oracle-first**: correctness is defined as agreement with eccodes/wgrib2 over real files, not as passing hand-written unit tests.
 
 ```
 gribtract decode  ─┐
-                   ├─→ compare field-by-field + grid within tolerance
+                   ├─→ compare field-by-field + grid values within derived tolerance
 eccodes/wgrib2    ─┘
 ```
 
-Run the harness:
+The differential harness in `gribtract-testutil` runs both decoders over a corpus of real NOAA GRIB2 files (GFS, HRRR, NBM, GEFS) and compares:
+
+- **Metadata exactly** — center, parameter ID, level, forecast time, grid geometry
+- **Grid values within derived tolerance** — computed from the packing template's own scale factors, never an arbitrary epsilon
+
+Any disagreement becomes a permanent regression fixture. The agreement percentage can only increase; there is no mechanism to silently drop a covered template.
 
 ```bash
+# Run the differential tests
 cargo test -p gribtract -- differential
-```
 
-Fetch and run against the full corpus (requires eccodes installed):
-
-```bash
+# Fetch and verify against the full corpus (requires eccodes installed)
 cargo xtask corpus fetch
 cargo xtask corpus verify
 ```
 
-## Performance Dashboard
+## 📊 Performance Dashboard
 
 A self-contained benchmark dashboard (`dashboard.html`) tracks decode throughput on real NOAA files, fed by `bench-results.json`. Speed numbers are never reported without a corresponding correctness verification run.
 
 ```bash
-# Run benchmarks and regenerate bench-results.json
-cargo xtask bench
-
-# Serve the live dashboard with streaming benchmark updates
-cargo xtask serve
+cargo xtask bench    # run benchmarks, regenerate bench-results.json
+cargo xtask serve    # serve the live dashboard with streaming updates
 ```
 
-## Building
+## 🏗️ Building from Source
 
-Requires Rust 1.75+.
+Requires **Rust 1.75+**.
 
 ```bash
 git clone https://github.com/jedarden/gribtract
@@ -187,28 +232,18 @@ cd gribtract
 cargo build --release
 ```
 
-The `gribtract-py` Python extension is excluded from the default workspace build (it requires Python headers for PyO3). Build it explicitly:
+The `gribtract-py` extension is excluded from the default workspace build (it needs Python headers for PyO3) — build it explicitly with `maturin develop -p gribtract-py`.
+
+## 💻 CLI Reference
 
 ```bash
-pip install maturin
-maturin develop -p gribtract-py
+gribtract list   forecast.grib2   # 📋 list all fields (JSON)
+gribtract decode forecast.grib2   # 📤 decode all fields + values (JSON)
+gribtract dump   forecast.grib2   # 🔍 raw hex dump
 ```
 
-## CLI
+The CLI is a thin wrapper over the library API, intended for ad-hoc inspection.
 
-```bash
-# List all fields in a GRIB2 file (JSON output)
-gribtract list forecast.grib2
+## 📜 License
 
-# Decode all fields and print as JSON
-gribtract decode forecast.grib2
-
-# Dump raw hex of the file
-gribtract dump forecast.grib2
-```
-
-The CLI binary name is `gribtract` (built from `crates/gribtract-cli`). It provides a thin wrapper over the library API for ad-hoc inspection rather than production use.
-
-## License
-
-MIT OR Apache-2.0
+MIT OR Apache-2.0, at your option.
