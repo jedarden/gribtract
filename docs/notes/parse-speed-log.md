@@ -278,3 +278,66 @@ either:
 Given that Attempt 6 already found no measurable performance benefit from the
 specialized versions, the effort is not justified. The generic windowed extractor
 remains fast and correct.
+
+---
+
+## Attempt 8: Re-benchmark the corrected specialized extractors (2026-07-22)
+
+**Technique:** The specialized extractors were re-introduced after Attempt 7 (with
+the buffer-init bug fixed) and verified correct by bead `bf-gv2j` (100% differential
+agreement + a new `extract_group_specialized_matches_generic` cross-validation test).
+This attempt is the missing **performance gate**: an A/B benchmark of specialized vs
+generic-only on the now-correct, now-tested code — the measurement Attempt 6 lacked
+on a bug-free version.
+
+**Methodology:** `cargo xtask bench --workload full-grid`, 3 consecutive runs per
+variant on the DRT=3 GFS 1-degree fixture (65160 points). The A/B was toggled at the
+single dispatch site in `decode_drt3`'s group loop: the **specialized** variant calls
+`extract_group_specialized` (dispatches on w=4/8/12/16); the **generic-only** variant
+calls `extract_group_windowed` directly. Same machine, same corpus, release builds.
+
+**Result (DRT=3 / template 5.3, GFS fixture — the only metric this change can move):**
+
+| variant                       | runs (MB/s)        | mean           |
+|-------------------------------|--------------------|----------------|
+| specialized (w=4/8/12/16)     | 20.9, 21.7, 21.5   | **21.37 MB/s** |
+| generic-only (windowed)       | 20.7, 20.3, 20.8   | **20.60 MB/s** |
+
+- Delta: +0.77 MB/s (**+3.7%** for specialized by mean) — but **not significant**:
+  the 5.0 (simple-packing) control row on the *same* generic binary swung 80.8 → 86.5
+  MB/s (**±7%**) across consecutive runs, so the host's run-to-run noise is larger
+  than the apparent specialized gain. **No measurable win.** (An earlier timed-out
+  run of this same bead measured +0.5%; both are inside the noise floor.)
+- Agreement: 100.0% in every run for both variants; full workspace tests pass
+  (87 passed, 0 failed); differential suite explicitly reports **6/6 (100.0%)** and
+  holds at `AGREEMENT_FLOOR = 100`.
+
+**Why `station-extract` (stations-hours/s) is not reported here:** the extractor runs
+inside `decode()`. The station-extract bench decodes each fixture **once**, caches the
+fields, then times only the post-decode nearest/bilinear interpolation. The extractor
+change is therefore amortized out of `station-hours/s` entirely — only the full-grid
+decode MB/s reflects it. (For the record, the station-extract workload reports
+~60M nearest station-hours/s and 100% agreement, unchanged across variants.)
+
+**Why no win (consistent with Attempt 6):** the bit-extraction inner loop is no longer
+the bottleneck after Attempts 4 and 5. `extract_group_windowed`'s while-loop refill
+runs at most `ceil(w/8) ≤ 2` times per element for w ≤ 16, and the branch predictor
+learns the refill pattern within a group. The specialized paths remove that loop, but
+the saved cycles are dwarfed by the spatial-differencing running sum (strict sequential
+dependency) and the final f64 scaling pass, which dominate `decode_drt3`. The dispatch
+`match w` plus duplicated code paths (icache pressure) further offset any micro-gain.
+
+**Reverted to generic-only.** The specialized extractor functions
+(`extract_group_w4`/`w8`/`w12`/`w16`, `extract_group_specialized`) and the
+`extract_group_specialized_matches_generic` test were removed from `decode.rs`. The
+group loop now calls `extract_group_windowed` directly — the sole extractor path.
+`extract_group_windowed_matches_read_bits_at` is retained (it guards the surviving
+function). Per the plan rule, a faster path that does not measurably win is reverted.
+
+**Conclusion / dead end:** per-width **scalar** specializations of the DRT=3 group
+extractor are a confirmed dead end — benchmarked twice (Attempts 6 and 8) with the same
+conclusion, now on a version independently verified correct by `bf-gv2j`. **Do not
+re-attempt scalar specializations.** The next meaningful DRT=3 speedup requires
+attacking the spatial-differencing sequential dependency or eliminating the `packed`
+intermediate allocation (see Attempt 5 "Next headroom"), or SIMD intrinsics operating
+across multiple group values at once.

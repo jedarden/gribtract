@@ -1200,9 +1200,16 @@ fn decode_drt3(
             for _ in 0..l { packed.push(gref); }
             continue;
         }
-        // Use specialized extractors for common widths, generic for others.
+        // Generic windowed extractor — the sole extractor path. Per-width
+        // specializations (w=4/8/12/16) were benchmarked A/B vs this path in
+        // parse-speed-log Attempt 8 (2026-07-22, 3 runs/variant): specialized
+        // 21.4 MB/s vs generic 20.6 MB/s mean, a ~+4% delta that is within the
+        // host's run-to-run noise (the 5.0 control row varies ±7% across
+        // identical-config runs). No measurable win → specialized code reverted
+        // to keep this path simple. Verified correct (100% differential
+        // agreement) and already carries the Attempt 4+5 wins.
         let start_bit = bit_offset;
-        extract_group_specialized(body, start_bit, w, l, gref, &mut packed);
+        extract_group_windowed(body, start_bit, w, l, gref, &mut packed);
         bit_offset = start_bit + w * l;
     }
 
@@ -1366,202 +1373,6 @@ fn extract_group_windowed(
     }
 }
 
-// ── Specialized group extractors for DRT=3 ───
-
-/// Dispatch function for specialized group extractors.
-///
-/// Calls the appropriate specialized extractor for common widths (w=4, 8, 12, 16)
-/// or falls back to the generic windowed extractor for other widths.
-fn extract_group_specialized(
-    data: &[u8],
-    start_bit: usize,
-    w: usize,
-    count: usize,
-    gref: i64,
-    out: &mut Vec<i64>,
-) {
-    match w {
-        4 => extract_group_w4(data, start_bit, count, gref, out),
-        8 => extract_group_w8(data, start_bit, count, gref, out),
-        12 => extract_group_w12(data, start_bit, count, gref, out),
-        16 => extract_group_w16(data, start_bit, count, gref, out),
-        _ => extract_group_windowed(data, start_bit, w, count, gref, out),
-    }
-}
-
-/// Specialized extractor for w=4 (2 values per byte).
-///
-/// Loads exactly ceil(count/2) bytes and extracts 4-bit values without refill loop.
-/// Only handles byte-aligned case (skip=0). Falls back to windowed for misaligned data.
-fn extract_group_w4(data: &[u8], start_bit: usize, count: usize, gref: i64, out: &mut Vec<i64>) {
-    if count == 0 {
-        return;
-    }
-
-    let byte_pos = start_bit / 8;
-    let skip = start_bit % 8;
-
-    // Only handle byte-aligned case
-    if skip != 0 {
-        extract_group_windowed(data, start_bit, 4, count, gref, out);
-        return;
-    }
-
-    let bytes_needed = (count + 1) / 2;
-
-    if byte_pos + bytes_needed > data.len() {
-        extract_group_windowed(data, start_bit, 4, count, gref, out);
-        return;
-    }
-
-    let pairs = count / 2;
-    let has_remainder = count % 2 == 1;
-
-    // Byte-aligned: 2 values per byte
-    for i in 0..pairs {
-        let byte = data[byte_pos + i] as u64;
-        out.push(gref + ((byte >> 4) & 0xF) as i64);
-        out.push(gref + (byte & 0xF) as i64);
-    }
-
-    // Handle final odd value if present
-    if has_remainder {
-        let byte = data[byte_pos + pairs] as u64;
-        out.push(gref + ((byte >> 4) & 0xF) as i64);
-    }
-}
-
-/// Specialized extractor for w=8 (1 value per byte).
-///
-/// Loads exactly count bytes and extracts 8-bit values without refill loop.
-fn extract_group_w8(data: &[u8], start_bit: usize, count: usize, gref: i64, out: &mut Vec<i64>) {
-    if count == 0 {
-        return;
-    }
-
-    let byte_pos = start_bit / 8;
-    let skip = start_bit % 8;
-
-    // Only handle byte-aligned case
-    if skip != 0 {
-        extract_group_windowed(data, start_bit, 8, count, gref, out);
-        return;
-    }
-
-    let bytes_needed = count;
-
-    if byte_pos + bytes_needed > data.len() {
-        extract_group_windowed(data, start_bit, 8, count, gref, out);
-        return;
-    }
-
-    // Byte-aligned: 1 value per byte
-    for i in 0..count {
-        out.push(gref + data[byte_pos + i] as i64);
-    }
-}
-
-/// Specialized extractor for w=12 (2 values in 3 bytes).
-///
-/// Loads exactly ceil(count * 3 / 2) bytes and extracts 12-bit values without refill loop.
-fn extract_group_w12(data: &[u8], start_bit: usize, count: usize, gref: i64, out: &mut Vec<i64>) {
-    if count == 0 {
-        return;
-    }
-
-    let byte_pos = start_bit / 8;
-    let skip = start_bit % 8;
-
-    // Only handle byte-aligned case (skip=0) or skip=4 (aligns after first value)
-    if skip != 0 && skip != 4 {
-        extract_group_windowed(data, start_bit, 12, count, gref, out);
-        return;
-    }
-
-    let bytes_needed = if skip == 0 {
-        (count * 12).div_ceil(8)
-    } else {
-        // skip=4: first value consumes bits 4-15 (2 bytes), then byte-aligned
-        2 + ((count - 1) * 12).div_ceil(8)
-    };
-
-    if byte_pos + bytes_needed > data.len() {
-        extract_group_windowed(data, start_bit, 12, count, gref, out);
-        return;
-    }
-
-    let mut i = 0usize;
-    let mut pos = byte_pos;
-
-    // Handle skip=4: first value spans 2 bytes (bits 4-15)
-    if skip == 4 {
-        let b0 = data[pos] as u64;
-        let b1 = data[pos + 1] as u64;
-        // First 12-bit value: low 4 bits of b0 + high 8 bits of b1
-        let v = (((b0 & 0xF) << 8) | b1) & 0xFFF;
-        out.push(gref + v as i64);
-        i += 1;
-        pos += 2; // Now byte-aligned
-    }
-
-    // Remaining values are byte-aligned: 2 values per 3 bytes
-    let pairs = (count - i) / 2;
-    let has_remainder = (count - i) % 2 == 1;
-
-    for _ in 0..pairs {
-        let b0 = data[pos] as u64;
-        let b1 = data[pos + 1] as u64;
-        let b2 = data[pos + 2] as u64;
-        // First 12-bit value: high 4 bits of b0 + all 8 bits of b1
-        let v1 = ((b0 << 4) | (b1 >> 4)) & 0xFFF;
-        // Second 12-bit value: low 4 bits of b1 + all 8 bits of b2
-        let v2 = (((b1 & 0xF) << 8) | b2) & 0xFFF;
-        out.push(gref + v1 as i64);
-        out.push(gref + v2 as i64);
-        pos += 3;
-    }
-
-    // Handle final odd value if present
-    if has_remainder {
-        let b0 = data[pos] as u64;
-        let b1 = data[pos + 1] as u64;
-        let v = ((b0 << 4) | (b1 >> 4)) & 0xFFF;
-        out.push(gref + v as i64);
-    }
-}
-
-/// Specialized extractor for w=16 (1 value per 2 bytes).
-///
-/// Loads exactly count * 2 bytes and extracts 16-bit values without refill loop.
-fn extract_group_w16(data: &[u8], start_bit: usize, count: usize, gref: i64, out: &mut Vec<i64>) {
-    if count == 0 {
-        return;
-    }
-
-    let byte_pos = start_bit / 8;
-    let skip = start_bit % 8;
-
-    // Only handle byte-aligned case
-    if skip != 0 {
-        extract_group_windowed(data, start_bit, 16, count, gref, out);
-        return;
-    }
-
-    let bytes_needed = count * 2;
-
-    if byte_pos + bytes_needed > data.len() {
-        extract_group_windowed(data, start_bit, 16, count, gref, out);
-        return;
-    }
-
-    // Byte-aligned: 1 value per 2 bytes (big-endian)
-    for i in 0..count {
-        let b0 = data[byte_pos + i * 2] as u64;
-        let b1 = data[byte_pos + i * 2 + 1] as u64;
-        let v = (b0 << 8) | b1;
-        out.push(gref + v as i64);
-    }
-}
 /// Read `n_bits` bits from `data` starting at `bit_offset` (MSB-first).
 fn read_bits_at(data: &[u8], bit_offset: usize, n_bits: usize) -> u64 {
     if n_bits == 0 {
@@ -2074,54 +1885,6 @@ mod tests {
                     expected, actual,
                     "skip={skip} w={w}: windowed result differs from read_bits_at",
                 );
-            }
-        }
-    }
-
-    /// Cross-validate the specialized group extractors against the generic
-    /// windowed extractor.
-    ///
-    /// For every (skip, width, count) in the matrix below, the specialized
-    /// dispatcher must produce element-for-element identical output to the
-    /// reference [`extract_group_windowed`]. This guards the DRT=3 performance
-    /// specialisations (w = 4/8/12/16) against correctness regressions — e.g. a
-    /// buffer-initialisation or bit-alignment bug that silently changes a value
-    /// (or even the output length) without raising any other test.
-    #[test]
-    fn extract_group_specialized_matches_generic() {
-        // Deterministic high-entropy buffer long enough for the worst case
-        // (skip=7, w=16, count=20 → 7 + 320 = 327 bits → 41 bytes).
-        // A pseudo-random (xorshift32) stream is used rather than a simple
-        // incrementing counter: every nibble and bit position must take on
-        // varied values, otherwise a bug that only corrupts e.g. the high
-        // nibble of small byte values can be silently masked.
-        let mut data = Vec::with_capacity(256);
-        let mut x: u32 = 0x1234_5678;
-        for _ in 0..256 {
-            x ^= x << 13;
-            x ^= x >> 17;
-            x ^= x << 5;
-            data.push((x & 0xFF) as u8);
-        }
-        let gref = 7i64;
-
-        for skip in 0..=7usize {
-            for &w in &[4usize, 8, 12, 16] {
-                for count in 1..=20usize {
-                    let mut specialized = Vec::with_capacity(count);
-                    extract_group_specialized(&data, skip, w, count, gref, &mut specialized);
-
-                    let mut generic = Vec::with_capacity(count);
-                    extract_group_windowed(&data, skip, w, count, gref, &mut generic);
-
-                    assert_eq!(
-                        specialized, generic,
-                        "skip={skip} w={w} count={count}: specialized differs from generic \
-                         (len sp={}, gen={})",
-                        specialized.len(),
-                        generic.len(),
-                    );
-                }
             }
         }
     }

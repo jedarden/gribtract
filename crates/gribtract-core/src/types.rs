@@ -418,6 +418,26 @@ pub struct GaussianLatLonParams {
     pub n_parallels: u32,
 }
 
+/// Parameters unique to GDT 3.1 (Rotated Latitude/Longitude).
+///
+/// A rotated lat/lon grid uses a rotated coordinate system where the "pole"
+/// of the grid is not at the geographic pole. The rotation is defined by
+/// specifying the geographic location of the southern pole of the rotated
+/// system and the rotation angle of the local coordinate system.
+///
+/// Nearest-point queries work by rotating the query point from geographic
+/// coordinates into the rotated coordinate system, then applying the regular
+/// lat/lon arithmetic.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RotatedLatLonParams {
+    /// Latitude of the southern pole of the rotation (degrees, positive N).
+    pub lat_pole_rot: f64,
+    /// Longitude of the southern pole of the rotation (degrees, positive E, 0–360).
+    pub lon_pole_rot: f64,
+    /// Angle of rotation of the local coordinate system (degrees, last 2 digits are fractional).
+    pub angle_rot: f64,
+}
+
 impl GaussianLatLonParams {
     /// Nearest-grid-point flat index for a Gaussian lat/lon grid.
     ///
@@ -450,6 +470,84 @@ impl GaussianLatLonParams {
     }
 }
 
+impl RotatedLatLonParams {
+    /// Rotate a geographic (lat, lon) point into the rotated coordinate system.
+    ///
+    /// Returns the (lat_rot, lon_rot) coordinates in the rotated system.
+    /// The rotation follows the standard GRIB2 rotated pole definition:
+    /// 1. Rotate around the Z axis by -(lon_pole_rot + 180°)
+    /// 2. Rotate around the Y axis by -(lat_pole_rot + 90°)
+    /// 3. Rotate around the Z axis by angle_rot
+    fn geographic_to_rotated(&self, lat: f64, lon: f64) -> (f64, f64) {
+        use std::f64::consts::PI;
+        let to_rad = PI / 180.0;
+        let to_deg = 180.0 / PI;
+
+        let lat_rad = lat * to_rad;
+        let lon_rad = lon * to_rad;
+        let pole_lat_rad = self.lat_pole_rot * to_rad;
+        let pole_lon_rad = self.lon_pole_rot * to_rad;
+        let angle_rad = self.angle_rot * to_rad;
+
+        // Convert to Cartesian coordinates
+        let x = lat_rad.cos() * lon_rad.cos();
+        let y = lat_rad.cos() * lon_rad.sin();
+        let z = lat_rad.sin();
+
+        // Rotate around Z axis by -(pole_lon + 180°)
+        let rot_z1 = -(pole_lon_rad + PI);
+        let x1 = x * rot_z1.cos() - y * rot_z1.sin();
+        let y1 = x * rot_z1.sin() + y * rot_z1.cos();
+        let z1 = z;
+
+        // Rotate around Y axis by -(pole_lat + 90°)
+        let rot_y = -(pole_lat_rad + PI / 2.0);
+        let x2 = x1 * rot_y.cos() + z1 * rot_y.sin();
+        let y2 = y1;
+        let z2 = -x1 * rot_y.sin() + z1 * rot_y.cos();
+
+        // Rotate around Z axis by angle_rot
+        let x3 = x2 * angle_rad.cos() - y2 * angle_rad.sin();
+        let y3 = x2 * angle_rad.sin() + y2 * angle_rad.cos();
+        let z3 = z2;
+
+        // Convert back to spherical coordinates
+        let lat_rot = z3.atan2(y3.hypot(x3)) * to_deg;
+        let lon_rot = y3.atan2(x3) * to_deg;
+        (lat_rot, lon_rot)
+    }
+
+    /// Nearest-grid-point flat index for a rotated lat/lon grid.
+    ///
+    /// Rotates the query point into the rotated coordinate system, then
+    /// applies the same uniform-grid arithmetic as GDT 3.0.
+    /// Returns `None` if the query is outside the grid extent.
+    pub fn nearest_index(&self, grid: &GridDefinition, lat: f64, lon: f64) -> Option<usize> {
+        if grid.di == 0.0 || grid.dj == 0.0 {
+            return None;
+        }
+
+        // Rotate the query point into the rotated coordinate system
+        let (lat_rot, lon_rot) = self.geographic_to_rotated(lat, lon);
+
+        // Use the same arithmetic as GDT 3.0 in the rotated system
+        let mut fi = GridDefinition::lon_to_fi(lon_rot, grid.lon_first, grid.di, grid.nx);
+        let nx_f = grid.nx as f64;
+        if fi < -0.5 { fi += 360.0 / grid.di; }
+        else if fi > nx_f - 0.5 { fi -= 360.0 / grid.di; }
+        if fi < -0.5 || fi > nx_f - 0.5 { return None; }
+
+        let fj = grid.lat_to_fj(lat_rot);
+        let ny_f = grid.ny as f64;
+        if fj < -0.5 || fj > ny_f - 0.5 { return None; }
+
+        let i = fi.round() as usize;
+        let j = fj.round() as usize;
+        if i >= grid.nx as usize || j >= grid.ny as usize { return None; }
+        Some(j * grid.nx as usize + i)
+    }
+}
+
 /// Template-specific grid projection parameters.
 ///
 /// Carried inside [`GridDefinition`] to hold parameters that are only present
@@ -460,6 +558,8 @@ pub enum GridProjection {
     /// GDT 3.0 (or similar lat/lon): all geometry in the common fields.
     #[default]
     LatLon,
+    /// GDT 3.1: rotated latitude/longitude.
+    RotatedLatLon(RotatedLatLonParams),
     /// GDT 3.20: polar stereographic.
     PolarStereographic(PolarStereographicParams),
     /// GDT 3.30: Lambert conformal conic.
@@ -618,13 +718,19 @@ impl GridDefinition {
     /// Dispatches on `self.projection`:
     /// - [`GridProjection::LatLon`]: regular lat/lon arithmetic (template 0).
     ///   Returns `None` if increments are zero or the query is outside the grid.
+    /// - [`GridProjection::RotatedLatLon`]: rotated lat/lon grid.
+    ///   Rotates the query point into the rotated coordinate system, then
+    ///   applies regular lat/lon arithmetic.
     /// - [`GridProjection::PolarStereographic`]: polar stereographic projection.
     ///   Returns `None` if the query is outside the grid extent.
     /// - [`GridProjection::LambertConformal`]: Lambert conformal conic projection.
     ///   Returns `None` if the query is outside the grid extent.
+    /// - [`GridProjection::GaussianLatLon`]: Gaussian lat/lon grid.
+    ///   Returns `None` if the query is outside the grid extent.
     pub fn nearest_index(&self, lat: f64, lon: f64) -> Option<usize> {
         match &self.projection {
             GridProjection::LatLon => self.nearest_index_latlon(lat, lon),
+            GridProjection::RotatedLatLon(p) => p.nearest_index(self, lat, lon),
             GridProjection::PolarStereographic(p) => p.nearest_index(self, lat, lon),
             GridProjection::LambertConformal(p) => p.nearest_index(self, lat, lon),
             GridProjection::GaussianLatLon(p) => p.nearest_index(self, lat, lon),
