@@ -439,6 +439,53 @@ https://[bucket].s3.amazonaws.com/[model].[YYYYMMDD]/[path]/[filename]
 ---
 
 *Research completed for bead bf-4dli on 2026-07-03*
+*Verification and accessibility testing performed on 2026-07-22*
+
+## Archive URL Verification (2026-07-22)
+
+### Verified Accessible Archives
+
+The following URLs were tested and confirmed publicly accessible on 2026-07-22:
+
+**HRRR (AWS S3):**
+```
+https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20260703/conus/hrrr.t00z.wrfsfcf00.grib2
+```
+✅ **HTTP 200 OK** - Verified accessible
+
+**NAM (AWS S3):**
+```
+https://noaa-nam-pds.s3.amazonaws.com/nam.20260703/nam.t00z.awphys00.tm00.grib2
+```
+✅ **HTTP 200 OK** - Verified accessible
+
+**NBM (AWS S3):**
+```
+https://noaa-nbm-grib2-pds.s3.amazonaws.com/blend.20260703/00/core/blend.t00z.core.f001.co.grib2
+```
+✅ **HTTP 200 OK** - Verified accessible
+
+**RAP (NCEP Products):**
+```
+https://www.nco.ncep.noaa.gov/pmb/products/rap/
+```
+✅ **HTTP 200 OK** - Verified accessible
+
+**HRRR (NCEP Products):**
+```
+https://www.nco.ncep.noaa.gov/pmb/products/hrrr/
+```
+✅ **HTTP 200 OK** - Verified accessible
+
+### Archives Reiring Further Investigation
+
+**RAP (AWS S3):**
+- Bucket root accessible: `https://noaa-rap-pds.s3.amazonaws.com/` ✅
+- Specific date paths need structure verification
+
+**RRFS, RTMA (AWS S3):**
+- Experimental models with varying availability
+- Archive structures may differ from documentation
 
 ## Sources
 
