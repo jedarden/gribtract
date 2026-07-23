@@ -131,6 +131,20 @@
         "capture_date": "2026-07-22",
         "generated_by": "curl from noaa-nam-pds.s3.amazonaws.com; verified by eccodes 2.41.0 (gribtract project)"
       }
+    },
+    {
+      "id": "hrrr_conus_drt3_lambert",
+      "path": "large/hrrr.t12z.wrfsfcf00.grib2",
+      "sha256": "22a80611536f4098358ec06eee4db8eb1998ee376da860ba7949c19aaa9adfd0",
+      "size_bytes": 141252632,
+      "storage": "remote",
+      "url": "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20240601/conus/hrrr.t12z.wrfsfcf00.grib2",
+      "provenance": {
+        "source": "NOAA HRRR (High-Resolution Rapid Refresh, CONUS 3km Lambert Conformal)",
+        "description": "HRRR CONUS wrfsfcf analysis, run 2024-06-01 12z, forecast hour F00. 170 GRIB2 messages, ALL GDT 3.30 (Lambert Conformal Conic) + DRT 3 (template 5.3: complex packing with spatial differencing). Grid: 1059 x 1799 points (1.9M total), 3km resolution, La1=21.138N/Lo1=237.280E, LaD=38.5N, LoV=262.5E, Latin1=Latin2=38.5N, Dx=Dy=3000m. Includes surface fields: REFC (composite reflectivity), UGRD/VGRD (wind components at multiple levels: 250/300/500/700/850 mb), HGT (geopotential height), TMP (temperature), DPT (dew point), and 165+ additional meteorological fields. Sourced from noaa-hrrr-bdp-pds S3 (AWS Open Data, public, no auth). Verified via wgrib2: grid_template=30 (Lambert Conformal), Data Repr. Template=5.3 (DRT=3). NOTE: gribtract's own DRT=3 unpacker is not yet implemented, so this is a target fixture for DRT=3 + Lambert-conformal decoder coverage — storage=remote because the 135 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-23",
+        "generated_by": "curl from noaa-hrrr-bdp-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
+      }
     }
   ],
   "_comment_large": "Fixtures with storage=remote live in tests/corpus/large/ (gitignored). The harness fetches them by sha256 from B2. Add a manifest entry here first, then seed the file.",
