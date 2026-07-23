@@ -187,6 +187,19 @@
         "capture_date": "2026-07-23",
         "generated_by": "curl from storage.googleapis.com/noaa-nws-ncep-core; verified by wgrib2 (gribtract project)"
       }
+    },
+    {
+      "id": "ecmwf_ensemble_pdt41_enso",
+      "path": "large/ecmwf_ensemble_enso_0h.grib2",
+      "sha256": "a363988b982f45bbab7f114cb789c3169c0e13237bd54a60fce82d0ef9911b6b",
+      "size_bytes": 1551056896,
+      "storage": "remote",
+      "provenance": {
+        "source": "ECMWF (European Centre for Medium-Range Weather Forecasts)",
+        "description": "ECMWF ENSO (El Niño-Southern Oscillation) ensemble analysis, 2023-01-18 00z. 2,614 GRIB2 messages, predominantly PDT 4.1 (2,563 messages, 98.0%) for individual ensemble forecasts, with 51 PDT 4.11 messages. Variables include UGRD/VGRD (10m wind components), TMP (2m temperature), and precipitation accumulations. Ensemble members identified from ENS=+1 through ENS=+49, representing a large ensemble system with individual perturbation forecasts. Center=98 (ECMWF), analysis time (significance=0). storage=remote because the 1.55 GiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`). NOTE: gribtract's PDT 4.1 decoder support is pending — this fixture provides comprehensive ensemble coverage for testing individual ensemble member forecast handling.",
+        "capture_date": "2026-07-23",
+        "generated_by": "ECMWF ensemble dataset; verified by wgrib2 (gribtract project)"
+      }
     }
   ],
   "_comment_large": "Fixtures with storage=remote live in tests/corpus/large/ (gitignored). The harness fetches them by sha256 from B2. Add a manifest entry here first, then seed the file.",
