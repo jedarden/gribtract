@@ -535,19 +535,26 @@ class GRIB2Parser:
         if len(section1) < 21:
             return None
 
-        # Note: section data includes the 5-byte header (length + section number)
+        # Note: section data includes the 5-byte header (4-byte length + 1-byte section number)
         # So octet N in the spec is at index N-1 in the byte array
         center = struct.unpack('>H', section1[5:7])[0]
         subcenter = struct.unpack('>H', section1[7:9])[0]
 
-        # Reference time fields (offsets are 1-indexed octet numbers, convert to 0-indexed)
-        significance = section1[13]
-        year = struct.unpack('>H', section1[14:16])[0]
-        month = section1[16]
-        day = section1[17]
-        hour = section1[18]
-        minute = section1[19]
-        second = section1[20] if len(section1) > 20 else 0
+        # Reference time fields (octet numbers from GRIB2 spec, Section 1)
+        # Octet 14: significance of reference time
+        # Octet 15-16: year
+        # Octet 17: month
+        # Octet 18: day
+        # Octet 19: hour
+        # Octet 20: minute
+        # Octet 21: second
+        significance = section1[13]    # Octet 14
+        year = struct.unpack('>H', section1[12:14])[0]    # Octets 13-14 (fix: was 14-16)
+        month = section1[14]         # Octet 15 (fix: was 16)
+        day = section1[15]            # Octet 16 (fix: was 17)
+        hour = section1[16]           # Octet 17 (fix: was 18)
+        minute = section1[17]         # Octet 18 (fix: was 19)
+        second = section1[18] if len(section1) > 18 else 0  # Octet 19 (fix: was 20)
 
         # Section 3: Grid Definition Section
         # Octets: 1-4 (length), 5 (section number), 6-7 (template number)
