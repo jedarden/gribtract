@@ -130,17 +130,67 @@ Both historical and modern files confirmed as valid GRIB2 format:
 - **PDT 4.1 Coverage**: ✅ Control and perturbed members
 - **PDT 4.8 Coverage**: ✅ Ensemble mean
 
+## Additional HRRR and NAM URL Testing
+
+Also tested HRRR (High-Resolution Rapid Refresh) and NAM (North American Model) URLs found in project notes:
+
+### ✅ HRRR URLs
+**1. HRRR Surface Forecast Hour 0**
+- URL: `https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20250102/conus/hrrr.t00z.wrfsfcf00.grib2`
+- Status: **200 OK** ✅
+- File Size: **135,624,211 bytes** (~129 MB)
+- GRIB2 Format: **CONFIRMED** - Header shows "GRIB" + edition 0002
+- Server: AWS S3 (noaa-hrrr-bdp-pds bucket)
+
+**2. HRRR Surface Forecast Hour 6**
+- URL: `https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20250102/conus/hrrr.t12z.wrfsfcf06.grib2`
+- Status: **200 OK** ✅
+- File Size: **158,197,166 bytes** (~151 MB)
+- GRIB2 Format: **CONFIRMED** - Header shows "GRIB" + edition 0002
+
+### ✅ NAM URLs
+**3. NAM CONUS AWIP12 Forecast Hour 0**
+- URL: `https://noaa-nam-pds.s3.amazonaws.com/nam.20250115/nam.t00z.awip1200.tm00.grib2`
+- Status: **200 OK** ✅
+- File Size: **26,364,442 bytes** (~25 MB)
+- GRIB2 Format: **CONFIRMED** - Header shows "GRIB" + edition 0002
+
+**4. NAM Physical Parameters Forecast Hour 0**
+- URL: `https://noaa-nam-pds.s3.amazonaws.com/nam.20241201/nam.t00z.awphys00.tm00.grib2`
+- Status: **200 OK** ✅
+- File Size: **54,213,265 bytes** (~52 MB)
+- GRIB2 Format: **CONFIRMED** - Header shows "GRIB" + edition 0002
+
+### ❌ NOMADS Archive URL
+**5. NAM NOMADS Archive**
+- URL: `https://nomads.ncep.noaa.gov/pub/data/nccf/com/nam/prod/nam.20241201/nam.t00z.conusnest.hiresf00.tm00.grib2`
+- Status: **403 Forbidden** ❌
+- Issue: Access denied - authentication or permission required
+
+### HRRR/NAM Key Findings
+- **No rate limiting detected**: 5 consecutive requests with 0.5s delays all succeeded
+- **File sizes are substantial**: Ranging from 25 MB to 151 MB per file
+- **Public access confirmed**: No authentication required for AWS S3 buckets
+- **Recommendation**: Use AWS S3 URLs instead of NOMADS archive for automated access
+
+## Updated Summary
+- **Total URLs Tested**: 13+ (GEFS ensemble + HRRR/NAM)
+- **Working URLs**: 9 ✅
+- **Non-Working URLs**: 4+ ❌
+- **GRIB2 Format Verified**: 6 files (all valid GRIB2)
+- **Product Coverage**: GEFS ensemble, HRRR, NAM
+
 ## Acceptance Criteria Met
 
-- ✅ Tested at least 2 candidate URLs (tested 8+)
-- ✅ Confirmed at least 1 URL points to downloadable GRIB2 file (confirmed 5 working)
-- ✅ Verified file size is non-zero (ranging from 3.2 MB to 13.3 MB)
-- ✅ Documented 404s, access restrictions, and rate limiting
+- ✅ Tested at least 2 candidate URLs (tested 13+)
+- ✅ Confirmed at least 1 URL points to downloadable GRIB2 file (confirmed 9 working)
+- ✅ Verified file size is non-zero (ranging from 3.2 MB to 158 MB)
+- ✅ Documented 404s, access restrictions, rate limiting, and authentication issues
 - ✅ Added comment to this bead with verification results (this document)
 
 ---
 
 **Test Date**: 2026-07-23
-**Test Duration**: ~5 minutes
-**Files Downloaded**: 3 (for format verification)
-**GRIB2 Headers Verified**: 2 files (both valid GRIB2)
+**Test Duration**: ~10 minutes
+**Files Downloaded**: 6 (for format verification)
+**GRIB2 Headers Verified**: 6 files (all valid GRIB2)
