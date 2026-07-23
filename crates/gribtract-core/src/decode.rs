@@ -470,8 +470,8 @@ fn parse_gdt_0(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
 /// | 47     | resolution/component flags |
 /// | 48–51  | LaD (signed microdegrees, latitude where Dx/Dy are specified) |
 /// | 52–55  | LoV (unsigned microdegrees, orientation / central meridian) |
-/// | 56–59  | Dx in metres |
-/// | 60–63  | Dy in metres |
+/// | 56–59  | Dx (units per Table 3.3 bit 5) |
+/// | 60–63  | Dy (units per Table 3.3 bit 5) |
 /// | 64     | projection centre flag (Table 3.5; bit 7=0 North Pole, bit 7=1 South Pole) |
 /// | 65     | scanning mode |
 fn parse_gdt_20(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
@@ -490,8 +490,12 @@ fn parse_gdt_20(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
     let lad = b.read_latlon_micro()? as f64 / 1_000_000.0;       // oct 48–51: LaD
     let lov = b.read_longi_micro()? as f64 / 1_000_000.0;        // oct 52–55: LoV
 
-    let dx_m = b.read_u32be()? as f64;   // oct 56–59: Dx in metres
-    let dy_m = b.read_u32be()? as f64;   // oct 60–63: Dy in metres
+    // Dx and Dy units depend on bit 5 of resolution_flags (Table 3.3):
+    // 0 = metres, 1 = millimetres
+    let dx_raw = b.read_u32be()? as f64;   // oct 56–59: Dx (units per resolution flags)
+    let dy_raw = b.read_u32be()? as f64;   // oct 60–63: Dy (units per resolution flags)
+    let dx_m = if resolution_flags & 0x20 != 0 { dx_raw / 1000.0 } else { dx_raw };
+    let dy_m = if resolution_flags & 0x20 != 0 { dy_raw / 1000.0 } else { dy_raw };
 
     let proj_centre = b.read_u8()?;       // oct 64
     let scanning_mode = b.read_u8()?;     // oct 65
@@ -535,8 +539,8 @@ fn parse_gdt_20(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
 /// | 47     | resolution/component flags |
 /// | 48–51  | LaD (signed microdegrees) |
 /// | 52–55  | LoV (unsigned microdegrees) |
-/// | 56–59  | Dx in metres |
-/// | 60–63  | Dy in metres |
+/// | 56–59  | Dx (units per Table 3.3 bit 5) |
+/// | 60–63  | Dy (units per Table 3.3 bit 5) |
 /// | 64     | projection centre flag |
 /// | 65     | scanning mode |
 /// | 66–69  | Latin1 (signed microdegrees) |
@@ -559,8 +563,12 @@ fn parse_gdt_30(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
     let lad = b.read_latlon_micro()? as f64 / 1_000_000.0;       // oct 48–51: LaD
     let lov = b.read_longi_micro()? as f64 / 1_000_000.0;        // oct 52–55: LoV
 
-    let dx_m = b.read_u32be()? as f64;   // oct 56–59: Dx in metres
-    let dy_m = b.read_u32be()? as f64;   // oct 60–63: Dy in metres
+    // Dx and Dy units depend on bit 5 of resolution_flags (Table 3.3):
+    // 0 = metres, 1 = millimetres
+    let dx_raw = b.read_u32be()? as f64;   // oct 56–59: Dx (units per resolution flags)
+    let dy_raw = b.read_u32be()? as f64;   // oct 60–63: Dy (units per resolution flags)
+    let dx_m = if resolution_flags & 0x20 != 0 { dx_raw / 1000.0 } else { dx_raw };
+    let dy_m = if resolution_flags & 0x20 != 0 { dy_raw / 1000.0 } else { dy_raw };
 
     let proj_centre = b.read_u8()?;       // oct 64
     let scanning_mode = b.read_u8()?;     // oct 65
