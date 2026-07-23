@@ -1,60 +1,91 @@
-# DRT Inspection Results for bf-4jpf
+# DRT Inspection - wgrib2 Analysis
+**Bead:** bf-4jpf  
+**Date:** 2026-07-23
 
-## Task Completed: 2026-07-23
+## Task
+Inspect and document Data Representation Template (DRT) values in GRIB2 files using wgrib2.
 
-## Summary
-Inspected GRIB2 files using wgrib2 to identify Data Representation Template (DRT) numbers.
+## Files Inspected
+
+### Main Files
+1. **samples/nam.t00z.awip1200.tm00.grib2** (26MB)
+2. **tests/corpus/large/nam.t00z.awip1200.tm00.grib2**
+
+### Test Corpus (small/)
+- drt2_simple_3x3.grib2
+- drt40_j2k_3x2.grib2
+- drt41_png_3x2.grib2
+- gfs_anl_t2m_5x5.grib2
+- gfs_tmp2m_1deg_anl.grib2
+- gfswave_arctic_wind_drt40.grib2
+- mrms_carib_refl_drt41.grib2
+- pdt1_ensemble_3x2.grib2
+- pdt8_accum_3x2.grib2
+- rotated_latlon_5x5.grib2
 
 ## wgrib2 Command Used
 ```bash
-wgrib2 -Sec5 <file>
+wgrib2 <file> -Sec5
 ```
 
-## Key Findings
+The `-Sec5` option shows Section 5 (Data Representation Section) which contains the Data Representation Template (DRT) information.
 
-### Primary File: NAM AWIP12 (Complex Packing)
-**File:** `/home/coding/gribtract/samples/nam.t00z.awip1200.tm00.grib2`
-- **DRT:** 5.3 (Section 5, Template 3)
-- **Packing Type:** Complex Packing (DRT 3)
-- **All 186 records** in this file use DRT 3
-- **Data points:** 262,792 per record (most records), 129,654 for some
-- **Section 5 length:** 49 bytes
+## DRT Values Found
 
-### Comparison Files
+### Main NAM File (196 records)
+- **DRT 5.3** — All 196 records use Data Representation Template 5.3
+- This is **NOT DRT 3** (complex packing)
+- DRT 5.3 is typically used for simple packing with spatial differencing
 
-#### HRRR File
-**File:** `/home/coding/gribtract/data/hrrr.t12z.wrfsfcf00.grib2`
-- **DRT:** 5.3 (Complex Packing)
-- **Data points:** 1,905,141 per record
+### Test Corpus Summary
+| DRT Value | Count | Template Name | File Example |
+|-----------|-------|---------------|--------------|
+| 5.0 | 4 | Simple packing | gfs_anl_t2m_5x5.grib2 |
+| 5.2 | 1 | Simple packing with decimal scaling | drt2_simple_3x3.grib2 |
+| 5.3 | 1 | Simple packing with spatial differencing | gfs_tmp2m_1deg_anl.grib2 |
+| 5.40 | 2 | JPEG2000 coding | drt40_j2k_3x2.grib2, gfswave_arctic_wind_drt40.grib2 |
+| 5.41 | 2 | PNG coding | drt41_png_3x2.grib2, mrms_carib_refl_drt41.grib2 |
 
-#### Simple Packing (DRT 2)
-**File:** `/home/coding/gribtract/tests/corpus/small/drt2_simple_3x3.grib2`
-- **DRT:** 5.2 (Simple Packing)
-- **Data points:** 9
-- **Section 5 length:** 47 bytes
+## Key Finding: No DRT 3 Files Found
 
-#### JPEG2000 Packing (DRT 40)
-**File:** `/home/coding/gribtract/tests/corpus/small/drt40_j2k_3x2.grib2`
-- **DRT:** 5.40 (JPEG2000 Packing)
-- **Data points:** 6
-- **Section 5 length:** 21 bytes
+**DRT 3 (complex packing)** was **NOT FOUND** in any of the inspected files.
 
-#### PNG Packing (DRT 41)
-**File:** `/home/coding/gribtract/tests/corpus/small/drt41_png_3x2.grib2`
-- **DRT:** 5.41 (PNG Packing)
-- **Data points:** 6
-- **Section 5 length:** 21 bytes
+- DRT 3.0 is "Complex packing" (a legacy complex packing scheme)
+- DRT 5.x is the newer "Data Representation Template 5" series which includes various compression schemes
+
+The workspace contains placeholder files (empty 0-byte files) with names suggesting DRT 3 content:
+- test_data/nam_awip12_drt3.grib2 (0 bytes)
+- nam_20250115_awip12.grib2 (0 bytes)
+
+However, no actual DRT 3 GRIB2 files were found in the current workspace.
 
 ## DRT Classification Summary
 
-- **DRT 3 (5.3): Complex Packing** - Used by NAM and HRRR operational model files
-- **DRT 2 (5.2): Simple Packing** - Used by simple test files
-- **DRT 40 (5.40): JPEG2000 Packing** - Used for grid compression
-- **DRT 41 (5.41): PNG Packing** - Used for grid compression
+From the wgrib2 inspection, the workspace contains:
 
-## Full Output
-Complete wgrib2 -Sec5 output for the primary NAM file is saved in:
-`/home/coding/gribtract/notes/bf-4jpf_drt3_output.txt`
+- **Simple packing schemes**: DRT 5.0, 5.2, 5.3
+- **JPEG2000 compression**: DRT 5.40
+- **PNG compression**: DRT 5.41
+- **No complex packing (DRT 3)**: Not present in inspected files
+
+## Sample Output from wgrib2 -Sec5
+
+```
+1:0:Sec5 len=49 #defined data points=262792 Data Repr. Template=5.3
+2:240117:Sec5 len=49 #defined data points=262792 Data Repr. Template=5.3
+3:481603:Sec5 len=49 #defined data points=262792 Data Repr. Template=5.3
+```
+
+Each line shows:
+- Record number and byte offset
+- Section 5 length
+- Number of defined data points
+- **Data Representation Template number** (the DRT value)
 
 ## Conclusion
-The primary operational GRIB2 files (NAM, HRRR) use **DRT 3 (Complex Packing)** for data representation. This is the most common packing method for numerical weather prediction model output.
+
+The GRIB2 files in the gribtract workspace use DRT 5.x series templates (simple packing and compression schemes), **NOT DRT 3 (complex packing)**. 
+
+The actual DRT 3 (complex packing) files are either:
+1. Not present in the current workspace
+2. Represented only by empty placeholder files
