@@ -75,6 +75,23 @@ Created `verify_gdt30_lambert_metadata.rs` to validate all GDT 3.30 metadata fie
 2. **`crates/gribtract/tests/verify_gdt30_lambert_metadata.rs`** (new file)
    - Comprehensive verification test for all Lambert Conformal metadata fields
 
+## Re-verification (2026-07-23)
+
+Re-ran the verification test to confirm the fix is still working correctly:
+
+```bash
+cargo test verify_lambert_gdt30_metadata_population
+```
+
+**Result:** ✅ All checks pass
+- Grid template: 30 (Lambert Conformal)
+- Dimensions: 614×428 (262,792 points)
+- All projection parameters match wgrib2 reference values
+- Dx/Dy correctly parsed as 12,191 meters (not millimeters)
+- All 196 fields have consistent grid metadata
+
+The fix for millimeter-to-meter conversion (resolution_flags bit 5) is working correctly.
+
 ## Reference
 
 - **GRIB2 Table 3.3:** Resolution and Component Flags
