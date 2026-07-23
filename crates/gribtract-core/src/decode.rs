@@ -320,10 +320,15 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
                 builder.values = Some(values);
 
                 // Complete field — flush the builder.
+                let prev_grid = builder.grid.clone();
+                let prev_gdt_template = builder.gdt_template;
                 let next_builder = FieldBuilder {
                     center: builder.center,
                     subcenter: builder.subcenter,
                     ref_time: builder.ref_time,
+                    // Preserve grid definition for subsequent fields in multi-field messages
+                    grid: prev_grid,
+                    gdt_template: prev_gdt_template,
                     ..Default::default()
                 };
                 if let Some(field) = builder.build() {
