@@ -1,0 +1,4 @@
+*** check_pdt: pdt size 54 expected 58 ***
+1:0:d=2024011500:APCP Total Precipitation [kg/m^2]:surface:Code Table 4.11=reserved:
+
+*** FATAL ERROR (delayed): PDT size error for /home/coding/gribtract/tests/corpus/small/pdt8_accum_3x2.grib2

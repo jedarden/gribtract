@@ -1,0 +1,69 @@
+1:0:d=2017010100:HGT Geopotential Height [gpm]:10 mb:anl:ENS=+1
+2:51175:d=2017010100:TMP Temperature [K]:10 mb:anl:ENS=+1
+3:71207:d=2017010100:RH Relative Humidity [%]:10 mb:anl:ENS=+1
+4:81889:d=2017010100:UGRD U-Component of Wind [m/s]:10 mb:anl:ENS=+1
+5:105874:d=2017010100:VGRD V-Component of Wind [m/s]:10 mb:anl:ENS=+1
+6:126862:d=2017010100:HGT Geopotential Height [gpm]:50 mb:anl:ENS=+1
+7:186365:d=2017010100:TMP Temperature [K]:50 mb:anl:ENS=+1
+8:211137:d=2017010100:RH Relative Humidity [%]:50 mb:anl:ENS=+1
+9:234756:d=2017010100:UGRD U-Component of Wind [m/s]:50 mb:anl:ENS=+1
+10:284999:d=2017010100:VGRD V-Component of Wind [m/s]:50 mb:anl:ENS=+1
+11:332893:d=2017010100:HGT Geopotential Height [gpm]:100 mb:anl:ENS=+1
+12:396785:d=2017010100:TMP Temperature [K]:100 mb:anl:ENS=+1
+13:425790:d=2017010100:RH Relative Humidity [%]:100 mb:anl:ENS=+1
+14:464211:d=2017010100:UGRD U-Component of Wind [m/s]:100 mb:anl:ENS=+1
+15:523669:d=2017010100:VGRD V-Component of Wind [m/s]:100 mb:anl:ENS=+1
+16:580954:d=2017010100:HGT Geopotential Height [gpm]:200 mb:anl:ENS=+1
+17:647334:d=2017010100:TMP Temperature [K]:200 mb:anl:ENS=+1
+18:679058:d=2017010100:RH Relative Humidity [%]:200 mb:anl:ENS=+1
+19:734802:d=2017010100:UGRD U-Component of Wind [m/s]:200 mb:anl:ENS=+1
+20:777673:d=2017010100:VGRD V-Component of Wind [m/s]:200 mb:anl:ENS=+1
+21:821272:d=2017010100:HGT Geopotential Height [gpm]:250 mb:anl:ENS=+1
+22:888751:d=2017010100:TMP Temperature [K]:250 mb:anl:ENS=+1
+23:921722:d=2017010100:RH Relative Humidity [%]:250 mb:anl:ENS=+1
+24:985394:d=2017010100:UGRD U-Component of Wind [m/s]:250 mb:anl:ENS=+1
+25:1030771:d=2017010100:VGRD V-Component of Wind [m/s]:250 mb:anl:ENS=+1
+26:1077607:d=2017010100:UGRD U-Component of Wind [m/s]:300 mb:anl:ENS=+1
+27:1125367:d=2017010100:VGRD V-Component of Wind [m/s]:300 mb:anl:ENS=+1
+28:1174479:d=2017010100:UGRD U-Component of Wind [m/s]:400 mb:anl:ENS=+1
+29:1221764:d=2017010100:VGRD V-Component of Wind [m/s]:400 mb:anl:ENS=+1
+30:1270750:d=2017010100:HGT Geopotential Height [gpm]:500 mb:anl:ENS=+1
+31:1342566:d=2017010100:TMP Temperature [K]:500 mb:anl:ENS=+1
+32:1377112:d=2017010100:RH Relative Humidity [%]:500 mb:anl:ENS=+1
+33:1447097:d=2017010100:UGRD U-Component of Wind [m/s]:500 mb:anl:ENS=+1
+34:1493847:d=2017010100:VGRD V-Component of Wind [m/s]:500 mb:anl:ENS=+1
+35:1541640:d=2017010100:HGT Geopotential Height [gpm]:700 mb:anl:ENS=+1
+36:1615334:d=2017010100:TMP Temperature [K]:700 mb:anl:ENS=+1
+37:1653136:d=2017010100:RH Relative Humidity [%]:700 mb:anl:ENS=+1
+38:1723596:d=2017010100:UGRD U-Component of Wind [m/s]:700 mb:anl:ENS=+1
+39:1797558:d=2017010100:VGRD V-Component of Wind [m/s]:700 mb:anl:ENS=+1
+40:1873105:d=2017010100:HGT Geopotential Height [gpm]:850 mb:anl:ENS=+1
+41:1948216:d=2017010100:TMP Temperature [K]:850 mb:anl:ENS=+1
+42:1990675:d=2017010100:RH Relative Humidity [%]:850 mb:anl:ENS=+1
+43:2062879:d=2017010100:VVEL Vertical Velocity (Pressure) [Pa/s]:850 mb:anl:ENS=+1
+44:2148055:d=2017010100:UGRD U-Component of Wind [m/s]:850 mb:anl:ENS=+1
+45:2223610:d=2017010100:VGRD V-Component of Wind [m/s]:850 mb:anl:ENS=+1
+46:2301121:d=2017010100:HGT Geopotential Height [gpm]:925 mb:anl:ENS=+1
+47:2377822:d=2017010100:TMP Temperature [K]:925 mb:anl:ENS=+1
+48:2419984:d=2017010100:RH Relative Humidity [%]:925 mb:anl:ENS=+1
+49:2489114:d=2017010100:UGRD U-Component of Wind [m/s]:925 mb:anl:ENS=+1
+50:2564532:d=2017010100:VGRD V-Component of Wind [m/s]:925 mb:anl:ENS=+1
+51:2642065:d=2017010100:TMP Temperature [K]:1000 mb:anl:ENS=+1
+52:2683205:d=2017010100:RH Relative Humidity [%]:1000 mb:anl:ENS=+1
+53:2748261:d=2017010100:UGRD U-Component of Wind [m/s]:1000 mb:anl:ENS=+1
+54:2824292:d=2017010100:VGRD V-Component of Wind [m/s]:1000 mb:anl:ENS=+1
+55:2900561:d=2017010100:HGT Geopotential Height [gpm]:1000 mb:anl:ENS=+1
+56:2980052:d=2017010100:PRES Pressure [Pa]:surface:anl:ENS=+1
+57:3056957:d=2017010100:HGT Geopotential Height [gpm]:surface:anl:ENS=+1
+58:3123346:d=2017010100:TSOIL Soil Temperature [K]:0-0.1 m below ground:anl:ENS=+1
+59:3159384:d=2017010100:SOILW Volumetric Soil Moisture Content [Fraction]:0-0.1 m below ground:anl:ENS=+1
+60:3184759:d=2017010100:WEASD Water Equivalent of Accumulated Snow Depth [kg/m^2]:surface:anl:ENS=+1
+61:3200016:d=2017010100:SNOD Snow Depth [m]:surface:anl:ENS=+1
+62:3221852:d=2017010100:TMP Temperature [K]:2 m above ground:anl:ENS=+1
+63:3293469:d=2017010100:RH Relative Humidity [%]:2 m above ground:anl:ENS=+1
+64:3356622:d=2017010100:UGRD U-Component of Wind [m/s]:10 m above ground:anl:ENS=+1
+65:3430781:d=2017010100:VGRD V-Component of Wind [m/s]:10 m above ground:anl:ENS=+1
+66:3505365:d=2017010100:PWAT Precipitable Water [kg/m^2]:entire atmosphere (considered as a single layer):anl:ENS=+1
+67:3553093:d=2017010100:CAPE Convective Available Potential Energy [J/kg]:180-0 mb above ground:anl:ENS=+1
+68:3599059:d=2017010100:CIN Convective Inhibition [J/kg]:180-0 mb above ground:anl:ENS=+1
+69:3645277:d=2017010100:PRMSL Pressure Reduced to MSL [Pa]:mean sea level:anl:ENS=+1
