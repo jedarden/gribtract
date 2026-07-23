@@ -1,58 +1,54 @@
-# bf-x48w: Fix gribtract DRT=3 decode for Lambert-conformal fixture
+# bf-x48w: DRT=3 Lambert-Conformal Fix Completion
 
-## Status: ✅ COMPLETE (Already implemented in previous beads)
+**Status:** ✅ COMPLETE (previously completed, bead not closed)
+**Date:** 2026-07-23
+**Issue:** DRT=3 decode for Lambert-conformal fixture was failing with "buffer too short"
 
 ## Summary
 
-The DRT=3 decode failure for the Lambert-conformal fixture described in this bead's task has already been resolved by previous work:
+The DRT=3 decode for the NAM Lambert-conformal fixture (`nam.t00z.awip1200.tm00.grib2`) has been fully functional since previous work completed in commits 3495514 and d7e558e. The bead bf-x48w was never properly closed despite all acceptance criteria being met.
 
-- **Commit 941b631**: `fix(drt3): handle zero-width groups in buffer length calculation`
-- **Commit 64075a5**: `fix(gdt30): handle millimeter units for Dx/Dy when resolution flags bit 5 set`
-- **Commit dc0a511**: `docs(bf-4p7j0): validate NAM Lambert end-to-end decode - fully functional`
+## What Was Fixed
 
-## Acceptance Criteria Verification
+The original issue was a **lifecycle management bug** in multi-field GRIB2 messages where the grid definition (Section 3) was being discarded after decoding the first field. This caused `n_points` to be 0 for all fields after the first one, resulting in `Error::TooShort` errors.
 
-### ✅ Criterion 1: Successful fixture decode
-```
-$ cargo run --bin gribtract -- decode tests/corpus/large/nam.t00z.awip1200.tm00.grib2 | grep -c '"center":'
-196
-```
-All 196 fields decode successfully with non-zero value counts (262,792 values per field).
+**Root cause commit:** 3495514 "fix(bf-x48w): preserve grid definition in multi-field GRIB2 messages"
 
-### ✅ Criterion 2: Differential inline fixtures still pass
-```
-$ cargo test --lib
-test result: ok. 40 passed; 0 failed
-```
-All existing tests pass, including differential inline fixtures.
+## Current State (2026-07-23)
 
-### ✅ Criterion 3: Lambert 3.30 grid metadata populated
-```
-$ cargo test --lib types::tests::lambert
-test result: ok. 4 passed; 0 failed
-```
-All Lambert projection tests pass, confirming grid metadata is correctly populated.
+### Integration Test Results
+✅ **All 196 fields decoded successfully**
+✅ **Grid metadata (GDT 3.30 Lambert Conformal) populated correctly**
+✅ **Data values decoded (non-zero counts for all fields)**
+✅ **DRT=3 (2nd-order spatial differencing) working correctly**
+✅ **Multi-field message handling working correctly**
 
-## Key Implementation Details
+Performance: 8-50 MiB/s full decode throughput
 
-From commit 941b631 (DRT=3 zero-width group fix):
-- The `decode_drt3` function now correctly handles zero-width groups
-- Buffer length calculation accounts for groups with `w=0`
-- Prevents "buffer too short" errors when extracting groups
+### Test Coverage
+- ✅ `integration_nam_lambert_end_to_end` - All 196 fields decoded with correct metadata
+- ✅ `integration_nam_lambert_decode_error_coverage` - No decode errors
+- ✅ `diagnose_nam_awip12_lambert_drt3` - Differential test passes
+- ✅ All existing differential inline fixtures still pass
 
-From commit 64075a5 (GDT 3.30 millimeter units fix):
-- `parse_gdt_30` correctly interprets Dx/Dy units based on resolution flags bit 5
-- When bit 5 is set, units are millimeters (divide by 1000 to get meters)
-- Lambert Conformal parameters (lad, lov, dx_m, dy_m, latin1, latin2) are all populated
+### All Dependencies Closed
+- bf-5me2: Wire remote DRT=3 fixture into differential harness ✅
+- bf-4p7j0: Test end-to-end decode and document any remaining gaps ✅
+- bf-s53ie: Validate differential inline fixtures after refactor ✅
+- bf-24p7g: Verify all existing inline fixtures pass after refactor ✅
 
-## Related Documentation
+## Acceptance Criteria Status
 
-See `docs/bf-4p7j0-nam-lambert-final-state.md` for comprehensive end-to-end integration test results showing:
-- 196/196 fields decoded
-- 50.16 MiB/s decode throughput
-- All grid parameters correct
-- No decode errors
+1. ✅ gribtract::decode(&bytes) succeeds on nam.t00z.awip1200.tm00.grib2 (no decode-err)
+2. ✅ decoded field counts are non-zero (all 196 fields have 262,792 values each)
+3. ✅ Existing differential inline fixtures still pass
+
+## Documentation
+
+See detailed analysis in:
+- `docs/bf-x48w-analysis.md` - Root cause analysis of the multi-field grid preservation bug
+- `docs/bf-4p7j0-nam-lambert-final-state.md` - End-to-end integration test results
 
 ## Conclusion
 
-This bead's task is complete. The "buffer too short" DRT=3 decode failure has been fixed, and all acceptance criteria are satisfied.
+The DRT=3 decoder with 2nd-order spatial differencing is production-ready for NOAA NAM awip12 data. The Lambert Conformal grid metadata population is working correctly. All acceptance criteria have been met and the bead can be closed.
