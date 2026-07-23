@@ -133,6 +133,20 @@
       }
     },
     {
+      "id": "nam_awip12_lambert_drt3_20250120",
+      "path": "large/nam.t00z.awip1200.tm00.20250120.grib2",
+      "sha256": "0ca7d348375cf529c22877d3d7bdc97ce4cc7811dfd3b5688aa2685afeafb4f1",
+      "size_bytes": 27000733,
+      "storage": "remote",
+      "url": "https://noaa-nam-pds.s3.amazonaws.com/nam.20250120/nam.t00z.awip1200.tm00.grib2",
+      "provenance": {
+        "source": "NOAA NAM awip12 (NCEP Grid 218, Lambert Conformal)",
+        "description": "NAM (North American Mesoscale) awip12 analysis, run 2025-01-20 00z, forecast hour F00. 196 GRIB2 messages, ALL GDT 3.30 (Lambert Conformal Conic) + DRT 3 (template 5.3: complex packing with 2nd-order spatial differencing). NCEP Grid 218: Nx=614, Ny=428 (262792 points), La1=12.19N/Lo1=226.541E, LaD=25N, LoV=265E, Latin1=Latin2=25N, Dx=Dy=12.191 km, scanningMode=0x40, bitsPerValue=15, centre=kwbc (NCEP). Sourced from noaa-nam-pds S3 (AWS Open Data, public, no auth, Accept-Ranges: bytes). Verified via wgrib2: grid_template=30 (Lambert Conformal). NOTE: gribtract's own DRT=3 unpacker is not yet implemented, so this is a target fixture for DRT=3 + Lambert-conformal decoder coverage — storage=remote because the 26.3 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-23",
+        "generated_by": "curl from noaa-nam-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
+      }
+    },
+    {
       "id": "hrrr_conus_drt3_lambert",
       "path": "large/hrrr.t12z.wrfsfcf00.grib2",
       "sha256": "22a80611536f4098358ec06eee4db8eb1998ee376da860ba7949c19aaa9adfd0",
