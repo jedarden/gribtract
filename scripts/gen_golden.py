@@ -16,6 +16,375 @@ import json
 import struct
 import sys
 from pathlib import Path
+from datetime import datetime, timezone
+
+
+# ============================================================================
+# GRIB2 Parameter and Level Tables
+# ============================================================================
+
+# Discipline codes (Code Table 0.0)
+DISCIPLINE_TABLE = {
+    0: "Meteorological",
+    1: "Hydrological",
+    2: "Land Surface",
+    3: "Space Weather",
+    10: "Oceanographic",
+    192: "Experimental",
+    255: "Missing"
+}
+
+# Parameter category names for Discipline 0 (Meteorological)
+PARAM_CATEGORY_MET = {
+    0: "Temperature",
+    1: "Moisture",
+    2: "Momentum",
+    3: "Wind",
+    4: "Mass",
+    5: "Short-wave Radiation",
+    6: "Cloud",
+    7: "Thermodynamic",
+    8: "Ozone",
+    9: "Vertical Motion",
+    10: "Radiation (Long-wave)",
+    11: "Sea Surface",
+    12: "Land Surface",
+    13: "Atmospheric Chemical Constituents",
+    14: "Movement",
+    15: "Imagery",
+    16: "Active Passives",
+    191: "Physical/optical properties of aerosol",
+    192: "Physical/optical properties of aerosol",
+    193: "Forecast probability indices",
+    194: "Nuclear/radiological",
+    255: "Missing"
+}
+
+# Common parameter names and units for Discipline 0 (NCEP operational parameters)
+# Format: (discipline, category, number): (short_name, long_name, units)
+PARAM_TABLE_NCEP = {
+    (0, 0, 0): ("TMP", "Temperature", "K"),
+    (0, 0, 1): ("VTMP", "Virtual Temperature", "K"),
+    (0, 0, 2): ("POT", "Potential Temperature", "K"),
+    (0, 0, 3): ("EPOT", "Equivalent Potential Temperature", "K"),
+    (0, 0, 4): ("TMAX", "Maximum Temperature", "K"),
+    (0, 0, 5): ("TMIN", "Minimum Temperature", "K"),
+    (0, 0, 6): ("DPT", "Dew Point Temperature", "K"),
+    (0, 0, 7): ("DEPR", "Dew Point Depression", "K"),
+    (0, 0, 11): ("LHTFL", "Latent Heat Net Flux", "W/m^2"),
+    (0, 0, 12): ("SHTFL", "Sensible Heat Net Flux", "W/m^2"),
+    (0, 1, 0): ("SPFH", "Specific Humidity", "kg/kg"),
+    (0, 1, 1): ("RH", "Relative Humidity", "%"),
+    (0, 1, 2): ("MIXR", "Mixing Ratio", "kg/kg"),
+    (0, 1, 3): ("PWAT", "Precipitable Water", "kg/m^2"),
+    (0, 1, 4): ("VAPP", "Vapor Pressure", "Pa"),
+    (0, 1, 5): ("SATD", "Saturation Deficit", "kg/kg"),
+    (0, 2, 0): ("PRES", "Pressure", "Pa"),
+    (0, 2, 1): ("MSLP", "Mean Sea Level Pressure", "Pa"),
+    (0, 2, 2): ("PMSL", "Pressure reduced to MSL", "Pa"),
+    (0, 3, 0): ("UGRD", "u-component of wind", "m/s"),
+    (0, 3, 1): ("VGRD", "v-component of wind", "m/s"),
+    (0, 3, 2): ("DTRW", "Drift Wind", "m/s"),
+    (0, 3, 3): ("STRM", "Streamfunction", "m^2/s"),
+    (0, 3, 4): ("VPOT", "Velocity Potential", "m^2/s"),
+    (0, 3, 5): ("MNTF", "Montgomery Stream Function", "m^2/s^2"),
+    (0, 3, 6): ("SGCVV", "Sigma-Vertical Velocity", "1/s"),
+    (0, 6, 1): ("CRAIN", "Rain", "kg/m^2"),
+    (0, 6, 2): ("CFRZR", "Freezing Rain", "kg/m^2"),
+    (0, 6, 3): ("CICEP", "Ice Pellets", "kg/m^2"),
+    (0, 6, 4): ("CSNOW", "Snow", "kg/m^2"),
+    (0, 6, 5): ("APCP", "Total Precipitation", "kg/m^2"),
+    (0, 6, 6): ("NCPCP", "Large-scale Precipitation", "kg/m^2"),
+    (0, 6, 7): ("ACPCP", "Convective Precipitation", "kg/m^2"),
+    (0, 6, 8): ("CPOFP", "Prob. of Frozen Precip", "%"),
+    (0, 6, 9): ("CRSUP", "Convective Rain", "kg/m^2"),
+    (0, 6, 10): ("CSUSF", "Convective Snow", "kg/m^2"),
+    (0, 6, 11): ("CWAT", "Cloud Water", "kg/m^2"),
+    (0, 6, 12): ("SNOD", "Snow Depth", "m"),
+    (0, 6, 13): ("SNOWH", "Snow Depth (water equivalent)", "kg/m^2"),
+    (0, 6, 14): ("WEASD", "Water Equivalent of Accumulated Snow Depth", "kg/m^2"),
+    (0, 6, 15): ("SNOF", "Snowfall", "kg/m^2"),
+    (0, 6, 16): ("SOTYP", "Snow Type", "numeric"),
+    (0, 6, 17): ("SRORG", "Snow Age", "s"),
+    (0, 6, 18): ("SMREF", "Snow Albedo", "%"),
+    (0, 6, 19): ("SMTYP", "Snow temperature categories", "numeric"),
+    (0, 6, 20): ("BRNS", "Brunt", "K/day"),
+    (0, 6, 21): ("LFTX", "Best (4 layer) Lifted Index", "K"),
+}
+
+# Level type codes (Code Table 4.5)
+LEVEL_TYPE_TABLE = {
+    1: ("surface", "Surface or land surface"),
+    2: ("cloud_base", "Cloud base level"),
+    3: ("cloud_top", "Cloud top level"),
+    4: ("snow_depth", "Level 0 meters below sea level (snow depth)"),
+    5: ("atmosphere", "Level above sea level"),
+    6: ("level", "Level from ground (altitude)"),
+    7: ("altitude", "Isothermal level"),
+    8: ("pressure", "Isobaric surface"),
+    9: ("sea_level", "Sea level"),
+    10: ("fixed_height", "Specified altitude level above ground (height above ground)"),
+    11: ("tropopause", "Tropopause"),
+    12: ("nominal_tropopause", "Nominal tropopause"),
+    13: ("max_wind", "Maximum wind level"),
+    14: ("max_temp", "Level of 0°C isotherm"),
+    15: ("atmosphere_depth", "Level of adiabatic condensation lifted from the surface"),
+    16: ("pressure_surface_ground", "Pressure at ground level"),
+    17: ("pressure_above_ground", "Pressure above ground level"),
+    18: ("pressure_below_sea", "Pressure below sea level"),
+    19: ("sigma", "Sigma level"),
+    20: ("depth_below_sea", "Depth below sea level"),
+    21: ("isothermal", "Isothermal level"),
+    22: ("log_pressure", "Logarithmic pressure level"),
+    23: ("potential_temperature", "Potential temperature level"),
+    24: ("potential_vorticity", "Potential vorticity surface"),
+    25: ("eta", "Eta level"),
+    26: ("height_above_sea", "Height above sea level"),
+    27: ("mixed_layer", "Mixed layer depth"),
+    28: ("boundary_layer", "Top of boundary layer"),
+    29: ("sea_bottom", "Sea bottom"),
+    30: ("isobaric", "Isobaric surface (Pa) - used with scaled value"),
+    31: ("layer", "Layer between two depths"),
+    32: ("layer_between_isobaric", "Layer between two isobaric surfaces"),
+    33: ("layer_between_sigma", "Layer between two sigma levels"),
+    34: ("layer_between_eta", "Layer between two eta levels"),
+    35: ("layer_between_heights", "Layer between two height levels above ground"),
+    36: ("layer_between_pressure", "Layer between two pressure levels below sea level"),
+    37: ("layer_between_heights_sea", "Layer between two height levels above sea level"),
+    38: ("altitude_msl", "Altitude from mean sea level"),
+    39: ("pressure_from_ground", "Pressure (converted from Pa to hPa) from ground"),
+    40: ("pressure_interval", "Pressure interval from ground to level"),
+    41: ("height_above_ground", "Height above ground level"),
+    42: ("height_interval", "Height interval from ground"),
+    43: ("potential_temperature_interval", "Potential temperature interval from ground"),
+    44: ("potential_vorticity_interval", "Potential vorticity interval from ground"),
+    45: ("height_interval_sea", "Height interval above sea level"),
+    46: ("pressure_interval_sea", "Pressure interval from sea level"),
+    47: ("pressure_interval_from_msl", "Pressure interval from mean sea level"),
+    48: ("sigma_interval", "Sigma interval from ground"),
+    49: ("eta_interval", "Eta interval from ground"),
+    50: ("depth_interval", "Depth interval below sea level"),
+    51: ("layer_between_isobaric_intvl", "Layer between two isobaric interval surfaces"),
+    52: ("layer_between_sigma_intvl", "Layer between two sigma interval surfaces"),
+    53: ("layer_between_eta_intvl", "Layer between two eta interval surfaces"),
+    54: ("layer_between_heights_intvl", "Layer between two height interval surfaces above ground"),
+    55: ("layer_between_heights_sea_intvl", "Layer between two height interval surfaces above sea"),
+    56: ("layer_between_pressure_intvl", "Layer between two pressure interval surfaces below sea"),
+    57: ("layer_between_potential_temp", "Layer between two potential temperature surfaces"),
+    58: ("layer_between_potential_vorticity", "Layer between two potential vorticity surfaces"),
+    59: ("entire_atmosphere", "Entire atmosphere"),
+    60: ("entire_ocean", "Entire ocean"),
+    100: ("isobaric_high_prec", "High precision isobaric surface"),
+    101: ("height_above_ground_high", "High precision height above ground"),
+    102: ("height_above_sea_high", "High precision height above sea level"),
+    103: ("surface_below_sea", "Surface below land/sea"),
+    104: ("isobaric_layer_high", "High precision isobaric layer"),
+    105: ("height_layer_above_ground_high", "High precision height layer above ground"),
+    106: ("height_layer_above_sea_high", "High precision height layer above sea"),
+    107: ("pressure_high", "High precision pressure from ground"),
+    108: ("depth_below_land", "Depth below land surface"),
+    109: ("layer_depths_below_land", "Layer between two depths below land surface"),
+    110: ("layer_depth_intervals_below_land", "Layer between two depth intervals below land"),
+    111: ("highest_tropospheric_freezing", "Highest tropospheric freezing level"),
+    112: ("boundary_layer_top", "Boundary layer top"),
+    113: ("layer_between_isobaric_high", "Layer between two isobaric surfaces (high precision)"),
+    192: ("low_cloud_bottom", "Low cloud bottom"),
+    193: ("low_cloud_top", "Low cloud top"),
+    194: ("cloud_bottom", "Cloud bottom"),
+    195: ("cloud_top", "Cloud top"),
+    196: ("cloud_ceiling", "Cloud ceiling"),
+    197: ("high_cloud_bottom", "High cloud bottom"),
+    198: ("high_cloud_top", "High cloud top"),
+    199: ("lowest_cloud_top", "Lowest cloud top"),
+    200: ("ocean_isobaric", "Ocean isobaric surface"),
+    201: ("ocean_depth", "Depth below ocean surface"),
+    204: ("height_above_ground_agl", "Height above ground level (AGL)"),
+    206: ("general_vertical", "General vertical level"),
+    232: ("entire_atmosphere_layer", "Entire atmosphere layer"),
+    233: ("entire_ocean_layer", "Entire ocean layer"),
+    234: ("composite_layer", "Composite layer"),
+    235: ("ocean_surface_layer", "Ocean surface layer"),
+    236: ("bottom_ocean_layer", "Bottom ocean layer"),
+    237: ("ocean_temperature_layer", "Ocean temperature layer"),
+    238: ("ocean_salinity_layer", "Ocean salinity layer"),
+    255: ("missing", "Missing")
+}
+
+# Time range indicator codes (Code Table 4.10)
+TIME_RANGE_INDICATOR = {
+    0: "Forecast",
+    1: "Analysis",
+    2: "Analysis or forecast at a horizontal level or in a horizontal layer at a point in time",
+    3: "Average",
+    4: "Accumulation",
+    5: "Difference",
+    6: "Accumulation (from previous time)",
+    7: "Average (from previous time)",
+    8: "Maximum",
+    9: "Minimum",
+    10: "Difference from previous time",
+    11: "Standard deviation of values over time range",
+    12: "Covariance of values over time range",
+    13: "Correlation coefficient of values over time range",
+    14: "Sum over time range",
+    15: "Spread of ensemble over time range",
+    16: "Normalized spread of ensemble over time range",
+    19: "Statistical interpolation",
+    20: "Statistical interpolation - normalized values",
+    21: "Vector mean resultant over time range",
+    22: "Vector mean resultant - normalized values over time range",
+    23: "Standard deviation - normalized values over time range",
+    24: "Principal component analysis time series",
+    25: "Empirical orthogonal function time series",
+    26: "Average over a restricted time range",
+    27: "Accumulation over a restricted time range",
+    28: "Difference from a previous time within a time range",
+    29: "Standard deviation - normalized values - restricted time range",
+    30: "Vector mean resultant - restricted time range",
+    31: "Vector mean resultant - normalized values - restricted time range",
+    32: "Vector mean resultant over a time range - normalized values",
+    33: "Difference of Gaussian filter time series",
+    34: "Sum over a time range",
+    51: "Root mean square of values over time range",
+    254: "Trend",
+    255: "Missing"
+}
+
+
+# ============================================================================
+# Basic GRIB2 parsing implementation
+# ============================================================================
+
+# ============================================================================
+# Helper functions for parameter and level lookup
+# ============================================================================
+
+def get_parameter_info(discipline, category, number):
+    """Get parameter name, description, and units from lookup tables.
+
+    Args:
+        discipline: GRIB2 discipline code (0=meteorological, 1=hydrological, etc.)
+        category: Parameter category code
+        number: Parameter number code
+
+    Returns:
+        Dictionary with short_name, long_name, and units
+    """
+    # Try NCEP operational parameter table first
+    key = (discipline, category, number)
+    if key in PARAM_TABLE_NCEP:
+        short_name, long_name, units = PARAM_TABLE_NCEP[key]
+        return {
+            'short_name': short_name,
+            'long_name': long_name,
+            'units': units,
+            'source': 'NCEP_operational'
+        }
+
+    # Fallback: use category name for description
+    category_name = "Unknown"
+    if discipline == 0 and category in PARAM_CATEGORY_MET:
+        category_name = PARAM_CATEGORY_MET[category]
+    elif discipline in DISCIPLINE_TABLE:
+        category_name = f"{DISCIPLINE_TABLE[discipline]} category {category}"
+
+    return {
+        'short_name': f"PARAM-{discipline}-{category}-{number}",
+        'long_name': f"{category_name} parameter {number}",
+        'units': "Unknown",
+        'source': 'fallback'
+    }
+
+
+def get_level_type_info(level_type):
+    """Get level type name and description from lookup table.
+
+    Args:
+        level_type: GRIB2 level type code (Code Table 4.5)
+
+    Returns:
+        Dictionary with short_name and description
+    """
+    if level_type in LEVEL_TYPE_TABLE:
+        short_name, description = LEVEL_TYPE_TABLE[level_type]
+        return {
+            'short_name': short_name,
+            'description': description,
+            'code': level_type
+        }
+
+    return {
+        'short_name': f"level_{level_type}",
+        'description': f"Unknown level type {level_type}",
+        'code': level_type
+    }
+
+
+def format_reference_time(year, month, day, hour, minute, second, significance):
+    """Format reference time into ISO 8601 string and significance info.
+
+    Args:
+        year, month, day, hour, minute, second: Time components
+        significance: Significance of reference time (Code Table 1.2)
+
+    Returns:
+        Dictionary with iso_string, significance_name, and components
+    """
+    # Validate and clamp time components
+    year = max(0, min(9999, year))
+    month = max(1, min(12, month))
+    day = max(1, min(31, day))
+    hour = max(0, min(23, hour))
+    minute = max(0, min(59, minute))
+    second = max(0, min(59, second))
+
+    try:
+        iso_string = datetime(year, month, day, hour, minute, second, tzinfo=timezone.utc).isoformat()
+    except ValueError:
+        iso_string = f"{year:04d}-{month:02d}-{day:02d}T{hour:02d}:{minute:02d}:{second:02d}Z"
+
+    # Significance of reference time (Code Table 1.2)
+    significance_names = {
+        0: "Start of forecast",
+        1: "Start of analysis",
+        2: "Time of observation",
+        3: "Start of assimilation",
+        4: "Verification time",
+        255: "Missing"
+    }
+
+    return {
+        'iso_string': iso_string,
+        'significance': significance,
+        'significance_name': significance_names.get(significance, f"Unknown({significance})"),
+        'components': {
+            'year': year,
+            'month': month,
+            'day': day,
+            'hour': hour,
+            'minute': minute,
+            'second': second
+        }
+    }
+
+
+def parse_scaled_value(scale_factor, scaled_value):
+    """Parse scaled value from GRIB2 encoding.
+
+    Args:
+        scale_factor: Scale factor (negative = decimal shift, positive = multiply)
+        scaled_value: Scaled value
+
+    Returns:
+        Actual value (float)
+    """
+    if scale_factor == 0:
+        return float(scaled_value)
+
+    # Handle signed scaled_value (can be negative)
+    # In GRIB2, scaled_value is stored as signed int
+    actual_value = float(scaled_value) * (10.0 ** (-scale_factor))
+    return actual_value
 
 
 # ============================================================================
@@ -202,33 +571,35 @@ class GRIB2Parser:
         param_category = section4[9]
         param_number = section4[10]
 
-        # Forecast time offset (varies by template - typically octet 15-16 for PDT 4.0)
-        forecast_offset = 0
-        if len(section4) >= 19:
-            forecast_offset = struct.unpack('>H', section4[14:16])[0]  # Octets 15-16
+        # Get parameter information from lookup tables
+        param_info = get_parameter_info(discipline, param_category, param_number)
+
+        # Extract level information from Section 4
+        # For PDT 4.0, level info starts at octet 11 (index 10)
+        level_info = self._extract_level_info(section4, pdt_template)
+
+        # Extract forecast/time information
+        forecast_info = self._extract_forecast_info(section4, pdt_template, year, month, day, hour, minute, second, significance)
 
         # Build basic message structure
         message = {
             'center': center,
             'subcenter': subcenter,
-            'discipline': discipline,
+            'discipline': {
+                'code': discipline,
+                'name': DISCIPLINE_TABLE.get(discipline, f"Unknown discipline {discipline}")
+            },
             'parameter': {
                 'discipline': discipline,
                 'category': param_category,
-                'number': param_number
+                'number': param_number,
+                'short_name': param_info['short_name'],
+                'long_name': param_info['long_name'],
+                'units': param_info['units'],
+                'table_source': param_info['source']
             },
-            'forecast': {
-                'reference_time': {
-                    'year': year,
-                    'month': month,
-                    'day': day,
-                    'hour': hour,
-                    'minute': minute,
-                    'second': second,
-                    'significance': significance
-                },
-                'forecast_offset': forecast_offset
-            },
+            'level': level_info,
+            'forecast': forecast_info,
             'gdt_template': gdt_template,
             'pdt_template': pdt_template,
             'sections_found': sorted(sections.keys())
@@ -250,6 +621,219 @@ class GRIB2Parser:
             }
 
         return message
+
+    def _extract_level_info(self, section4, pdt_template):
+        """Extract level information from Section 4.
+
+        For PDT 4.0 (template 0):
+        - Octet 11 (index 10): First level type
+        - Octet 12-13 (index 11-12): Scale factor for first level
+        - Octet 14-17 (index 13-16): Scaled value for first level
+        - Octet 18 (index 17): Second level type
+        - Octet 19-20 (index 18-19): Scale factor for second level
+        - Octet 21-24 (index 20-23): Scaled value for second level
+
+        Returns:
+            Dictionary with level type, value, and description
+        """
+        level_info = {
+            'pdt_template': pdt_template,
+            'first_level': None,
+            'second_level': None
+        }
+
+        try:
+            if pdt_template == 0:  # PDT 4.0
+                if len(section4) >= 18:
+                    # First level
+                    level1_type = section4[10]
+                    level1_scale = struct.unpack('>h', section4[11:13])[0]  # signed short
+                    level1_value = struct.unpack('>i', section4[13:17])[0]  # signed int
+
+                    # Parse scaled value
+                    actual_level1 = parse_scaled_value(level1_scale, level1_value)
+                    level1_info = get_level_type_info(level1_type)
+
+                    level_info['first_level'] = {
+                        'type_code': level1_type,
+                        'type_name': level1_info['short_name'],
+                        'type_description': level1_info['description'],
+                        'scale_factor': level1_scale,
+                        'scaled_value': level1_value,
+                        'value': actual_level1
+                    }
+
+                    # Second level (if present)
+                    if len(section4) >= 25:
+                        level2_type = section4[17]
+                        level2_scale = struct.unpack('>h', section4[18:20])[0]  # signed short
+                        level2_value = struct.unpack('>i', section4[20:24])[0]  # signed int
+
+                        # Parse scaled value
+                        actual_level2 = parse_scaled_value(level2_scale, level2_value)
+                        level2_info = get_level_type_info(level2_type)
+
+                        level_info['second_level'] = {
+                            'type_code': level2_type,
+                            'type_name': level2_info['short_name'],
+                            'type_description': level2_info['description'],
+                            'scale_factor': level2_scale,
+                            'scaled_value': level2_value,
+                            'value': actual_level2
+                        }
+
+            else:
+                # For other PDT templates, store minimal info
+                level_info['extraction_note'] = f'Level extraction for PDT {pdt_template} not fully implemented'
+                level_info['pdt_template'] = pdt_template
+
+        except (struct.error, ValueError, IndexError) as e:
+            level_info['extraction_error'] = str(e)
+
+        return level_info
+
+    def _extract_forecast_info(self, section4, pdt_template, year, month, day, hour, minute, second, significance):
+        """Extract forecast/time information from Section 4.
+
+        For PDT 4.0 (template 0):
+        - Forecast time offset is at octets 15-16 (index 14-15)
+        - Time range indicator is in some templates
+
+        Returns:
+            Dictionary with reference_time, forecast_time, and temporal metadata
+        """
+        forecast_info = {}
+
+        try:
+            # Format reference time
+            ref_time = format_reference_time(year, month, day, hour, minute, second, significance)
+            forecast_info['reference_time'] = ref_time
+
+            # Extract forecast offset (for PDT 4.0)
+            forecast_offset = 0
+            forecast_offset_unit = 1  # Default: hours
+
+            if pdt_template == 0 and len(section4) >= 19:
+                # Octets 15-16: Forecast time in units defined by octet 19
+                forecast_offset = struct.unpack('>H', section4[14:16])[0]
+                # Octet 19: Time range indicator/forecast time unit
+                if len(section4) >= 22:
+                    time_unit_code = section4[21]  # Octet 22
+                    # Time unit codes: 0=minute, 1=hour, 2=day, 3=month, 4=year, etc.
+                    forecast_offset_unit = time_unit_code
+            elif pdt_template == 1 and len(section4) >= 19:
+                # PDT 4.1 (ensemble forecast)
+                forecast_offset = struct.unpack('>H', section4[14:16])[0]
+                if len(section4) >= 22:
+                    forecast_offset_unit = section4[21]
+
+            forecast_info['forecast_offset'] = {
+                'value': forecast_offset,
+                'unit_code': forecast_offset_unit,
+                'unit_name': self._get_time_unit_name(forecast_offset_unit)
+            }
+
+            # Calculate forecast time if offset is available
+            if forecast_offset > 0:
+                forecast_info['forecast_time'] = self._calculate_forecast_time(
+                    ref_time, forecast_offset, forecast_offset_unit
+                )
+
+        except (struct.error, ValueError, IndexError) as e:
+            forecast_info['extraction_error'] = str(e)
+
+        return forecast_info
+
+    def _get_time_unit_name(self, unit_code):
+        """Get human-readable time unit name from code.
+
+        Time unit codes (Code Table 4.4):
+        0: minutes
+        1: hours
+        2: days
+        3: months
+        4: years
+        5: decades
+        6: normals (30 years)
+        7: centuries (100 years)
+        8-9: reserved
+        10: 3 hours
+        11: 6 hours
+        12: 12 hours
+        13: seconds
+        """
+        time_units = {
+            0: "minutes",
+            1: "hours",
+            2: "days",
+            3: "months",
+            4: "years",
+            5: "decades",
+            6: "normals (30 years)",
+            7: "centuries",
+            10: "3 hours",
+            11: "6 hours",
+            12: "12 hours",
+            13: "seconds"
+        }
+        return time_units.get(unit_code, f"unknown_unit({unit_code})")
+
+    def _calculate_forecast_time(self, ref_time, offset, unit_code):
+        """Calculate forecast time string from reference time and offset.
+
+        Args:
+            ref_time: Reference time dictionary from format_reference_time()
+            offset: Forecast offset value
+            unit_code: Time unit code
+
+        Returns:
+            Dictionary with iso_string and offset information
+        """
+        try:
+            from datetime import timedelta
+
+            # Convert offset to hours
+            offset_hours = offset
+            if unit_code == 0:  # minutes
+                offset_hours = offset / 60.0
+            elif unit_code == 2:  # days
+                offset_hours = offset * 24.0
+            elif unit_code == 10:  # 3 hours
+                offset_hours = offset * 3.0
+            elif unit_code == 11:  # 6 hours
+                offset_hours = offset * 6.0
+            elif unit_code == 12:  # 12 hours
+                offset_hours = offset * 12.0
+            elif unit_code == 13:  # seconds
+                offset_hours = offset / 3600.0
+            elif unit_code in (3, 4, 5, 6, 7):  # months, years, decades, etc.
+                # For longer units, can't easily convert to hours
+                offset_hours = None
+
+            # Calculate forecast time if possible
+            iso_string = None
+            if offset_hours is not None:
+                try:
+                    ref_dt = datetime.fromisoformat(ref_time['iso_string'].replace('Z', '+00:00'))
+                    forecast_dt = ref_dt + timedelta(hours=offset_hours)
+                    iso_string = forecast_dt.isoformat()
+                except (ValueError, OverflowError):
+                    pass
+
+            return {
+                'iso_string': iso_string,
+                'offset': offset,
+                'offset_unit_code': unit_code,
+                'offset_unit_name': self._get_time_unit_name(unit_code),
+                'offset_hours': offset_hours
+            }
+
+        except Exception as e:
+            return {
+                'error': str(e),
+                'offset': offset,
+                'offset_unit_code': unit_code
+            }
 
     def _extract_grid_metadata(self, section3, gdt_template):
         """Extract grid metadata from Grid Definition Section (Section 3).
