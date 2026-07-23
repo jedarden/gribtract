@@ -90,10 +90,73 @@ pub struct GoldenPackingInfo {
 }
 
 /// Grid values in golden JSON: `{"Dense": [...]}` or `{"Masked": {...}}`.
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+///
+/// The `Dense` variant allows `null` values in the JSON array, which are
+/// interpreted as missing/undefined data points and represented as NaN.
+#[derive(Debug, Clone, PartialEq)]
 pub enum GoldenGridValues {
     Dense(Vec<f64>),
     Masked { values: Vec<f64>, present: Vec<bool> },
+}
+
+// Custom deserializer to handle null values in Dense arrays
+impl<'de> Deserialize<'de> for GoldenGridValues {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        use serde::de::{self, Visitor, SeqAccess, MapAccess};
+        use std::fmt;
+
+        struct GoldenGridValuesVisitor;
+
+        impl<'de> Visitor<'de> for GoldenGridValuesVisitor {
+            type Value = GoldenGridValues;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("an object with keys 'Dense' or 'Masked'")
+            }
+
+            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                let mut dense_value = None;
+                let mut masked_values = None;
+                let mut masked_present = None;
+
+                while let Some(key) = map.next_key::<String>()? {
+                    match key.as_str() {
+                        "Dense" => {
+                            // Deserialize as Vec<Option<f64>> to handle nulls
+                            let raw: Vec<Option<f64>> = map.next_value()?;
+                            // Convert nulls to NaN
+                            dense_value = Some(raw.into_iter().map(|v| v.unwrap_or(f64::NAN)).collect());
+                        }
+                        "values" => {
+                            masked_values = Some(map.next_value()?);
+                        }
+                        "present" => {
+                            masked_present = Some(map.next_value()?);
+                        }
+                        _ => {
+                            map.next_value::<de::IgnoredAny>()?;
+                        }
+                    }
+                }
+
+                if let Some(dense) = dense_value {
+                    Ok(GoldenGridValues::Dense(dense))
+                } else if let (Some(values), Some(present)) = (masked_values, masked_present) {
+                    Ok(GoldenGridValues::Masked { values, present })
+                } else {
+                    Err(de::Error::custom("expected 'Dense' key or both 'values' and 'present' keys"))
+                }
+            }
+        }
+
+        deserializer.deserialize_any(GoldenGridValuesVisitor)
+    }
 }
 
 impl GoldenGridValues {
@@ -112,7 +175,11 @@ impl GoldenGridValues {
         match self {
             GoldenGridValues::Dense(v) => v
                 .iter()
-                .map(|&val| (val, true))
+                .map(|&val| {
+                    // NaN values (from null in JSON) are treated as missing
+                    let present = !val.is_nan();
+                    (val, present)
+                })
                 .collect::<Vec<_>>()
                 .into_iter(),
             GoldenGridValues::Masked { values, present } => values
