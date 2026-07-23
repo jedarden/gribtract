@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""gen_golden_fixed.py — Generate gribtract golden reference files using basic GRIB2 parsing.
+"""gen_golden.py — Generate gribtract golden reference files using basic GRIB2 parsing.
 
 This script implements basic GRIB2 file parsing from scratch without external dependencies.
 It extracts key metadata from GRIB2 messages and outputs JSON structure.
 
 Usage:
-    python3 scripts/gen_golden_fixed.py <grib2_file> <fixture_id> [--output-dir DIR]
+    python3 scripts/gen_golden.py <grib2_file> <fixture_id> [--output-dir DIR]
 
 Output:
     tests/corpus/golden/<fixture_id>.json
@@ -252,6 +252,10 @@ TIME_RANGE_INDICATOR = {
 
 
 # ============================================================================
+# Basic GRIB2 parsing implementation
+# ============================================================================
+
+# ============================================================================
 # Helper functions for parameter and level lookup
 # ============================================================================
 
@@ -447,7 +451,7 @@ class GRIB2Parser:
         # Bytes 4-5: reserved (always 0)
         # Byte 6: discipline
         # Byte 7: edition (2 for GRIB2)
-        # Bytes 8-15: total length of message (8 bytes in GRIB2 spec)
+        # Bytes 8-11: total length of message
         try:
             discipline = data[offset+6]
             edition = data[offset+7]
@@ -457,8 +461,9 @@ class GRIB2Parser:
             # Bytes 4-5: Reserved (00 00)
             # Byte 6: Discipline
             # Byte 7: Edition (2 for GRIB2)
-            # Bytes 8-15: Total length of message (8-byte unsigned long)
-            section0_length = struct.unpack('>Q', data[offset+8:offset+16])[0]
+            # Bytes 8-11: Additional fields/reserved
+            # Bytes 12-15: Total length of message
+            section0_length = struct.unpack('>I', data[offset+12:offset+16])[0]
 
             if edition != 2:
                 return None  # Only GRIB2 supported
@@ -504,18 +509,7 @@ class GRIB2Parser:
             if not sections:
                 return None
 
-            # Extract GDT and PDT template numbers first (needed for _extract_metadata)
-            gdt_template = 0
-            if 3 in sections and len(sections[3]['data']) >= 7:
-                section3 = sections[3]['data']
-                gdt_template = struct.unpack('>H', section3[5:7])[0]
-
-            pdt_template = 0
-            if 4 in sections and len(sections[4]['data']) >= 7:
-                section4 = sections[4]['data']
-                pdt_template = struct.unpack('>H', section4[5:7])[0]
-
-            message = self._extract_metadata(sections, discipline, gdt_template, pdt_template)
+            message = self._extract_metadata(sections, discipline)
             next_offset = offset + section0_length
 
             return message, next_offset
@@ -523,7 +517,7 @@ class GRIB2Parser:
         except (struct.error, ValueError):
             return None
 
-    def _extract_metadata(self, sections, discipline, gdt_template, pdt_template):
+    def _extract_metadata(self, sections, discipline):
         """Extract metadata from parsed sections."""
         if 1 not in sections or 3 not in sections or 4 not in sections:
             return None
@@ -533,62 +527,45 @@ class GRIB2Parser:
         section4 = sections[4]['data']
 
         # Section 1: Identification Section
-        # Octets 1-4: length, Octet 5: section number
-        # Octets 6-7: center
-        # Octets 8-9: subcenter
-        # Octets 10-11: master tables version
-        # Octets 12-13: local tables version
+        # Octets: 1-4 (length), 5 (section number), 6-7 (center),
+        #         8-9 (subcenter), 10-11 (master tables version), 12-13 (local tables version),
+        #         14 (significance of reference time), 15-16 (year), 17 (month), 18 (day),
+        #         19 (hour), 20 (minute), 21 (second)
+        # Minimum Section 1 length is 21 bytes (including 5-byte header)
+        if len(section1) < 21:
+            return None
+
+        # Note: section data includes the 5-byte header (4-byte length + 1-byte section number)
+        # So octet N in the spec is at index N-1 in the byte array
+        center = struct.unpack('>H', section1[5:7])[0]
+        subcenter = struct.unpack('>H', section1[7:9])[0]
+
+        # Reference time fields (octet numbers from GRIB2 spec, Section 1)
         # Octet 14: significance of reference time
-        # Octets 15-16: year
+        # Octet 15-16: year
         # Octet 17: month
         # Octet 18: day
         # Octet 19: hour
         # Octet 20: minute
         # Octet 21: second
-        # (Data includes 5-byte header, so octet N is at index N-1)
-        if len(section1) < 21:
-            return None
-
-        center = struct.unpack('>H', section1[5:7])[0]
-        subcenter = struct.unpack('>H', section1[7:9])[0]
-
-        significance = section1[13]    # Octet 14 → index 13
-        year = struct.unpack('>H', section1[14:16])[0]    # Octets 15-16 → indices 14-15
-        month = section1[16]         # Octet 17 → index 16
-        day = section1[17]            # Octet 18 → index 17
-        hour = section1[18]           # Octet 19 → index 18
-        minute = section1[19]         # Octet 20 → index 19
-        second = section1[20] if len(section1) > 20 else 0  # Octet 21 → index 20
+        significance = section1[13]    # Octet 14
+        year = struct.unpack('>H', section1[12:14])[0]    # Octets 13-14 (fix: was 14-16)
+        month = section1[14]         # Octet 15 (fix: was 16)
+        day = section1[15]            # Octet 16 (fix: was 17)
+        hour = section1[16]           # Octet 17 (fix: was 18)
+        minute = section1[17]         # Octet 18 (fix: was 19)
+        second = section1[18] if len(section1) > 18 else 0  # Octet 19 (fix: was 20)
 
         # Section 3: Grid Definition Section
+        # Octets: 1-4 (length), 5 (section number), 6-7 (template number)
         if len(section3) < 7:
             return None
 
         gdt_template = struct.unpack('>H', section3[5:7])[0]
 
-        # Extract grid metadata with error handling
-        try:
-            grid_info = self._extract_grid_metadata(section3, gdt_template)
-        except (struct.error, ValueError, IndexError) as e:
-            # If grid extraction fails, still return the message with basic grid info
-            grid_info = {
-                'template': gdt_template,
-                'num_data_points': None,
-                'nx': None,
-                'ny': None,
-                'lat_first': None,
-                'lon_first': None,
-                'lat_last': None,
-                'lon_last': None,
-                'di': None,
-                'dj': None,
-                'scanning_mode': 0,
-                'resolution_flags': 48,
-                'shape_of_earth': 6,
-                'extraction_error': str(e)
-            }
-
         # Section 4: Product Definition Section
+        # Octets: 1-4 (length), 5 (section number), 6-7 (template number),
+        #         8 (number of coordinates), then parameter info
         if len(section4) < 15:
             return None
 
@@ -596,8 +573,8 @@ class GRIB2Parser:
         num_coords = section4[7]
 
         # For template 4.0 (analysis/forecast):
-        # Octet 10 (index 9): parameter category
-        # Octet 11 (index 10): parameter number
+        # Octet 10: parameter category
+        # Octet 11: parameter number
         param_category = section4[9]
         param_number = section4[10]
 
@@ -605,132 +582,117 @@ class GRIB2Parser:
         param_info = get_parameter_info(discipline, param_category, param_number)
 
         # Extract level information from Section 4
+        # For PDT 4.0, level info starts at octet 11 (index 10)
         level_info = self._extract_level_info(section4, pdt_template)
 
         # Extract forecast/time information
         forecast_info = self._extract_forecast_info(section4, pdt_template, year, month, day, hour, minute, second, significance)
 
-        # Extract ensemble information if PDT 4.1
-        ensemble_info = None
-        if pdt_template == 1:
-            ensemble_info = self._extract_ensemble_info(section4)
-
-        # Extract Section 5 (Data Representation Section) for pack info
-        drt_template = None
-        packing_info = None
-        if 5 in sections:
-            section5 = sections[5]['data']
-            drt_template, packing_info = self._extract_drt_info(section5)
-
-        # Extract Section 6 (Bitmap Section) if present
-        bitmap_info = None
-        if 6 in sections:
-            bitmap_info = self._extract_bitmap_info(sections[6]['data'])
-
-        # Extract Section 7 (Data Section) for actual data values
-        values_info = None
-        if 7 in sections and packing_info:
-            values_info = self._extract_data_values(
-                sections[7]['data'],
-                packing_info,
-                bitmap_info,
-                grid_info.get('num_data_points')
-            )
-
-        # Build basic message structure in golden format
+        # Build basic message structure
         message = {
             'center': center,
             'subcenter': subcenter,
+            'discipline': {
+                'code': discipline,
+                'name': DISCIPLINE_TABLE.get(discipline, f"Unknown discipline {discipline}")
+            },
             'parameter': {
                 'discipline': discipline,
                 'category': param_category,
-                'number': param_number
+                'number': param_number,
+                'short_name': param_info['short_name'],
+                'long_name': param_info['long_name'],
+                'units': param_info['units'],
+                'table_source': param_info['source']
             },
-            'forecast': forecast_info,
             'level': level_info,
-            'ensemble': ensemble_info,
-            'grid': grid_info,
+            'forecast': forecast_info,
             'gdt_template': gdt_template,
             'pdt_template': pdt_template,
-            'drt_template': drt_template,
-            'packing': packing_info,
-            'values': values_info
+            'sections_found': sorted(sections.keys())
         }
+
+        # Extract grid metadata with error handling
+        try:
+            grid_info = self._extract_grid_metadata(section3, gdt_template)
+            message['grid'] = grid_info
+        except (struct.error, ValueError, IndexError) as e:
+            # If grid extraction fails, still return the message with basic grid info
+            message['grid'] = {
+                'template': gdt_template,
+                'extraction_error': str(e),
+                'ni': None,
+                'nj': None,
+                'grid_type': self._get_grid_type_name(gdt_template),
+                'scanning_mode': None
+            }
 
         return message
 
     def _extract_level_info(self, section4, pdt_template):
-        """Extract level information from Section 4 in golden format.
-
-        Section 4 structure (with 5-byte header):
-        - Octets 1-4 (indices 0-3): section length
-        - Octet 5 (index 4): section number
-        - Octets 6-7 (indices 5-6): number of coordinate values
-        - Octets 8-9 (indices 7-8): product definition template number
-        - Octet 10 (index 9): parameter category
-        - Octet 11 (index 10): parameter number
-        - Octet 12 (index 11): generating process
-        - Octet 13 (index 12): background process id
-        - Octet 14 (index 13): forecast generating process id
-        - Octets 15-16 (indices 14-15): hours after reference time for cutoff
-        - Octet 17 (index 16): minutes after cutoff time
-        - Octet 18 (index 17): indicator of unit of time range
-        - Octets 19-22 (indices 18-21): forecast time in units
+        """Extract level information from Section 4.
 
         For PDT 4.0 (template 0):
-        - Octets 23-30 (indices 22-29): first fixed surface
-        - Octet 23 (index 22): First level type (type1)
-        - Octets 24-25 (indices 23-24): Scale factor for first level (scale_factor1)
-        - Octets 26-29 (indices 25-28): Scaled value for first level (scaled_value1)
-        - Octets 31-38 (indices 30-37): second fixed surface
-        - Octet 31 (index 30): Second level type (type2)
-        - Octets 32-33 (indices 31-32): Scale factor for second level (scale_factor2)
-        - Octets 34-37 (indices 33-36): Scaled value for second level (scaled_value2)
+        - Octet 11 (index 10): First level type
+        - Octet 12-13 (index 11-12): Scale factor for first level
+        - Octet 14-17 (index 13-16): Scaled value for first level
+        - Octet 18 (index 17): Second level type
+        - Octet 19-20 (index 18-19): Scale factor for second level
+        - Octet 21-24 (index 20-23): Scaled value for second level
 
         Returns:
-            Dictionary in golden format: {type1, scale_factor1, scaled_value1, type2, scale_factor2, scaled_value2}
+            Dictionary with level type, value, and description
         """
         level_info = {
-            'type1': 255,
-            'scale_factor1': 0,
-            'scaled_value1': 0,
-            'type2': 255,
-            'scale_factor2': 0,
-            'scaled_value2': 0
+            'pdt_template': pdt_template,
+            'first_level': None,
+            'second_level': None
         }
 
         try:
             if pdt_template == 0:  # PDT 4.0
-                if len(section4) >= 30:
-                    # First fixed surface
-                    level_info['type1'] = section4[22]  # Octet 23 → index 22
-                    level_info['scale_factor1'] = struct.unpack('>h', section4[23:25])[0]  # Octets 24-25 → indices 23-24
-                    level_info['scaled_value1'] = struct.unpack('>i', section4[25:29])[0]  # Octets 26-29 → indices 25-28
+                if len(section4) >= 18:
+                    # First level
+                    level1_type = section4[10]
+                    level1_scale = struct.unpack('>h', section4[11:13])[0]  # signed short
+                    level1_value = struct.unpack('>i', section4[13:17])[0]  # signed int
 
-                    # Second fixed surface (if present)
-                    if len(section4) >= 38:
-                        level_info['type2'] = section4[30]  # Octet 31 → index 30
-                        level_info['scale_factor2'] = struct.unpack('>h', section4[31:33])[0]  # Octets 32-33 → indices 31-32
-                        level_info['scaled_value2'] = struct.unpack('>i', section4[33:37])[0]  # Octets 34-37 → indices 33-36
+                    # Parse scaled value
+                    actual_level1 = parse_scaled_value(level1_scale, level1_value)
+                    level1_info = get_level_type_info(level1_type)
 
-            elif pdt_template == 1:  # PDT 4.1 (ensemble)
-                if len(section4) >= 30:
-                    # Same structure as PDT 4.0 for level info
-                    level_info['type1'] = section4[22]  # Octet 23 → index 22
-                    level_info['scale_factor1'] = struct.unpack('>h', section4[23:25])[0]  # Octets 24-25 → indices 23-24
-                    level_info['scaled_value1'] = struct.unpack('>i', section4[25:29])[0]  # Octets 26-29 → indices 25-28
+                    level_info['first_level'] = {
+                        'type_code': level1_type,
+                        'type_name': level1_info['short_name'],
+                        'type_description': level1_info['description'],
+                        'scale_factor': level1_scale,
+                        'scaled_value': level1_value,
+                        'value': actual_level1
+                    }
 
-                    if len(section4) >= 38:
-                        level_info['type2'] = section4[30]  # Octet 31 → index 30
-                        level_info['scale_factor2'] = struct.unpack('>h', section4[31:33])[0]  # Octets 32-33 → indices 31-32
-                        level_info['scaled_value2'] = struct.unpack('>i', section4[33:37])[0]  # Octets 34-37 → indices 33-36
+                    # Second level (if present)
+                    if len(section4) >= 25:
+                        level2_type = section4[17]
+                        level2_scale = struct.unpack('>h', section4[18:20])[0]  # signed short
+                        level2_value = struct.unpack('>i', section4[20:24])[0]  # signed int
+
+                        # Parse scaled value
+                        actual_level2 = parse_scaled_value(level2_scale, level2_value)
+                        level2_info = get_level_type_info(level2_type)
+
+                        level_info['second_level'] = {
+                            'type_code': level2_type,
+                            'type_name': level2_info['short_name'],
+                            'type_description': level2_info['description'],
+                            'scale_factor': level2_scale,
+                            'scaled_value': level2_value,
+                            'value': actual_level2
+                        }
 
             else:
-                # For other PDT templates, try to extract basic level info (same offsets)
-                if len(section4) >= 30:
-                    level_info['type1'] = section4[22]  # Octet 23 → index 22
-                    level_info['scale_factor1'] = struct.unpack('>h', section4[23:25])[0]  # Octets 24-25 → indices 23-24
-                    level_info['scaled_value1'] = struct.unpack('>i', section4[25:29])[0]  # Octets 26-29 → indices 25-28
+                # For other PDT templates, store minimal info
+                level_info['extraction_note'] = f'Level extraction for PDT {pdt_template} not fully implemented'
+                level_info['pdt_template'] = pdt_template
 
         except (struct.error, ValueError, IndexError) as e:
             level_info['extraction_error'] = str(e)
@@ -738,427 +700,312 @@ class GRIB2Parser:
         return level_info
 
     def _extract_forecast_info(self, section4, pdt_template, year, month, day, hour, minute, second, significance):
-        """Extract forecast/time information from Section 4 in golden format.
+        """Extract forecast/time information from Section 4.
 
         For PDT 4.0 (template 0):
-        - Octet 18 (index 17): Indicator of unit for time range
-        - Octets 19-22 (indices 18-21): Forecast time in units
+        - Forecast time offset is at octets 15-16 (index 14-15)
+        - Time range indicator is in some templates
 
         Returns:
-            Dictionary in golden format: {reference_time: {...}, time_range_unit, forecast_offset}
+            Dictionary with reference_time, forecast_time, and temporal metadata
         """
         forecast_info = {}
-        forecast_offset = 0
-        time_range_unit = 1  # Default: hours (Code Table 4.4)
 
         try:
-            # Reference time as flat object
-            forecast_info['reference_time'] = {
-                'year': year,
-                'month': month,
-                'day': day,
-                'hour': hour,
-                'minute': minute,
-                'second': second,
-                'significance': significance
+            # Format reference time
+            ref_time = format_reference_time(year, month, day, hour, minute, second, significance)
+            forecast_info['reference_time'] = ref_time
+
+            # Extract forecast offset (for PDT 4.0)
+            forecast_offset = 0
+            forecast_offset_unit = 1  # Default: hours
+
+            if pdt_template == 0 and len(section4) >= 19:
+                # Octets 15-16: Forecast time in units defined by octet 19
+                forecast_offset = struct.unpack('>H', section4[14:16])[0]
+                # Octet 19: Time range indicator/forecast time unit
+                if len(section4) >= 22:
+                    time_unit_code = section4[21]  # Octet 22
+                    # Time unit codes: 0=minute, 1=hour, 2=day, 3=month, 4=year, etc.
+                    forecast_offset_unit = time_unit_code
+            elif pdt_template == 1 and len(section4) >= 19:
+                # PDT 4.1 (ensemble forecast)
+                forecast_offset = struct.unpack('>H', section4[14:16])[0]
+                if len(section4) >= 22:
+                    forecast_offset_unit = section4[21]
+
+            forecast_info['forecast_offset'] = {
+                'value': forecast_offset,
+                'unit_code': forecast_offset_unit,
+                'unit_name': self._get_time_unit_name(forecast_offset_unit)
             }
 
-            # Extract forecast offset and time unit
-            # For PDT 4.0/4.1, after 5-byte header:
-            # Octet 18: Indicator of unit for time range → index 17
-            # Octets 19-22: Forecast time in units → indices 18-21
-            if pdt_template in (0, 1) and len(section4) >= 23:
-                # Octet 18: Indicator of unit for time range → index 17
-                time_range_unit = section4[17]
-                # Octets 19-22: Forecast time in units → indices 18-21
-                forecast_offset = struct.unpack('>I', section4[18:22])[0]
-
-            forecast_info['time_range_unit'] = time_range_unit
-            forecast_info['forecast_offset'] = forecast_offset
+            # Calculate forecast time if offset is available
+            if forecast_offset > 0:
+                forecast_info['forecast_time'] = self._calculate_forecast_time(
+                    ref_time, forecast_offset, forecast_offset_unit
+                )
 
         except (struct.error, ValueError, IndexError) as e:
             forecast_info['extraction_error'] = str(e)
 
         return forecast_info
 
-    def _extract_grid_metadata(self, section3, gdt_template):
-        """Extract grid metadata from Grid Definition Section (Section 3) in golden format.
+    def _get_time_unit_name(self, unit_code):
+        """Get human-readable time unit name from code.
+
+        Time unit codes (Code Table 4.4):
+        0: minutes
+        1: hours
+        2: days
+        3: months
+        4: years
+        5: decades
+        6: normals (30 years)
+        7: centuries (100 years)
+        8-9: reserved
+        10: 3 hours
+        11: 6 hours
+        12: 12 hours
+        13: seconds
+        """
+        time_units = {
+            0: "minutes",
+            1: "hours",
+            2: "days",
+            3: "months",
+            4: "years",
+            5: "decades",
+            6: "normals (30 years)",
+            7: "centuries",
+            10: "3 hours",
+            11: "6 hours",
+            12: "12 hours",
+            13: "seconds"
+        }
+        return time_units.get(unit_code, f"unknown_unit({unit_code})")
+
+    def _calculate_forecast_time(self, ref_time, offset, unit_code):
+        """Calculate forecast time string from reference time and offset.
 
         Args:
-            section3: Raw bytes of Section 3 (including 5-byte header)
+            ref_time: Reference time dictionary from format_reference_time()
+            offset: Forecast offset value
+            unit_code: Time unit code
+
+        Returns:
+            Dictionary with iso_string and offset information
+        """
+        try:
+            from datetime import timedelta
+
+            # Convert offset to hours
+            offset_hours = offset
+            if unit_code == 0:  # minutes
+                offset_hours = offset / 60.0
+            elif unit_code == 2:  # days
+                offset_hours = offset * 24.0
+            elif unit_code == 10:  # 3 hours
+                offset_hours = offset * 3.0
+            elif unit_code == 11:  # 6 hours
+                offset_hours = offset * 6.0
+            elif unit_code == 12:  # 12 hours
+                offset_hours = offset * 12.0
+            elif unit_code == 13:  # seconds
+                offset_hours = offset / 3600.0
+            elif unit_code in (3, 4, 5, 6, 7):  # months, years, decades, etc.
+                # For longer units, can't easily convert to hours
+                offset_hours = None
+
+            # Calculate forecast time if possible
+            iso_string = None
+            if offset_hours is not None:
+                try:
+                    ref_dt = datetime.fromisoformat(ref_time['iso_string'].replace('Z', '+00:00'))
+                    forecast_dt = ref_dt + timedelta(hours=offset_hours)
+                    iso_string = forecast_dt.isoformat()
+                except (ValueError, OverflowError):
+                    pass
+
+            return {
+                'iso_string': iso_string,
+                'offset': offset,
+                'offset_unit_code': unit_code,
+                'offset_unit_name': self._get_time_unit_name(unit_code),
+                'offset_hours': offset_hours
+            }
+
+        except Exception as e:
+            return {
+                'error': str(e),
+                'offset': offset,
+                'offset_unit_code': unit_code
+            }
+
+    def _extract_grid_metadata(self, section3, gdt_template):
+        """Extract grid metadata from Grid Definition Section (Section 3).
+
+        Args:
+            section3: Raw bytes of Section 3
             gdt_template: Grid Definition Template number
 
         Returns:
-            Dictionary in golden format containing grid metadata
+            Dictionary containing grid metadata
+
+        Raises:
+            struct.error: If binary unpacking fails
+            ValueError: If section is malformed
+            IndexError: If section is too short
         """
         if len(section3) < 7:
             raise ValueError(f"Section 3 too short: {len(section3)} bytes")
 
-        # Initialize grid structure in golden format
+        # Initialize grid structure
         grid_info = {
             'template': gdt_template,
-            'num_data_points': None,
-            'nx': None,
-            'ny': None,
-            'lat_first': None,
-            'lon_first': None,
-            'lat_last': None,
-            'lon_last': None,
-            'di': None,
-            'dj': None,
-            'scanning_mode': 0,
-            'resolution_flags': 48,
-            'shape_of_earth': 6
+            'grid_type': self._get_grid_type_name(gdt_template),
+            'ni': None,  # Number of points along latitude (i direction)
+            'nj': None,  # Number of points along longitude (j direction)
+            'scanning_mode': None
         }
-
-        # Section 3 structure (after 5-byte header):
-        # Octets 1-4: source (type of grid)
-        # Octets 5-8: number of data points
-        # Octet 9: number of octets for optional list
-        # Octet 10: interpretation of optional list
-        # Octets 11-12: template number
-
-        # Extract basic fields from Section 3 (before template)
-        try:
-            # Octets 5-8: number of data points (indices 4-7 in section data)
-            if len(section3) >= 9:
-                grid_info['num_data_points'] = struct.unpack('>I', section3[4:8])[0]
-        except (struct.error, ValueError, IndexError):
-            pass
 
         # Template 3.0: Latitude/Longitude (or Equidistant Cylindrical)
         if gdt_template == 0:
             grid_info.update(self._extract_grid_template_0(section3))
+        # Template 3.1: Rotated Latitude/Longitude
         elif gdt_template == 1:
             grid_info.update(self._extract_grid_template_1(section3))
+        # Template 3.10: Mercator
         elif gdt_template == 10:
             grid_info.update(self._extract_grid_template_10(section3))
         else:
+            # For unsupported templates, still try to extract basic info
             grid_info['extraction_warning'] = f'Grid template {gdt_template} not fully supported'
 
         return grid_info
 
     def _extract_grid_template_0(self, section3):
-        """Extract grid metadata for Template 3.0 (Latitude/Longitude) in golden format.
+        """Extract grid metadata for Template 3.0 (Latitude/Longitude).
 
-        Section 3 structure (with 5-byte header):
-        - Octets 1-4 (indices 0-3): source
-        - Octets 5-8 (indices 4-7): number of data points
-        - Octet 9 (index 8): number of octets for optional list
-        - Octet 10 (index 9): interpretation of optional list
-        - Octets 11-12 (indices 10-11): template number
-
-        Template 3.0 structure (starts at index 12):
-        - Octet 1 (index 12): shape of the earth
-        - Octets 2-3 (indices 13-14): scale factor of radius of spherical earth
-        - Octets 4-7 (indices 15-18): scaled value of radius of spherical earth
-        - Octets 8-9 (indices 19-20): scale factor of major axis of oblate spheroid earth
-        - Octets 10-13 (indices 21-24): scaled value of major axis of oblate spheroid earth
-        - Octets 14-15 (indices 25-26): scale factor of minor axis of oblate spheroid earth
-        - Octets 16-19 (indices 27-30): scaled value of minor axis of oblate spheroid earth
-        - Octets 20-23 (indices 31-34): Ni (number of points along latitude)
-        - Octets 24-27 (indices 35-38): Nj (number of points along longitude)
-        - Octets 28-31 (indices 39-42): basic angle of the initial production domain
-        - Octets 32-35 (indices 43-46): subdivisions of basic angle
-        - Octets 36-39 (indices 47-50): latitude of first grid point (scaled by 10^-6)
-        - Octets 40-43 (indices 51-54): longitude of first grid point (scaled by 10^-6)
-        - Octet 44 (index 55): resolution and component flags
-        - Octets 45-48 (indices 56-59): latitude of last grid point (scaled by 10^-6)
-        - Octets 49-52 (indices 60-63): longitude of last grid point (scaled by 10^-6)
-        - Octets 53-56 (indices 64-67): i direction increment (scaled by 10^-6)
-        - Octets 57-60 (indices 68-71): j direction increment (scaled by 10^-6)
-        - Octet 61 (index 72): scanning mode
+        Template 3.0 structure:
+        - Octets 8-9: Ni (number of points along latitude)
+        - Octets 10-11: Nj (number of points along longitude)
+        - Octet 12: Basic angle of the initial production domain
+        - Octets 13-16: Latitude of first point (scaled by 10^-6)
+        - Octets 17-20: Longitude of first point (scaled by 10^-6)
+        - Octets 21-24: Latitude of last point (scaled by 10^-6)
+        - Octets 25-28: Longitude of last point (scaled by 10^-6)
+        - Octets 29-32: i direction increment (scaled by 10^-6)
+        - Octets 33-36: j direction increment (scaled by 10^-6)
+        - Octet 37: Scanning mode
 
         Returns:
-            Dictionary in golden format with grid metadata for template 0
+            Dictionary with grid metadata for template 0
         """
-        if len(section3) < 73:
-            raise ValueError(f"Section 3 too short for template 0: {len(section3)} bytes, need at least 73")
+        if len(section3) < 37:
+            raise ValueError(f"Section 3 too short for template 0: {len(section3)} bytes, need at least 37")
 
         info = {}
 
-        # Shape of earth (octet 1 of template, index 12)
-        info['shape_of_earth'] = section3[12]
+        # Ni and Nj (number of grid points)
+        info['ni'] = struct.unpack('>H', section3[7:9])[0]
+        info['nj'] = struct.unpack('>H', section3[9:11])[0]
 
-        # Nx and Ny (number of grid points) - 4-byte unsigned integers
-        info['nx'] = struct.unpack('>I', section3[31:35])[0]
-        info['ny'] = struct.unpack('>I', section3[35:39])[0]
-        info['num_data_points'] = info['nx'] * info['ny']
+        # Basic angle flags (octet 12)
+        basic_angle = section3[11]
 
-        # Latitude/longitude bounds (scaled by 10^-6) - 4-byte signed integers
-        info['lat_first'] = struct.unpack('>i', section3[47:51])[0] / 1000000.0
-        info['lon_first'] = struct.unpack('>i', section3[51:55])[0] / 1000000.0
+        # Latitude/longitude bounds (scaled by 10^-6)
+        info['lat_first'] = struct.unpack('>i', section3[12:16])[0] / 1000000.0
+        info['lon_first'] = struct.unpack('>i', section3[16:20])[0] / 1000000.0
+        info['lat_last'] = struct.unpack('>i', section3[20:24])[0] / 1000000.0
+        info['lon_last'] = struct.unpack('>i', section3[24:28])[0] / 1000000.0
 
-        # Resolution and component flags (octet 44, index 55)
-        info['resolution_flags'] = section3[55]
+        # Grid increments (scaled by 10^-6)
+        info['di'] = struct.unpack('>i', section3[28:32])[0] / 1000000.0
+        info['dj'] = struct.unpack('>i', section3[32:36])[0] / 1000000.0
 
-        # Latitude/longitude of last point (scaled by 10^-6) - 4-byte signed integers
-        info['lat_last'] = struct.unpack('>i', section3[56:60])[0] / 1000000.0
-        info['lon_last'] = struct.unpack('>i', section3[60:64])[0] / 1000000.0
+        # Scanning mode (octet 37)
+        scanning_mode = section3[36]
+        info['scanning_mode'] = self._parse_scanning_mode(scanning_mode)
 
-        # Grid increments (scaled by 10^-6) - 4-byte signed integers
-        info['di'] = struct.unpack('>i', section3[64:68])[0] / 1000000.0
-        info['dj'] = struct.unpack('>i', section3[68:72])[0] / 1000000.0
-
-        # Scanning mode (octet 61, index 72) - raw byte value
-        info['scanning_mode'] = section3[72]
+        # Calculate bounds from grid parameters if available
+        if info['ni'] and info['nj'] and info['di'] and info['dj']:
+            info['bounds_calculated'] = {
+                'lat_min': min(info['lat_first'], info['lat_last']),
+                'lat_max': max(info['lat_first'], info['lat_last']),
+                'lon_min': min(info['lon_first'], info['lon_last']),
+                'lon_max': max(info['lon_first'], info['lon_last'])
+            }
 
         return info
 
     def _extract_grid_template_1(self, section3):
-        """Extract grid metadata for Template 3.1 (Rotated Latitude/Longitude)."""
+        """Extract grid metadata for Template 3.1 (Rotated Latitude/Longitude).
+
+        Returns minimal info for rotated grids.
+        """
         info = {}
-        if len(section3) >= 39:
-            nx = struct.unpack('>I', section3[31:35])[0]
-            ny = struct.unpack('>I', section3[35:39])[0]
-            info['nx'] = nx
-            info['ny'] = ny
-            info['num_data_points'] = nx * ny
+        if len(section3) >= 11:
+            info['ni'] = struct.unpack('>H', section3[7:9])[0]
+            info['nj'] = struct.unpack('>H', section3[9:11])[0]
             info['extraction_note'] = 'Rotated grid - full extraction not implemented'
         return info
 
     def _extract_grid_template_10(self, section3):
-        """Extract grid metadata for Template 3.10 (Mercator)."""
+        """Extract grid metadata for Template 3.10 (Mercator).
+
+        Returns minimal info for Mercator grids.
+        """
         info = {}
-        if len(section3) >= 39:
-            nx = struct.unpack('>I', section3[31:35])[0]
-            ny = struct.unpack('>I', section3[35:39])[0]
-            info['nx'] = nx
-            info['ny'] = ny
-            info['num_data_points'] = nx * ny
+        if len(section3) >= 11:
+            info['ni'] = struct.unpack('>H', section3[7:9])[0]
+            info['nj'] = struct.unpack('>H', section3[9:11])[0]
             info['extraction_note'] = 'Mercator grid - full extraction not implemented'
         return info
 
-    def _extract_ensemble_info(self, section4):
-        """Extract ensemble information from Section 4 for PDT 4.1.
+    def _get_grid_type_name(self, gdt_template):
+        """Get human-readable grid type name from template number."""
+        grid_types = {
+            0: 'latitude_longitude',
+            1: 'rotated_latitude_longitude',
+            2: 'stretched_lat_lon',
+            3: 'stretched_rotated_lat_lon',
+            5: 'polar_stereographic',
+            10: 'mercator',
+            12: 'lambert_conformal',
+            20: 'gaussian_lat_lon',
+            30: 'reduced_gg',
+            40: 'rotated_reduced_gg',
+            42: 'stretched_gg',
+            43: 'stretched_rotated_gg',
+            50: 'spectral',
+            90: 'space_view_perspective',
+            204: 'unstructured',
+            32768: 'cross_section',
+            1000: 'triangular',
+            1100: 'unstructured_hexagonal'
+        }
+        return grid_types.get(gdt_template, f'unknown_template_{gdt_template}')
 
-        For PDT 4.1 (ensemble forecast):
-        - Octet 27 (index 26): Type of ensemble forecast
-        - Octet 28 (index 27): Perturbation number
+    def _parse_scanning_mode(self, mode_byte):
+        """Parse scanning mode flags from octet 37 in Template 3.0.
 
-        Returns:
-            Dictionary in golden format: {member_type, number}
-        """
-        ensemble_info = None
-
-        try:
-            if len(section4) >= 28:
-                member_type = section4[26]
-                number = section4[27]
-
-                ensemble_info = {
-                    'member_type': member_type,
-                    'number': number
-                }
-        except (struct.error, ValueError, IndexError) as e:
-            ensemble_info = {'extraction_error': str(e)}
-
-        return ensemble_info
-
-    def _extract_drt_info(self, section5):
-        """Extract Data Representation Template information from Section 5.
-
-        For DRT 5.0 (grid point data - simple packing):
-        - Octets 6-7: Template number
-        - Octets 8-15: Reference value (IEEE 64-bit floating point)
-        - Octet 16: Binary scale factor (signed)
-        - Octet 17: Decimal scale factor (signed)
-        - Octet 18: Number of bits per value
-        - Octet 19: Type of original field values
+        The scanning mode is a bitmask:
+        - Bit 1 (0x80): Scan mode for i points (0: +x direction, 1: -x direction)
+        - Bit 2 (0x40): Scan mode for j points (0: +y direction, 1: -y direction)
+        - Bit 3 (0x20): Adjacent i points are consecutive (1: yes, 0: no)
+        - Bit 4 (0x10): Adjacent rows are consecutive (1: yes, 0: no)
 
         Returns:
-            Tuple of (drt_template, packing_info) in golden format
+            Dictionary describing the scanning mode
         """
-        drt_template = None
-        packing_info = None
-
-        try:
-            if len(section5) >= 19:
-                # Template number (octets 6-7, indices 5-6)
-                drt_template = struct.unpack('>H', section5[5:7])[0]
-
-                # Reference value (octets 8-15, indices 7-14) - IEEE 64-bit float
-                reference_value = struct.unpack('>d', section5[7:15])[0]
-
-                # Binary scale factor (octet 16, index 15) - signed
-                binary_scale_factor = struct.unpack('>b', bytes([section5[15]]))[0]
-
-                # Decimal scale factor (octet 17, index 16) - signed
-                decimal_scale_factor = struct.unpack('>b', bytes([section5[16]]))[0]
-
-                # Bits per value (octet 18, index 17)
-                bits_per_value = section5[17]
-
-                # Type of original field values (octet 19, index 18)
-                original_field_type = section5[18]
-
-                packing_info = {
-                    'reference_value': float(reference_value),
-                    'binary_scale_factor': binary_scale_factor,
-                    'decimal_scale_factor': decimal_scale_factor,
-                    'bits_per_value': bits_per_value,
-                    'original_field_type': original_field_type
-                }
-            else:
-                packing_info = {
-                    'extraction_error': f'Section 5 too short: {len(section5)} bytes'
-                }
-        except (struct.error, ValueError, IndexError) as e:
-            packing_info = {'extraction_error': str(e)}
-
-        return drt_template, packing_info
-
-    def _extract_bitmap_info(self, section6):
-        """Extract bitmap information from Section 6.
-
-        Section 6 structure:
-        - Octets 1-4: Section length
-        - Octet 5: Section number (6)
-        - Octet 6: Bit indicator (0=bitmap applies, 1=no bitmap)
-        - Octets 7+: Bitmap data
-
-        Returns:
-            Dictionary with bitmap list if present, None otherwise
-        """
-        try:
-            if len(section6) < 6:
-                return None
-
-            # Bit indicator (octet 6, index 5)
-            bit_indicator = section6[5]
-
-            # If bit indicator is 1, there's no bitmap
-            if bit_indicator == 1:
-                return None
-
-            # Extract bitmap bits from octets 7+
-            bitmap_bits = section6[6:] if len(section6) > 6 else b''
-
-            bitmap = []
-            for byte in bitmap_bits:
-                # Process each bit in the byte (MSB first)
-                for bit_idx in range(7, -1, -1):
-                    bitmap.append(bool((byte >> bit_idx) & 1))
-
-            return bitmap
-
-        except (struct.error, ValueError, IndexError) as e:
-            return {'extraction_error': str(e)}
-
-    def _extract_data_values(self, section7, packing_info, bitmap_info, num_data_points):
-        """Extract and decode data values from Section 7.
-
-        Section 7 structure:
-        - Octets 1-4: Section length
-        - Octet 5: Section number (7)
-        - Octets 6+: Packed data values
-
-        For DRT 5.0 (simple packing):
-        - Values are stored as packed integers with bits_per_value each
-        - Actual value = reference_value + (packed_value * 2^binary_scale_factor) / 10^decimal_scale_factor
-
-        Args:
-            section7: Raw bytes of Section 7
-            packing_info: Packing information from Section 5
-            bitmap_info: Bitmap information from Section 6 (if present)
-            num_data_points: Number of data points in grid
-
-        Returns:
-            Dictionary in golden format: {"Dense": [float values]} or {"Masked": {...}}
-        """
-        try:
-            if packing_info is None:
-                return None
-
-            bits_per_value = packing_info.get('bits_per_value', 0)
-            reference_value = packing_info.get('reference_value', 0.0)
-            binary_scale_factor = packing_info.get('binary_scale_factor', 0)
-            decimal_scale_factor = packing_info.get('decimal_scale_factor', 0)
-
-            if bits_per_value == 0 or bits_per_value > 32:
-                return None
-
-            # Get raw data bytes (skip 5-byte header)
-            data_bytes = section7[5:] if len(section7) > 5 else b''
-
-            if not data_bytes:
-                return None
-
-            # Decode packed values
-            packed_values = self._decode_packed_values(data_bytes, bits_per_value, num_data_points)
-
-            if not packed_values:
-                return None
-
-            # Convert packed values to actual values
-            scale_factor = 2.0 ** binary_scale_factor
-            decimal_divisor = 10.0 ** decimal_scale_factor
-
-            actual_values = []
-            for packed_val in packed_values:
-                # Apply scaling: actual = ref + (packed * 2^binary) / 10^decimal
-                actual_val = reference_value + (packed_val * scale_factor) / decimal_divisor
-                actual_values.append(float(actual_val))
-
-            # Return in golden format
-            if bitmap_info:
-                return {
-                    'Masked': {
-                        'values': actual_values,
-                        'present': bitmap_info
-                    }
-                }
-            else:
-                return {'Dense': actual_values}
-
-        except (struct.error, ValueError, IndexError) as e:
-            return {'extraction_error': str(e)}
-
-    def _decode_packed_values(self, data_bytes, bits_per_value, num_points):
-        """Decode packed integer values from raw data bytes.
-
-        Args:
-            data_bytes: Raw packed data bytes
-            bits_per_value: Number of bits per value
-            num_points: Expected number of data points
-
-        Returns:
-            List of decoded integer values
-        """
-        if bits_per_value == 0 or num_points is None or num_points == 0:
-            return None
-
-        # Calculate total bits needed
-        total_bits = bits_per_value * num_points
-        total_bytes = (total_bits + 7) // 8
-
-        if len(data_bytes) < total_bytes:
-            return None
-
-        # Convert bytes to bit stream
-        bit_stream = []
-        for byte in data_bytes:
-            for bit_idx in range(7, -1, -1):
-                bit_stream.append((byte >> bit_idx) & 1)
-
-        # Extract packed values
-        packed_values = []
-        for i in range(num_points):
-            value = 0
-            start_bit = i * bits_per_value
-
-            # Extract bits_per_value bits
-            for j in range(bits_per_value):
-                if start_bit + j < len(bit_stream):
-                    value = (value << 1) | bit_stream[start_bit + j]
-
-            # Handle signed values (two's complement for bits_per_value < 32)
-            if bits_per_value < 32 and (value & (1 << (bits_per_value - 1))):
-                value -= (1 << bits_per_value)
-
-            packed_values.append(value)
-
-        return packed_values
+        return {
+            'raw_value': mode_byte,
+            'i_direction_negative': bool(mode_byte & 0x80),
+            'j_direction_negative': bool(mode_byte & 0x40),
+            'i_points_consecutive': bool(mode_byte & 0x20),
+            'rows_consecutive': bool(mode_byte & 0x10)
+        }
 
 
 def gen_golden_basic(grib2_path, fixture_id, output_dir):
@@ -1199,7 +1046,7 @@ def gen_golden_basic(grib2_path, fixture_id, output_dir):
             ' using basic GRIB2 parsing (no external dependencies).'
         ),
         'fields': messages,
-        'parser_version': 'basic_0.2'
+        'parser_version': 'basic_0.1'
     }
 
     out = Path(output_dir) / f'{fixture_id}.json'
