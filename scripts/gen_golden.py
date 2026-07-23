@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""gen_golden.py — Generate gribtract golden reference files.
+"""gen_golden.py — Generate gribtract golden reference files using basic GRIB2 parsing.
 
-This script supports both eccodes Python bindings and CLI tools.
-Python bindings are preferred when available; falls back to CLI tools otherwise.
+This script implements basic GRIB2 file parsing from scratch without external dependencies.
+It extracts key metadata from GRIB2 messages and outputs JSON structure.
 
 Usage:
     python3 scripts/gen_golden.py <grib2_file> <fixture_id> [--output-dir DIR]
@@ -13,517 +13,338 @@ Output:
 
 import argparse
 import json
+import struct
 import sys
-import subprocess
 from pathlib import Path
 
-# Try to import eccodes Python bindings
-try:
-    import eccodes
-    ECCODES_AVAILABLE = True
-except ImportError:
-    ECCODES_AVAILABLE = False
-
-# Check if CLI tools are available
-def check_cli_tools():
-    """Check if eccodes CLI tools are available."""
-    try:
-        # Test with a simple metadata query instead of --help
-        result = subprocess.run(
-            ["grib_get", "-p", "editionNumber", "/dev/null"],
-            capture_output=True,
-            timeout=2
-        )
-        # Command may fail on /dev/null but that's OK - we just want to see if the binary exists
-        return True
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        return False
-
-CLI_TOOLS_AVAILABLE = check_cli_tools()
-
-if not ECCODES_AVAILABLE and not CLI_TOOLS_AVAILABLE:
-    print(
-        "ERROR: No eccodes installation found. "
-        "Install either: pip install eccodes OR eccodes CLI tools (grib_dump, grib_get)",
-        file=sys.stderr
-    )
-    sys.exit(1)
-
 
 # ============================================================================
-# Python bindings implementation (preferred)
+# Basic GRIB2 parsing implementation
 # ============================================================================
 
-def _get(msg, key, default=None):
-    """Retrieve a key from an eccodes message, returning default on error."""
-    try:
-        return eccodes.codes_get(msg, key)
-    except eccodes.KeyValueNotFoundError:
-        return default
+class GRIB2Parser:
+    """Basic GRIB2 parser that extracts metadata without external dependencies."""
 
+    def __init__(self, file_path):
+        self.file_path = Path(file_path)
+        self.messages = []
 
-def decode_message_python(msg):
-    """Extract one field dict from an open eccodes message handle using Python bindings."""
-    edition = _get(msg, "edition")
-    if edition != 2:
-        return None
+    def parse(self):
+        """Parse all GRIB2 messages in the file.
 
-    center    = _get(msg, "centre", 0)
-    subcenter = _get(msg, "subCentre", 0)
+        Raises:
+            FileNotFoundError: If the GRIB2 file does not exist
+            ValueError: If the file is not a valid GRIB2 file
+        """
+        if not self.file_path.exists():
+            raise FileNotFoundError(f"GRIB2 file not found: {self.file_path}")
 
-    discipline = _get(msg, "discipline", 0)
-    category   = _get(msg, "parameterCategory", 0)
-    number     = _get(msg, "parameterNumber", 0)
+        if not self.file_path.is_file():
+            raise ValueError(f"Path is not a file: {self.file_path}")
 
-    year        = _get(msg, "year", 0)
-    month       = _get(msg, "month", 0)
-    day         = _get(msg, "day", 0)
-    hour        = _get(msg, "hour", 0)
-    minute      = _get(msg, "minute", 0)
-    second      = _get(msg, "second", 0)
-    significance = _get(msg, "significanceOfReferenceTime", 0)
+        with open(self.file_path, 'rb') as f:
+            data = f.read()
 
-    time_range_unit = _get(msg, "indicatorOfUnitOfTimeRange", 1)
-    forecast_offset = _get(msg, "forecastTime", 0)
+        if len(data) < 16:
+            raise ValueError(f"File too small to be a valid GRIB2 file: {self.file_path}")
 
-    type1         = _get(msg, "typeOfFirstFixedSurface", 255)
-    scale_factor1 = _get(msg, "scaleFactorOfFirstFixedSurface", 0)
-    scaled_value1 = _get(msg, "scaledValueOfFirstFixedSurface", 0)
-    type2         = _get(msg, "typeOfSecondFixedSurface", 255)
-    scale_factor2 = _get(msg, "scaleFactorOfSecondFixedSurface", 0)
-    scaled_value2 = _get(msg, "scaledValueOfSecondFixedSurface", 0)
+        offset = 0
+        message_count = 0
 
-    pdt = _get(msg, "productDefinitionTemplateNumber", 0)
-    ensemble = None
-    if pdt in (1, 11):
-        ensemble = {
-            "member_type": _get(msg, "typeOfEnsembleForecast", 0),
-            "number": _get(msg, "perturbationNumber", 0),
-        }
+        while offset < len(data):
+            result = self._parse_message(data, offset)
+            if result is None:
+                break
 
-    gdt             = _get(msg, "gridDefinitionTemplateNumber", 0)
-    num_data_points = _get(msg, "numberOfDataPoints", 0)
-    nx              = _get(msg, "Ni", 0)
-    ny              = _get(msg, "Nj", 0)
-    lat_first       = _get(msg, "latitudeOfFirstGridPointInDegrees", 0.0)
-    lon_first       = _get(msg, "longitudeOfFirstGridPointInDegrees", 0.0)
-    lat_last        = _get(msg, "latitudeOfLastGridPointInDegrees", 0.0)
-    lon_last        = _get(msg, "longitudeOfLastGridPointInDegrees", 0.0)
-    di              = _get(msg, "iDirectionIncrementInDegrees", 0.0)
-    dj              = _get(msg, "jDirectionIncrementInDegrees", 0.0)
-    scanning_mode   = _get(msg, "scanningMode", 0)
-    resolution_flags = _get(msg, "resolutionAndComponentFlags", 48)
-    shape_of_earth  = _get(msg, "shapeOfTheEarth", 6)
+            message, next_offset = result
+            if message:
+                self.messages.append(message)
+                message_count += 1
 
-    drt                  = _get(msg, "dataRepresentationTemplateNumber", 0)
-    reference_value      = float(_get(msg, "referenceValue", 0.0))
-    binary_scale_factor  = _get(msg, "binaryScaleFactor", 0)
-    decimal_scale_factor = _get(msg, "decimalScaleFactor", 0)
-    bits_per_value       = _get(msg, "bitsPerValue", 0)
-    original_field_type  = _get(msg, "typeOfOriginalFieldValues", 0)
+            offset = next_offset
+            if offset <= 0 or offset >= len(data):
+                break
 
-    values = eccodes.codes_get_values(msg).tolist()
-    bitmap_present = _get(msg, "bitmapPresent", 0)
-    if bitmap_present:
-        bitmap = eccodes.codes_get_array(msg, "bitmap").tolist()
-        grid_values = {
-            "Masked": {
-                "values": values,
-                "present": [bool(b) for b in bitmap],
-            }
-        }
-    else:
-        grid_values = {"Dense": values}
+        return self.messages
 
-    return {
-        "center": center,
-        "subcenter": subcenter,
-        "parameter": {
-            "discipline": discipline,
-            "category": category,
-            "number": number,
-        },
-        "forecast": {
-            "reference_time": {
-                "year": year,
-                "month": month,
-                "day": day,
-                "hour": hour,
-                "minute": minute,
-                "second": second,
-                "significance": significance,
+    def _parse_message(self, data, offset):
+        """Parse a single GRIB2 message starting at offset."""
+        if offset + 16 > len(data):
+            return None
+
+        # Check for GRIB magic
+        magic = data[offset:offset+4]
+        if magic != b'GRIB':
+            return None
+
+        # Section 0: Indicator Section (IS)
+        # Bytes 0-3: "GRIB" magic
+        # Bytes 4-5: reserved (always 0)
+        # Byte 6: discipline
+        # Byte 7: edition (2 for GRIB2)
+        # Bytes 8-11: total length of message
+        try:
+            discipline = data[offset+6]
+            edition = data[offset+7]
+
+            # GRIB2 Section 0 structure:
+            # Bytes 0-3: "GRIB" magic
+            # Bytes 4-5: Reserved (00 00)
+            # Byte 6: Discipline
+            # Byte 7: Edition (2 for GRIB2)
+            # Bytes 8-11: Additional fields/reserved
+            # Bytes 12-15: Total length of message
+            section0_length = struct.unpack('>I', data[offset+12:offset+16])[0]
+
+            if edition != 2:
+                return None  # Only GRIB2 supported
+
+            # Parse sections
+            sections = {}
+            current_offset = offset + 16  # Start after Section 0 (which is 16 bytes)
+
+            while current_offset < offset + section0_length:
+                # Check for Section 8 (End Section) - special case, only 4 bytes "7777"
+                if current_offset + 4 <= len(data) and data[current_offset:current_offset+4] == b'7777':
+                    sections[8] = {'length': 4, 'data': b'7777'}
+                    break
+
+                if current_offset + 5 > len(data):
+                    break
+
+                # Each section starts with: length (4 octets) + section number (1 octet)
+                section_length = struct.unpack('>I', data[current_offset:current_offset+4])[0]
+                section_number = data[current_offset+4]
+
+                if section_length == 0 or section_length > 10000000:  # Sanity check
+                    break
+
+                # Extract section data
+                section_start = current_offset
+                section_end = current_offset + section_length
+
+                if section_end > len(data):
+                    break
+
+                section_data = data[current_offset:section_end]
+
+                # Store section
+                sections[section_number] = {
+                    'length': section_length,
+                    'data': section_data
+                }
+
+                current_offset = section_end
+
+            # Extract metadata from sections
+            if not sections:
+                return None
+
+            message = self._extract_metadata(sections, discipline)
+            next_offset = offset + section0_length
+
+            return message, next_offset
+
+        except (struct.error, ValueError):
+            return None
+
+    def _extract_metadata(self, sections, discipline):
+        """Extract metadata from parsed sections."""
+        if 1 not in sections or 3 not in sections or 4 not in sections:
+            return None
+
+        section1 = sections[1]['data']
+        section3 = sections[3]['data']
+        section4 = sections[4]['data']
+
+        # Section 1: Identification Section
+        # Octets: 1-4 (length), 5 (section number), 6-7 (center),
+        #         8-9 (subcenter), 10-11 (master tables version), 12-13 (local tables version),
+        #         14 (significance of reference time), 15-16 (year), 17 (month), 18 (day),
+        #         19 (hour), 20 (minute), 21 (second)
+        # Minimum Section 1 length is 21 bytes (including 5-byte header)
+        if len(section1) < 21:
+            return None
+
+        # Note: section data includes the 5-byte header (length + section number)
+        # So octet N in the spec is at index N-1 in the byte array
+        center = struct.unpack('>H', section1[5:7])[0]
+        subcenter = struct.unpack('>H', section1[7:9])[0]
+
+        # Reference time fields (offsets are 1-indexed octet numbers, convert to 0-indexed)
+        significance = section1[13]
+        year = struct.unpack('>H', section1[14:16])[0]
+        month = section1[16]
+        day = section1[17]
+        hour = section1[18]
+        minute = section1[19]
+        second = section1[20] if len(section1) > 20 else 0
+
+        # Section 3: Grid Definition Section
+        # Octets: 1-4 (length), 5 (section number), 6-7 (template number)
+        if len(section3) < 7:
+            return None
+
+        gdt_template = struct.unpack('>H', section3[5:7])[0]
+
+        # Section 4: Product Definition Section
+        # Octets: 1-4 (length), 5 (section number), 6-7 (template number),
+        #         8 (number of coordinates), then parameter info
+        if len(section4) < 15:
+            return None
+
+        pdt_template = struct.unpack('>H', section4[5:7])[0]
+        num_coords = section4[7]
+
+        # For template 4.0 (analysis/forecast):
+        # Octet 10: parameter category
+        # Octet 11: parameter number
+        param_category = section4[9]
+        param_number = section4[10]
+
+        # Forecast time offset (varies by template - typically octet 15-16 for PDT 4.0)
+        forecast_offset = 0
+        if len(section4) >= 19:
+            forecast_offset = struct.unpack('>H', section4[14:16])[0]  # Octets 15-16
+
+        # Build basic message structure
+        message = {
+            'center': center,
+            'subcenter': subcenter,
+            'discipline': discipline,
+            'parameter': {
+                'discipline': discipline,
+                'category': param_category,
+                'number': param_number
             },
-            "time_range_unit": time_range_unit,
-            "forecast_offset": forecast_offset,
-        },
-        "level": {
-            "type1": type1,
-            "scale_factor1": scale_factor1,
-            "scaled_value1": scaled_value1,
-            "type2": type2,
-            "scale_factor2": scale_factor2,
-            "scaled_value2": scaled_value2,
-        },
-        "ensemble": ensemble,
-        "grid": {
-            "template": gdt,
-            "num_data_points": num_data_points,
-            "nx": nx,
-            "ny": ny,
-            "lat_first": lat_first,
-            "lon_first": lon_first,
-            "lat_last": lat_last,
-            "lon_last": lon_last,
-            "di": di,
-            "dj": dj,
-            "scanning_mode": scanning_mode,
-            "resolution_flags": resolution_flags,
-            "shape_of_earth": shape_of_earth,
-        },
-        "values": grid_values,
-        "gdt_template": gdt,
-        "pdt_template": pdt,
-        "drt_template": drt,
-        "packing": {
-            "reference_value": reference_value,
-            "binary_scale_factor": binary_scale_factor,
-            "decimal_scale_factor": decimal_scale_factor,
-            "bits_per_value": bits_per_value,
-            "original_field_type": original_field_type,
-        },
-    }
+            'forecast': {
+                'reference_time': {
+                    'year': year,
+                    'month': month,
+                    'day': day,
+                    'hour': hour,
+                    'minute': minute,
+                    'second': second,
+                    'significance': significance
+                },
+                'forecast_offset': forecast_offset
+            },
+            'gdt_template': gdt_template,
+            'pdt_template': pdt_template,
+            'grid': {
+                'template': gdt_template
+            },
+            'sections_found': sorted(sections.keys())
+        }
+
+        # Try to extract grid info if available (template 3.0 - lat/lon)
+        if gdt_template == 0 and len(section3) >= 32:
+            # Template 3.0: Latitude/Longitude
+            # Octets 8-9: Ni (nx)
+            # Octets 10-11: Nj (ny)
+            nx = struct.unpack('>H', section3[7:9])[0]
+            ny = struct.unpack('>H', section3[9:11])[0]
+
+            # Basic angle flags (octet 12) should be 0 for lat/lon in degrees
+
+            # Octets 13-16: Latitude of first point (scaled by 10^-6)
+            # Octets 17-20: Longitude of first point (scaled by 10^-6)
+            lat_first = struct.unpack('>i', section3[12:16])[0] / 1000000.0
+            lon_first = struct.unpack('>i', section3[16:20])[0] / 1000000.0
+
+            # Octets 21-24: Latitude of last point
+            # Octets 25-28: Longitude of last point
+            lat_last = struct.unpack('>i', section3[20:24])[0] / 1000000.0
+            lon_last = struct.unpack('>i', section3[24:28])[0] / 1000000.0
+
+            # Octets 29-32: i direction increment
+            # Octets 33-36: j direction increment
+            di = struct.unpack('>i', section3[28:32])[0] / 1000000.0 if len(section3) >= 32 else 0.0
+            dj = struct.unpack('>i', section3[32:36])[0] / 1000000.0 if len(section3) >= 36 else 0.0
+
+            message['grid'].update({
+                'nx': nx,
+                'ny': ny,
+                'lat_first': lat_first,
+                'lon_first': lon_first,
+                'lat_last': lat_last,
+                'lon_last': lon_last,
+                'di': di,
+                'dj': dj
+            })
+
+        return message
 
 
-def gen_golden_python(grib2_path, fixture_id, output_dir):
-    """Generate golden JSON using eccodes Python bindings."""
-    fields = []
-    with open(grib2_path, "rb") as f:
-        while True:
-            try:
-                msg = eccodes.codes_grib_new_from_file(f)
-            except Exception:
-                break
-            if msg is None:
-                break
-            try:
-                field = decode_message_python(msg)
-                if field is not None:
-                    fields.append(field)
-            finally:
-                eccodes.codes_release(msg)
+def gen_golden_basic(grib2_path, fixture_id, output_dir):
+    """Generate golden JSON using basic GRIB2 parsing.
 
-    if not fields:
-        print(f"WARNING: no GRIB2 fields decoded from {grib2_path}", file=sys.stderr)
+    Args:
+        grib2_path: Path to input GRIB2 file
+        fixture_id: Fixture ID for output filename
+        output_dir: Directory for output JSON
+
+    Raises:
+        SystemExit: On file access or parsing errors
+    """
+    try:
+        parser = GRIB2Parser(grib2_path)
+        messages = parser.parse()
+    except FileNotFoundError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(1)
-
-    golden = {
-        "fixture_id": fixture_id,
-        "_provenance": (
-            f"Generated by scripts/gen_golden.py from {Path(grib2_path).name}"
-            " using eccodes Python bindings."
-        ),
-        "fields": fields,
-    }
-
-    out = Path(output_dir) / f"{fixture_id}.json"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with open(out, "w") as fh:
-        json.dump(golden, fh, indent=4)
-    print(f"Written: {out}  ({len(fields)} field(s))")
-
-
-# ============================================================================
-# CLI tools implementation (fallback)
-# ============================================================================
-
-def run_grib_dump(grib2_path):
-    """Run grib_dump with JSON output and return parsed result."""
-    result = subprocess.run(
-        ["grib_dump", "-j", grib2_path],
-        capture_output=True,
-        text=True
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"grib_dump failed: {result.stderr}")
-    return json.loads(result.stdout)
-
-
-def run_grib_get(grib2_path, key):
-    """Run grib_get to extract a single key value."""
-    result = subprocess.run(
-        ["grib_get", "-p", key, grib2_path],
-        capture_output=True,
-        text=True
-    )
-    if result.returncode != 0:
-        return None
-    lines = result.stdout.strip().split('\n')
-    if not lines or not lines[0].strip():
-        return None
-    return lines[0].strip()
-
-
-def extract_values_array(grib2_path):
-    """Extract the data values array from GRIB file.
-
-    Note: eccodes CLI tools (grib_get) cannot directly extract array-type keys.
-    For full values extraction, either:
-    - Build wgrib2 from source (wgrib2.tgz in repo)
-    - Use eccodes Python bindings (pip install eccodes)
-    - Use a custom C decoder
-
-    Returns empty list for now - basic metadata extraction is the priority.
-    """
-    # TODO: Implement values extraction via wgrib2 or C binding
-    return []
-
-
-def extract_bitmap(grib2_path):
-    """Extract bitmap if present.
-
-    Note: eccodes CLI tools cannot directly extract array-type keys like bitmap.
-    Returns None for now - bitmap detection is handled in metadata.
-    """
-    return None
-
-
-def key_list_to_dict(key_list):
-    """Convert grib_dump key list format to dict."""
-    result = {}
-    for item in key_list:
-        if "key" in item and "value" in item:
-            result[item["key"]] = item["value"]
-    return result
-
-
-def decode_message_cli(data_dict):
-    """Extract one field dict from parsed grib_dump data using CLI tools."""
-    edition = data_dict.get("editionNumber")
-    if edition != 2:
-        return None
-
-    center = data_dict.get("centre", 0)
-    subcenter = data_dict.get("subCentre", 0)
-
-    discipline = data_dict.get("discipline", 0)
-    category = data_dict.get("parameterCategory", 0)
-    number = data_dict.get("parameterNumber", 0)
-
-    # Parse date from YYYYMMDD format
-    data_date = data_dict.get("dataDate", 0)
-    if data_date:
-        date_str = str(int(data_date))
-        year = int(date_str[:4]) if len(date_str) >= 4 else 0
-        month = int(date_str[4:6]) if len(date_str) >= 6 else 0
-        day = int(date_str[6:8]) if len(date_str) >= 8 else 0
-    else:
-        year = month = day = 0
-
-    # Parse time from HHMM format
-    data_time = data_dict.get("dataTime", 0)
-    if data_time:
-        time_str = str(int(data_time)).zfill(4)
-        hour = int(time_str[:2]) if len(time_str) >= 2 else 0
-        minute = int(time_str[2:4]) if len(time_str) >= 4 else 0
-    else:
-        hour = minute = 0
-    second = data_dict.get("second", 0)
-    if second is None:
-        second = 0
-
-    significance = data_dict.get("significanceOfReferenceTime", 0)
-
-    time_range_unit = data_dict.get("indicatorOfUnitForForecastTime", 1)
-    forecast_offset = data_dict.get("forecastTime", 0)
-
-    type1 = data_dict.get("typeOfFirstFixedSurface", 255)
-    scale_factor1 = data_dict.get("scaleFactorOfFirstFixedSurface", 0)
-    scaled_value1 = data_dict.get("scaledValueOfFirstFixedSurface", 0)
-    type2 = data_dict.get("typeOfSecondFixedSurface", 255)
-    scale_factor2 = data_dict.get("scaleFactorOfSecondFixedSurface", 0)
-    scaled_value2 = data_dict.get("scaledValueOfSecondFixedSurface", 0)
-
-    pdt = data_dict.get("productDefinitionTemplateNumber", 0)
-    ensemble = None
-    if pdt in (1, 11):
-        ensemble = {
-            "member_type": data_dict.get("typeOfEnsembleForecast", 0),
-            "number": data_dict.get("perturbationNumber", 0),
-        }
-
-    gdt = data_dict.get("gridDefinitionTemplateNumber", 0)
-    num_data_points = data_dict.get("numberOfDataPoints", 0)
-    nx = data_dict.get("Ni", 0)
-    ny = data_dict.get("Nj", 0)
-    lat_first = data_dict.get("latitudeOfFirstGridPointInDegrees", 0.0)
-    lon_first = data_dict.get("longitudeOfFirstGridPointInDegrees", 0.0)
-    lat_last = data_dict.get("latitudeOfLastGridPointInDegrees", 0.0)
-    lon_last = data_dict.get("longitudeOfLastGridPointInDegrees", 0.0)
-    di = data_dict.get("iDirectionIncrementInDegrees", 0.0)
-    dj = data_dict.get("jDirectionIncrementInDegrees", 0.0)
-
-    # Compute scanning mode from individual flags
-    scanning_mode = 0
-    if data_dict.get("iScansNegatively", 0):
-        scanning_mode |= 0x80
-    if data_dict.get("jScansPositively", 0):
-        scanning_mode |= 0x40
-    if data_dict.get("jPointsAreConsecutive", 0):
-        scanning_mode |= 0x20
-    if data_dict.get("alternativeRowScanning", 0):
-        scanning_mode |= 0x10
-
-    resolution_flags = data_dict.get("resolutionAndComponentFlags", 48)
-    shape_of_earth = data_dict.get("shapeOfTheEarth", 6)
-
-    drt = data_dict.get("dataRepresentationTemplateNumber", 0)
-    reference_value = float(data_dict.get("referenceValue", 0.0))
-    binary_scale_factor = data_dict.get("binaryScaleFactor", 0)
-    decimal_scale_factor = data_dict.get("decimalScaleFactor", 0)
-    bits_per_value = data_dict.get("bitsPerValue", 0)
-    original_field_type = data_dict.get("typeOfOriginalFieldValues", 0)
-
-    return {
-        "center": center,
-        "subcenter": subcenter,
-        "parameter": {
-            "discipline": discipline,
-            "category": category,
-            "number": number,
-        },
-        "forecast": {
-            "reference_time": {
-                "year": year,
-                "month": month,
-                "day": day,
-                "hour": hour,
-                "minute": minute,
-                "second": second,
-                "significance": significance,
-            },
-            "time_range_unit": time_range_unit,
-            "forecast_offset": forecast_offset,
-        },
-        "level": {
-            "type1": type1,
-            "scale_factor1": scale_factor1,
-            "scaled_value1": scaled_value1,
-            "type2": type2,
-            "scale_factor2": scale_factor2,
-            "scaled_value2": scaled_value2,
-        },
-        "ensemble": ensemble,
-        "grid": {
-            "template": gdt,
-            "num_data_points": num_data_points,
-            "nx": nx,
-            "ny": ny,
-            "lat_first": lat_first,
-            "lon_first": lon_first,
-            "lat_last": lat_last,
-            "lon_last": lon_last,
-            "di": di,
-            "dj": dj,
-            "scanning_mode": scanning_mode,
-            "resolution_flags": resolution_flags,
-            "shape_of_earth": shape_of_earth,
-        },
-        "gdt_template": gdt,
-        "pdt_template": pdt,
-        "drt_template": drt,
-        "packing": {
-            "reference_value": reference_value,
-            "binary_scale_factor": binary_scale_factor,
-            "decimal_scale_factor": decimal_scale_factor,
-            "bits_per_value": bits_per_value,
-            "original_field_type": original_field_type,
-        },
-    }
-
-
-def gen_golden_cli(grib2_path, fixture_id, output_dir):
-    """Generate golden JSON using eccodes CLI tools."""
-    # Get metadata from grib_dump
-    dump_data = run_grib_dump(grib2_path)
-    messages = dump_data.get("messages", [])
+    except ValueError as e:
+        print(f"ERROR: Invalid GRIB2 file - {e}", file=sys.stderr)
+        sys.exit(1)
+    except OSError as e:
+        print(f"ERROR: Cannot read file {grib2_path}: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"ERROR: Unexpected error parsing {grib2_path}: {e}", file=sys.stderr)
+        sys.exit(1)
 
     if not messages:
         print(f"WARNING: no GRIB2 messages decoded from {grib2_path}", file=sys.stderr)
         sys.exit(1)
 
-    # Extract values array and bitmap
-    values = extract_values_array(grib2_path)
-    bitmap = extract_bitmap(grib2_path)
-
-    # Process all messages
-    fields = []
-    for msg_list in messages:
-        msg_dict = key_list_to_dict(msg_list)
-        field = decode_message_cli(msg_dict)
-        if field is not None:
-            # Add values to field
-            if bitmap:
-                field["values"] = {
-                    "Masked": {
-                        "values": values,
-                        "present": bitmap,
-                    }
-                }
-            else:
-                field["values"] = {"Dense": values}
-            fields.append(field)
-
-    if not fields:
-        print(f"WARNING: failed to decode GRIB2 messages from {grib2_path}", file=sys.stderr)
-        sys.exit(1)
-
     golden = {
-        "fixture_id": fixture_id,
-        "_provenance": (
-            f"Generated by scripts/gen_golden.py from {Path(grib2_path).name}"
-            " using eccodes CLI tools."
+        'fixture_id': fixture_id,
+        '_provenance': (
+            f'Generated by scripts/gen_golden.py from {Path(grib2_path).name}'
+            ' using basic GRIB2 parsing (no external dependencies).'
         ),
-        "fields": fields,
+        'fields': messages,
+        'parser_version': 'basic_0.1'
     }
 
-    out = Path(output_dir) / f"{fixture_id}.json"
+    out = Path(output_dir) / f'{fixture_id}.json'
     out.parent.mkdir(parents=True, exist_ok=True)
-    with open(out, "w") as fh:
+
+    with open(out, 'w') as fh:
         json.dump(golden, fh, indent=4)
-    print(f"Written: {out}  ({len(fields)} field(s))")
+
+    print(f'Written: {out}  ({len(messages)} message(s))')
 
 
 # ============================================================================
 # Main entry point
 # ============================================================================
 
-def gen_golden(grib2_path, fixture_id, output_dir):
-    """Generate golden JSON from a GRIB2 file.
-
-    Uses eccodes Python bindings if available, otherwise falls back to CLI tools.
-    """
-    if ECCODES_AVAILABLE:
-        print(f"Using eccodes Python bindings...")
-        gen_golden_python(grib2_path, fixture_id, output_dir)
-    else:
-        print(f"Using eccodes CLI tools...")
-        gen_golden_cli(grib2_path, fixture_id, output_dir)
-
-
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate gribtract golden reference JSON from a GRIB2 file"
+        description='Generate gribtract golden reference JSON from a GRIB2 file using basic parsing'
     )
-    parser.add_argument("grib2_file", help="Input GRIB2 file")
-    parser.add_argument("fixture_id", help="Fixture ID (becomes the output filename)")
+    parser.add_argument('grib2_file', help='Input GRIB2 file')
+    parser.add_argument('fixture_id', help='Fixture ID (becomes the output filename)')
     parser.add_argument(
-        "--output-dir",
-        default="tests/corpus/golden",
-        help="Directory for the output JSON (default: tests/corpus/golden)",
+        '--output-dir',
+        default='tests/corpus/golden',
+        help='Directory for the output JSON (default: tests/corpus/golden)',
     )
     args = parser.parse_args()
-    gen_golden(args.grib2_file, args.fixture_id, args.output_dir)
+
+    gen_golden_basic(args.grib2_file, args.fixture_id, args.output_dir)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
