@@ -1166,22 +1166,40 @@ fn decode_drt3(
 
     let mut byte_pos = total_seed_bytes;
 
+    // Helper: check if we have enough bytes remaining for the next operation
+    let check_bytes = |needed: usize, body_len: usize, byte_pos: usize, context: &str| -> Result<()> {
+        let remaining = body_len.saturating_sub(byte_pos);
+        if remaining < needed {
+            return Err(Error::TooShort {
+                needed: byte_pos + needed,
+                got: body_len,
+            });
+        }
+        Ok(())
+    };
+
     // 2. Group references: n_groups × bits_per_value bits, byte-aligned.
     let nbits = packing.bits_per_value as usize;
+    let bytes_needed_refs = (n_groups * nbits).div_ceil(8);
+    check_bytes(bytes_needed_refs, body.len(), byte_pos, "group references")?;
     let group_refs = unpack_n_bits(&body[byte_pos..], n_groups, nbits);
-    byte_pos += (n_groups * nbits).div_ceil(8);
+    byte_pos += bytes_needed_refs;
 
     // 3. Group widths: n_groups × bits_group_widths bits, byte-aligned.
     let bw = extra.bits_group_widths as usize;
+    let bytes_needed_widths = (n_groups * bw).div_ceil(8);
+    check_bytes(bytes_needed_widths, body.len(), byte_pos, "group widths")?;
     let raw_widths = unpack_n_bits(&body[byte_pos..], n_groups, bw);
     let group_widths: Vec<usize> = raw_widths.iter()
         .map(|&w| extra.ref_group_widths as usize + w as usize)
         .collect();
-    byte_pos += (n_groups * bw).div_ceil(8);
+    byte_pos += bytes_needed_widths;
 
     // 4. Group lengths: n_groups × bits_scaled_group_lengths bits, byte-aligned.
     //    The last group always uses `true_last_group_length` from Section 5.
     let bl = extra.bits_scaled_group_lengths as usize;
+    let bytes_needed_lengths = (n_groups * bl).div_ceil(8);
+    check_bytes(bytes_needed_lengths, body.len(), byte_pos, "group lengths")?;
     let raw_lengths = unpack_n_bits(&body[byte_pos..], n_groups, bl);
     let group_lengths: Vec<usize> = raw_lengths.iter().enumerate().map(|(g, &l)| {
         if g == n_groups - 1 {
@@ -1190,9 +1208,29 @@ fn decode_drt3(
             extra.ref_group_lengths as usize + l as usize * extra.length_increment as usize
         }
     }).collect();
-    byte_pos += (n_groups * bl).div_ceil(8);
+    byte_pos += bytes_needed_lengths;
 
     // 5. Packed values within groups (variable bit width per group).
+    // Calculate the total bits needed for all groups to ensure we have sufficient buffer.
+    let total_bits_needed: usize = group_widths.iter().zip(group_lengths.iter())
+        .map(|(&w, &l)| w * l)
+        .sum();
+    // Account for the starting bit offset when calculating byte requirements.
+    // If we start at bit_offset within byte byte_pos, and need total_bits_needed more bits,
+    // the last bit we'll read is at bit_offset + total_bits_needed - 1.
+    // The byte containing that last bit is at position (last_bit / 8).
+    // Since bytes are 0-indexed, we need bytes 0..(last_bit / 8 + 1), which is (last_bit / 8 + 1) bytes total.
+    // When total_bits_needed is 0 (all zero-width groups), we need 0 bytes.
+    let bytes_needed_packed = if total_bits_needed == 0 {
+        0
+    } else {
+        let start_bit = byte_pos * 8;
+        let last_bit = start_bit + total_bits_needed - 1;
+        let last_byte = last_bit / 8;
+        last_byte - byte_pos + 1
+    };
+    check_bytes(bytes_needed_packed, body.len(), byte_pos, "packed values")?;
+
     let mut packed = Vec::with_capacity(n_points);
     let mut bit_offset = byte_pos * 8;
     for g in 0..n_groups {
@@ -1205,6 +1243,8 @@ fn decode_drt3(
             for _ in 0..l { packed.push(gref); }
             continue;
         }
+
+
         // Generic windowed extractor — the sole extractor path. Per-width
         // specializations (w=4/8/12/16) were benchmarked A/B vs this path in
         // parse-speed-log Attempt 8 (2026-07-22, 3 runs/variant): specialized
