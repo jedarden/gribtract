@@ -1,0 +1,1 @@
+1:0:code table 5.0=40 Grid point data - JPEG 2000 code stream format

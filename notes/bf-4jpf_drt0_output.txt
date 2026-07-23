@@ -1,0 +1,1 @@
+1:0:code table 5.0=0 Grid point data - simple packing

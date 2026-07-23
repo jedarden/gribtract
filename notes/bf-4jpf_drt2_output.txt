@@ -1,0 +1,1 @@
+1:0:code table 5.0=2 Grid point data - complex packing
