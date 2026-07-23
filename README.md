@@ -25,6 +25,8 @@ gribtract list hrrr.t00z.wrfsfcf01.grib2
 gribtract decode hrrr.t00z.wrfsfcf01.grib2
 ```
 
+> **⚠️ CLI not yet implemented** — The commands above (steps 1, 3, 4) document the planned interface but are not yet functional. Use the library API shown below instead. See [bf-4nam](https://github.com/jedarden/gribtract/issues?q=bf-4nam) for status.
+
 Or as a library:
 
 ```toml
@@ -236,13 +238,15 @@ The `gribtract-py` extension is excluded from the default workspace build (it ne
 
 ## 💻 CLI Reference
 
+> **⚠️ Not yet implemented** — The CLI commands below are documented for the planned interface, but are not yet functional. See [bf-4nam](https://github.com/jedarden/gribtract/issues?q=bf-4nam) for status.
+
 ```bash
 gribtract list   forecast.grib2   # 📋 list all fields (JSON)
 gribtract decode forecast.grib2   # 📤 decode all fields + values (JSON)
 gribtract dump   forecast.grib2   # 🔍 raw hex dump
 ```
 
-The CLI is a thin wrapper over the library API, intended for ad-hoc inspection.
+The CLI is intended as a thin wrapper over the library API for ad-hoc inspection.
 
 ## 📜 License
 
