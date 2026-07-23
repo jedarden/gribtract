@@ -231,49 +231,190 @@ class GRIB2Parser:
             },
             'gdt_template': gdt_template,
             'pdt_template': pdt_template,
-            'grid': {
-                'template': gdt_template
-            },
             'sections_found': sorted(sections.keys())
         }
 
-        # Try to extract grid info if available (template 3.0 - lat/lon)
-        if gdt_template == 0 and len(section3) >= 32:
-            # Template 3.0: Latitude/Longitude
-            # Octets 8-9: Ni (nx)
-            # Octets 10-11: Nj (ny)
-            nx = struct.unpack('>H', section3[7:9])[0]
-            ny = struct.unpack('>H', section3[9:11])[0]
-
-            # Basic angle flags (octet 12) should be 0 for lat/lon in degrees
-
-            # Octets 13-16: Latitude of first point (scaled by 10^-6)
-            # Octets 17-20: Longitude of first point (scaled by 10^-6)
-            lat_first = struct.unpack('>i', section3[12:16])[0] / 1000000.0
-            lon_first = struct.unpack('>i', section3[16:20])[0] / 1000000.0
-
-            # Octets 21-24: Latitude of last point
-            # Octets 25-28: Longitude of last point
-            lat_last = struct.unpack('>i', section3[20:24])[0] / 1000000.0
-            lon_last = struct.unpack('>i', section3[24:28])[0] / 1000000.0
-
-            # Octets 29-32: i direction increment
-            # Octets 33-36: j direction increment
-            di = struct.unpack('>i', section3[28:32])[0] / 1000000.0 if len(section3) >= 32 else 0.0
-            dj = struct.unpack('>i', section3[32:36])[0] / 1000000.0 if len(section3) >= 36 else 0.0
-
-            message['grid'].update({
-                'nx': nx,
-                'ny': ny,
-                'lat_first': lat_first,
-                'lon_first': lon_first,
-                'lat_last': lat_last,
-                'lon_last': lon_last,
-                'di': di,
-                'dj': dj
-            })
+        # Extract grid metadata with error handling
+        try:
+            grid_info = self._extract_grid_metadata(section3, gdt_template)
+            message['grid'] = grid_info
+        except (struct.error, ValueError, IndexError) as e:
+            # If grid extraction fails, still return the message with basic grid info
+            message['grid'] = {
+                'template': gdt_template,
+                'extraction_error': str(e),
+                'ni': None,
+                'nj': None,
+                'grid_type': self._get_grid_type_name(gdt_template),
+                'scanning_mode': None
+            }
 
         return message
+
+    def _extract_grid_metadata(self, section3, gdt_template):
+        """Extract grid metadata from Grid Definition Section (Section 3).
+
+        Args:
+            section3: Raw bytes of Section 3
+            gdt_template: Grid Definition Template number
+
+        Returns:
+            Dictionary containing grid metadata
+
+        Raises:
+            struct.error: If binary unpacking fails
+            ValueError: If section is malformed
+            IndexError: If section is too short
+        """
+        if len(section3) < 7:
+            raise ValueError(f"Section 3 too short: {len(section3)} bytes")
+
+        # Initialize grid structure
+        grid_info = {
+            'template': gdt_template,
+            'grid_type': self._get_grid_type_name(gdt_template),
+            'ni': None,  # Number of points along latitude (i direction)
+            'nj': None,  # Number of points along longitude (j direction)
+            'scanning_mode': None
+        }
+
+        # Template 3.0: Latitude/Longitude (or Equidistant Cylindrical)
+        if gdt_template == 0:
+            grid_info.update(self._extract_grid_template_0(section3))
+        # Template 3.1: Rotated Latitude/Longitude
+        elif gdt_template == 1:
+            grid_info.update(self._extract_grid_template_1(section3))
+        # Template 3.10: Mercator
+        elif gdt_template == 10:
+            grid_info.update(self._extract_grid_template_10(section3))
+        else:
+            # For unsupported templates, still try to extract basic info
+            grid_info['extraction_warning'] = f'Grid template {gdt_template} not fully supported'
+
+        return grid_info
+
+    def _extract_grid_template_0(self, section3):
+        """Extract grid metadata for Template 3.0 (Latitude/Longitude).
+
+        Template 3.0 structure:
+        - Octets 8-9: Ni (number of points along latitude)
+        - Octets 10-11: Nj (number of points along longitude)
+        - Octet 12: Basic angle of the initial production domain
+        - Octets 13-16: Latitude of first point (scaled by 10^-6)
+        - Octets 17-20: Longitude of first point (scaled by 10^-6)
+        - Octets 21-24: Latitude of last point (scaled by 10^-6)
+        - Octets 25-28: Longitude of last point (scaled by 10^-6)
+        - Octets 29-32: i direction increment (scaled by 10^-6)
+        - Octets 33-36: j direction increment (scaled by 10^-6)
+        - Octet 37: Scanning mode
+
+        Returns:
+            Dictionary with grid metadata for template 0
+        """
+        if len(section3) < 37:
+            raise ValueError(f"Section 3 too short for template 0: {len(section3)} bytes, need at least 37")
+
+        info = {}
+
+        # Ni and Nj (number of grid points)
+        info['ni'] = struct.unpack('>H', section3[7:9])[0]
+        info['nj'] = struct.unpack('>H', section3[9:11])[0]
+
+        # Basic angle flags (octet 12)
+        basic_angle = section3[11]
+
+        # Latitude/longitude bounds (scaled by 10^-6)
+        info['lat_first'] = struct.unpack('>i', section3[12:16])[0] / 1000000.0
+        info['lon_first'] = struct.unpack('>i', section3[16:20])[0] / 1000000.0
+        info['lat_last'] = struct.unpack('>i', section3[20:24])[0] / 1000000.0
+        info['lon_last'] = struct.unpack('>i', section3[24:28])[0] / 1000000.0
+
+        # Grid increments (scaled by 10^-6)
+        info['di'] = struct.unpack('>i', section3[28:32])[0] / 1000000.0
+        info['dj'] = struct.unpack('>i', section3[32:36])[0] / 1000000.0
+
+        # Scanning mode (octet 37)
+        scanning_mode = section3[36]
+        info['scanning_mode'] = self._parse_scanning_mode(scanning_mode)
+
+        # Calculate bounds from grid parameters if available
+        if info['ni'] and info['nj'] and info['di'] and info['dj']:
+            info['bounds_calculated'] = {
+                'lat_min': min(info['lat_first'], info['lat_last']),
+                'lat_max': max(info['lat_first'], info['lat_last']),
+                'lon_min': min(info['lon_first'], info['lon_last']),
+                'lon_max': max(info['lon_first'], info['lon_last'])
+            }
+
+        return info
+
+    def _extract_grid_template_1(self, section3):
+        """Extract grid metadata for Template 3.1 (Rotated Latitude/Longitude).
+
+        Returns minimal info for rotated grids.
+        """
+        info = {}
+        if len(section3) >= 11:
+            info['ni'] = struct.unpack('>H', section3[7:9])[0]
+            info['nj'] = struct.unpack('>H', section3[9:11])[0]
+            info['extraction_note'] = 'Rotated grid - full extraction not implemented'
+        return info
+
+    def _extract_grid_template_10(self, section3):
+        """Extract grid metadata for Template 3.10 (Mercator).
+
+        Returns minimal info for Mercator grids.
+        """
+        info = {}
+        if len(section3) >= 11:
+            info['ni'] = struct.unpack('>H', section3[7:9])[0]
+            info['nj'] = struct.unpack('>H', section3[9:11])[0]
+            info['extraction_note'] = 'Mercator grid - full extraction not implemented'
+        return info
+
+    def _get_grid_type_name(self, gdt_template):
+        """Get human-readable grid type name from template number."""
+        grid_types = {
+            0: 'latitude_longitude',
+            1: 'rotated_latitude_longitude',
+            2: 'stretched_lat_lon',
+            3: 'stretched_rotated_lat_lon',
+            5: 'polar_stereographic',
+            10: 'mercator',
+            12: 'lambert_conformal',
+            20: 'gaussian_lat_lon',
+            30: 'reduced_gg',
+            40: 'rotated_reduced_gg',
+            42: 'stretched_gg',
+            43: 'stretched_rotated_gg',
+            50: 'spectral',
+            90: 'space_view_perspective',
+            204: 'unstructured',
+            32768: 'cross_section',
+            1000: 'triangular',
+            1100: 'unstructured_hexagonal'
+        }
+        return grid_types.get(gdt_template, f'unknown_template_{gdt_template}')
+
+    def _parse_scanning_mode(self, mode_byte):
+        """Parse scanning mode flags from octet 37 in Template 3.0.
+
+        The scanning mode is a bitmask:
+        - Bit 1 (0x80): Scan mode for i points (0: +x direction, 1: -x direction)
+        - Bit 2 (0x40): Scan mode for j points (0: +y direction, 1: -y direction)
+        - Bit 3 (0x20): Adjacent i points are consecutive (1: yes, 0: no)
+        - Bit 4 (0x10): Adjacent rows are consecutive (1: yes, 0: no)
+
+        Returns:
+            Dictionary describing the scanning mode
+        """
+        return {
+            'raw_value': mode_byte,
+            'i_direction_negative': bool(mode_byte & 0x80),
+            'j_direction_negative': bool(mode_byte & 0x40),
+            'i_points_consecutive': bool(mode_byte & 0x20),
+            'rows_consecutive': bool(mode_byte & 0x10)
+        }
 
 
 def gen_golden_basic(grib2_path, fixture_id, output_dir):
