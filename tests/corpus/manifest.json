@@ -159,6 +159,20 @@
         "capture_date": "2026-07-23",
         "generated_by": "curl from noaa-hrrr-bdp-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
       }
+    },
+    {
+      "id": "gefs_ensemble_mean_pdt48",
+      "path": "large/gefs.20240101.00.atmos.pgrb2ap5.geavg.t00z.pgrb2a.0p50.f000.grib2",
+      "sha256": "bb2c90188ec6370aca833b55118b199097c21ef978f0b5e6fe8ab9e9955b3158",
+      "size_bytes": 13664431,
+      "storage": "remote",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20240101/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000",
+      "provenance": {
+        "source": "NOAA GEFS (Global Ensemble Forecast System)",
+        "description": "GEFS ensemble mean analysis, run 2024-01-01 00z, forecast hour F00. 71 GRIB2 messages, ALL GDT 0 (lat/lon) + PDT 4.8 (ensemble mean statistical product). Grid: 0.5° resolution global lat/lon (pgrb2ap5). Product: geavg (ensemble mean across 31 members). Template: PDT 4.8 (statistically processed ensemble product, wgrib2 pdt=2). Variables: ensemble mean of HGT (geopotential height), TMP (temperature), UGRD/VGRD (wind components), RH (relative humidity) at multiple pressure levels (10 mb, 50 mb, etc.). Verified via wgrib2: pdt=2 (PDT 4.8) for all 71 messages. Sourced from noaa-gefs-pds S3 (AWS Open Data, public, no auth). storage=remote because the 13.7 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-23",
+        "generated_by": "curl from noaa-gefs-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
+      }
     }
   ],
   "_comment_large": "Fixtures with storage=remote live in tests/corpus/large/ (gitignored). The harness fetches them by sha256 from B2. Add a manifest entry here first, then seed the file.",
