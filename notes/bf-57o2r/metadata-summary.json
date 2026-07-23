@@ -1,0 +1,80 @@
+{
+  "fixture": {
+    "filename": "gefs_ensemble_mean_sample.grib2",
+    "source_path": "/tmp/geavg_20260723_t00z_f000.grib2",
+    "suggested_path": "tests/corpus/large/gefs_ensemble_mean_sample.grib2",
+    "size_bytes": 13991214,
+    "size_human": "13.4 MB",
+    "validation_status": "approved",
+    "download_date": "2026-07-23T15:39:54Z"
+  },
+  "source": {
+    "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260723/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000",
+    "provider": "NOAA NCEP",
+    "archive": "noaa-gefs-pds (AWS S3)",
+    "documentation": "https://registry.opendata.aws/noaa-gefs/"
+  },
+  "product": {
+    "model": "GEFS",
+    "product_type": "ensemble_mean",
+    "reference_date": "2026-07-23",
+    "cycle": "00z",
+    "forecast_hour": "f000",
+    "resolution": "0.5"
+  },
+  "structure": {
+    "grib_edition": 2,
+    "total_messages": 71,
+    "grid_type": "regular_ll",
+    "grid_dimensions": "720x361",
+    "grid_points": 259920,
+    "resolution_degrees": 0.5
+  },
+  "pdt": {
+    "distribution": {
+      "pdt_4_2": 71,
+      "pdt_4_1": 0,
+      "pdt_4_8": 0
+    },
+    "primary_pdt": "4.2",
+    "description": "Derived products based on individual ensemble forecasts"
+  },
+  "variables": [
+    "HGT", "TMP", "RH", "UGRD", "VGRD", "VVEL",
+    "PRES", "PRMSL", "TSOIL", "SOILW", "WEASD",
+    "SNOD", "ICETK", "PWAT", "CAPE", "CIN"
+  ],
+  "levels": [
+    "10 mb", "50 mb", "100 mb", "200 mb", "250 mb",
+    "300 mb", "400 mb", "500 mb", "700 mb", "850 mb",
+    "925 mb", "1000 mb", "surface", "2 m above ground",
+    "10 m above ground", "0-0.1 m below ground",
+    "entire atmosphere", "180-0 mb above ground"
+  ],
+  "quality": {
+    "structure_valid": true,
+    "wgrib2_decode_ok": true,
+    "eccodes_decode_ok": true,
+    "integrity_check": "pass",
+    "message_count_correct": true
+  },
+  "use_cases": [
+    "PDT 4.2 testing (ensemble statistical products)",
+    "Ensemble mean product handling",
+    "Multi-message GRIB2 structure testing",
+    "Performance testing (71 messages)",
+    "Global grid operations (0.5°)"
+  ],
+  "limitations": [
+    "Contains only PDT 4.2 messages",
+    "Single forecast cycle (00z)",
+    "Single forecast hour (f000)",
+    "Single model (GEFS)"
+  ],
+  "validation_commands": [
+    "ls -lh /tmp/geavg_20260723_t00z_f000.grib2",
+    "wgrib2 /tmp/geavg_20260723_t00z_f000.grib2 -pdt | wc -l",
+    "grib_ls /tmp/geavg_20260723_t00z_f000.grib2 | head -5",
+    "grib_count /tmp/geavg_20260723_t00z_f000.grib2"
+  ]
+}
