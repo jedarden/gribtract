@@ -64,6 +64,10 @@ pub struct CoverageReport {
     /// These are counted in fixtures_total but excluded from the comparable
     /// count when computing agreement percentage.
     pub fixtures_skipped_feature: usize,
+    /// Fixtures skipped due to storage=remote not being fetched locally.
+    /// These are NOT counted in fixtures_total and excluded from the comparable
+    /// count when computing agreement percentage.
+    pub fixtures_skipped_remote: usize,
     /// (gdt_template, pdt_template, drt_template) → stat
     pub by_template: HashMap<(u16, u16, u16), TemplateStat>,
 }
@@ -89,11 +93,12 @@ impl CoverageReport {
             .saturating_sub(self.fixtures_skipped_feature);
         println!("=== Differential Harness Coverage ===");
         println!(
-            "Fixtures : {} total  ({} comparable, {} no-golden, {} skipped-feature)",
+            "Fixtures : {} total  ({} comparable, {} no-golden, {} skipped-feature, {} skipped-remote-not-fetched)",
             self.fixtures_total,
             comparable,
             self.fixtures_no_golden,
-            self.fixtures_skipped_feature
+            self.fixtures_skipped_feature,
+            self.fixtures_skipped_remote
         );
         println!("  matched      : {}", self.fixtures_matched);
         println!("  decode errors: {}", self.fixtures_decode_error);
@@ -187,14 +192,34 @@ pub fn compare_field(actual: &Field, golden: &GoldenField) -> FieldResult {
     let gg = &golden.grid;
     check_meta!("grid.template", ag.template, gg.template);
     check_meta!("grid.num_data_points", ag.num_data_points, gg.num_data_points);
-    check_meta!("grid.nx", ag.nx, gg.nx);
-    check_meta!("grid.ny", ag.ny, gg.ny);
+
+    // nx/ny: only compare if golden has a value (some grid types don't use these)
+    if let Some(golden_nx) = gg.nx {
+        check_meta!("grid.nx", ag.nx, golden_nx);
+    }
+    if let Some(golden_ny) = gg.ny {
+        check_meta!("grid.ny", ag.ny, golden_ny);
+    }
+
     check_meta!("grid.lat_first", ag.lat_first.to_bits(), gg.lat_first.to_bits());
     check_meta!("grid.lon_first", ag.lon_first.to_bits(), gg.lon_first.to_bits());
-    check_meta!("grid.lat_last", ag.lat_last.to_bits(), gg.lat_last.to_bits());
-    check_meta!("grid.lon_last", ag.lon_last.to_bits(), gg.lon_last.to_bits());
-    check_meta!("grid.di", ag.di.to_bits(), gg.di.to_bits());
-    check_meta!("grid.dj", ag.dj.to_bits(), gg.dj.to_bits());
+
+    // lat_last/lon_last: only compare if golden has a value
+    if let Some(golden_lat_last) = gg.lat_last {
+        check_meta!("grid.lat_last", ag.lat_last.to_bits(), golden_lat_last.to_bits());
+    }
+    if let Some(golden_lon_last) = gg.lon_last {
+        check_meta!("grid.lon_last", ag.lon_last.to_bits(), golden_lon_last.to_bits());
+    }
+
+    // di/dj: only compare if golden has a value
+    if let Some(golden_di) = gg.di {
+        check_meta!("grid.di", ag.di.to_bits(), golden_di.to_bits());
+    }
+    if let Some(golden_dj) = gg.dj {
+        check_meta!("grid.dj", ag.dj.to_bits(), golden_dj.to_bits());
+    }
+
     check_meta!("grid.scanning_mode", ag.scanning_mode, gg.scanning_mode);
     check_meta!("grid.resolution_flags", ag.resolution_flags, gg.resolution_flags);
     check_meta!("grid.shape_of_earth", ag.shape_of_earth, gg.shape_of_earth);
@@ -357,9 +382,9 @@ mod tests {
             },
             ensemble: None,
             grid: GoldenGridDefinition {
-                template: 0, num_data_points: 4, nx: 2, ny: 2,
-                lat_first: 10.0, lon_first: 0.0, lat_last: 0.0, lon_last: 10.0,
-                di: 10.0, dj: 10.0, scanning_mode: 0, resolution_flags: 48,
+                template: 0, num_data_points: 4, nx: Some(2), ny: Some(2),
+                lat_first: 10.0, lon_first: 0.0, lat_last: Some(0.0), lon_last: Some(10.0),
+                di: Some(10.0), dj: Some(10.0), scanning_mode: 0, resolution_flags: 48,
                 shape_of_earth: 6,
             },
             values: GoldenGridValues::Dense(values),

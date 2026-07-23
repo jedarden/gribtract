@@ -57,18 +57,28 @@ pub struct GoldenEnsemble {
 pub struct GoldenGridDefinition {
     pub template: u16,
     pub num_data_points: u32,
-    pub nx: u32,
-    pub ny: u32,
+    #[serde(default = "default_nx")]
+    pub nx: Option<u32>,
+    #[serde(default = "default_ny")]
+    pub ny: Option<u32>,
     pub lat_first: f64,
     pub lon_first: f64,
-    pub lat_last: f64,
-    pub lon_last: f64,
-    pub di: f64,
-    pub dj: f64,
+    #[serde(default = "default_zero_f64")]
+    pub lat_last: Option<f64>,
+    #[serde(default = "default_zero_f64")]
+    pub lon_last: Option<f64>,
+    #[serde(default = "default_zero_f64")]
+    pub di: Option<f64>,
+    #[serde(default = "default_zero_f64")]
+    pub dj: Option<f64>,
     pub scanning_mode: u8,
     pub resolution_flags: u8,
     pub shape_of_earth: u8,
 }
+
+fn default_nx() -> Option<u32> { None }
+fn default_ny() -> Option<u32> { None }
+fn default_zero_f64() -> Option<f64> { None }
 
 #[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct GoldenPackingInfo {
@@ -173,8 +183,8 @@ mod tests {
         assert_eq!(f.parameter.discipline, 0);
         assert_eq!(f.parameter.category, 0);
         assert_eq!(f.parameter.number, 0);
-        assert_eq!(f.grid.nx, 5);
-        assert_eq!(f.grid.ny, 5);
+        assert_eq!(f.grid.nx, Some(5));
+        assert_eq!(f.grid.ny, Some(5));
         assert_eq!(f.gdt_template, 0);
         assert_eq!(f.pdt_template, 0);
         assert_eq!(f.drt_template, 0);

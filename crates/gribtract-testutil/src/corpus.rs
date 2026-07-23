@@ -75,21 +75,40 @@ pub fn fixture_entry(id: &str) -> Result<FixtureEntry, String> {
         .ok_or_else(|| format!("fixture '{}' not found in manifest", id))
 }
 
+/// Check if a fixture is available locally.
+///
+/// Returns `true` if the fixture file exists at the expected path.
+/// For `storage=inline` fixtures this should always be true (they're committed).
+/// For `storage=remote` fixtures this returns true only after `cargo xtask corpus fetch`.
+pub fn is_available_locally(entry: &FixtureEntry) -> bool {
+    let file_path = corpus_root().join(&entry.path);
+    file_path.exists()
+}
+
 /// Load fixture bytes by id, verifying SHA-256.
 ///
 /// Returns `Err` if the fixture is not in the manifest, the file is missing,
 /// or the digest does not match.
+///
+/// For fixtures with `storage=remote`, this function will succeed if the file
+/// has been fetched locally (i.e., exists at the expected path). Otherwise it
+/// returns an error pointing to the fetch command.
 pub fn load(id: &str) -> Result<Vec<u8>, String> {
     let entry = fixture_entry(id)?;
 
+    let file_path = corpus_root().join(&entry.path);
+
+    // For remote fixtures, check if file exists locally first
     if entry.storage == "remote" {
-        return Err(format!(
-            "fixture '{}' has storage=remote — run `cargo xtask corpus fetch {}` first",
-            id, id
-        ));
+        if !file_path.exists() {
+            return Err(format!(
+                "fixture '{}' has storage=remote and is not present locally — run `cargo xtask corpus fetch {}` first",
+                id, id
+            ));
+        }
+        // File exists: fall through to load and verify
     }
 
-    let file_path = corpus_root().join(&entry.path);
     let bytes = std::fs::read(&file_path)
         .map_err(|e| format!("cannot read fixture {}: {}", file_path.display(), e))?;
 

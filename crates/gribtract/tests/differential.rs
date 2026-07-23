@@ -19,13 +19,17 @@ fn differential_coverage_report() {
     let mut report = CoverageReport::default();
 
     for entry in &fixtures {
-        // Only run inline fixtures; remote fixtures require a separate fetch step.
-        if entry.storage != "inline" {
+        // Skip remote fixtures that haven't been fetched locally.
+        // Remote fixtures that are present locally (via `cargo xtask corpus fetch`)
+        // will participate in the differential test.
+        if entry.storage == "remote" && !corpus::is_available_locally(entry) {
+            eprintln!("  [skip-remote-not-fetched] {}", entry.id);
+            report.fixtures_skipped_remote += 1;
             continue;
         }
 
-        // Count all inline fixtures in fixtures_total first, so that
-        // fixtures_total - fixtures_no_golden correctly computes the comparable count.
+        // Count all fixtures that will run (inline + fetched remote) in fixtures_total first,
+        // so that fixtures_total - fixtures_no_golden correctly computes the comparable count.
         report.fixtures_total += 1;
 
         // Skip DRT=40 (JPEG2000) fixtures when jpeg2000 feature is disabled
