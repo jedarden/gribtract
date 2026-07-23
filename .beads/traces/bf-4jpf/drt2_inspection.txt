@@ -1,0 +1,71 @@
+{
+  "file": "/home/coding/gribtract/tests/corpus/small/drt2_simple_3x3.grib2",
+  "field_count": 1,
+  "fields": [
+{
+    "center": 7,
+    "subcenter": 0,
+    "parameter": {
+      "discipline": 0,
+      "category": 0,
+      "number": 0
+    },
+    "level": {
+      "type1": 103,
+      "scale_factor1": 0,
+      "scaled_value1": 2,
+      "type2": 255,
+      "scale_factor2": 0,
+      "scaled_value2": 0,
+      "value1": 2
+    },
+    "forecast_time": {
+      "reference_time": {
+        "year": 2026,
+        "month": 6,
+        "day": 21,
+        "hour": 0,
+        "minute": 0,
+        "second": 0,
+        "significance": 0,
+        "unix_seconds": 1782000000
+      },
+      "time_range_unit": 1,
+      "forecast_offset": 0,
+      "offset_seconds": 0,
+      "valid_unix_seconds": 1782000000
+    },
+    "ensemble": null,
+    "grid": {
+      "template": 0,
+      "num_data_points": 9,
+      "nx": 3,
+      "ny": 3,
+      "lat_first": 20,
+      "lon_first": 0,
+      "lat_last": 0,
+      "lon_last": 20,
+      "di": 10,
+      "dj": 10,
+      "scanning_mode": 0,
+      "resolution_flags": 48,
+      "shape_of_earth": 6,
+      "projection": LatLon,
+    },
+    "templates": {
+      "gdt": 0,
+      "pdt": 0,
+      "drt": 2
+    },
+    "packing": {
+      "reference_value": 100,
+      "binary_scale_factor": 0,
+      "decimal_scale_factor": 0,
+      "bits_per_value": 8,
+      "original_field_type": 0,
+      "quantization_step": 1,
+      "tolerance": 0.5
+    },
+ }
+  ]
+}
