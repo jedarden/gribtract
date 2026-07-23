@@ -92,3 +92,30 @@ Used a custom Python parser (`/tmp/check_drt.py`) to:
 - WMO GRIB2 Edition 2 specification
 - NCEP GRIB2 documentation
 - Data Representation Template 5.3 (Complex Packing)
+
+## wgrib2 Verification (2026-07-23)
+
+Additional verification using wgrib2 v3.1.3 confirms DRT=3 complex packing across all fields:
+
+### Field: PRMSL (Mean Sea Level Pressure)
+```
+packing=Grid point data - complex packing and spatial differencing
+c3 val=(9.94887e+06+i*2^4)*10^-2, ref=0..32767 (#bits=15)
+group width bits=4 #groups=8324
+```
+
+### Field: UGRD (U-wind component)
+All instances show:
+```
+packing=Grid point data - complex packing and spatial differencing
+group width bits=4 #groups=8224-8786 (varies by level)
+```
+
+### Key Packing Parameters Confirmed:
+- **Packing type:** Grid point data - complex packing and spatial differencing (DRT=3) ✓
+- **Group splitting:** Variable-width groups with 4 bits for group width
+- **Spatial differencing:** Applied (part of complex packing scheme)
+- **Bit-width flexibility:** Variable (9-15 bits) depending on field characteristics
+- **Group counts:** 8,000-8,800 groups per field (262,792 data points total)
+
+The consistent use of "complex packing and spatial differencing" across all meteorological fields confirms the file uses **DRT=3** for data compression.
