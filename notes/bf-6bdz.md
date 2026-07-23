@@ -24,15 +24,36 @@ Version: wgrib2 v3.1.3 10/2023
 
 **-V**: Show diagnostic output including grid template, statistical values, and metadata
 
+**-packing**: Show packing mode (complex packing, spatial differencing, etc.)
+
+**-precision**: Show precision of packing
+
+**-scale**: Show scale factors for packing (decimal and binary scaling)
+
+**-pdt**: Show Product Definition Table information
+
 ### Results from Various GRIB2 Files
 
 #### NAM DRT3 File (test_data/nam_awip12_drt3.grib2)
-All records use **DRT 5.3** (Simple packing):
+All records use **DRT 5.3** (Grid point data - complex packing and spatial differencing):
 ```
 1:0:vt=2025011500:Sec5 len=49 #defined data points=262792 Data Repr. Template=5.3
 2:240117:vt=2025011500:Sec5 len=49 #defined data points=262792 Data Repr. Template=5.3
 ...
 ```
+
+**Detailed packing information** (from `-packing -precision -scale`):
+```
+1:0:packing=Grid point data - complex packing and spatial differencing,c3:encode i*2^4*10^-2:scale=-2,4
+2:240117:packing=Grid point data - complex packing and spatial differencing,c3:encode i*2^3*10^-1:scale=-1,3
+3:481603:packing=Grid point data - complex packing and spatial differencing,c3:encode i*2^0*10^-5:scale=-5,0
+...
+```
+
+**Encoding format**: `i*2^N*10^M` where:
+- `i` = integer values
+- `N` = binary scaling factor (varies by record: -4 to 6)
+- `M` = decimal scaling factor (varies by record: -6 to 2)
 
 #### DRT2 Simple Grid (tests/corpus/small/drt2_simple_3x3.grib2)
 Uses **DRT 5.2** (Complex packing):
