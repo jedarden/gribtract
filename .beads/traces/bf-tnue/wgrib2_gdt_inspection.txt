@@ -1,0 +1,50 @@
+Error processing line 4 of /home/coding/.local/lib/python3.13/site-packages/_cuda_bindings_redirector.pth:
+
+  Traceback (most recent call last):
+    File "<frozen site>", line 213, in addpackage
+    File "<string>", line 1, in <module>
+    File "/home/coding/.local/lib/python3.13/site-packages/_cuda_bindings_redirector.py", line 9, in <module>
+      import cuda
+  ModuleNotFoundError: No module named 'cuda'
+
+Remainder of file ignored
+
+======================================================================
+FILE: nam_conus_20260703.grib2
+======================================================================
+Message   1: 3.30 ✓, DRT=3 ✓, param=260074, name=Pressure reduced to MSL
+            grid_type=lambert, size=1799x1059
+Message   2: 3.30 ✓, DRT=3 ✓, param=260389, name=Derived radar reflectivity
+            grid_type=lambert, size=1799x1059
+Message   3: 3.30 ✓, DRT=3 ✓, param=54, name=Pressure
+            grid_type=lambert, size=1799x1059
+Message   4: 3.30 ✓, DRT=3 ✓, param=260018, name=Cloud mixing ratio
+            grid_type=lambert, size=1799x1059
+Message   5: 3.30 ✓, DRT=3 ✓, param=260101, name=Cloud Ice
+            grid_type=lambert, size=1799x1059
+Message   6: 3.30 ✓, DRT=3 ✓, param=260020, name=Rain mixing ratio
+            grid_type=lambert, size=1799x1059
+Message   7: 3.30 ✓, DRT=3 ✓, param=260021, name=Snow mixing ratio
+            grid_type=lambert, size=1799x1059
+Message   8: 3.30 ✓, DRT=3 ✓, param=260389, name=Derived radar reflectivity
+            grid_type=lambert, size=1799x1059
+Message   9: 3.30 ✓, DRT=3 ✓, param=260017, name=Condensate
+            grid_type=lambert, size=1799x1059
+Message  10: 3.30 ✓, DRT=3 ✓, param=260040, name=Rime factor
+            grid_type=lambert, size=1799x1059
+Message  11: 3.30 ✓, DRT=3 ✓, param=156, name=Geopotential height
+            grid_type=lambert, size=1799x1059
+Message  12: 3.30 ✓, DRT=3 ✓, param=130, name=Temperature
+            grid_type=lambert, size=1799x1059
+Message  13: 3.30 ✓, DRT=3 ✓, param=157, name=Relative humidity
+            grid_type=lambert, size=1799x1059
+Message  14: 3.30 ✓, DRT=3 ✓, param=133, name=Specific humidity
+            grid_type=lambert, size=1799x1059
+Message  15: 3.30 ✓, DRT=3 ✓, param=131, name=U component of wind
+            grid_type=lambert, size=1799x1059
+Message  16: 3.30 ✓, DRT=3 ✓, param=135, name=Vertical velocity
+            grid_type=lambert, size=1799x1059
+Message  17: 3.30 ✓, DRT=3 ✓, param=260155, name=Turbulent kinetic energy
+            grid_type=lambert, size=1799x1059
+Message  18: 3.30 ✓, DRT=3 ✓, param=131, name=U component of wind
+            grid_type=lambert, size=1799x1059
