@@ -90,11 +90,72 @@ https://noaa-gefs-pds.s3.amazonaws.com/gefs.YYYYMMDD/CC/MBR.tCCz.pgrb2a[f]FFF
 - **NCEP GRIB2 Documentation:** https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/
 - **PDT 4.1 (Individual Ensemble):** https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_temp4-1.shtml
 
+## Alternative Archive: NOMADS (Recent Data)
+
+**Base URL:** `https://nomads.ncep.noaa.gov/pub/data/nccf/com/gens/prod/`
+
+- Provides real-time access to recent GEFS data
+- More current than AWS S3 historical archive
+- Direct HTTP access without authentication
+
+### GEFS Recent URLs (PDT 4.1) - July 23, 2026
+
+**Control Member:**
+```
+https://nomads.ncep.noaa.gov/pub/data/nccf/com/gens/prod/gefs.20260723/00/atmos/pgrb2ap5/gec00.t00z.pgrb2a.0p50.f000
+```
+- File size: ~14MB
+- HTTP Status: 200 OK (verified)
+
+**Perturbed Member 01:**
+```
+https://nomads.ncep.noaa.gov/pub/data/nccf/com/gens/prod/gefs.20260723/00/atmos/pgrb2ap5/gep01.t00z.pgrb2a.0p50.f000
+```
+- File size: ~14MB
+- HTTP Status: 200 OK (verified)
+
+**NOMADS URL Structure:**
+```
+https://nomads.ncep.noaa.gov/pub/data/nccf/com/gens/prod/gefs.YYYYMMDD/CC/atmos/pgrb2ap5/MBR.tCCz.pgrb2a.0p50.fFFF
+```
+
+### SREF Statistical Processing URLs (PDT 4.8) - July 23, 2026
+
+**Ensemble Mean:**
+```
+https://nomads.ncep.noaa.gov/pub/data/nccf/com/sref/prod/sref.20260723/03/ensprod/sref.t03z.pgrb132.mean_3hrly.grib2
+```
+- File size: ~377MB
+- PDT 4.8 (statistical processing - ensemble mean)
+
+**Probability Products:**
+```
+https://nomads.ncep.noaa.gov/pub/data/nccf/com/sref/prod/sref.20260723/03/ensprod/sref.t03z.pgrb132.prob_3hrly.grib2
+```
+- PDT 4.8 (statistical processing - probability forecasts)
+
+**Ensemble Spread:**
+```
+https://nomads.ncep.noaa.gov/pub/data/nccf/com/sref/prod/sref.20260723/03/ensprod/sref.t03z.pgrb132.spread_3hrly.grib2
+```
+- PDT 4.8 (statistical processing - uncertainty/spread)
+
+**SREF URL Structure:**
+```
+https://nomads.ncep.noaa.gov/pub/data/nccf/com/sref/prod/sref.YYYYMMDD/CC/ensprod/sref.tCCz.pgrbXXX.STAT_T.grib2
+```
+
+Where:
+- `XXX` = resolution (132, 212, 216, 243)
+- `STAT` = statistical type (mean, spread, prob, max, min, mod, p10-p90)
+- `T` = temporal frequency (1hrly, 3hrly)
+
 ## Acceptance Criteria Met
 
 ✅ Located working URLs for ensemble products (PDT 4.1)
-✅ URLs point to real GRIB2 files in NOAA public archive
-✅ Verified URL structure and download pattern
+✅ Located working URLs for statistical processing products (PDT 4.8)
+✅ URLs point to real GRIB2 files in NOAA public archives
+✅ Verified URL structure and download patterns for both AWS S3 and NOMADS
 ✅ Added comment with URLs to bead (comment #15)
 
 ## Verification Details
