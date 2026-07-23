@@ -173,6 +173,20 @@
         "capture_date": "2026-07-23",
         "generated_by": "curl from noaa-gefs-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
       }
+    },
+    {
+      "id": "core_gaussian_gdt40",
+      "path": "large/flx.2024011500.grib2",
+      "sha256": "003a93bfc907c17be3b62891071260569c409a97a0d258e59460a0d013064397",
+      "size_bytes": 10968510,
+      "storage": "remote",
+      "url": "https://storage.googleapis.com/noaa-nws-ncep-core/grib/3hour/flx/2024/01/flx.2024011500.grb",
+      "provenance": {
+        "source": "NOAA CORe Archive (Climate Data Record - Google Cloud Storage)",
+        "description": "CORe 3-hourly flux file, 2024-01-15 00z. GRIB2 messages using GDT 3.40 (Gaussian Latitude/Longitude grid). Grid: 512 x 256 Gaussian grid, 131,072 points. Latitude range: 89.46°N to -89.46°S. Longitude range: 0° to 359.30° with ~0.703° increment. Number of latitudes between pole-equator: 128. File type: flx (flux files directly created by FV3GFS model, containing radiative, heat fluxes, land surface, soil conditions, and cloud layers). Verified via wgrib2: grid_template=40 (GDT 3.40) confirmed. Sourced from NOAA NWS NCEP CORe archive on Google Cloud Storage (public, no auth, Open Data Dissemination). Coverage: 1950-present. storage=remote because the 10.5 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-23",
+        "generated_by": "curl from storage.googleapis.com/noaa-nws-ncep-core; verified by wgrib2 (gribtract project)"
+      }
     }
   ],
   "_comment_large": "Fixtures with storage=remote live in tests/corpus/large/ (gitignored). The harness fetches them by sha256 from B2. Add a manifest entry here first, then seed the file.",
