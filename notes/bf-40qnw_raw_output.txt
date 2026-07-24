@@ -1,0 +1,145 @@
+=== DRT Analysis for Downloaded Candidate Files ===
+Generated: Fri Jul 24 03:36:47 AM EDT 2026
+Task: bf-40qnw
+
+Using wgrib2 command: wgrib2 <file> -grid | grep grid_template
+
+=== Resolution: 0p25 ===
+File: gfs.t00z.pgrb2.0p25.f000.20260722.grib2
+Path: downloads/candidates/0p25/gfs.t00z.pgrb2.0p25.f000.20260722.grib2
+Size: 489M
+1:0:grid_template=0:winds(N/S):
+2:876054:grid_template=0:winds(N/S):
+3:995749:grid_template=0:winds(N/S):
+4:1196539:grid_template=0:winds(N/S):
+5:1478446:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.0p25.f000.20260724.grib2
+Path: downloads/candidates/0p25/gfs.t00z.pgrb2.0p25.f000.20260724.grib2
+Size: 491M
+1:0:grid_template=0:winds(N/S):
+2:880569:grid_template=0:winds(N/S):
+3:991113:grid_template=0:winds(N/S):
+4:1167097:grid_template=0:winds(N/S):
+5:1409282:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.0p25.f003.20260724.grib2
+Path: downloads/candidates/0p25/gfs.t00z.pgrb2.0p25.f003.20260724.grib2
+Size: 519M
+1:0:grid_template=0:winds(N/S):
+2:881020:grid_template=0:winds(N/S):
+3:988640:grid_template=0:winds(N/S):
+4:1185906:grid_template=0:winds(N/S):
+5:1434045:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.0p25.f006.20260724.grib2
+Path: downloads/candidates/0p25/gfs.t00z.pgrb2.0p25.f006.20260724.grib2
+Size: 521M
+1:0:grid_template=0:winds(N/S):
+2:1006927:grid_template=0:winds(N/S):
+3:1112269:grid_template=0:winds(N/S):
+4:1310518:grid_template=0:winds(N/S):
+5:1596018:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.0p25.f012.20260723.grib2
+Path: downloads/candidates/0p25/gfs.t00z.pgrb2.0p25.f012.20260723.grib2
+Size: 521M
+1:0:grid_template=0:winds(N/S):
+2:887514:grid_template=0:winds(N/S):
+3:992231:grid_template=0:winds(N/S):
+4:1184837:grid_template=0:winds(N/S):
+5:1441724:grid_template=0:winds(N/S):
+
+
+=== Resolution: 0p50 ===
+File: gfs.t00z.pgrb2.0p50.f000.20260723.grib2
+Path: downloads/candidates/0p50/gfs.t00z.pgrb2.0p50.f000.20260723.grib2
+Size: 145M
+1:0:grid_template=0:winds(N/S):
+2:261724:grid_template=0:winds(N/S):
+3:299946:grid_template=0:winds(N/S):
+4:364192:grid_template=0:winds(N/S):
+5:443562:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.0p50.f000.20260724.grib2
+Path: downloads/candidates/0p50/gfs.t00z.pgrb2.0p50.f000.20260724.grib2
+Size: 146M
+1:0:grid_template=0:winds(N/S):
+2:262800:grid_template=0:winds(N/S):
+3:300515:grid_template=0:winds(N/S):
+4:357486:grid_template=0:winds(N/S):
+5:438871:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.0p50.f003.20260724.grib2
+Path: downloads/candidates/0p50/gfs.t00z.pgrb2.0p50.f003.20260724.grib2
+Size: 154M
+1:0:grid_template=0:winds(N/S):
+2:263974:grid_template=0:winds(N/S):
+3:301008:grid_template=0:winds(N/S):
+4:364116:grid_template=0:winds(N/S):
+5:447424:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.0p50.f006.20260724.grib2
+Path: downloads/candidates/0p50/gfs.t00z.pgrb2.0p50.f006.20260724.grib2
+Size: 154M
+1:0:grid_template=0:winds(N/S):
+2:294841:grid_template=0:winds(N/S):
+3:330470:grid_template=0:winds(N/S):
+4:394153:grid_template=0:winds(N/S):
+5:487321:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.0p50.f012.20260721.grib2
+Path: downloads/candidates/0p50/gfs.t00z.pgrb2.0p50.f012.20260721.grib2
+Size: 154M
+1:0:grid_template=0:winds(N/S):
+2:294812:grid_template=0:winds(N/S):
+3:334646:grid_template=0:winds(N/S):
+4:392087:grid_template=0:winds(N/S):
+5:477649:grid_template=0:winds(N/S):
+
+
+=== Resolution: 1p00 ===
+File: gfs.t00z.pgrb2.1p00.f000.20260723.grib2
+Path: downloads/candidates/1p00/gfs.t00z.pgrb2.1p00.f000.20260723.grib2
+Size: 41M
+1:0:grid_template=0:winds(N/S):
+2:74836:grid_template=0:winds(N/S):
+3:87476:grid_template=0:winds(N/S):
+4:107584:grid_template=0:winds(N/S):
+5:132891:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.1p00.f000.20260724.grib2
+Path: downloads/candidates/1p00/gfs.t00z.pgrb2.1p00.f000.20260724.grib2
+Size: 41M
+1:0:grid_template=0:winds(N/S):
+2:75204:grid_template=0:winds(N/S):
+3:87488:grid_template=0:winds(N/S):
+4:105723:grid_template=0:winds(N/S):
+5:130975:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.1p00.f003.20260724.grib2
+Path: downloads/candidates/1p00/gfs.t00z.pgrb2.1p00.f003.20260724.grib2
+Size: 44M
+1:0:grid_template=0:winds(N/S):
+2:75282:grid_template=0:winds(N/S):
+3:87432:grid_template=0:winds(N/S):
+4:107327:grid_template=0:winds(N/S):
+5:133349:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.1p00.f006.20260724.grib2
+Path: downloads/candidates/1p00/gfs.t00z.pgrb2.1p00.f006.20260724.grib2
+Size: 44M
+1:0:grid_template=0:winds(N/S):
+2:83309:grid_template=0:winds(N/S):
+3:95213:grid_template=0:winds(N/S):
+4:115442:grid_template=0:winds(N/S):
+5:144626:grid_template=0:winds(N/S):
+
+File: gfs.t00z.pgrb2.1p00.f024.20260722.grib2
+Path: downloads/candidates/1p00/gfs.t00z.pgrb2.1p00.f024.20260722.grib2
+Size: 44M
+1:0:grid_template=0:winds(N/S):
+2:74990:grid_template=0:winds(N/S):
+3:87533:grid_template=0:winds(N/S):
+4:107807:grid_template=0:winds(N/S):
+5:133630:grid_template=0:winds(N/S):
