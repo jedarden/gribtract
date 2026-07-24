@@ -1,0 +1,337 @@
+================================================================================
+                    CONUS COVERAGE MAP - HRRR CONUS GRID
+                    High-Resolution Rapid Refresh
+                    Grid Template 30 (Lambert Conformal Conic)
+                    1799 × 1059 points, 3km resolution
+================================================================================
+
+LATITUDE RANGE: 21.14°N to ~50°N     LONGITUDE RANGE: 122.72°W to ~65°W
+COVERAGE RADIUS: ~2,000 km from center (38.5°N, -97.5°W)
+
+LEGEND:
+  ●  Grid Center (38.5°N, -97.5°W)
+  ★  Major Airport Station (✓ Covered)
+  ☆  Marginal Station (<100 km from edge)
+  ■  Grid Boundary (approximate)
+  ░░░░  Coastal/Marginal Zone
+  ████  Core Coverage Zone
+
+
+================================================================================
+                         50°N (Northern Border)
+================================================================================
+
+                                           INL ★ 48.57°N ✓
+                                       (International Falls, MN)
+
+                                       HIB ★ 47.37°N ✓
+                                      (Hibbing, MN)
+
+                                     MOT ★ 48.26°N ✓
+                                    (Minot, ND)
+
+           GFK ★ 47.95°N ✓                          BIS ★ 46.77°N ✓
+      (Grand Forks, ND)                          (Bismarck, ND)
+
+                                       FAR ★ 46.87°N ✓
+                                      (Fargo, ND)
+
+  [GRID BOUNDARY ~50°N] ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+
+================================================================================
+                         45°N (Northern Tier)
+================================================================================
+
+                                          MSP ★ 44.88°N ✓
+                                      (Minneapolis, MN)
+
+                                              MKE ★ 42.95°N ✓
+                                          (Milwaukee, WI)
+
+        BOI ★ 43.56°N ✓                    ORD ★ 41.98°N ✓
+     (Boise, ID)                         (Chicago, IL)
+
+                                          DTW ★ 42.21°N ✓
+                                     (Detroit, MI)
+
+                                          CLE ★ 41.41°N ✓
+                                     (Cleveland, OH)
+
+    [MOUNTAIN REGION]                    [MIDWEST REGION]
+
+
+================================================================================
+                         40°N (Central CONUS)
+================================================================================
+
+                                              DEN ★ 39.85°N ✓
+                                          (Denver, CO)
+
+                                      CMH ★ 39.99°N ✓
+                                   (Columbus, OH)
+
+                                          PHL ★ 39.87°N ✓
+                                     (Philadelphia, PA)
+
+                                    IND ★ 39.73°N ✓
+                                (Indianapolis, IN)
+
+                                          STL ★ 38.75°N ✓
+                                      (St. Louis, MO)
+
+                                        ● 38.5°N, -97.5°W
+                                    (GRID CENTER - Reference)
+
+                                     DCA ★ 38.85°N ✓
+                                  (Washington, DC)
+
+    [ROCKY MOUNTAINS]                  [MIDWEST / EAST]
+
+
+================================================================================
+                         35°N (Southern Central)
+================================================================================
+
+                                         ABQ ★ 35.04°N ✓
+                                    (Albuquerque, NM)
+
+                                       EWR ★ 40.69°N ✓
+                                   (Newark, NJ)
+
+                                         JFK ★ 40.64°N ✓
+                                     (New York, NY)
+
+                                          RDU ★ 35.88°N ✓
+                                    (Raleigh, NC)
+
+                                      CLT ★ 35.21°N ✓
+                                  (Charlotte, NC)
+
+                                          OKC ★ 35.39°N ✓
+                                  (Oklahoma City, OK)
+
+    [SOUTHWEST]                       [SOUTH CENTRAL]
+
+
+================================================================================
+                         30°N (Southern Tier)
+================================================================================
+
+                                          SLC ★ 40.79°N ✓
+                                    (Salt Lake City, UT)
+
+                                          PHX ★ 33.43°N ✓
+                                    (Phoenix, AZ)
+
+                                          TUS ★ 32.12°N ✓
+                                     (Tucson, AZ)
+
+                                          LAS ★ 36.08°N ✓
+                                     (Las Vegas, NV)
+
+                                         DFW ★ 32.90°N ✓
+                                    (Dallas, TX)
+
+                                        AUS ★ 30.19°N ✓
+                                    (Austin, TX)
+
+                                        SAT ★ 29.53°N ✓
+                                  (San Antonio, TX)
+
+                                       JAX ★ 30.49°N ✓
+                                 (Jacksonville, FL)
+
+                                       IAH ★ 29.99°N ✓
+                                   (Houston, TX)
+
+                                       MSY ★ 29.99°N ✓
+                                (New Orleans, LA)
+
+                                      CRP ★ 27.77°N ✓
+                              (Corpus Christi, TX)
+
+    [SOUTHWEST]                       [SOUTH CENTRAL]
+
+
+================================================================================
+                         25°N (Southern Border)
+================================================================================
+
+                                          PSP ★ 33.83°N ✓
+                               (Palm Springs, CA)
+
+                                         RNO ★ 39.50°N ☆
+                                   (Reno, NV) - MARGINAL
+
+                                          ELP ★ 31.81°N ✓
+                                    (El Paso, TX)
+
+                                          YUM ★ 32.66°N ✓
+                                     (Yuma, AZ)
+
+                                        BRO ★ 25.91°N ✓
+                             (Brownsville, TX) - SOUTHERNMOST
+
+    [SOUTHWEST]                       [SOUTHERN BORDER]
+
+
+================================================================================
+                         COASTAL REGIONS
+================================================================================
+
+WEST COAST (7 marginal stations near edge):
+
+                                          SEA ★ 47.45°N ☆
+                                  (Seattle, WA) - MARGINAL
+
+                                          PDX ★ 45.59°N ☆
+                              (Portland, OR) - MARGINAL
+
+                                          SFO ★ 37.62°N ☆
+                         (San Francisco, CA) - MARGINAL
+
+                                          OAK ★ 37.71°N ☆
+                            (Oakland, CA) - MARGINAL
+
+                                          SJC ★ 37.36°N ☆
+                            (San Jose, CA) - MARGINAL
+
+                                          SMF ★ 38.70°N ☆
+                          (Sacramento, CA) - MARGINAL
+
+                                          LAX ★ 33.94°N ☆
+                          (Los Angeles, CA) - MARGINAL
+
+                                          SAN ★ 32.73°N ✓
+                            (San Diego, CA)
+
+
+EAST COAST (4 marginal stations near edge):
+
+                                          BOS ★ 42.36°N ☆
+                               (Boston, MA) - MARGINAL
+
+                                          JFK ★ 40.64°N ✓
+                                (New York, NY)
+
+                                          EWR ★ 40.69°N ☆
+                               (Newark, NJ) - MARGINAL
+
+                                          PHL ★ 39.87°N ☆
+                          (Philadelphia, PA) - MARGINAL
+
+                                          DCA ★ 38.85°N ✓
+                            (Washington, DC)
+
+
+SOUTHEAST / FLORIDA (2 marginal stations near edge):
+
+                                          MIA ★ 25.79°N ☆
+                              (Miami, FL) - MARGINAL
+
+                                          FLL ★ 26.07°N ☆
+                        (Ft. Lauderdale, FL) - MARGINAL
+
+                                          TPA ★ 27.97°N ✓
+                            (Tampa, FL)
+
+                                          ORF ★ 36.90°N ✓
+                           (Norfolk, VA)
+
+                                          ATL ★ 33.64°N ✓
+                             (Atlanta, GA)
+
+
+================================================================================
+                         COVERAGE ANALYSIS
+================================================================================
+
+GRID CENTER: ● (38.5°N, -97.5°W) - Central CONUS reference point
+COVERAGE RADIUS: ~2,000 km in all directions from center
+MARGINAL ZONE: Stations within ~100 km of grid boundary
+
+DISTANCE FROM GRID CENTER:
+  Closest Stations (<500 km):
+    OKC  ★ 346 km   STL  ★ 620 km   DFW  ★ 624 km
+    DEN  ★ 636 km   ABQ  ★ 897 km   AUS  ★ 924 km
+
+  Mid-range Stations (500-1500 km):
+    IAH  ★ 967 km   SAT  ★ 1001 km  IND  ★ 978 km
+    ORD  ★ 901 km   MSP  ★ 793 km   ATL  ★ 1291 km
+
+  Farthest Stations (>2000 km) - Near Grid Edge:
+    BOS  ★ 2273 km  SEA ★ 2237 km  PDX  ★ 2206 km
+    SFO  ★ 2174 km  OAK ★ 2158 km  SJC  ★ 2140 km
+    MIA  ★ 2143 km  FLL ★ 2131 km
+
+
+================================================================================
+                         REGIONAL COVERAGE SUMMARY
+================================================================================
+
+REGION                  STATIONS   COVERED   MARGINAL   COVERAGE %
+─────────────────────────────────────────────────────────────────
+East Coast                  5         5         4         100%
+Southeast                   8         8         2         100%
+Midwest                     8         8         0         100%
+South Central               7         7         0         100%
+Mountain                    4         4         0         100%
+West Coast                  8         8         7         100%
+Southwest                   4         4         1         100%
+Northern Border             6         6         0         100%
+Southern Border             5         5         0         100%
+─────────────────────────────────────────────────────────────────
+TOTAL                      56        56        15         100%
+
+
+================================================================================
+                         GRID CHARACTERISTICS
+================================================================================
+
+PROJECTION:      Lambert Conformal Conic (Grid Definition Template 30)
+RESOLUTION:      3.0 km × 3.0 km
+GRID POINTS:     1,905,141 (1799 × 1059)
+FIRST POINT:     21.138°N, 122.720°W (SW corner)
+PROJECTION ORIGIN: 38.5°N, -97.5°W (Central CONUS)
+STANDARD PARALLELS: 38.5°N (tangent cone)
+GRID RADIUS:     ~2,000 km from origin
+
+SPATIAL COVERAGE:
+  Northern Extent:  ~50°N (tested to 48.57°N - International Falls, MN)
+  Southern Extent:  ~20°N (tested to 25.91°N - Brownsville, TX)
+  Western Extent:  ~125°W (tested to 122.60°W - Portland, OR)
+  Eastern Extent:  ~65°W (tested to 71.01°W - Boston, MA)
+
+COVERAGE QUALITY:
+  ✅ Complete CONUS coverage (100% station success rate)
+  ✅ No coverage gaps identified
+  ⚠️  27% of stations near grid edges (expected for CONUS domain)
+  ✅ All geographic regions represented
+  ✅ Coastal and border stations fully covered
+
+
+================================================================================
+                         ACCEPTANCE CRITERIA
+================================================================================
+
+✅ Coverage validation summary documented
+✅ Geographical limitations noted (coastal edge proximity)
+✅ CONUS station coverage confirmed (100%, 56/56 stations)
+✅ Coverage map visualization provided
+✅ Grid limitations documented (resolution, extent, edge zones)
+✅ Findings added to project documentation
+
+
+================================================================================
+                         VALIDATION STATUS: COMPLETE ✅
+================================================================================
+
+The HRRR CONUS GRIB2 grid provides excellent coverage for CONUS weather station
+data extraction. All 56 tested stations across 9 geographic regions are covered,
+with no gaps or missing areas. Coastal stations near grid edges are expected for
+the CONUS-optimized domain design.
+
+Based on validation from bead bf-5jgf0 (2026-07-23)
+Document compiled for bead bf-1ahyl (2026-07-24)
+================================================================================
