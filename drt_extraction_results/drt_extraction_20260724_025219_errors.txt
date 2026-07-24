@@ -1,0 +1,61 @@
+
+File: crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f000.grib2
+Error: Error: File is empty: /home/coding/gribtract/crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f000.grib2
+
+File: test.grib2
+Error: Error: File is empty: /home/coding/gribtract/test.grib2
+
+File: gefs_test.grib2
+Error: Error: File is empty: /home/coding/gribtract/gefs_test.grib2
+
+File: samples/hrrr.t00z.wrfsfcf01.grib2
+Error: The file may not be a valid GRIB2 file or may be corrupted
+
+File: samples/grib2-noaa-nam/nam.20260724.t00z.conusnest.hiresf00.tm00.grib2
+Error: The file may not be a valid GRIB2 file or may be corrupted
+
+File: samples/nam_awip12_20250115_t00z_f00.grib2
+Error: Error: File is empty: /home/coding/gribtract/samples/nam_awip12_20250115_t00z_f00.grib2
+
+File: samples/grib2-noaa-rap/rap.20260724.t00z.awp130pgrbf00.grib2
+Error: The file may not be a valid GRIB2 file or may be corrupted
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t06z.wrfsfcf00.grib2
+Error: The file may not be a valid GRIB2 file or may be corrupted
+
+File: samples/grib2-noaa-hrrr/hrrr.20260723.t00z.wrfsfcf03.grib2
+Error: The file may not be a valid GRIB2 file or may be corrupted
+
+File: samples/grib2-noaa-hrrr/hrrr.20260723.t12z.wrfsfcf00.grib2
+Error: The file may not be a valid GRIB2 file or may be corrupted
+
+File: nam_20250115_awip12.grib2
+Error: Error: File is empty: /home/coding/gribtract/nam_20250115_awip12.grib2
+
+File: test_data/nam_awip12_drt3.grib2
+Error: Error: File is empty: /home/coding/gribtract/test_data/nam_awip12_drt3.grib2
+
+File: data/nam.t00z.awip1200.tm00.grib2
+Error: Error: File is empty: /home/coding/gribtract/data/nam.t00z.awip1200.tm00.grib2
+
+File: grib2/nam.20250115.t00z.awip1200.tm00.grib2
+Error: Error: File is empty: /home/coding/gribtract/grib2/nam.20250115.t00z.awip1200.tm00.grib2
+
+File: grib2/hrrr.t12z.wrfsfcf00.grib2
+Error: Error: File is empty: /home/coding/gribtract/grib2/hrrr.t12z.wrfsfcf00.grib2
+
+File: tests/corpus/large/gefs_ensemble_mean_sample.grib2
+Error: The file may not be a valid GRIB2 file or may be corrupted
+
+File: tests/corpus/large/gefs_perturbation_member_pdt41_test.grib2
+Error: Error: File is empty: /home/coding/gribtract/tests/corpus/large/gefs_perturbation_member_pdt41_test.grib2
+
+File: scratch/drt0-verification/rap.t12z.awip32f00.grib2
+Error: Error: File is empty: /home/coding/gribtract/scratch/drt0-verification/rap.t12z.awip32f00.grib2
+
+File: scratch/drt0-verification/nam.t12z.awp130f00.grib2
+Error: The file may not be a valid GRIB2 file or may be corrupted
+
+File: hrrr_test_20260724.grib2
+Error: The file may not be a valid GRIB2 file or may be corrupted
+

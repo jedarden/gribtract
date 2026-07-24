@@ -1,0 +1,11 @@
+{
+  "timestamp": "20260724_025155",
+  "summary": {
+    "total_files": 84,
+    "successful": 0,
+    "errors": 84,
+    "multiple_drt_values": 0
+  },
+  "details_file": "drt_extraction_20260724_025155.csv",
+  "errors_file": "drt_extraction_20260724_025155_errors.txt"
+}

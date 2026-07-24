@@ -1,0 +1,253 @@
+
+File: ndfd_temp.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.0p50.f006.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.0p50.f000.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f012.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: crates/gribtract/fixtures/noaa-samples/gfs.20260723.t00z.pgrb2.1p00.f006.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f006.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f000.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.0p50.f003.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f003.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: crates/gribtract/fixtures/noaa-samples/gfs.20260722.t00z.pgrb2.1p00.f000.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: crates/gribtract/fixtures/noaa-samples/gfs.20260723.t00z.pgrb2.1p00.f000.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: downloads/gfs_20260724_00z_1p00_f000.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: test.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: gefs_test.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/bf-dy62/nam_awip12_20250115_t00z_f00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/hrrr.t00z.wrfsfcf01.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-nam/nam.20260724.t00z.conusnest.hiresf00.tm00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/hrrr.20260723.t00z.wrfsfcf01.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/nam_awip12_20250115_t00z_f00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-rap/rap.20260724.t00z.awp130pgrbf00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/nam.t00z.awip1200.tm00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf02.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf08.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf03.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf05.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf07.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf04.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t06z.wrfsfcf00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf01.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf12.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260723.t00z.wrfsfcf03.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260723.t12z.wrfsfcf00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf06.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: fixtures/conus/hrrr.t12z.wrfsfcf00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: nam_20250115_awip12.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: test_data/nam_awip12_drt3.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: test_data/ensemble/gefs_perturbed_p01_20260723_t00z_f000.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: test_data/ensemble/gefs_perturbed_p02_20260723_t00z_f000.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: test_data/ensemble/gefs_ensemble_mean_20260723_t00z_f000.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: data/conus_drt0_mxuphl.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: data/hrrr.t12z.wrfsfcf00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: data/conus_drt0_mxuphl_20260723.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: data/noaa-hrrr/hrrr.t12z.wrfsfcf00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: data/nam.t00z.awip1200.tm00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: drt_check_samples/test.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: drt_check_samples/gfs_20260724_00z_1p00_f000.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: grib2/nam.20250115.t00z.awip1200.tm00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: grib2/hrrr.t12z.wrfsfcf00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/gefs_ensemble_mean_sample.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/hrrr.t12z.wrfsfcf00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/rap.t12z.awp130pgrbf00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/gefs.20240101.00.atmos.pgrb2ap5.geavg.t00z.pgrb2a.0p50.f000.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/ecmwf_ensemble_enso_0h.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/flx.2024011500.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/rap.20240123.t00z.awp130pgrbf00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/nam.t00z.awip1200.tm00.20250120.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/gefs_perturbation_member_pdt41_test.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/gefs_ensemble_p01_cape.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/hrrr.t12z.wrfsfcf00.20260723.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/nam.20240123.t00z.awip1200.tm00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/nam.t00z.awip1200.tm00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/large/gefs.20240101.00.atmos.pgrb2ap5.gep01.t00z.pgrb2a.0p50.f000.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/small/gfs_tmp2m_1deg_anl.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/small/pdt8_accum_3x2.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/small/rotated_latlon_5x5.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/small/mrms_carib_refl_drt41.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/small/drt2_simple_3x3.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/small/gfswave_arctic_wind_drt40.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/small/pdt1_ensemble_3x2.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/small/gfs_anl_t2m_5x5.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/small/conus_drt0.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/small/drt40_j2k_3x2.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: tests/corpus/small/drt41_png_3x2.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: scratch/drt0_test/hrrr_t00z_f01.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: scratch/drt0_test/nam_t12z_awphys00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: scratch/drt0_test/hrrr_t12z_f00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: scratch/drt0_test/gfs_sample.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: scratch/drt0_test/hrrr_t06z_f00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: scratch/drt0_test/rap_t12z_awp236_f00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: scratch/drt0-verification/rap.t12z.awip32f00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: scratch/drt0-verification/nam.t12z.afwaca00.tm00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: scratch/drt0-verification/nam.t12z.awp130f00.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
+File: hrrr_test_20260724.grib2
+Error: /home/coding/gribtract/run_drt_extraction_all.sh: line 47: /home/coding/gribtract/scripts/extract_drt.sh: cannot execute: required file not found
+
