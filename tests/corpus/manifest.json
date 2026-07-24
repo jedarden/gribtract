@@ -173,6 +173,20 @@
       }
     },
     {
+      "id": "hrrr_conus_drt0_lambert_20260723",
+      "path": "large/hrrr.t12z.wrfsfcf00.20260723.grib2",
+      "sha256": "22a80611536f4098358ec06eee4db8eb1998ee376da860ba7949c19aaa9adfd0",
+      "size_bytes": 142393582,
+      "storage": "remote",
+      "url": "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20260723/conus/hrrr.t12z.wrfsfcf00.grib2",
+      "provenance": {
+        "source": "NOAA HRRR (High-Resolution Rapid Refresh, CONUS 3km Lambert Conformal)",
+        "description": "HRRR CONUS wrfsfcf analysis, run 2026-07-23 12z, forecast hour F00. GRIB2 messages including DRT 0 (simple packing) messages. Grid: 1799 x 1059 points (1.9M total), 3km resolution, Lambert Conformal projection. Contains MXUPHL (Maximum Updraft Helicity) message 45 with DRT=0 simple packing, extracted as conus_drt0_mxuphl_20260723.grib2 for DRT=0 fixture testing. Coverage: CONUS (La1=21.138N, approximately 20N-55N, 125W-65W). Sourced from noaa-hrrr-bdp-pds S3 (AWS Open Data, public, no auth). Verified via wgrib2: grid_template=30 (Lambert Conformal), packing=grid point data - simple packing (for DRT=0 messages). NOTE: Contains DRT=0 messages suitable for testing simple packing decoder — storage=remote because the 136 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-23",
+        "generated_by": "curl from noaa-hrrr-bdp-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
+      }
+    },
+    {
       "id": "hrrr_conus_drt3_lambert",
       "path": "large/hrrr.t12z.wrfsfcf00.grib2",
       "sha256": "22a80611536f4098358ec06eee4db8eb1998ee376da860ba7949c19aaa9adfd0",
