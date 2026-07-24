@@ -1,19 +1,24 @@
-#!/bin/bash
-# Extract DRT (Data Representation Type) values from a GRIB2 file using wgrib2
+#!/usr/bin/env bash
+# Extract DRT (Data Representation Type) values from GRIB2 files using wgrib2
 # Usage: ./extract_drt.sh <grib2_file_path>
 #
-# This script extracts the grid template numbers (DRT values) from a GRIB2 file.
-# DRT values are stored in GRIB2 Section 3 and indicate the grid definition template used.
+# This script extracts grid template numbers (DRT values) from GRIB2 files.
+# DRT values are stored in GRIB2 Section 3 (Grid Definition Section) and indicate
+# the grid definition template used for the data.
 #
 # Example:
 #   ./extract_drt.sh /path/to/file.grib2
-#   Output: DRT=30
+#   Output: /path/to/file.grib2: DRT=0
+#
+# Output format: filename: DRT=<value>
+# For multi-message files with different DRTs: filename: DRT=<value1>,<value2>,...
 
-set -e
+set -euo pipefail
 
 # Check if wgrib2 is available
 if ! command -v wgrib2 &> /dev/null; then
     echo "Error: wgrib2 is not installed or not in PATH" >&2
+    echo "Install from: https://www.cpc.ncep.noaa.gov/products/wesley/wgrib2/" >&2
     exit 1
 fi
 
@@ -47,25 +52,26 @@ fi
 # Extract DRT values using wgrib2 -grid option
 # The output format is like: "1:80:grid_template=30:winds(N/S):"
 # We extract the number after grid_template= using grep with Perl regex
-DRT_VALUES=$(wgrib2 "$FILE" -grid 2>&1 | grep -oP 'grid_template=\K[0-9]+' | sort -u)
+# Then we sort and deduplicate to get unique DRT values
+mapfile -t DRT_VALUES < <(wgrib2 "$FILE" -grid 2>&1 | grep -oP 'grid_template=\K[0-9]+' | sort -u)
 
 # Check if we got any results
-if [ -z "$DRT_VALUES" ]; then
+if [ ${#DRT_VALUES[@]} -eq 0 ]; then
     echo "Error: Could not extract DRT values from $FILE" >&2
     echo "The file may not be a valid GRIB2 file or may be corrupted" >&2
     exit 1
 fi
 
-# Convert multiple values to space-separated list
-DRT_LIST=$(echo "$DRT_VALUES" | tr '\n' ' ' | sed 's/ $//')
+# Convert array to comma-separated list
+DRT_LIST=$(IFS=,; echo "${DRT_VALUES[*]}")
 
-# Output the result
-if [ $(echo "$DRT_VALUES" | wc -l) -eq 1 ]; then
+# Output the result in specified format: filename: DRT=<value>
+if [ ${#DRT_VALUES[@]} -eq 1 ]; then
     # Single DRT value
-    echo "DRT=$DRT_VALUES"
+    echo "${FILE}: DRT=${DRT_VALUES[0]}"
 else
     # Multiple DRT values (unusual but possible for multi-message files)
-    echo "DRT=$DRT_LIST (multiple values)"
+    echo "${FILE}: DRT=${DRT_LIST} (multiple values)"
 fi
 
 exit 0
