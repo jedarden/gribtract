@@ -67,6 +67,19 @@
       }
     },
     {
+      "id": "rotated_latlon_5x5",
+      "path": "small/rotated_latlon_5x5.grib2",
+      "sha256": "8ae9de6cc4cc04d3ada06bed503f44cc4c3395afb43ce84aa10446e2dc081b95",
+      "size_bytes": 216,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 fixture with rotated latitude/longitude grid: 2m temperature analysis, 5x5 grid (25 points). Section 0 discipline=0 (meteorological), edition=2. Section 1: center=7 (US NCEP), analysis (significance=0), 2024-06-19T00:00:00Z. Section 3 template 3.1 (rotated lat/lon): shape=6 (WGS84), Ni=5, Nj=5, scanning_mode=0x00 (+i, -j), latitude 40°N to 0°N by 10°, longitude 0°E to 40°E by 10°, south pole at (30°N, 0°E), rotation angle=0°. Section 4 template 4.0: discipline=0/cat=0/num=0 (temperature K), level type=103 (height above ground), value=2m, forecast_offset=0h. Section 5 template 5.0 (simple packing, DRT=0): R=270.0, E=0, D=0, nbits=8. Section 6: no bitmap (indicator=255). Section 7: 25 packed bytes.",
+        "capture_date": "2024-06-19",
+        "generated_by": "scripts/gen_grib2.py (gribtract project)"
+      }
+    },
+    {
       "id": "pdt1_ensemble_3x2",
       "path": "small/pdt1_ensemble_3x2.grib2",
       "sha256": "efc2bd63db399e592419c1ef1a8f780bb93e78be8a1954e1900e19789350b0fa",
