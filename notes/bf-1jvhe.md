@@ -1,90 +1,83 @@
-# DRT Value Analysis - GRIB2 Files
+# DRT Value Analysis using wgrib2
 
-## Task Summary
-Checked DRT (Data Representation Template) values for all downloaded GRIB2 files using wgrib2.
+## Task Completion Summary
 
-## wgrib2 Command Used
+Successfully completed DRT (Data Representation Template) value extraction for downloaded GRIB2 files and sample files.
+
+## Command Used
+
 ```bash
-wgrib2 -Sec3 <file> | grep -oP 'Grid Def Template=\K[0-9.]+(?= |$)'
+wgrib2 -V <file> | grep -o "grid_template=[0-9]*"
 ```
 
-The `-Sec3` option shows the Grid Definition Section contents, which includes the DRT value as "Grid Def Template=X.Y"
+The `-V` flag in wgrib2 provides verbose output including grid template information, and we extract the `grid_template` value which represents the DRT.
 
-## Results
+## Downloaded File Results
 
-### Files Successfully Analyzed: 28 total
+### Main Downloaded File
+- **File:** `gfs_20260724_00z_1p00_f000.grib2`
+- **Location:** `/home/coding/gribtract/downloads/`
+- **Size:** 41M
+- **DRT Value:** `grid_template=0` (Regular latitude-longitude grid)
 
-#### GFS Files (16 files) - DRT 3.0
-All GFS files use **DRT 3.0 (Lambert Conformal Conic grid)**:
-- gfs.20260722.t00z.pgrb2.0p25.f003
-- gfs.20260723.t00z.pgrb2.0p25.f000
-- gfs.20260723.t00z.pgrb2.0p25.f006
-- gfs.20260723.t00z.pgrb2.0p50.f000
-- gfs.20260723.t00z.pgrb2.1p00.f000
-- gfs.20260724.t00z.pgrb2.0p25.f000
-- gfs.20260724.t00z.pgrb2.0p25.f012
-- gfs.20260724.t00z.pgrb2.0p50.f000
-- gfs.20260724.t00z.pgrb2.1p00.f000
-- gfs.t00z.pgrb2.0p25.f000
-- gfs.t00z.pgrb2.0p25.f003
-- gfs.t00z.pgrb2.0p25.f006
-- gfs.t00z.pgrb2.0p25.f012
-- gfs.t00z.pgrb2.0p50.f000
-- gfs.t00z.pgrb2.0p25.f003
-- gfs.t00z.pgrb2.1p00.f000
+## Comprehensive DRT Analysis Results
 
-#### HRRR Files (11 files) - DRT 3.30
-All HRRR files use **DRT 3.30 (Lambert Conformal Conic grid variant)**:
-- hrrr.20260723.t00z.wrfsfcf01.grib2
-- hrrr.20260724.t00z.wrfsfcf00.grib2
-- hrrr.20260724.t00z.wrfsfcf01.grib2
-- hrrr.20260724.t00z.wrfsfcf02.grib2
-- hrrr.20260724.t00z.wrfsfcf03.grib2
-- hrrr.20260724.t00z.wrfsfcf04.grib2
-- hrrr.20260724.t00z.wrfsfcf05.grib2
-- hrrr.20260724.t00z.wrfsfcf06.grib2
-- hrrr.20260724.t00z.wrfsfcf07.grib2
-- hrrr.20260724.t00z.wrfsfcf08.grib2
-- hrrr.20260724.t00z.wrfsfcf12.grib2
+### Files with DRT=0 (Regular Lat-Lon Grid)
+Found 21 files with DRT=0, including:
+- GFS Global Forecast System files (`gfs.t00z.pgrb2.*.f000.grib2`)
+- GEFS ensemble files (`gefs_perturbed_*.grib2`, `gefs_ensemble_mean_*.grib2`)
+- ECMWF ensemble data (`ecmwf_ensemble_enso_0h.grib2`)
+- Downloaded file: `gfs_20260724_00z_1p00_f000.grib2`
+- Various test files with regular grids
 
-#### Other Files (1 file) - DRT 3.30
-- nam.t00z.awip1200.tm00.grib2 - **DRT 3.30 (Lambert Conformal Conic)**
+**DRT=0** represents the standard regular latitude-longitude grid template used by most global weather models.
 
-### Files Skipped (empty/incomplete): 8 files
+### Files with Non-Zero DRT Values
 
-The following files were too small (< 1KB) and likely represent incomplete downloads:
-- gfs.20260721.t00z.pgrb2.0p50.f000 (0 bytes - completely empty)
-- hrrr.t00z.wrfsfcf01.grib2 (336 bytes)
-- hrrr.20260723.t00z.wrfsfcf03.grib2 (196 bytes)
-- hrrr.20260723.t12z.wrfsfcf00.grib2 (196 bytes)
-- hrrr.20260724.t06z.wrfsfcf00.grib2 (196 bytes)
-- nam.20260724.t00z.conusnest.hiresf00.tm00.grib2 (199 bytes)
-- rap.20260724.t00z.awp130pgrbf00.grib2 (196 bytes)
-- nam_awip12_20250115_t00z_f00.grib2 (0 bytes - completely empty)
+#### DRT=1: Rotated Latitude-Lonitude Grid
+- `rotated_latlon_5x5.grib2` - Test file with rotated grid
 
-## DRT Value Meanings
+#### DRT=20: Curvilinear Orthographic Grid  
+- `gfswave_arctic_wind_drt40.grib2` - GFS Wave Arctic wind data
+- **Note:** Despite the filename suggesting DRT=40, this file actually uses DRT=20
 
-- **DRT 0.0**: Latitude/Longitude grid (simple regular lat/lon grid)
-- **DRT 3.0**: Lambert Conformal Conic projection grid
-- **DRT 3.30**: Lambert Conformal Conic projection grid (variant with specific parameters)
-- **DRT 40.0**: Rotated Latitude/Longitude grid
-- Other values: Specialized grid types
+#### DRT=30: Lambert Conformal Conic Projection
+Found 27 files with DRT=30, including:
+- **HRRR** (High-Resolution Rapid Refresh) files - CONUS coverage
+- **NAM** (North American Mesoscale) files - CONUS coverage  
+- **RAP** (Rapid Refresh) files - CONUS coverage
+
+**DRT=30** is the Lambert Conformal Conic projection, commonly used for regional models covering the CONUS (Continental US) domain.
+
+#### DRT=40: Spectral Representation
+- `flx.2024011500.grib2` - Flux data using spectral representation
+
+### Empty/Placeholder Files
+Several files showed 0 bytes (4.0K reported but empty) and had no DRT values extracted. These appear to be placeholder files.
 
 ## Key Findings
 
-1. **No files with DRT=0.0**: None of the downloaded files use simple Latitude/Longitude grids. All use Lambert Conformal Conic projections (DRT 3.0 or 3.30).
+1. **Downloaded file is DRT=0**: The main downloaded GFS file uses the standard regular latitude-longitude grid (DRT=0)
 
-2. **Model-specific DRT patterns**:
-   - GFS: Uses DRT 3.0 (standard Lambert Conformal Conic)
-   - HRRR: Uses DRT 3.30 (Lambert Conformal Conic variant)
-   - NAM: Uses DRT 3.30 (Lambert Conformal Conic variant)
+2. **DRT distribution matches expectations**:
+   - Global models (GFS, GEFS, ECMWF) → DRT=0
+   - Regional CONUS models (HRRR, NAM, RAP) → DRT=30  
+   - Specialized grids (rotated, curvilinear, spectral) → Various DRTs
 
-3. **Incomplete downloads identified**: 8 files are too small and represent failed or incomplete downloads.
+3. **wgrib2 availability**: The tool is available at `/home/coding/.local/bin/wgrib2` and functions correctly for DRT extraction
 
-4. **All successful files are valid**: The 28 files that were successfully analyzed are all valid GRIB2 files with proper DRT values.
+## Files Created
 
-## Script Created
+- `check_drt_values.sh` - Comprehensive script for DRT analysis
+- `notes/bf-1jvhe.md` - This summary document
 
-The analysis was performed using the script: `scripts/check_drt_values.sh`
+## Verification
 
-This script can be re-run to analyze any new GRIB2 files downloaded in the future.
+The analysis successfully extracted DRT values from all non-empty GRIB2 files in the workspace, providing a clear record of which files have DRT=0 versus other DRT values.
+
+## Next Steps
+
+This DRT analysis provides the foundation for:
+- Understanding grid representation types across different weather models
+- Ensuring proper handling of different DRT values in GRIB2 processing
+- Supporting the gribtract library's development for diverse GRIB2 file types

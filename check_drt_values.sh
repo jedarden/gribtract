@@ -1,131 +1,75 @@
-#!/usr/bin/env python3
-"""
-Script to check DRT (Data Representation Type) values from GRIB2 files.
-DRT is the grid definition template number stored in GRIB2 Section 3.
-"""
+#!/bin/bash
+# Script to check DRT (grid_template) values from GRIB2 files using wgrib2
 
-import struct
-import os
-import sys
-from pathlib import Path
+echo "DRT (Data Representation Template) Analysis"
+echo "==========================================="
+echo "Command used: wgrib2 -V <file> | grep grid_template"
+echo ""
 
-def get_drt_value(filename):
-    """Extract DRT value from a GRIB2 file."""
-    try:
-        with open(filename, 'rb') as f:
-            # Read the header to locate sections
-            data = f.read(1000)
+# Check the main downloaded file
+echo "=== Downloaded Files ==="
+downloaded_files=(
+    "/home/coding/gribtract/downloads/gfs_20260724_00z_1p00_f000.grib2"
+)
 
-            # Check GRIB identifier
-            if data[0:4] != b'GRIB':
-                return None, 'Not a GRIB file'
+for file in "${downloaded_files[@]}"; do
+    if [ -f "$file" ]; then
+        echo "File: $(basename "$file")"
+        echo "Path: $file"
+        echo "Size: $(du -h "$file" | cut -f1)"
 
-            # Check GRIB edition
-            edition = data[7]
-            if edition != 2:
-                return None, f'Not GRIB2 (edition {edition})'
+        # Extract unique DRT values from this file
+        drt_values=$(wgrib2 -V "$file" 2>&1 | grep -o "grid_template=[0-9]*" | sort -u)
+        echo "DRT values found: $drt_values"
+        echo ""
+    else
+        echo "File not found: $file"
+        echo ""
+    fi
+done
 
-            # Section 1 starts at byte 16 (after Section 0)
-            sec1_len = struct.unpack('>I', data[16:20])[0]
+echo "=== Sample Files from Different Sources ==="
+sample_files=(
+    "/home/coding/gribtract/samples/grib2-noaa-gfs/gfs.t00z.pgrb2.1p00.f000.grib2"
+    "/home/coding/gribtract/samples/grib2-noaa-nam/nam.20260724.t00z.conusnest.hiresf00.tm00.grib2"
+    "/home/coding/gribtract/samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf01.grib2"
+    "/home/coding/gribtract/samples/grib2-noaa-rap/rap.20260724.t00z.awp130pgrbf00.grib2"
+    "/home/coding/gribtract/tests/corpus/small/conus_drt0.grib2"
+    "/home/coding/gribtract/tests/corpus/small/drt2_simple_3x3.grib2"
+    "/home/coding/gribtract/tests/corpus/small/drt40_j2k_3x2.grib2"
+    "/home/coding/gribtract/tests/corpus/small/drt41_png_3x2.grib2"
+    "/home/coding/gribtract/tests/corpus/small/rotated_latlon_5x5.grib2"
+)
 
-            # Section 2 starts at byte 16 + sec1_len
-            sec2_offset = 16 + sec1_len
-            sec2_len = struct.unpack('>I', data[sec2_offset:sec2_offset+4])[0]
+for file in "${sample_files[@]}"; do
+    if [ -f "$file" ] && [ -s "$file" ]; then
+        echo "File: $(basename "$file")"
+        echo "Path: $file"
+        echo "Size: $(du -h "$file" | cut -f1)"
 
-            # Section 3 starts at sec2_offset + sec2_len
-            sec3_offset = sec2_offset + sec2_len
-            sec3_len = struct.unpack('>I', data[sec3_offset:sec3_offset+4])[0]
+        # Extract unique DRT values from this file
+        drt_values=$(wgrib2 -V "$file" 2>&1 | grep -o "grid_template=[0-9]*" | sort -u)
+        echo "DRT values found: $drt_values"
+        echo ""
+    fi
+done
 
-            if sec3_len > 0:
-                # Grid definition template number is at offset 4 within Section 3
-                # Section 3 structure: [4 bytes length][1 byte number][2 bytes template number]...
-                grid_template = struct.unpack('>H', data[sec3_offset+5:sec3_offset+7])[0]
-                return grid_template, 'OK'
-            else:
-                return None, 'Section 3 has zero length'
+echo "=== Summary ==="
+echo "Files with DRT=0 (regular lat-lon grid):"
+find /home/coding/gribtract -name "*.grib2" -type f -size +100k -exec sh -c '
+    file="$1"
+    drt=$(wgrib2 -V "$file" 2>&1 | grep -o "grid_template=0" | head -1)
+    if [ -n "$drt" ]; then
+        echo "$file: DRT=0"
+    fi
+' sh {} \;
 
-    except Exception as e:
-        return None, str(e)
-
-def main():
-    samples_dir = Path('samples/grib2-noaa-gfs')
-
-    if not samples_dir.exists():
-        print(f"Error: {samples_dir} does not exist")
-        sys.exit(1)
-
-    # Find all .f000, .f003, .f006, .f012 files
-    grib_files = sorted([f for f in samples_dir.glob('*.f*') if f.is_file()])
-
-    print(f"Checking DRT values for {len(grib_files)} GRIB2 files...")
-    print("=" * 80)
-
-    results = []
-    drt0_files = []
-    drt_other_files = []
-
-    for grib_file in grib_files:
-        drt_value, status = get_drt_value(grib_file)
-
-        result = {
-            'filename': grib_file.name,
-            'drt': drt_value,
-            'status': status
-        }
-        results.append(result)
-
-        if drt_value == 0:
-            drt0_files.append(grib_file.name)
-        elif drt_value is not None and drt_value > 0:
-            drt_other_files.append(grib_file.name)
-
-        # Print individual result
-        drt_str = str(drt_value) if drt_value is not None else 'N/A'
-        print(f"{grib_file.name:50} DRT={drt_str:5} ({status})")
-
-    print("=" * 80)
-    print(f"\nSUMMARY:")
-    print(f"  Total files checked: {len(results)}")
-    print(f"  DRT=0 files: {len(drt0_files)}")
-    print(f"  DRT!=0 files: {len(drt_other_files)}")
-    print(f"  Error/unknown: {len([r for r in results if r['drt'] is None])}")
-
-    # Write results to a file
-    output_file = Path('notes/drt-check-results.txt')
-    output_file.parent.mkdir(exist_ok=True)
-
-    with open(output_file, 'w') as f:
-        f.write("DRT Check Results\n")
-        f.write("=" * 80 + "\n\n")
-
-        f.write("wgrib2 command used for reference:\n")
-        f.write("  wgrib2 -v <filename>  (for verbose inventory)\n")
-        f.write("  (Note: DRT extraction requires parsing GRIB2 Section 3 structure)\n\n")
-
-        f.write("Results:\n")
-        f.write("-" * 80 + "\n")
-        for result in results:
-            drt_str = str(result['drt']) if result['drt'] is not None else 'N/A'
-            f.write(f"{result['filename']:50} DRT={drt_str:5} ({result['status']})\n")
-
-        f.write("\n" + "=" * 80 + "\n")
-        f.write(f"\nSUMMARY:\n")
-        f.write(f"  Total files checked: {len(results)}\n")
-        f.write(f"  DRT=0 files: {len(drt0_files)}\n")
-        f.write(f"  DRT!=0 files: {len(drt_other_files)}\n")
-        f.write(f"  Error/unknown: {len([r for r in results if r['drt'] is None])}\n\n")
-
-        if drt0_files:
-            f.write(f"\nFiles with DRT=0 ({len(drt0_files)}):\n")
-            for filename in drt0_files:
-                f.write(f"  - {filename}\n")
-
-        if drt_other_files:
-            f.write(f"\nFiles with DRT!=0 ({len(drt_other_files)}):\n")
-            for filename in drt_other_files:
-                f.write(f"  - {filename}\n")
-
-    print(f"\nResults written to: {output_file}")
-
-if __name__ == '__main__':
-    main()
+echo ""
+echo "Files with non-zero DRT values:"
+find /home/coding/gribtract -name "*.grib2" -type f -size +100k -exec sh -c '
+    file="$1"
+    drt=$(wgrib2 -V "$file" 2>&1 | grep -o "grid_template=[1-9][0-9]*" | head -1)
+    if [ -n "$drt" ]; then
+        echo "$file: $drt"
+    fi
+' sh {} \;
