@@ -1,0 +1,18 @@
+# Packing Specifications for All Candidates
+# Format: filename | data_repr_template | packing_type | DRT
+
+gfs.t00z.pgrb2.0p25.f000.20260722.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.0p25.f000.20260724.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.0p25.f003.20260724.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.0p25.f006.20260724.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.0p25.f012.20260723.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.0p50.f000.20260723.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.0p50.f000.20260724.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.0p50.f003.20260724.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.0p50.f006.20260724.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.0p50.f012.20260721.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.1p00.f000.20260723.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.1p00.f000.20260724.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.1p00.f003.20260724.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.1p00.f006.20260724.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3
+gfs.t00z.pgrb2.1p00.f024.20260722.grib2 | 5.3 | packing=Grid point data - complex packing and spatial differencing,c3 | DRT=3

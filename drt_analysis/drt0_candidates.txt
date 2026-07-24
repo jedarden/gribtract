@@ -1,0 +1,3 @@
+# Files with DRT=0 (Simple Packing)
+# These files are candidates for CONUS verification
+
