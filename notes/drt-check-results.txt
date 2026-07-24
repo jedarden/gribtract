@@ -1,0 +1,51 @@
+DRT Check Results
+================================================================================
+
+wgrib2 command used for reference:
+  wgrib2 -v <filename>  (for verbose inventory)
+  (Note: DRT extraction requires parsing GRIB2 Section 3 structure)
+
+Results:
+--------------------------------------------------------------------------------
+gfs.20260721.t00z.pgrb2.0p50.f000                  DRT=N/A   (Not a GRIB file)
+gfs.20260722.t00z.pgrb2.0p25.f003                  DRT=0     (OK)
+gfs.20260723.t00z.pgrb2.0p25.f000                  DRT=0     (OK)
+gfs.20260723.t00z.pgrb2.0p25.f006                  DRT=0     (OK)
+gfs.20260723.t00z.pgrb2.0p50.f000                  DRT=0     (OK)
+gfs.20260723.t00z.pgrb2.1p00.f000                  DRT=0     (OK)
+gfs.20260724.t00z.pgrb2.0p25.f000                  DRT=0     (OK)
+gfs.20260724.t00z.pgrb2.0p25.f012                  DRT=0     (OK)
+gfs.20260724.t00z.pgrb2.0p50.f000                  DRT=0     (OK)
+gfs.20260724.t00z.pgrb2.1p00.f000                  DRT=0     (OK)
+gfs.t00z.pgrb2.0p25.f000                           DRT=0     (OK)
+gfs.t00z.pgrb2.0p25.f003                           DRT=0     (OK)
+gfs.t00z.pgrb2.0p25.f006                           DRT=0     (OK)
+gfs.t00z.pgrb2.0p25.f012                           DRT=0     (OK)
+gfs.t00z.pgrb2.0p50.f000                           DRT=0     (OK)
+gfs.t00z.pgrb2.1p00.f000                           DRT=0     (OK)
+
+================================================================================
+
+SUMMARY:
+  Total files checked: 16
+  DRT=0 files: 15
+  DRT!=0 files: 0
+  Error/unknown: 1
+
+
+Files with DRT=0 (15):
+  - gfs.20260722.t00z.pgrb2.0p25.f003
+  - gfs.20260723.t00z.pgrb2.0p25.f000
+  - gfs.20260723.t00z.pgrb2.0p25.f006
+  - gfs.20260723.t00z.pgrb2.0p50.f000
+  - gfs.20260723.t00z.pgrb2.1p00.f000
+  - gfs.20260724.t00z.pgrb2.0p25.f000
+  - gfs.20260724.t00z.pgrb2.0p25.f012
+  - gfs.20260724.t00z.pgrb2.0p50.f000
+  - gfs.20260724.t00z.pgrb2.1p00.f000
+  - gfs.t00z.pgrb2.0p25.f000
+  - gfs.t00z.pgrb2.0p25.f003
+  - gfs.t00z.pgrb2.0p25.f006
+  - gfs.t00z.pgrb2.0p25.f012
+  - gfs.t00z.pgrb2.0p50.f000
+  - gfs.t00z.pgrb2.1p00.f000
