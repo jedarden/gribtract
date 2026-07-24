@@ -243,6 +243,20 @@
       }
     },
     {
+      "id": "gfs_gaussian_gdt40_t1534",
+      "path": "large/gdas.t00z.sfluxgrbf000.grib2",
+      "sha256": "f0d63afe6f4ca96ecbd437f962596ec1017b2088569faaba139625b49c471d9e",
+      "size_bytes": 127659863,
+      "storage": "remote",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gdas.20260724/00/atmos/gdas.t00z.sfluxgrbf000.grib2",
+      "provenance": {
+        "source": "NOAA GDAS (Global Data Assimilation System) Surface Flux",
+        "description": "GDAS surface flux analysis, run 2026-07-24 00z, forecast hour F000. 54 GRIB2 messages, ALL GDT 3.40 (Gaussian Latitude/Longitude grid). T1534 Gaussian grid: 3072 x 1536 grid points, N=768 (number of parallels between pole and equator), ~0.117° resolution (~12 km). Latitude range: 89.910324° to -89.910324°, Longitude range: 0.000000° to 359.882813°. Total grid points: 4,718,592. Variables include surface flux fields (radiation, heat fluxes, land surface, soil conditions, cloud layers). Sourced from NOAA NOMADS (public, no auth). Verified via wgrib2: grid_template=40 (GDT 3.40) confirmed. Verified via gribtract: successfully decoded all 54 fields with correct grid metadata and data values. Grid template 3.40 parameters correctly parsed: template=40, num_data_points=4718592, nx=3072, ny=1536, projection=GaussianLatLon(N=768). NOTE: ✅ Fully supported - gribtract's GDT 3.40 decoder successfully handles T1534 Gaussian grids. End-to-end integration testing completed 2026-07-24 (bead bf-1qia4). All 54 fields decoded with correct metadata and 4.7M data points per field. See notes/bf-1qia4.md for detailed verification results. storage=remote because the 122 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-24",
+        "generated_by": "curl from nomads.ncep.noaa.gov; verified by wgrib2 and gribtract (gribtract project)"
+      }
+    },
+    {
       "id": "ecmwf_ensemble_pdt41_enso",
       "path": "large/ecmwf_ensemble_enso_0h.grib2",
       "sha256": "a363988b982f45bbab7f114cb789c3169c0e13237bd54a60fce82d0ef9911b6b",
