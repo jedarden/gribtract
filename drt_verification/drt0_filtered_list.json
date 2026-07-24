@@ -1,0 +1,150 @@
+{
+  "filter_metadata": {
+    "generated": "2026-07-24",
+    "source_bead": "bf-4wg4g",
+    "analysis_source": "drt_analysis/drt_analysis_results.txt",
+    "filter_criteria": "DRT=0 (Simple Packing only)"
+  },
+  "summary": {
+    "original_candidates": 9,
+    "valid_grib2_files": 7,
+    "drt_zero_confirmed": 7,
+    "excluded_drt_nonzero": 0,
+    "excluded_empty_corrupt": 2,
+    "excluded_analysis_failure": 0
+  },
+  "candidates": [
+    {
+      "id": 1,
+      "filename": "gfs_1p00_20260724_f000.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2",
+      "header_file": "headers/bf-3ugst/gfs.t00z.pgrb2.1p00.f000.headers.txt",
+      "drt_value": 0,
+      "packing_type": "Simple Packing",
+      "model": "GFS",
+      "resolution": "1.00",
+      "date": "2026-07-24",
+      "forecast_hour": "000",
+      "size_bytes": 42755881,
+      "messages": 696,
+      "source_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000"
+    },
+    {
+      "id": 2,
+      "filename": "gfs_0p25_20260723_f000.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2",
+      "header_file": "headers/bf-3ugst/gfs.t00z.pgrb2.0p25.f000.headers.txt",
+      "drt_value": 0,
+      "packing_type": "Simple Packing",
+      "model": "GFS",
+      "resolution": "0.25",
+      "date": "2026-07-23",
+      "forecast_hour": "000",
+      "size_bytes": 510275792,
+      "messages": 696,
+      "source_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000"
+    },
+    {
+      "id": 3,
+      "filename": "gefs_0p50_f000.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2",
+      "header_file": "headers/bf-3ugst/geavg.t00z.pgrb2a.0p50.f000.headers.txt",
+      "drt_value": 0,
+      "packing_type": "Simple Packing",
+      "model": "GEFS",
+      "ensemble_type": "mean",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "000",
+      "size_bytes": 14272610,
+      "messages": 71,
+      "source_url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000"
+    },
+    {
+      "id": 4,
+      "filename": "gefs_0p50_f003.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2",
+      "header_file": "headers/bf-3ugst/geavg.t00z.pgrb2a.0p50.f003.headers.txt",
+      "drt_value": 0,
+      "packing_type": "Simple Packing",
+      "model": "GEFS",
+      "ensemble_type": "mean",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "003",
+      "size_bytes": 15343992,
+      "messages": 85,
+      "source_url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003"
+    },
+    {
+      "id": 5,
+      "filename": "gfs_1p00_20260723_f000.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2",
+      "header_file": "headers/bf-3ugst/gfs.t00z.pgrb2.1p00.f000.headers.txt",
+      "drt_value": 0,
+      "packing_type": "Simple Packing",
+      "model": "GFS",
+      "resolution": "1.00",
+      "date": "2026-07-23",
+      "forecast_hour": "000",
+      "size_bytes": 42460488,
+      "messages": 696,
+      "source_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000"
+    },
+    {
+      "id": 6,
+      "filename": "gfs_0p50_20260724_f000.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2",
+      "header_file": "headers/bf-3ugst/gfs.t00z.pgrb2.0p50.f000.headers.txt",
+      "drt_value": 0,
+      "packing_type": "Simple Packing",
+      "model": "GFS",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "000",
+      "size_bytes": 152106356,
+      "messages": 696,
+      "source_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000"
+    },
+    {
+      "id": 7,
+      "filename": "gefs_0p50_f006.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2",
+      "header_file": "headers/bf-3ugst/geavg.t00z.pgrb2a.0p50.f006.headers.txt",
+      "drt_value": 0,
+      "packing_type": "Simple Packing",
+      "model": "GEFS",
+      "ensemble_type": "mean",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "006",
+      "size_bytes": 14723500,
+      "messages": 85,
+      "source_url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006"
+    }
+  ],
+  "excluded_files": [
+    {
+      "id": 8,
+      "filename": "gfs_0p25_20260724_f000.grib2",
+      "status": "empty",
+      "reason": "Download incomplete or failed",
+      "size_bytes": 0,
+      "expected_source": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p25.f000"
+    },
+    {
+      "id": 9,
+      "filename": "gfs_0p50_20260723_f000.grib2",
+      "status": "empty",
+      "reason": "Download incomplete or failed",
+      "size_bytes": 0,
+      "expected_source": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p50.f000"
+    }
+  ],
+  "packing_specifications": {
+    "drt_zero_definition": "Simple Packing - no complex compression or spatial differencing",
+    "excluded_packing_types": ["DRT=2: Complex packing", "DRT=3: Spatial differencing", "DRT=40000: IEEE floating point"],
+    "analysis_method": "wgrib2 -grid with grid_template extraction",
+    "analysis_script": "scripts/extract_drt.sh"
+  }
+}

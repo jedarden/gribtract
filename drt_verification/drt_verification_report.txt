@@ -1,0 +1,42 @@
+DRT=0 Verification Report
+Generated: Fri Jul 24 07:20:37 AM EDT 2026
+=
+
+Checking: gefs_0p50_f000.grib2
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  ✗ NOT DRT=0 (packing=Grid point data - complex packing and spatial differencing,c3)
+
+Checking: gefs_0p50_f003.grib2
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  ✗ NOT DRT=0 (packing=Grid point data - complex packing and spatial differencing,c3)
+
+Checking: gefs_0p50_f006.grib2
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  ✗ NOT DRT=0 (packing=Grid point data - complex packing and spatial differencing,c3)
+
+Checking: gfs_0p25_20260723_f000.grib2
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  ✗ NOT DRT=0 (packing=Grid point data - complex packing and spatial differencing,c3)
+
+Skipping empty file: gfs_0p25_20260724_f000.grib2
+Skipping empty file: gfs_0p50_20260723_f000.grib2
+Checking: gfs_0p50_20260724_f000.grib2
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  ✗ NOT DRT=0 (packing=Grid point data - complex packing and spatial differencing,c3)
+
+Checking: gfs_1p00_20260723_f000.grib2
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  ✗ NOT DRT=0 (packing=Grid point data - complex packing and spatial differencing,c3)
+
+Checking: gfs_1p00_20260724_f000.grib2
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  ✗ NOT DRT=0 (packing=Grid point data - complex packing and spatial differencing,c3)
+
+=== Summary ===
+
+Total DRT=0 files: 0
+0
+Total NON-DRT=0 files: 7
+
+DRT=0 list saved to: /home/coding/gribtract/drt_verification/drt0_candidates.txt
+NON-DRT0 list saved to: /home/coding/gribtract/drt_verification/non_drt0_candidates.txt

@@ -1,0 +1,10 @@
+# Files with NON-DRT=0 packing (Complex/Spatial)
+# These files should be excluded from DRT=0 verification
+
+gefs_0p50_f000.grib2 - packing=Grid point data - complex packing and spatial differencing,c3
+gefs_0p50_f003.grib2 - packing=Grid point data - complex packing and spatial differencing,c3
+gefs_0p50_f006.grib2 - packing=Grid point data - complex packing and spatial differencing,c3
+gfs_0p25_20260723_f000.grib2 - packing=Grid point data - complex packing and spatial differencing,c3
+gfs_0p50_20260724_f000.grib2 - packing=Grid point data - complex packing and spatial differencing,c3
+gfs_1p00_20260723_f000.grib2 - packing=Grid point data - complex packing and spatial differencing,c3
+gfs_1p00_20260724_f000.grib2 - packing=Grid point data - complex packing and spatial differencing,c3
