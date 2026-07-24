@@ -1,0 +1,6 @@
+gfs.t00z.pgrb2.0p25.f000 - 491M - DRT=0
+gfs.t00z.pgrb2.0p50.f000 - 146M - DRT=0
+gfs.t00z.pgrb2.1p00.f000 - 41M - DRT=0
+gfs.t00z.pgrb2.0p25.f000 - 487M - DRT=0
+gfs.t00z.pgrb2.0p50.f000 - 145M - DRT=0
+gfs.t00z.pgrb2.1p00.f000 - 41M - DRT=0
