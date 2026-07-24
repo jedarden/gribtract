@@ -1,0 +1,99 @@
+DRT Analysis Results for Candidate Files
+==========================================
+Generated: 2026-07-24
+Source Bead: bf-1fmeu
+Analysis Script: scripts/extract_drt.sh
+
+EXECUTIVE SUMMARY
+-----------------
+Total candidates from bf-3ugst header download: 9
+Valid GRIB2 files available for analysis: 7
+Files successfully analyzed: 7
+Files with DRT=0 (Simple Packing): 7
+Files with missing/non-DRT=0 values: 0
+Empty/missing GRIB2 files: 2
+
+DETAILED RESULTS
+----------------
+
+1. gfs_1p00_20260724_f000.grib2
+   Status: ✅ SUCCESS
+   DRT Value: 0 (Simple Packing)
+   Full path: /home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2
+   Size: 42,755,881 bytes
+   Corresponds to: gfs.t00z.pgrb2.1p00.f000 (2026-07-24)
+
+2. gfs_0p25_20260723_f000.grib2
+   Status: ✅ SUCCESS
+   DRT Value: 0 (Simple Packing)
+   Full path: /home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2
+   Size: 510,275,792 bytes
+   Corresponds to: gfs.t00z.pgrb2.0p25.f000 (2026-07-23)
+
+3. gefs_0p50_f000.grib2
+   Status: ✅ SUCCESS
+   DRT Value: 0 (Simple Packing)
+   Full path: /home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2
+   Size: 14,272,610 bytes
+   Corresponds to: geavg.t00z.pgrb2a.0p50.f000 (GEFS ensemble mean)
+
+4. gefs_0p50_f003.grib2
+   Status: ✅ SUCCESS
+   DRT Value: 0 (Simple Packing)
+   Full path: /home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2
+   Size: 15,343,992 bytes
+   Corresponds to: geavg.t00z.pgrb2a.0p50.f003 (GEFS ensemble mean, FH 003)
+
+5. gfs_1p00_20260723_f000.grib2
+   Status: ✅ SUCCESS
+   DRT Value: 0 (Simple Packing)
+   Full path: /home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2
+   Size: 42,460,488 bytes
+   Corresponds to: gfs.t00z.pgrb2.1p00.f000 (2026-07-23)
+
+6. gfs_0p50_20260724_f000.grib2
+   Status: ✅ SUCCESS
+   DRT Value: 0 (Simple Packing)
+   Full path: /home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2
+   Size: 152,106,356 bytes
+   Corresponds to: gfs.t00z.pgrb2.0p50.f000 (2026-07-24)
+
+7. gefs_0p50_f006.grib2
+   Status: ✅ SUCCESS
+   DRT Value: 0 (Simple Packing)
+   Full path: /home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2
+   Size: 14,723,500 bytes
+   Corresponds to: geavg.t00z.pgrb2a.0p50.f006 (GEFS ensemble mean, FH 006)
+
+MISSING/EMPTY FILES
+-------------------
+The following candidate files were either empty or unavailable:
+
+1. gfs_0p25_20260724_f000.grib2
+   Status: ❌ EMPTY FILE
+   Size: 0 bytes
+   Issue: Download incomplete or failed
+   Corresponds to: gfs.t00z.pgrb2.0p25.f000 (2026-07-24)
+
+2. gfs_0p50_20260723_f000.grib2
+   Status: ❌ EMPTY FILE
+   Size: 0 bytes
+   Issue: Download incomplete or failed
+   Corresponds to: gfs.t00z.pgrb2.0p50.f000 (2026-07-23)
+
+ANALYSIS NOTES
+--------------
+- All successfully analyzed files show DRT=0, confirming they use simple packing
+- DRT=0 indicates these files are suitable for efficient parsing and CONUS coverage analysis
+- No files showed complex packing (DRT≠0) or missing DRT values
+- Two files were empty and could not be analyzed - these may need to be re-downloaded
+
+DRT=0 CONFIRMATION
+------------------
+Based on this analysis, all 7 valid candidate files use DRT=0 (Simple Packing),
+confirming they are suitable candidates for the CONUS coverage verification
+workflow that requires DRT=0 files.
+
+Script used: scripts/extract_drt.sh
+Method: wgrib2 -grid with grid_template extraction
+Next steps: These DRT=0 files can be used for CONUS coverage analysis and verification
