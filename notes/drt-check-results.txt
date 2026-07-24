@@ -1,195 +1,310 @@
-DRT Check Results - Comprehensive Analysis
-================================================================================
-Date: 2026-07-24
+DRT (Data Representation Template) Check Results
+==================================================
+Generated: 2026-07-24
+Task: bf-3t95a
 Workspace: /home/coding/gribtract
-Extraction method: wgrib2-based grid template extraction
 
-wgrib2 command used for extraction:
-  wgrib2 "$FILE" -grid 2>&1 | grep -oP 'grid_template=\K[0-9]+' | sort -u
+METHODOLOGY
+===========
+Tool: wgrib2 v3.1.3 (10/2023)
+Location: /home/coding/.local/bin/wgrib2
 
-Results Summary:
-================================================================================
+Primary Command Used:
+  wgrib2 <file> -grid | grep -oP 'grid_template=\K[0-9]+'
+
+This command:
+1. Uses wgrib2 to extract grid information from GRIB2 files
+2. The -grid flag outputs grid specification details
+3. grep extracts the grid_template value (DRT number) using Perl regex
+4. Returns unique DRT values per file
+
+Alternative command (for verification):
+  wgrib2 -V <file> | grep grid_template
+
+Dataset:
+  - Scan performed across entire gribtract workspace
+  - All .grib2 files were checked
+  - Results timestamp: 20260724_025219
+
+SUMMARY STATISTICS
+==================
 Total files checked: 84
-Successful extractions: 64 (76.2%)
-Errors: 20 (23.8%)
+Successfully analyzed: 64 files (76.2%)
+Errors: 20 files (23.8%)
 
-DRT Value Distribution:
-================================================================================
-DRT=0: 40 files (62.5%) - Regular Latitude/Longitude grid
-DRT=30: 20 files (31.3%) - Lambert Conformal Conic projection
-DRT=1: 1 file (1.6%) - Rotated Latitude/Longitude grid
-DRT=20: 1 file (1.6%) - Polar Stereographic grid
-DRT=40: 1 file (1.6%) - Gaussian grid
+DRT Value Distribution (successful files):
+  DRT 0: 30 files (46.9% of successful)
+  DRT 30: 31 files (48.4% of successful)
+  DRT 40: 1 file (1.6% of successful)
+  DRT 20: 1 file (1.6% of successful)
+  DRT 1: 1 file (1.6% of successful)
 
-Files with DRT=0 (40 files):
-================================================================================
-GFS (Global Forecast System) Files:
-  - crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.0p50.f006.grib2
-  - crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.0p50.f000.grib2
-  - crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f012.grib2
-  - crates/gribtract/fixtures/noaa-samples/gfs.20260723.t00z.pgrb2.1p00.f006.grib2
-  - crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f006.grib2
-  - crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.0p50.f003.grib2
-  - crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f003.grib2
-  - crates/gribtract/fixtures/noaa-samples/gfs.20260722.t00z.pgrb2.1p00.f000.grib2
-  - crates/gribtract/fixtures/noaa-samples/gfs.20260723.t00z.pgrb2.1p00.f000.grib2
-  - downloads/gfs_20260724_00z_1p00_f000.grib2
+DRT=0 vs Non-Zero DRT:
+  DRT=0 (regular latitude/longitude): 30 files (46.9%)
+  Non-zero DRT (projected/other grids): 34 files (53.1%)
 
-GEFS (Global Ensemble Forecast System) Files:
-  - test_data/ensemble/gefs_perturbed_p01_20260723_t00z_f000.grib2
-  - test_data/ensemble/gefs_perturbed_p02_20260723_t00z_f000.grib2
-  - test_data/ensemble/gefs_ensemble_mean_20260723_t00z_f000.grib2
-  - tests/corpus/large/gefs.20240101.00.atmos.pgrb2ap5.geavg.t00z.pgrb2a.0p50.f000.grib2
-  - tests/corpus/large/gefs_ensemble_p01_cape.grib2
-  - tests/corpus/large/gefs.20240101.00.atmos.pgrb2ap5.gep01.t00z.pgrb2a.0p50.f000.grib2
+Error Categories:
+  Empty files: 11 files (13.1%)
+  Corrupted/invalid: 9 files (10.7%)
 
-Test Corpus - Small Files:
-  - tests/corpus/small/gfs_tmp2m_1deg_anl.grib2
-  - tests/corpus/small/pdt8_accum_3x2.grib2
-  - tests/corpus/small/mrms_carib_refl_drt41.grib2
-  - tests/corpus/small/drt2_simple_3x3.grib2
-  - tests/corpus/small/pdt1_ensemble_3x2.grib2
-  - tests/corpus/small/gfs_anl_t2m_5x5.grib2
-  - tests/corpus/small/conus_drt0.grib2
-  - tests/corpus/small/drt40_j2k_3x2.grib2
-  - tests/corpus/small/drt41_png_3x2.grib2
+DETAILED RESULTS BY DRT VALUE
+==============================
 
-Test Corpus - Large Files:
-  - tests/corpus/large/ecmwf_ensemble_enso_0h.grib2
+DRT 0 Files (30 files)
+----------------------
+Regular Latitude/Longitude Grid
+Template: Lat/Lon grid with points in i, j direction
 
-Verification/Check Samples:
-  - drt_check_samples/test.grib2
-  - drt_check_samples/gfs_20260724_00z_1p00_f000.grib2
-  - scratch/drt0-verification/nam.t12z.afwaca00.tm00.grib2
-  - scratch/drt0_test/gfs_sample.grib2
+Files:
+1. crates/gribtract/fixtures/noaa-samples/gfs.20260722.t00z.pgrb2.1p00.f000.grib2
+2. crates/gribtract/fixtures/noaa-samples/gfs.20260723.t00z.pgrb2.1p00.f000.grib2
+3. crates/gribtract/fixtures/noaa-samples/gfs.20260723.t00z.pgrb2.1p00.f006.grib2
+4. crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.0p50.f000.grib2
+5. crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.0p50.f003.grib2
+6. crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.0p50.f006.grib2
+7. crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f003.grib2
+8. crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f006.grib2
+9. crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f012.grib2
+10. downloads/gfs_20260724_00z_1p00_f000.grib2
+11. drt_check_samples/gfs_20260724_00z_1p00_f000.grib2
+12. drt_check_samples/test.grib2
+13. scratch/drt0_test/gfs_sample.grib2
+14. scratch/drt0-verification/nam.t12z.afwaca00.tm00.grib2
+15. test_data/ensemble/gefs_ensemble_mean_20260723_t00z_f000.grib2
+16. test_data/ensemble/gefs_perturbed_p01_20260723_t00z_f000.grib2
+17. test_data/ensemble/gefs_perturbed_p02_20260723_t00z_f000.grib2
+18. tests/corpus/large/ecmwf_ensemble_enso_0h.grib2
+19. tests/corpus/large/gefs.20240101.00.atmos.pgrb2ap5.geavg.t00z.pgrb2a.0p50.f000.grib2
+20. tests/corpus/large/gefs.20240101.00.atmos.pgrb2ap5.gep01.t00z.pgrb2a.0p50.f000.grib2
+21. tests/corpus/large/gefs_ensemble_p01_cape.grib2
+22. tests/corpus/small/conus_drt0.grib2
+23. tests/corpus/small/drt2_simple_3x3.grib2
+24. tests/corpus/small/drt40_j2k_3x2.grib2
+25. tests/corpus/small/drt41_png_3x2.grib2
+26. tests/corpus/small/gfs_anl_t2m_5x5.grib2
+27. tests/corpus/small/gfs_tmp2m_1deg_anl.grib2
+28. tests/corpus/small/pdt1_ensemble_3x2.grib2
+29. tests/corpus/small/pdt8_accum_3x2.grib2
+30. tests/corpus/small/mrms_carib_refl_drt41.grib2
 
-Files with DRT=30 (20 files):
-================================================================================
-HRRR (High-Resolution Rapid Refresh) Files:
-  - samples/bf-dy62/nam_awip12_20250115_t00z_f00.grib2
-  - samples/hrrr.20260723.t00z.wrfsfcf01.grib2
-  - samples/nam.t00z.awip1200.tm00.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf02.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf08.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf03.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf05.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf07.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf04.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf00.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf01.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf12.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf06.grib2
-  - fixtures/conus/hrrr.t12z.wrfsfcf00.grib2
-  - data/hrrr.t12z.wrfsfcf00.grib2
-  - data/noaa-hrrr/hrrr.t12z.wrfsfcf00.grib2
-  - data/conus_drt0_mxuphl.grib2 (NOTE: Named "drt0" but actual DRT=30)
-  - data/conus_drt0_mxuphl_20260723.grib2 (NOTE: Named "drt0" but actual DRT=30)
+DRT 30 Files (31 files)
+-----------------------
+Lambert Conformal Conic Projection
+Template: Lambert Conformal, Conic, or Polar Projection
 
-Test Corpus Files:
-  - tests/corpus/large/hrrr.t12z.wrfsfcf00.grib2
-  - tests/corpus/large/rap.t12z.awp130pgrbf00.grib2
-  - tests/corpus/large/rap.20240123.t00z.awp130pgrbf00.grib2
-  - tests/corpus/large/nam.t00z.awip1200.tm00.20250120.grib2
-  - tests/corpus/large/hrrr.t12z.wrfsfcf00.20260723.grib2
-  - tests/corpus/large/nam.20240123.t00z.awip1200.tm00.grib2
-  - tests/corpus/large/nam.t00z.awip1200.tm00.grib2
+Files:
+1. samples/bf-dy62/nam_awip12_20250115_t00z_f00.grib2
+2. samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf00.grib2
+3. samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf01.grib2
+4. samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf02.grib2
+5. samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf03.grib2
+6. samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf04.grib2
+7. samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf05.grib2
+8. samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf06.grib2
+9. samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf07.grib2
+10. samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf08.grib2
+11. samples/grib2-noaa-hrrr/hrrr.20260724.t00z.wrfsfcf12.grib2
+12. samples/hrrr.20260723.t00z.wrfsfcf01.grib2
+13. samples/nam.t00z.awip1200.tm00.grib2
+14. data/conus_drt0_mxuphl_20260723.grib2
+15. data/conus_drt0_mxuphl.grib2
+16. data/hrrr.t12z.wrfsfcf00.grib2
+17. data/noaa-hrrr/hrrr.t12z.wrfsfcf00.grib2
+18. fixtures/conus/hrrr.t12z.wrfsfcf00.grib2
+19. scratch/drt0_test/hrrr_t00z_f01.grib2
+20. scratch/drt0_test/hrrr_t06z_f00.grib2
+21. scratch/drt0_test/hrrr_t12z_f00.grib2
+22. scratch/drt0_test/nam_t12z_awphys00.grib2
+23. scratch/drt0_test/rap_t12z_awp236_f00.grib2
+24. tests/corpus/large/hrrr.t12z.wrfsfcf00.20260723.grib2
+25. tests/corpus/large/hrrr.t12z.wrfsfcf00.grib2
+26. tests/corpus/large/nam.20240123.t00z.awip1200.tm00.grib2
+27. tests/corpus/large/nam.t00z.awip1200.tm00.20250120.grib2
+28. tests/corpus/large/nam.t00z.awip1200.tm00.grib2
+29. tests/corpus/large/rap.20240123.t00z.awp130pgrbf00.grib2
+30. tests/corpus/large/rap.t12z.awp130pgrbf00.grib2
+31. ndfd_temp.grib2
 
-Verification Test Files:
-  - scratch/drt0_test/hrrr_t00z_f01.grib2
-  - scratch/drt0_test/nam_t12z_awphys00.grib2
-  - scratch/drt0_test/hrrr_t12z_f00.grib2
-  - scratch/drt0_test/hrrr_t06z_f00.grib2
-  - scratch/drt0_test/rap_t12z_awp236_f00.grib2
+DRT 40 Files (1 file)
+----------------------
+JPEG2000 Compression
+Template: JPEG2000 Compression Scheme
 
-NDFD (National Digital Forecast Database):
-  - ndfd_temp.grib2
+Files:
+1. tests/corpus/large/flx.2024011500.grib2
 
-Files with Other DRT Values (3 files):
-================================================================================
-DRT=1 (Rotated Latitude/Longitude):
-  - tests/corpus/small/rotated_latlon_5x5.grib2
+DRT 20 Files (1 file)
+----------------------
+Polar Stereographic Projection
+Template: Polar Stereographic Projection Grid
 
-DRT=20 (Polar Stereographic):
-  - tests/corpus/small/gfswave_arctic_wind_drt40.grib2
+Files:
+1. tests/corpus/small/gfswave_arctic_wind_drt40.grib2
 
-DRT=40 (Gaussian grid):
-  - tests/corpus/large/flx.2024011500.grib2
+DRT 1 Files (1 file)
+--------------------
+Rotated Latitude/Longitude Grid
+Template: Rotated Lat/Lon grid
 
-Error Files (20 files):
-================================================================================
-Empty Files (9 files) - Placeholder or incomplete downloads:
-  - crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f000.grib2
-  - test.grib2
-  - gefs_test.grib2
-  - samples/nam_awip12_20250115_t00z_f00.grib2
-  - nam_20250115_awip12.grib2
-  - test_data/nam_awip12_drt3.grib2
-  - data/nam.t00z.awip1200.tm00.grib2
-  - grib2/nam.20250115.t00z.awip1200.tm00.grib2
-  - grib2/hrrr.t12z.wrfsfcf00.grib2
-  - tests/corpus/large/gefs_perturbation_member_pdt41_test.grib2
-  - scratch/drt0-verification/rap.t12z.awip32f00.grib2
+Files:
+1. tests/corpus/small/rotated_latlon_5x5.grib2
 
-Corrupted/Invalid GRIB2 Files (11 files):
-  - samples/hrrr.t00z.wrfsfcf01.grib2
-  - samples/grib2-noaa-nam/nam.20260724.t00z.conusnest.hiresf00.tm00.grib2
-  - samples/grib2-noaa-rap/rap.20260724.t00z.awp130pgrbf00.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260724.t06z.wrfsfcf00.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260723.t00z.wrfsfcf03.grib2
-  - samples/grib2-noaa-hrrr/hrrr.20260723.t12z.wrfsfcf00.grib2
-  - tests/corpus/large/gefs_ensemble_mean_sample.grib2
-  - scratch/drt0-verification/nam.t12z.awp130f00.grib2
-  - hrrr_test_20260724.grib2
+ERRORS AND ISSUES
+=================
 
-Key Findings:
-================================================================================
-1. Strong DRT Bimodal Distribution:
-   - DRT=0 and DRT=30 account for 93.8% of all successful extractions
-   - Reflects dominance of global (DRT=0) and regional (DRT=30) weather models
+Empty Files (11 files)
+----------------------
+These files exist but have zero byte length:
+1. crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f000.grib2
+2. test.grib2
+3. gefs_test.grib2
+4. samples/nam_awip12_20250115_t00z_f00.grib2
+5. nam_20250115_awip12.grib2
+6. test_data/nam_awip12_drt3.grib2
+7. data/nam.t00z.awip1200.tm00.grib2
+8. grib2/nam.20250115.t00z.awip1200.tm00.grib2
+9. grib2/hrrr.t12z.wrfsfcf00.grib2
+10. tests/corpus/large/gefs_perturbation_member_pdt41_test.grib2
+11. scratch/drt0-verification/rap.t12z.awip32f00.grib2
+
+Corrupted/Invalid Files (9 files)
+----------------------------------
+These files could not be parsed as valid GRIB2:
+1. samples/hrrr.t00z.wrfsfcf01.grib2
+2. samples/grib2-noaa-nam/nam.20260724.t00z.conusnest.hiresf00.tm00.grib2
+3. samples/grib2-noaa-rap/rap.20260724.t00z.awp130pgrbf00.grib2
+4. samples/grib2-noaa-hrrr/hrrr.20260724.t06z.wrfsfcf00.grib2
+5. samples/grib2-noaa-hrrr/hrrr.20260723.t00z.wrfsfcf03.grib2
+6. samples/grib2-noaa-hrrr/hrrr.20260723.t12z.wrfsfcf00.grib2
+7. tests/corpus/large/gefs_ensemble_mean_sample.grib2
+8. scratch/drt0-verification/nam.t12z.awp130f00.grib2
+9. hrrr_test_20260724.grib2
+
+GRID TEMPLATE REFERENCE
+=======================
+Key DRT values found in this scan:
+
+DRT 0 - Latitude/Longitude
+  Regular lat/lon grid, most common for global models
+
+DRT 1 - Rotated Latitude/Longitude
+  Rotated lat/lon grid, used for regional models
+
+DRT 20 - Polar Stereographic
+  Polar stereographic projection, used for high-latitude regions
+
+DRT 30 - Lambert Conformal Conic
+  Lambert conformal projection, used for CONUS and mid-latitude regions
+
+DRT 40 - JPEG2000 Compression
+  JPEG2000 compression wrapper, indicates compressed data
+
+KEY FINDINGS
+============
+1. Bimodal DRT Distribution:
+   - DRT=0 (46.9%) and DRT=30 (48.4%) dominate the dataset
+   - This reflects the mix of global (GFS/GEFS) and regional (HRRR/NAM/RAP) models
 
 2. Model-Product Correlation:
    - GFS/GEFS (global models): Consistently use DRT=0
-   - HRRR/NAM/RAP (regional models): Consistently use DRT=30
-   - This pattern enables model type identification from DRT value
+   - HRRR/NAM/RAP (regional CONUS models): Consistently use DRT=30
+   - This pattern enables model type identification from DRT value alone
 
 3. File Quality Issues:
-   - 23.8% of files have extraction errors
-   - 10.7% are empty files, 13.1% are corrupted/invalid
+   - 23.8% of files have extraction errors (20 out of 84)
+   - 13.1% are empty files, likely incomplete downloads
+   - 10.7% are corrupted or invalid GRIB2 files
    - These should be cleaned up for accurate testing
 
 4. Naming Convention Anomalies:
-   - Several files named "conus_drt0" actually have DRT=30
+   - Files named "conus_drt0" (data/conus_drt0_mxuphl.grib2,
+     data/conus_drt0_mxuphl_20260723.grib2) actually have DRT=30
    - Historical naming may not reflect actual DRT values
 
 5. Test Coverage:
-   - Good coverage of DRT=0 and DRT=30
-   - Limited coverage of specialized DRT values (1, 20, 40)
+   - Excellent coverage of DRT=0 and DRT=30
+   - Limited but present coverage of specialized DRT values (1, 20, 40)
 
-Impact on gribtract Library:
-================================================================================
-Positive:
-  - Strong DRT=0 coverage (most common grid type)
-  - Good DRT=30 coverage for regional models
-  - Test fixtures exist for specialized grid types
+6. No Multiple DRT Values:
+   - 0 files had multiple DRT values
+   - All files use a single, consistent grid template
 
-Areas for Enhancement:
-  - Add more diverse DRT fixtures (DRT=1, 20, 40)
-  - Clean up empty and corrupted files
-  - Update naming conventions to match actual DRT values
+DATA SOURCE PATHS
+==================
+The checked files span multiple directories:
+
+Test Fixtures:
+  - crates/gribtract/fixtures/noaa-samples/ - GFS sample files
+  - fixtures/conus/ - CONUS test fixtures
+  - fixtures/ - Other test fixtures
+
+Downloaded/Sample Data:
+  - downloads/ - Newly downloaded files
+  - samples/ - Various weather model samples (HRRR, NAM, RAP, GFS)
+  - samples/grib2-noaa-gfs/ - GFS samples
+  - samples/grib2-noaa-nam/ - NAM samples
+  - samples/grib2-noaa-hrrr/ - HRRR samples
+  - samples/grib2-noaa-rap/ - RAP samples
+
+Test Data:
+  - test_data/ensemble/ - GEFS ensemble test data
+  - tests/corpus/large/ - Large test corpus
+  - tests/corpus/small/ - Small test corpus with known DRT values
+
+Development:
+  - scratch/ - Development/scratch files
+  - scratch/drt0_test/ - DRT=0 verification tests
+  - scratch/drt0-verification/ - DRT verification tests
+
+Data Storage:
+  - data/ - Various data files
+  - data/noaa-hrrr/ - HRRR data files
+  - drt_check_samples/ - DRT check sample files
 
 Raw Data Files:
-================================================================================
-- drt_extraction_results/drt_extraction_20260724_025219.csv
-- drt_extraction_results/drt_extraction_20260724_025219.json
-- drt_extraction_results/drt_extraction_20260724_025219_errors.txt
+  - JSON summary: drt_extraction_results/drt_extraction_20260724_025219.json
+  - CSV details: drt_extraction_results/drt_extraction_20260724_025219.csv
+  - Error log: drt_extraction_results/drt_extraction_20260724_025219_errors.txt
 
-Scripts:
-================================================================================
-- scripts/extract_drt.sh - Core DRT extraction using wgrib2
-- run_drt_extraction_all.sh - Batch extraction across all GRIB2 files
+IMPACT ON GRIBTRACT LIBRARY
+============================
+Positive:
+  - Strong DRT=0 coverage (most common grid type globally)
+  - Good DRT=30 coverage for regional CONUS models
+  - Test fixtures exist for specialized grid types (1, 20, 40)
+  - No files with multiple DRT values (simplifies parsing)
+
+Areas for Enhancement:
+  - Add more diverse DRT fixtures for better edge case coverage
+  - Clean up empty and corrupted files to improve test reliability
+  - Update naming conventions to match actual DRT values
+  - Consider adding DRT=2 (curvilinear orthogonal) and DRT=41 (JPEG2000) fixtures
+
+VERIFICATION
+=============
+Results can be verified using:
+  wgrib2 <file> -grid | grep grid_template
+
+Example:
+  wgrib2 tests/corpus/small/conus_drt0.grib2 -grid | grep grid_template
+  # Output: grid_template=0
+
+  wgrib2 samples/hrrr.20260723.t00z.wrfsfcf01.grib2 -grid | grep grid_template
+  # Output: grid_template=30
+
+REPORT METADATA
+================
+Report compiled by: Claude (bf-3t95a)
+Data extraction timestamp: 20260724_025219
+Scan methodology: wgrib2 grid_template extraction
+Processing time: ~10 seconds for 84 files
+Tool version: wgrib2 v3.1.3 (10/2023)
+
+Related Scripts:
+  - scripts/extract_drt.sh - Core DRT extraction script
+  - check_drt_downloaded.sh - Check downloaded files
+  - check_drt_values.sh - Check DRT values across samples
+  - run_drt_extraction_all.sh - Batch extraction script
 
 ================================================================================
 End of DRT Check Results
-Generated: 2026-07-24 02:52:19 UTC
-Processing time: ~10 seconds for 84 files
-Tool versions: wgrib2 (installed via bf-21wf9)
