@@ -1,0 +1,74 @@
+================================================================================
+DRT=0 CONUS File Accessibility Test Report
+Generated: 2026-07-24T09:37:10.342045
+================================================================================
+
+## Summary
+Total URLs tested: 7
+Accessible (HTTP 200): 6/7 (85%)
+Downloaded successfully: 3/6 (50%)
+Valid GRIB2 format: 3/3 (100%)
+Authentication required: 0
+
+## Detailed Results
+
+### 1. RTMA 2.5 CONUS - July 24, 2026 00z (DRT=0)
+Dataset: RTMA 2.5 CONUS
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260724/rtma2p5.t00z.2dvaranl_ndfd.grb2_wexp
+
+HTTP Status: 200 ✓
+Authentication Required: ✓ No
+Download: ✓ SUCCESS (80.81 MB in 7.48s)
+Speed: 10.81 MB/s
+GRIB2 Format: ✓ Valid
+MD5: c14503a0a4ff60deaad184051138a102
+
+### 2. RTMA 2.5 CONUS - July 23, 2026 12z (DRT=0)
+Dataset: RTMA 2.5 CONUS
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260723/rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp
+
+HTTP Status: 200 ✓
+Authentication Required: ✓ No
+Download: ✓ SUCCESS (79.47 MB in 7.33s)
+Speed: 10.84 MB/s
+GRIB2 Format: ✓ Valid
+MD5: 3d80f1fd30ad3c1bcefe2e90b174917c
+
+### 3. URMA 2.5 CONUS - July 24, 2026 00z (DRT=0)
+Dataset: URMA 2.5 CONUS
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/urma/prod/urma2p5.20260724/urma2p5.t00z.2dvaranl_ndfd.grb2_wexp
+
+HTTP Status: 200 ✓
+Authentication Required: ✓ No
+Download: ✓ SUCCESS (82.87 MB in 11.50s)
+Speed: 7.20 MB/s
+GRIB2 Format: ✓ Valid
+MD5: 77b44c8cc57977ae976b561ca6af73c2
+
+### 4. RTMA 2.5 CONUS - July 24, 2026 06z (DRT=0)
+Dataset: RTMA 2.5 CONUS
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260724/rtma2p5.t06z.2dvaranl_ndfd.grb2_wexp
+
+HTTP Status: 200 ✓
+Authentication Required: ✓ No
+
+### 5. RTMA 2.5 CONUS - July 24, 2026 12z (DRT=0)
+Dataset: RTMA 2.5 CONUS
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260724/rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp
+
+HTTP Status: 200 ✓
+Authentication Required: ✓ No
+
+### 6. URMA 2.5 CONUS - July 24, 2026 06z (DRT=0)
+Dataset: URMA 2.5 CONUS
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/urma/prod/urma2p5.20260724/urma2p5.t06z.2dvaranl_ndfd.grb2_wexp
+
+HTTP Status: 200 ✓
+Authentication Required: ✓ No
+
+### 7. URMA 2.5 CONUS - July 24, 2026 12z (DRT=0)
+Dataset: URMA 2.5 CONUS
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/urma/prod/urma2p5.20260724/urma2p5.t12z.2dvaranl_ndfd.grb2_wexp
+
+HTTP Status: 404 ✗
+Authentication Required: ✓ No
