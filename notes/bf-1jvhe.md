@@ -1,33 +1,21 @@
-# DRT Value Check Results
+# DRT Value Analysis - GRIB2 Files
 
 ## Task Summary
-Successfully checked DRT (Data Representation Type) values for all downloaded GRIB2 files using wgrib2 and custom GRIB2 Section 3 parsing.
+Checked DRT (Data Representation Template) values for all downloaded GRIB2 files using wgrib2.
 
-## Method Used
+## wgrib2 Command Used
+```bash
+wgrib2 -Sec3 <file> | grep -oP 'Grid Def Template=\K[0-9.]+(?= |$)'
+```
 
-### Direct GRIB2 Structure Parsing
-While wgrib2 provides verbose inventory output (`wgrib2 -v <file>`), extracting DRT values requires parsing the GRIB2 binary structure directly. The DRT is the Grid Definition Template number stored in GRIB2 Section 3 (Grid Definition Section).
-
-**The exact extraction method:**
-- Parse GRIB2 Section 0 (Indicator Section) → Section 1 (Identification Section) → Section 2 (Local Use Section) → Section 3 (Grid Definition Section)
-- Extract grid definition template number from Section 3 bytes 5-6 (2-byte unsigned big-endian integer)
-
-### Script Created
-Created `check_drt_values.sh` - Python script that:
-1. Parses GRIB2 binary structure to locate Section 3
-2. Extracts grid definition template number (DRT value)
-3. Generates comprehensive report in `notes/drt-check-results.txt`
+The `-Sec3` option shows the Grid Definition Section contents, which includes the DRT value as "Grid Def Template=X.Y"
 
 ## Results
 
-**Total files checked:** 16
-- **DRT=0 files:** 15 (regular latitude/longitude grids)
-- **DRT!=0 files:** 0
-- **Error/unknown:** 1 (empty 0-byte file: `gfs.20260721.t00z.pgrb2.0p50.f000`)
+### Files Successfully Analyzed: 28 total
 
-### Files with DRT=0 (15 files)
-All valid GRIB2 files have DRT=0, which means they use regular latitude/longitude grids (the most common and simplest grid type).
-
+#### GFS Files (16 files) - DRT 3.0
+All GFS files use **DRT 3.0 (Lambert Conformal Conic grid)**:
 - gfs.20260722.t00z.pgrb2.0p25.f003
 - gfs.20260723.t00z.pgrb2.0p25.f000
 - gfs.20260723.t00z.pgrb2.0p25.f006
@@ -42,28 +30,61 @@ All valid GRIB2 files have DRT=0, which means they use regular latitude/longitud
 - gfs.t00z.pgrb2.0p25.f006
 - gfs.t00z.pgrb2.0p25.f012
 - gfs.t00z.pgrb2.0p50.f000
+- gfs.t00z.pgrb2.0p25.f003
 - gfs.t00z.pgrb2.1p00.f000
 
-## Key Finding
-**All valid GRIB2 files have DRT=0**, meaning they all use regular latitude/longitude grids. This is ideal for the gribtract library because:
+#### HRRR Files (11 files) - DRT 3.30
+All HRRR files use **DRT 3.30 (Lambert Conformal Conic grid variant)**:
+- hrrr.20260723.t00z.wrfsfcf01.grib2
+- hrrr.20260724.t00z.wrfsfcf00.grib2
+- hrrr.20260724.t00z.wrfsfcf01.grib2
+- hrrr.20260724.t00z.wrfsfcf02.grib2
+- hrrr.20260724.t00z.wrfsfcf03.grib2
+- hrrr.20260724.t00z.wrfsfcf04.grib2
+- hrrr.20260724.t00z.wrfsfcf05.grib2
+- hrrr.20260724.t00z.wrfsfcf06.grib2
+- hrrr.20260724.t00z.wrfsfcf07.grib2
+- hrrr.20260724.t00z.wrfsfcf08.grib2
+- hrrr.20260724.t00z.wrfsfcf12.grib2
 
-1. **Simplest grid type** - DRT=0 means regular lat/lon grids with constant spacing
-2. **Maximum compatibility** - All 15 valid files use the same grid representation
-3. **No complex grid handling** - No need for special cases like rotated grids, stretched grids, or other complex grid types
+#### Other Files (1 file) - DRT 3.30
+- nam.t00z.awip1200.tm00.grib2 - **DRT 3.30 (Lambert Conformal Conic)**
 
-## Files Created
-- `check_drt_values.sh` - DRT extraction script
-- `notes/drt-check-results.txt` - Detailed DRT check results
-- `notes/bf-1jvhe.md` - This summary document
+### Files Skipped (empty/incomplete): 8 files
 
-## Commands Used
-```bash
-# To run DRT check on all files
-python3 check_drt_values.sh
+The following files were too small (< 1KB) and likely represent incomplete downloads:
+- gfs.20260721.t00z.pgrb2.0p50.f000 (0 bytes - completely empty)
+- hrrr.t00z.wrfsfcf01.grib2 (336 bytes)
+- hrrr.20260723.t00z.wrfsfcf03.grib2 (196 bytes)
+- hrrr.20260723.t12z.wrfsfcf00.grib2 (196 bytes)
+- hrrr.20260724.t06z.wrfsfcf00.grib2 (196 bytes)
+- nam.20260724.t00z.conusnest.hiresf00.tm00.grib2 (199 bytes)
+- rap.20260724.t00z.awp130pgrbf00.grib2 (196 bytes)
+- nam_awip12_20250115_t00z_f00.grib2 (0 bytes - completely empty)
 
-# To check individual file with wgrib2 (for reference)
-wgrib2 -v <filename>
-```
+## DRT Value Meanings
 
-## Next Steps
-Since all files have DRT=0, the gribtract library can proceed with standard latitude/longitude grid parsing without needing to handle complex grid types.
+- **DRT 0.0**: Latitude/Longitude grid (simple regular lat/lon grid)
+- **DRT 3.0**: Lambert Conformal Conic projection grid
+- **DRT 3.30**: Lambert Conformal Conic projection grid (variant with specific parameters)
+- **DRT 40.0**: Rotated Latitude/Longitude grid
+- Other values: Specialized grid types
+
+## Key Findings
+
+1. **No files with DRT=0.0**: None of the downloaded files use simple Latitude/Longitude grids. All use Lambert Conformal Conic projections (DRT 3.0 or 3.30).
+
+2. **Model-specific DRT patterns**:
+   - GFS: Uses DRT 3.0 (standard Lambert Conformal Conic)
+   - HRRR: Uses DRT 3.30 (Lambert Conformal Conic variant)
+   - NAM: Uses DRT 3.30 (Lambert Conformal Conic variant)
+
+3. **Incomplete downloads identified**: 8 files are too small and represent failed or incomplete downloads.
+
+4. **All successful files are valid**: The 28 files that were successfully analyzed are all valid GRIB2 files with proper DRT values.
+
+## Script Created
+
+The analysis was performed using the script: `scripts/check_drt_values.sh`
+
+This script can be re-run to analyze any new GRIB2 files downloaded in the future.
