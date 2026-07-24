@@ -1,0 +1,259 @@
+{
+  "metadata": {
+    "verification_date": "2026-07-24",
+    "bead": "bf-1evex",
+    "conus_bounds": {
+      "lat_min": 24.0,
+      "lat_max": 50.0,
+      "lon_min": "235.0\u00b0E (125\u00b0W)",
+      "lon_max": "293.0\u00b0E (67\u00b0W)"
+    },
+    "verification_method": "wgrib2 -grid extraction and cell counting"
+  },
+  "candidates": [
+    {
+      "candidate_id": "gfs_1p00_20260724_f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2",
+      "verification_status": "success",
+      "grid_info": {
+        "grid_type": "lat-lon",
+        "nx": 360,
+        "ny": 181,
+        "total_points": 65160,
+        "lat_start": 90.0,
+        "lat_end": -90.0,
+        "lat_step": 1.0,
+        "lon_start": 0.0,
+        "lon_end": 359.0,
+        "lon_step": 1.0,
+        "lat_range": [
+          90.0,
+          -90.0
+        ],
+        "lon_range": [
+          0.0,
+          359.0
+        ]
+      },
+      "conus_coverage": {
+        "is_global": true,
+        "conus_cells": 1593,
+        "total_cells": 65160,
+        "coverage_percentage": 2.44,
+        "lat_points_in_conus": 27,
+        "lon_points_in_conus": 59,
+        "conus_covered": true
+      }
+    },
+    {
+      "candidate_id": "gfs_0p25_20260723_f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2",
+      "verification_status": "success",
+      "grid_info": {
+        "grid_type": "lat-lon",
+        "nx": 1440,
+        "ny": 721,
+        "total_points": 1038240,
+        "lat_start": 90.0,
+        "lat_end": -90.0,
+        "lat_step": 0.25,
+        "lon_start": 0.0,
+        "lon_end": 359.75,
+        "lon_step": 0.25,
+        "lat_range": [
+          90.0,
+          -90.0
+        ],
+        "lon_range": [
+          0.0,
+          359.75
+        ]
+      },
+      "conus_coverage": {
+        "is_global": true,
+        "conus_cells": 24465,
+        "total_cells": 1038240,
+        "coverage_percentage": 2.36,
+        "lat_points_in_conus": 105,
+        "lon_points_in_conus": 233,
+        "conus_covered": true
+      }
+    },
+    {
+      "candidate_id": "gefs_0p50_20260724_f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2",
+      "verification_status": "success",
+      "grid_info": {
+        "grid_type": "lat-lon",
+        "nx": 720,
+        "ny": 361,
+        "total_points": 259920,
+        "lat_start": 90.0,
+        "lat_end": -90.0,
+        "lat_step": 0.5,
+        "lon_start": 0.0,
+        "lon_end": 359.5,
+        "lon_step": 0.5,
+        "lat_range": [
+          90.0,
+          -90.0
+        ],
+        "lon_range": [
+          0.0,
+          359.5
+        ]
+      },
+      "conus_coverage": {
+        "is_global": true,
+        "conus_cells": 6201,
+        "total_cells": 259920,
+        "coverage_percentage": 2.39,
+        "lat_points_in_conus": 53,
+        "lon_points_in_conus": 117,
+        "conus_covered": true
+      }
+    },
+    {
+      "candidate_id": "gefs_0p50_20260724_f003",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2",
+      "verification_status": "success",
+      "grid_info": {
+        "grid_type": "lat-lon",
+        "nx": 720,
+        "ny": 361,
+        "total_points": 259920,
+        "lat_start": 90.0,
+        "lat_end": -90.0,
+        "lat_step": 0.5,
+        "lon_start": 0.0,
+        "lon_end": 359.5,
+        "lon_step": 0.5,
+        "lat_range": [
+          90.0,
+          -90.0
+        ],
+        "lon_range": [
+          0.0,
+          359.5
+        ]
+      },
+      "conus_coverage": {
+        "is_global": true,
+        "conus_cells": 6201,
+        "total_cells": 259920,
+        "coverage_percentage": 2.39,
+        "lat_points_in_conus": 53,
+        "lon_points_in_conus": 117,
+        "conus_covered": true
+      }
+    },
+    {
+      "candidate_id": "gfs_1p00_20260723_f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2",
+      "verification_status": "success",
+      "grid_info": {
+        "grid_type": "lat-lon",
+        "nx": 360,
+        "ny": 181,
+        "total_points": 65160,
+        "lat_start": 90.0,
+        "lat_end": -90.0,
+        "lat_step": 1.0,
+        "lon_start": 0.0,
+        "lon_end": 359.0,
+        "lon_step": 1.0,
+        "lat_range": [
+          90.0,
+          -90.0
+        ],
+        "lon_range": [
+          0.0,
+          359.0
+        ]
+      },
+      "conus_coverage": {
+        "is_global": true,
+        "conus_cells": 1593,
+        "total_cells": 65160,
+        "coverage_percentage": 2.44,
+        "lat_points_in_conus": 27,
+        "lon_points_in_conus": 59,
+        "conus_covered": true
+      }
+    },
+    {
+      "candidate_id": "gfs_0p50_20260724_f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2",
+      "verification_status": "success",
+      "grid_info": {
+        "grid_type": "lat-lon",
+        "nx": 720,
+        "ny": 361,
+        "total_points": 259920,
+        "lat_start": 90.0,
+        "lat_end": -90.0,
+        "lat_step": 0.5,
+        "lon_start": 0.0,
+        "lon_end": 359.5,
+        "lon_step": 0.5,
+        "lat_range": [
+          90.0,
+          -90.0
+        ],
+        "lon_range": [
+          0.0,
+          359.5
+        ]
+      },
+      "conus_coverage": {
+        "is_global": true,
+        "conus_cells": 6201,
+        "total_cells": 259920,
+        "coverage_percentage": 2.39,
+        "lat_points_in_conus": 53,
+        "lon_points_in_conus": 117,
+        "conus_covered": true
+      }
+    },
+    {
+      "candidate_id": "gefs_0p50_20260724_f006",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2",
+      "verification_status": "success",
+      "grid_info": {
+        "grid_type": "lat-lon",
+        "nx": 720,
+        "ny": 361,
+        "total_points": 259920,
+        "lat_start": 90.0,
+        "lat_end": -90.0,
+        "lat_step": 0.5,
+        "lon_start": 0.0,
+        "lon_end": 359.5,
+        "lon_step": 0.5,
+        "lat_range": [
+          90.0,
+          -90.0
+        ],
+        "lon_range": [
+          0.0,
+          359.5
+        ]
+      },
+      "conus_coverage": {
+        "is_global": true,
+        "conus_cells": 6201,
+        "total_cells": 259920,
+        "coverage_percentage": 2.39,
+        "lat_points_in_conus": 53,
+        "lon_points_in_conus": 117,
+        "conus_covered": true
+      }
+    }
+  ],
+  "summary": {
+    "total_candidates": 7,
+    "verified_conus_coverage": 7,
+    "failed_verification": 0,
+    "no_conus_coverage": 0
+  }
+}
