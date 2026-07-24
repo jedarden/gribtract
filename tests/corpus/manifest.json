@@ -67,6 +67,19 @@
       }
     },
     {
+      "id": "conus_drt0",
+      "path": "small/conus_drt0.grib2",
+      "sha256": "2b962c04ef2a478e8cb027aa082c8853ca0c69ce44266a0517f764b90ba50008",
+      "size_bytes": 283,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 fixture: 2m temperature analysis, CONUS lat/lon grid (55-20°N, 125-65°W, 5°x5° spacing, 13x8=104 points). Section 0 discipline=0 (meteorological), edition=2. Section 1: center=7 (US NCEP), analysis (significance=0), 2024-01-15T00:00:00Z. Section 3 template 3.0 (lat/lon), shape=6 (WGS84), Ni=13, Nj=8, scanning_mode=0x00 (+i, -j), lat bounds 20-55°N, lon bounds 125-65°W (235-295°E). Section 4 template 4.0: discipline=0/cat=0/num=0 (temperature K), level type=103 (height above ground), value=2m, forecast_offset=0h. Section 5 template 5.0 (simple packing, DRT=0): R=270.0, E=0, D=0, nbits=8. Section 6: no bitmap (indicator=255). Section 7: 104 packed bytes X=0..103, unpacked values = 270.0+X K (270.0K at 55°N/125°W .. 373.0K at 20°N/65°W).",
+        "capture_date": "2026-07-23",
+        "generated_by": "scripts/gen_conus_drt0.py (gribtract project)"
+      }
+    },
+    {
       "id": "rotated_latlon_5x5",
       "path": "small/rotated_latlon_5x5.grib2",
       "sha256": "8ae9de6cc4cc04d3ada06bed503f44cc4c3395afb43ce84aa10446e2dc081b95",
