@@ -176,6 +176,65 @@ wgrib2 file.grib2 -grid
 
 These scripts are part of the CONUS coverage validation infrastructure developed for bead bf-1yvp2. They provide practical implementations of the verification criteria documented in `docs/conus-coverage-verification-criteria.md`.
 
+## DRT Extraction Scripts
+
+### extract_drt.sh
+
+Extracts DRT (Data Representation Type) values from GRIB2 files using wgrib2.
+
+**Usage:**
+```bash
+./extract_drt.sh <grib2_file_path>
+```
+
+**Examples:**
+```bash
+# Extract DRT from a single file
+./extract_drt.sh /path/to/file.grib2
+# Output: DRT=30
+
+# Extract DRT from multiple files in a directory
+for file in *.grib2; do
+    echo "$file: $(./extract_drt.sh "$file")"
+done
+```
+
+**What it does:**
+- Uses `wgrib2 -grid` to output grid information
+- Extracts the `grid_template` value (which is the DRT) using grep
+- Returns the DRT value as output (e.g., "DRT=30")
+- Handles multiple DRT values in multi-message files
+
+**Error handling:**
+- Missing or incorrect arguments
+- File not found
+- File not readable  
+- Empty files
+- Invalid or corrupted GRIB2 files
+- wgrib2 not installed
+
+**Return values:**
+- **0:** Success - DRT value extracted and printed
+- **1:** Error - appropriate error message printed to stderr
+
+**Requirements:**
+- `wgrib2` must be installed and in PATH
+
+**Related files:**
+- `../check_drt_values.sh` - Python script for batch DRT checking
+- `../check_drt_downloaded.sh` - Bash script for batch DRT checking of downloaded files
+
+**Implementation details:**
+The key command used:
+```bash
+wgrib2 "$file" -grid 2>&1 | grep -oP 'grid_template=\K[0-9]+'
+```
+
+This extracts the grid template number from wgrib2 output like:
+```
+1:80:grid_template=30:winds(N/S):
+```
+
 ## Contributing
 
 When adding new verification methods:
@@ -188,5 +247,5 @@ When adding new verification methods:
 ---
 
 **Last Updated:** 2026-07-24  
-**Bead ID:** bf-1yvp2  
+**Related Beads:** bf-1yvp2 (CONUS coverage), bf-1fvpp (DRT extraction)  
 **Status:** ✅ Complete
