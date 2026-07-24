@@ -5,7 +5,7 @@
     "total_candidates": 9,
     "successful": 9,
     "failed": 0,
-    "success_rate": "%"
+    "success_rate": "100.0%"
   },
   "headers": [
     {
@@ -18,7 +18,7 @@
       "header_file": "gfs.t00z.pgrb2.0p25.f000.headers.txt",
       "message_count": 696,
       "status": "success",
-      "download_timestamp": "2026-07-24T11:04:43Z"
+      "download_timestamp": "2026-07-24T11:08:39Z"
     },
     {
       "candidate_id": 2,
@@ -30,7 +30,7 @@
       "header_file": "gfs.t00z.pgrb2.0p50.f000.headers.txt",
       "message_count": 696,
       "status": "success",
-      "download_timestamp": "2026-07-24T11:04:58Z"
+      "download_timestamp": "2026-07-24T11:08:53Z"
     },
     {
       "candidate_id": 3,
@@ -42,7 +42,7 @@
       "header_file": "gfs.t00z.pgrb2.1p00.f000.headers.txt",
       "message_count": 696,
       "status": "success",
-      "download_timestamp": "2026-07-24T11:05:04Z"
+      "download_timestamp": "2026-07-24T11:08:58Z"
     },
     {
       "candidate_id": 4,
@@ -54,7 +54,7 @@
       "header_file": "gfs.t00z.pgrb2.0p25.f000.headers.txt",
       "message_count": 696,
       "status": "success",
-      "download_timestamp": "2026-07-24T11:05:51Z"
+      "download_timestamp": "2026-07-24T11:10:04Z"
     },
     {
       "candidate_id": 5,
@@ -66,7 +66,7 @@
       "header_file": "gfs.t00z.pgrb2.0p50.f000.headers.txt",
       "message_count": 696,
       "status": "success",
-      "download_timestamp": "2026-07-24T11:06:08Z"
+      "download_timestamp": "2026-07-24T11:10:18Z"
     },
     {
       "candidate_id": 6,
@@ -78,7 +78,7 @@
       "header_file": "gfs.t00z.pgrb2.1p00.f000.headers.txt",
       "message_count": 696,
       "status": "success",
-      "download_timestamp": "2026-07-24T11:06:13Z"
+      "download_timestamp": "2026-07-24T11:10:22Z"
     },
     {
       "candidate_id": 7,
@@ -90,7 +90,7 @@
       "header_file": "geavg.t00z.pgrb2a.0p50.f000.headers.txt",
       "message_count": 71,
       "status": "success",
-      "download_timestamp": "2026-07-24T11:06:15Z"
+      "download_timestamp": "2026-07-24T11:10:24Z"
     },
     {
       "candidate_id": 8,
@@ -102,7 +102,7 @@
       "header_file": "geavg.t00z.pgrb2a.0p50.f003.headers.txt",
       "message_count": 85,
       "status": "success",
-      "download_timestamp": "2026-07-24T11:06:16Z"
+      "download_timestamp": "2026-07-24T11:10:25Z"
     },
     {
       "candidate_id": 9,
@@ -114,7 +114,7 @@
       "header_file": "geavg.t00z.pgrb2a.0p50.f006.headers.txt",
       "message_count": 85,
       "status": "success",
-      "download_timestamp": "2026-07-24T11:06:18Z"
+      "download_timestamp": "2026-07-24T11:10:27Z"
     }
   ]
 }

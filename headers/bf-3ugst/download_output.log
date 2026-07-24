@@ -1,0 +1,66 @@
+Processing 9 candidates...
+Processing [1/9]: gfs.t00z.pgrb2.0p25.f000
+  URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p25.f000
+  Model: GFS, Resolution: 0.25, Date: 2026-07-24, FH: 000
+  ✅ Success: Headers saved to headers/bf-3ugst/gfs.t00z.pgrb2.0p25.f000.headers.txt
+  Messages: 696
+
+Processing [2/9]: gfs.t00z.pgrb2.0p50.f000
+  URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000
+  Model: GFS, Resolution: 0.50, Date: 2026-07-24, FH: 000
+  ✅ Success: Headers saved to headers/bf-3ugst/gfs.t00z.pgrb2.0p50.f000.headers.txt
+  Messages: 696
+
+Processing [3/9]: gfs.t00z.pgrb2.1p00.f000
+  URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000
+  Model: GFS, Resolution: 1.00, Date: 2026-07-24, FH: 000
+  ✅ Success: Headers saved to headers/bf-3ugst/gfs.t00z.pgrb2.1p00.f000.headers.txt
+  Messages: 696
+
+Processing [4/9]: gfs.t00z.pgrb2.0p25.f000
+  URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000
+  Model: GFS, Resolution: 0.25, Date: 2026-07-23, FH: 000
+  ✅ Success: Headers saved to headers/bf-3ugst/gfs.t00z.pgrb2.0p25.f000.headers.txt
+  Messages: 696
+
+Processing [5/9]: gfs.t00z.pgrb2.0p50.f000
+  URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p50.f000
+  Model: GFS, Resolution: 0.50, Date: 2026-07-23, FH: 000
+  ✅ Success: Headers saved to headers/bf-3ugst/gfs.t00z.pgrb2.0p50.f000.headers.txt
+  Messages: 696
+
+Processing [6/9]: gfs.t00z.pgrb2.1p00.f000
+  URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000
+  Model: GFS, Resolution: 1.00, Date: 2026-07-23, FH: 000
+  ✅ Success: Headers saved to headers/bf-3ugst/gfs.t00z.pgrb2.1p00.f000.headers.txt
+  Messages: 696
+
+Processing [7/9]: geavg.t00z.pgrb2a.0p50.f000
+  URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000
+  Model: GEFS, Resolution: 0.50, Date: 2026-07-24, FH: 000
+  ✅ Success: Headers saved to headers/bf-3ugst/geavg.t00z.pgrb2a.0p50.f000.headers.txt
+  Messages: 71
+
+Processing [8/9]: geavg.t00z.pgrb2a.0p50.f003
+  URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003
+  Model: GEFS, Resolution: 0.50, Date: 2026-07-24, FH: 003
+  ✅ Success: Headers saved to headers/bf-3ugst/geavg.t00z.pgrb2a.0p50.f003.headers.txt
+  Messages: 85
+
+Processing [9/9]: geavg.t00z.pgrb2a.0p50.f006
+  URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006
+  Model: GEFS, Resolution: 0.50, Date: 2026-07-24, FH: 006
+  ✅ Success: Headers saved to headers/bf-3ugst/geavg.t00z.pgrb2a.0p50.f006.headers.txt
+  Messages: 85
+
+========================================
+Header Download Summary
+========================================
+Total candidates: 9
+Successful: 9
+Failed: 0
+Output directory: headers/bf-3ugst
+Manifest: headers/bf-3ugst/manifest.json
+Failed log: headers/bf-3ugst/failed_downloads.log
+
+✅ All header downloads completed successfully!
