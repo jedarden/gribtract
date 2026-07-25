@@ -71,7 +71,7 @@ Identified and verified two GFS Gaussian-grid fixtures in the corpus manifest:
 - ✅ URL accessible (HTTP 200 response)
 - ⚠️ Golden JSON missing - must be generated for differential testing
 
-## Accessibility Verification
+## Accessibility Verification (2026-07-25)
 
 Both fixtures are accessible via the standard cargo xtask fetch mechanism:
 
@@ -79,7 +79,17 @@ Both fixtures are accessible via the standard cargo xtask fetch mechanism:
 cargo xtask corpus list  # Shows both as "remote" with "present: yes"
 ```
 
-The files are already downloaded to `tests/corpus/large/` and verified via SHA256.
+**Fetch test verified:**
+```bash
+$ cargo xtask corpus fetch --fixture core_gaussian_gdt40
+[ok]      core_gaussian_gdt40 (already present, sha256 matches)
+
+corpus fetch: 0 downloaded, 1 already present, 0 failed
+```
+
+The files are already downloaded to `tests/corpus/large/` and verified via SHA256:
+- `flx.2024011500.grib2`: 11 MB, SHA256 ✅ `003a93bfc907c17be3b62891071260569c409a97a0d258e59460a0d013064397`
+- `gdas.t00z.sfluxgrbf000.grib2`: 122 MB, SHA256 ✅ `f0d63afe6f4ca96ecbd437f962596ec1017b2088569faaba139625b49c471d9e`
 
 ## Recommendation
 
