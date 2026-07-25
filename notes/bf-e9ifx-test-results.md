@@ -1,9 +1,13 @@
 # Test Results for Bead bf-e9ifx - Differential Test Verification
 
 ## Test Run Summary
-**Date:** 2026-07-25  
-**Test:** `cargo test -p gribtract differential`  
+**Date:** 2026-07-25 (re-verified)
+**Test:** `cargo test -p gribtract differential`
+**Test Duration:** 45.25 seconds
 **Result:** ❌ FAILED
+**Agreement:** 7/11 (63.6%)
+**Floor:** 80.0%
+**Gap:** -16.4 percentage points
 
 ## Overall Test Results
 ```
