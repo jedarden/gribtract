@@ -4,7 +4,7 @@
 
 Identified and verified two GFS Gaussian-grid fixtures in the corpus manifest:
 
-### 1. core_gaussian_gdt40 ✅ RECOMMENDED
+### 1. core_gaussian_gdt40 ❌ NOT ACCESSIBLE - DECODING NOT IMPLEMENTED
 
 **Fixture ID**: `core_gaussian_gdt40`
 
@@ -35,8 +35,9 @@ Identified and verified two GFS Gaussian-grid fixtures in the corpus manifest:
 - ✅ File present locally in tests/corpus/large/
 - ✅ Grid template confirmed via wgrib2: `grid_template=40`
 - ✅ Golden JSON available for differential testing
+- ❌ **gribtract DECODING NOT IMPLEMENTED** - fails with "decode not implemented" error
 
-### 2. gfs_gaussian_gdt40_t1534 ⚠️ NEEDS GOLDEN
+### 2. gfs_gaussian_gdt40_t1534 ✅ RECOMMENDED - FULLY FUNCTIONAL
 
 **Fixture ID**: `gfs_gaussian_gdt40_t1534`
 
@@ -57,15 +58,18 @@ Identified and verified two GFS Gaussian-grid fixtures in the corpus manifest:
 - Storage: remote (committed to gitignore, fetched by cargo xtask)
 - SHA256: `f0d63afe6f4ca96ecbd437f962596ec1017b2088569faaba139625b49c471d9e` ✅ VERIFIED
 
-**Golden JSON**: ❌ DOES NOT EXIST (needs generation)
+**Golden JSON**: ⚠️ DOES NOT EXIST (needs generation for differential testing)
 - Expected: `tests/corpus/golden/gfs_gaussian_gdt40_t1534.json`
 - Status: Must be generated before use in differential tests
+- Tools available: grib_dump, wgrib2, scripts/gen_golden.py
 
 **Verification**:
 - ✅ SHA256 hash matches manifest
 - ✅ File present locally in tests/corpus/large/
 - ✅ Grid template confirmed via wgrib2: `grid_template=40`
-- ❌ Golden JSON missing - cannot use for differential testing until generated
+- ✅ **gribtract DECODING WORKS** - successfully decodes all 54 fields with 4.7M points each
+- ✅ URL accessible (HTTP 200 response)
+- ⚠️ Golden JSON missing - must be generated for differential testing
 
 ## Accessibility Verification
 
@@ -79,15 +83,26 @@ The files are already downloaded to `tests/corpus/large/` and verified via SHA25
 
 ## Recommendation
 
-**Use `core_gaussian_gdt40` for GFS Gaussian-grid integration** because:
+**USE `gfs_gaussian_gdt40_t1534` for GFS Gaussian-grid integration** because:
 
-1. ✅ **Golden JSON exists** - Ready for immediate differential testing
-2. ✅ **Smaller footprint** - 10.5 MiB vs 122 MiB, faster for CI/CD
-3. ✅ **Good coverage** - 512x256 Gaussian grid with 131K points provides representative GDT 3.40 testing
-4. ✅ **Stable source** - CORe archive provides long-term Climate Data Record coverage (1950-present)
-5. ✅ **Verified** - All integrity checks pass, wgrib2 confirms GDT 3.40
+1. ✅ **DECODING WORKS** - gribtract successfully decodes all 54 fields (bead bf-1qia4 verified)
+2. ✅ **FILE ACCESSIBLE** - Both local copy and remote URL available
+3. ✅ **GDT 3.40 VERIFIED** - Confirmed by both gribtract and wgrib2
+4. ✅ **REAL-WORLD DATA** - Actual GDAS analysis file (not synthetic)
+5. ✅ **COMPREHENSIVE COVERAGE** - T1534 grid (4.7M points) provides high-resolution Gaussian grid testing
 
-The `gfs_gaussian_gdt40_t1534` fixture (T1534, 4.7M points) provides higher-resolution coverage but requires golden JSON generation before it can be used in differential testing.
+**DO NOT USE `core_gaussian_gdt40`** - gribtract decoding is not implemented for this CORe archive format (fails with "decode not implemented" error).
+
+**Next Steps for Integration:**
+
+1. **Generate Golden Reference** (required for differential testing):
+   ```bash
+   cargo run --bin gen_golden -- tests/corpus/large/gdas.t00z.sfluxgrbf000.grib2 > tests/corpus/golden/gfs_gaussian_gdt40_t1534.json
+   ```
+
+2. **Verify Golden Schema** - Ensure JSON matches golden schema structure
+
+3. **Automatic Test Integration** - Once golden exists, fixture will be automatically included in differential tests (already in manifest.json)
 
 ## Grid Verification (wgrib2)
 
@@ -109,10 +124,19 @@ Both confirmed as GDT 3.40 (Gaussian Latitude/Longitude grid) as expected.
 
 ## Conclusion
 
-**Fixture to integrate**: `core_gaussian_gdt40`
-- GRIB2 file: ✅ Present and verified
-- Golden JSON: ✅ Available (361 MB)
-- Grid type: ✅ GDT 3.40 Gaussian (512x256)
+**Fixture to integrate**: `gfs_gaussian_gdt40_t1534`
+- GRIB2 file: ✅ Present and verified (122 MB)
+- Golden JSON: ⚠️ DOES NOT EXIST - needs generation via scripts/gen_golden.py
+- Grid type: ✅ GDT 3.40 Gaussian T1534 (3072x1536, 4.7M points)
 - Accessibility: ✅ Fetchable via cargo xtask
+- gribtract support: ✅ FULLY FUNCTIONAL - all 54 fields decode correctly (verified bead bf-1qia4)
 
-The fixture is ready for integration into the differential test suite.
+**DO NOT USE `core_gaussian_gdt40`** - gribtract decoding not implemented (fails with "decode not implemented" error).
+
+## Updated Assessment (2026-07-25)
+
+Based on comprehensive verification of both fixtures:
+1. **core_gaussian_gdt40**: Has golden JSON but gribtract cannot decode it
+2. **gfs_gaussian_gdt40_t1534**: No golden JSON yet, but gribtract fully decodes all fields
+
+The correct choice is **`gfs_gaussian_gdt40_t1534`** for integration testing.
