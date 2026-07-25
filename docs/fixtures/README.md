@@ -5,7 +5,8 @@ This directory contains detailed reference documentation for GRIB2 fixtures used
 ## Available Documentation
 
 ### Grid Definition References
-- [GFS Gaussian-Grid Structure](gfs-gaussian-grid-structure.md) — Comprehensive documentation for GFS Gaussian Latitude/Longitude grids (GDT 3.40), including data structure schema, key components, and implementation details.
+- [GFS Fixtures — Complete Reference](gfs-fixtures-complete-reference.md) — Comprehensive reference for all GFS fixtures, including Gaussian grids (GDT 40), regular lat/lon grids (GDT 0), rotated lat/lon grids (GDT 1), data representation templates (DRT 0, 3), and parameter categories.
+- [GFS Gaussian-Grid Structure](gfs-gaussian-grid-structure.md) — Detailed documentation for GFS Gaussian Latitude/Longitude grids (GDT 3.40), including data structure schema, key components, and implementation details.
 
 ## Related Documentation
 
