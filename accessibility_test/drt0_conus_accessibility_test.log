@@ -1,0 +1,46 @@
+=== DRT=0 CONUS File Accessibility Test ===
+Date: Sat Jul 25 12:34:13 AM EDT 2026
+Testing ACTUAL DRT=0 files (RTMA/URMA)
+
+========================================
+Test 1/3: rtma2p5_20260724_t00z
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260724/rtma2p5.t00z.2dvaranl_ndfd.grb2_wexp
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200 (response time: 0.089s)
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes in 0.170s
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 2/3: rtma2p5_20260723_t12z
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260723/rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200 (response time: 0.131s)
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes in 0.255s
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 3/3: urma2p5_20260724_t00z
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/urma/prod/urma2p5.20260724/urma2p5.t00z.2dvaranl_ndfd.grb2_wexp
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200 (response time: 0.123s)
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes in 0.244s
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+SUMMARY
+========================================
+Total files tested: 3
+Successful: 0
+Failed: 3
+Success rate: 0.00%
+
+Results saved to: /home/coding/gribtract/accessibility_test/drt0_conus_accessibility_results.json
