@@ -1,0 +1,82 @@
+{
+  "test_date": "2026-07-25T00:28:13-04:00",
+  "files": [
+    {
+      "filename": "rtma2p5.t00z.2dvaranl_ndfd.grb2_wexp",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260724/rtma2p5.t00z.2dvaranl_ndfd.grb2_wexp",
+      "http_head": true,
+      "http_status": 200,
+      "downloadable": true,
+      "grib2_valid": false,
+      "drt_zero": false,
+      "error": "Invalid GRIB2 format"
+      "partial_size": 1048576
+    }
+    ,
+    {
+      "filename": "rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260723/rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp",
+      "http_head": true,
+      "http_status": 200,
+      "downloadable": true,
+      "grib2_valid": false,
+      "drt_zero": false,
+      "error": "Invalid GRIB2 format"
+      "partial_size": 1048576
+    }
+    ,
+    {
+      "filename": "urma2p5.t00z.2dvaranl_ndfd.grb2_wexp",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/urma/prod/urma2p5.20260724/urma2p5.t00z.2dvaranl_ndfd.grb2_wexp",
+      "http_head": true,
+      "http_status": 200,
+      "downloadable": true,
+      "grib2_valid": false,
+      "drt_zero": false,
+      "error": "Invalid GRIB2 format"
+      "partial_size": 1048576
+    }
+    ,
+    {
+      "filename": "rtma2p5.t06z.2dvaranl_ndfd.grb2_wexp",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260724/rtma2p5.t06z.2dvaranl_ndfd.grb2_wexp",
+      "http_head": true,
+      "http_status": 200,
+      "downloadable": true,
+      "grib2_valid": false,
+      "drt_zero": false,
+      "error": "Invalid GRIB2 format"
+      "partial_size": 1048576
+    }
+    ,
+    {
+      "filename": "rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260724/rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp",
+      "http_head": true,
+      "http_status": 200,
+      "downloadable": true,
+      "grib2_valid": false,
+      "drt_zero": false,
+      "error": "Invalid GRIB2 format"
+      "partial_size": 1048576
+    }
+    ,
+    {
+      "filename": "urma2p5.t06z.2dvaranl_ndfd.grb2_wexp",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/urma/prod/urma2p5.20260724/urma2p5.t06z.2dvaranl_ndfd.grb2_wexp",
+      "http_head": true,
+      "http_status": 200,
+      "downloadable": true,
+      "grib2_valid": false,
+      "drt_zero": false,
+      "error": "Invalid GRIB2 format"
+      "partial_size": 1048576
+    }
+  ]
+  "summary": {
+    "total_files": 6,
+    "successful": 0,
+    "failed": 6,
+    "success_rate": 0.00
+  }
+}

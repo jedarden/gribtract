@@ -1,0 +1,58 @@
+{
+  "test_date": "2026-07-25T00:28:39-04:00",
+  "files": [
+    {
+      "filename": "rtma2p5.t00z.2dvaranl_ndfd.grb2_wexp",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260724/rtma2p5.t00z.2dvaranl_ndfd.grb2_wexp",
+      "http_head": true,
+      "http_status": 200,
+      "http_time": 0.092450,
+      "local_file_exists": true,
+      "local_file_size": 84732284,
+      "grib2_valid": true,
+      "first_record": "1:0:d=2026072400:HGT:surface:anl:",
+      "drt_zero": true,
+      "packing_info": "1:0:packing=Grid point data - simple packing,s",
+      "accessible": true,
+      "notes": "File is accessible via HTTP and verified as DRT=0 simple packing"
+    }
+    ,
+    {
+      "filename": "rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260723/rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp",
+      "http_head": true,
+      "http_status": 200,
+      "http_time": 0.155477,
+      "local_file_exists": true,
+      "local_file_size": 83327921,
+      "grib2_valid": true,
+      "first_record": "1:0:d=2026072312:HGT:surface:anl:",
+      "drt_zero": true,
+      "packing_info": "1:0:packing=Grid point data - simple packing,s",
+      "accessible": true,
+      "notes": "File is accessible via HTTP and verified as DRT=0 simple packing"
+    }
+    ,
+    {
+      "filename": "urma2p5.t00z.2dvaranl_ndfd.grb2_wexp",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/urma/prod/urma2p5.20260724/urma2p5.t00z.2dvaranl_ndfd.grb2_wexp",
+      "http_head": true,
+      "http_status": 200,
+      "http_time": 0.095174,
+      "local_file_exists": true,
+      "local_file_size": 86894578,
+      "grib2_valid": true,
+      "first_record": "1:0:d=2026072400:HGT:surface:anl:",
+      "drt_zero": true,
+      "packing_info": "1:0:packing=Grid point data - simple packing,s",
+      "accessible": true,
+      "notes": "File is accessible via HTTP and verified as DRT=0 simple packing"
+    }
+  ]
+  "summary": {
+    "total_files": 3,
+    "successful": 3,
+    "failed": 0,
+    "success_rate": 100.00
+  }
+}

@@ -101,7 +101,8 @@ for i in "${!FILES[@]}"; do
             if command -v wgrib2 >/dev/null 2>&1; then
                 GRIB2_INFO=$(wgrib2 "$PARTIAL_FILE" 2>&1 | head -1 || echo "")
 
-                if echo "$GRIB2_INFO" | grep -q "GRIB"; then
+                # Check if wgrib2 produced valid record output (contains colon and "d=" pattern)
+                if echo "$GRIB2_INFO" | grep -qE "^[0-9]+:[0-9]+:d="; then
                     echo "  ✅ PASSED: Valid GRIB2 format detected" | tee -a "$LOG_FILE"
                     echo "      \"grib2_valid\": true," >> "$RESULTS_FILE"
                     echo "      \"grib2_info\": \"$(echo "$GRIB2_INFO" | sed 's/"/\\"/g')\"," >> "$RESULTS_FILE"

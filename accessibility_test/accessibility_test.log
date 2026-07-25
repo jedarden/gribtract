@@ -382,3 +382,188 @@ Downloadable: 7 (100.00%)
 Local valid GRIB2: 7 (100.00%)
 
 Results saved to: /home/coding/gribtract/accessibility_test/accessibility_results.json
+=== DRT=0 CONUS File Accessibility Test ===
+Date: Sat Jul 25 12:27:04 AM EDT 2026
+
+========================================
+Test 1/7: gfs_1p00_20260724_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 2/7: gfs_0p25_20260723_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 3/7: gefs_0p50_20260724_f000
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 4/7: gefs_0p50_20260724_f003
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 5/7: gfs_1p00_20260723_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 6/7: gfs_0p50_20260724_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 7/7: gefs_0p50_20260724_f006
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+SUMMARY
+========================================
+Total files tested: 7
+Successful: 0
+Failed: 7
+Success rate: %
+
+Results saved to: /home/coding/gribtract/accessibility_test/accessibility_results.json
+=== DRT=0 CONUS File Accessibility Test ===
+Date: Sat Jul 25 12:27:30 AM EDT 2026
+
+========================================
+Test 1/7: gfs_1p00_20260724_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ✅ PASSED: Valid GRIB2 format detected
+  ⚠️  WARNING: DRT=0 not confirmed in partial file
+
+========================================
+Test 2/7: gfs_0p25_20260723_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ✅ PASSED: Valid GRIB2 format detected
+  ⚠️  WARNING: DRT=0 not confirmed in partial file
+
+========================================
+Test 3/7: gefs_0p50_20260724_f000
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ✅ PASSED: Valid GRIB2 format detected
+  ⚠️  WARNING: DRT=0 not confirmed in partial file
+
+========================================
+Test 4/7: gefs_0p50_20260724_f003
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ✅ PASSED: Valid GRIB2 format detected
+  ⚠️  WARNING: DRT=0 not confirmed in partial file
+
+========================================
+Test 5/7: gfs_1p00_20260723_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ✅ PASSED: Valid GRIB2 format detected
+  ⚠️  WARNING: DRT=0 not confirmed in partial file
+
+========================================
+Test 6/7: gfs_0p50_20260724_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ✅ PASSED: Valid GRIB2 format detected
+  ⚠️  WARNING: DRT=0 not confirmed in partial file
+
+========================================
+Test 7/7: gefs_0p50_20260724_f006
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ✅ PASSED: Valid GRIB2 format detected
+  ⚠️  WARNING: DRT=0 not confirmed in partial file
+
+========================================
+SUMMARY
+========================================
+Total files tested: 7
+Successful: 7
+Failed: 0
+Success rate: %
+
+Results saved to: /home/coding/gribtract/accessibility_test/accessibility_results.json
