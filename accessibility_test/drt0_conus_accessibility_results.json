@@ -1,53 +1,179 @@
 {
-  "test_date": "2026-07-25T00:34:13-04:00",
-  "test_purpose": "Verify accessibility of actual DRT=0 CONUS files (RTMA/URMA)",
+  "test_date": "2026-07-25T00:36:38-04:00",
+  "test_purpose": "Verify accessibility of 7 verified DRT=0 CONUS files",
   "files": [
     {
-      "filename": "rtma2p5_20260724_t00z",
-      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260724/rtma2p5.t00z.2dvaranl_ndfd.grb2_wexp",
+      "filename": "gfs_1p00_20260724_f000.grib2",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "local_size": 42755881,
       "http_head": true,
       "http_status": 200,
-      "response_time": 0.089,
-      "downloadable": true,
-      "download_time": 0.170,
-      "grib2_valid": false,
-      "drt_zero": false,
-      "error": "Invalid GRIB2 format"
-      "partial_size": 1048576
+      "response_time": 0.139,
+      "auth_required": false,
+      "accessible": true,
+      "download_test": {
+        "downloaded": true,
+        "download_size": 5242880,
+        "download_time": 0.533,
+        "download_speed_mb_s": 9.38,
+        "valid_grib2": true,
+        "grib2_info": "1:0:d=2026072400:PRMSL:mean sea level:anl:",
+        "drt_zero": false,
+        "packing_info": "1:0:packing=Grid point data - complex packing and spatial differencing,c3"
+      }
     }
     ,
     {
-      "filename": "rtma2p5_20260723_t12z",
-      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260723/rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp",
+      "filename": "gfs_0p25_20260723_f000.grib2",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "local_size": 510275792,
       "http_head": true,
       "http_status": 200,
-      "response_time": 0.131,
-      "downloadable": true,
-      "download_time": 0.255,
-      "grib2_valid": false,
-      "drt_zero": false,
-      "error": "Invalid GRIB2 format"
-      "partial_size": 1048576
+      "response_time": 0.044,
+      "auth_required": false,
+      "accessible": true,
+      "download_test": {
+        "downloaded": true,
+        "download_size": 5242880,
+        "download_time": 0.542,
+        "download_speed_mb_s": 9.23,
+        "valid_grib2": true,
+        "grib2_info": "1:0:d=2026072300:PRMSL:mean sea level:anl:",
+        "drt_zero": false,
+        "packing_info": "1:0:packing=Grid point data - complex packing and spatial differencing,c3"
+      }
     }
     ,
     {
-      "filename": "urma2p5_20260724_t00z",
-      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/urma/prod/urma2p5.20260724/urma2p5.t00z.2dvaranl_ndfd.grb2_wexp",
+      "filename": "gefs_0p50_f000.grib2",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "local_size": 14272610,
       "http_head": true,
       "http_status": 200,
-      "response_time": 0.123,
-      "downloadable": true,
-      "download_time": 0.244,
-      "grib2_valid": false,
-      "drt_zero": false,
-      "error": "Invalid GRIB2 format"
-      "partial_size": 1048576
+      "response_time": 0.075,
+      "auth_required": false,
+      "accessible": true,
+      "download_test": {
+        "downloaded": true,
+        "download_size": 5242880,
+        "download_time": 0.643,
+        "download_speed_mb_s": 7.78,
+        "valid_grib2": true,
+        "grib2_info": "1:0:d=2026072400:HGT:10 mb:anl:ens mean",
+        "drt_zero": false,
+        "packing_info": "1:0:packing=Grid point data - complex packing and spatial differencing,c3"
+      }
+    }
+    ,
+    {
+      "filename": "gefs_0p50_f003.grib2",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "local_size": 15343992,
+      "http_head": true,
+      "http_status": 200,
+      "response_time": 0.080,
+      "auth_required": false,
+      "accessible": true,
+      "download_test": {
+        "downloaded": true,
+        "download_size": 5242880,
+        "download_time": 0.640,
+        "download_speed_mb_s": 7.81,
+        "valid_grib2": true,
+        "grib2_info": "1:0:d=2026072400:HGT:10 mb:3 hour fcst:ens mean",
+        "drt_zero": false,
+        "packing_info": "1:0:packing=Grid point data - complex packing and spatial differencing,c3"
+      }
+    }
+    ,
+    {
+      "filename": "gfs_1p00_20260723_f000.grib2",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "local_size": 42460488,
+      "http_head": true,
+      "http_status": 200,
+      "response_time": 0.172,
+      "auth_required": false,
+      "accessible": true,
+      "download_test": {
+        "downloaded": true,
+        "download_size": 5242880,
+        "download_time": 0.528,
+        "download_speed_mb_s": 9.47,
+        "valid_grib2": true,
+        "grib2_info": "1:0:d=2026072300:PRMSL:mean sea level:anl:",
+        "drt_zero": false,
+        "packing_info": "1:0:packing=Grid point data - complex packing and spatial differencing,c3"
+      }
+    }
+    ,
+    {
+      "filename": "gfs_0p50_20260724_f000.grib2",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "local_size": 152106356,
+      "http_head": true,
+      "http_status": 200,
+      "response_time": 0.045,
+      "auth_required": false,
+      "accessible": true,
+      "download_test": {
+        "downloaded": true,
+        "download_size": 5242880,
+        "download_time": 0.570,
+        "download_speed_mb_s": 8.77,
+        "valid_grib2": true,
+        "grib2_info": "1:0:d=2026072400:PRMSL:mean sea level:anl:",
+        "drt_zero": false,
+        "packing_info": "1:0:packing=Grid point data - complex packing and spatial differencing,c3"
+      }
+    }
+    ,
+    {
+      "filename": "gefs_0p50_f006.grib2",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "local_size": 14723500,
+      "http_head": true,
+      "http_status": 200,
+      "response_time": 0.083,
+      "auth_required": false,
+      "accessible": true,
+      "download_test": {
+        "downloaded": true,
+        "download_size": 5242880,
+        "download_time": 0.648,
+        "download_speed_mb_s": 7.72,
+        "valid_grib2": true,
+        "grib2_info": "1:0:d=2026072400:HGT:10 mb:6 hour fcst:ens mean",
+        "drt_zero": false,
+        "packing_info": "1:0:packing=Grid point data - complex packing and spatial differencing,c3"
+      }
     }
   ]
   "summary": {
-    "total_files": 3,
+    "total_files": 7,
     "successful": 0,
-    "failed": 3,
+    "failed": 0,
     "success_rate": 0.00
   }
 }
