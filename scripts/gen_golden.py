@@ -177,12 +177,12 @@ def transform_message_to_golden(message_data):
     forecast_offset = data.get('forecastTime', 0)
 
     # Level info
-    level_type1 = data.get('typeOfFirstFixedSurface', 255)
-    level_scale1 = data.get('scaleFactorOfFirstFixedSurface', 0)
-    level_scaled1 = data.get('scaledValueOfFirstFixedSurface', 0)
-    level_type2 = data.get('typeOfSecondFixedSurface', 255)
-    level_scale2 = data.get('scaleFactorOfSecondFixedSurface', 0)
-    level_scaled2 = data.get('scaledValueOfSecondFixedSurface', 0)
+    level_type1 = data.get('typeOfFirstFixedSurface', 255) or 255
+    level_scale1 = data.get('scaleFactorOfFirstFixedSurface', 0) or 0
+    level_scaled1 = data.get('scaledValueOfFirstFixedSurface', 0) or 0
+    level_type2 = data.get('typeOfSecondFixedSurface', 255) or 255
+    level_scale2 = data.get('scaleFactorOfSecondFixedSurface', 0) or 0
+    level_scaled2 = data.get('scaledValueOfSecondFixedSurface', 0) or 0
 
     # Grid info
     gdt_template = data.get('gridDefinitionTemplateNumber', 0)

@@ -134,3 +134,27 @@ fn regenerate_mrms_carib_refl_drt41() {
 fn regenerate_gfs_gaussian_gdt40_t1534() {
     generate_golden("gfs_gaussian_gdt40_t1534").expect("should generate golden");
 }
+
+#[test]
+#[ignore] // Manual use only
+fn regenerate_conus_drt0() {
+    generate_golden("conus_drt0").expect("should generate golden");
+}
+
+#[test]
+#[ignore] // Manual use only
+fn regenerate_pdt1_ensemble_3x2() {
+    generate_golden("pdt1_ensemble_3x2").expect("should generate golden");
+}
+
+#[test]
+#[ignore] // Manual use only
+fn regenerate_gefs_ensemble_mean_pdt48() {
+    generate_golden("gefs_ensemble_mean_pdt48").expect("should generate golden");
+}
+
+#[test]
+#[ignore] // Manual use only
+fn regenerate_gefs_member01_pdt41() {
+    generate_golden("gefs_member01_pdt41").expect("should generate golden");
+}
