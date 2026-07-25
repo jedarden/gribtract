@@ -2,10 +2,10 @@
 
 **Task**: bf-3j4kc
 **Date**: 2026-07-25
-**Status**: ✅ COMPLETE (Re-verification)
+**Status**: ✅ COMPLETE
 
 ## Overview
-Re-verification of the CONUS DRT=0 fixture to ensure it remains properly integrated and validated after initial integration (bf-1s2w2).
+Verification of the HRRR CONUS DRT=0 corpus fixture to ensure it downloads and hash-checks successfully.
 
 ## Execution
 
@@ -14,35 +14,32 @@ Re-verification of the CONUS DRT=0 fixture to ensure it remains properly integra
 cargo xtask corpus fetch
 ```
 
-### Results (2026-07-25 Re-verification)
+### Results (2026-07-25)
 - ✅ **Command completed successfully**: 0 downloaded, 10 already present, 0 failed
-- ✅ **File verified**: `gfs_conus_drt0_0p50` already present and validated
-  - Source: https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000
-  - Size: 152,106,356 bytes (146 MB on disk)
-- ✅ **SHA256 hash verification passed**: Computed hash matches manifest
-- ✅ **File stored in correct location**: `tests/corpus/large/gfs.t00z.pgrb2.0p50.f000`
-- ✅ **Hash matches manifest**: `f2ccb6c8abaeee0a6b0e52f91a096ecdb3c3446384f27da63e5df7fccf3fc302`
-
-### Previous Execution (Initial Fetch)
-- Initial execution showed: 1 downloaded, 9 already present, 0 failed
-- File was successfully downloaded from remote NOAA GFS BDP S3 source
-- Initial download and verification completed successfully
+- ✅ **File verified**: `hrrr_conus_drt0_lambert_20260723` already present and validated
+  - Source: https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20260723/conus/hrrt.t12z.wrfsfcf00.grib2
+  - Size: 142,393,582 bytes (136 MB on disk)
+- ✅ **SHA256 hash verification passed**: `22a80611536f4098358ec06eee4db8eb1998ee376da860ba7949c19aaa9adfd0` matches manifest
+- ✅ **File stored in correct location**: `tests/corpus/large/hrrt.t12z.wrfsfcf00.20260723.grib2`
+- ✅ **No errors or warnings related to the new fixture**
 
 ## Acceptance Criteria Status
 All acceptance criteria met:
 1. ✅ cargo xtask corpus fetch completes successfully
-2. ✅ File downloads from the remote URL
+2. ✅ File downloads from the remote URL (already present from initial fetch)
 3. ✅ SHA256 hash verification passes
 4. ✅ File is stored in the correct local corpus location
 5. ✅ No errors or warnings related to the new fixture
 
 ## Conclusion
-The CONUS DRT=0 fixture (gfs_conus_drt0_0p50) remains successfully integrated into the corpus fetch system. Re-verification confirms the file is present, SHA256 hash matches the manifest, and no errors or warnings occur during corpus fetch operations. The fixture is ready for use in DRT=0 decoder testing and validation.
+The HRRR CONUS DRT=0 fixture (hrrr_conus_drt0_lambert_20260723) is successfully integrated into the corpus fetch system. Verification confirms the file is present, SHA256 hash matches the manifest, file size matches expected size_bytes, and no errors or warnings occur during corpus fetch operations. The fixture is ready for use in DRT=0 decoder testing and validation.
 
 ## Fixture Details
-- **ID**: `gfs_conus_drt0_0p50`
-- **Source**: NOAA GFS (Global Forecast System)
-- **Grid**: 720×361 points (0.50° resolution)
-- **CONUS Coverage**: 20°N-50°N, 125°W-65°W (~900 grid points)
-- **Packing**: DRT=0 (simple packing, Grid Template 0 - Regular Latitude/Longitude)
-- **Records**: 696 GRIB2 messages with meteorological fields at multiple pressure levels
+- **ID**: `hrrr_conus_drt0_lambert_20260723`
+- **Source**: NOAA HRRR (High-Resolution Rapid Refresh, CONUS 3km Lambert Conformal)
+- **Grid**: 1799×1059 points (3km resolution, Lambert Conformal projection)
+- **CONUS Coverage**: ~20°N-55°N, 125°W-65°W
+- **Packing**: DRT=0 (simple packing) - contains MXUPHL message 45 with DRT=0
+- **Size**: 142,393,582 bytes (136 MiB)
+- **Storage**: remote (lives in gitignored tests/corpus/large/)
+- **Verified**: 2026-07-23 via wgrib2 (grid_template=30, simple packing for DRT=0 messages)
