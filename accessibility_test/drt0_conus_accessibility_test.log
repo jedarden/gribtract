@@ -204,3 +204,163 @@ Failed: 0
 Success rate: 0.00%
 
 Results saved to: /home/coding/gribtract/accessibility_test/drt0_conus_accessibility_results.json
+=== DRT=0 CONUS File Accessibility Test ===
+Date: Sat Jul 25 12:38:01 AM EDT 2026
+Testing 7 verified DRT=0 CONUS files (GFS/GEFS)
+
+========================================
+Test 1/7: gfs_1p00_20260724_f000.grib2
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2
+
+Test 1: Local file verification...
+  ✓ Local file exists: 42755881 bytes
+  ✓ Local file is valid GRIB2
+Test 2: HTTP HEAD request...
+  ✓ PASSED: HTTP 200 (response time: 0.062s)
+Test 3: Authentication check...
+  ✓ No authentication required
+Test 4: Download test (first 5MB)...
+  ✓ Downloaded 5242880 bytes in 0.533s
+    Speed: 9.38 MB/s
+Test 5: GRIB2 format validation...
+  ✓ Valid GRIB2 format detected
+    First record: 1:0:d=2026072400:PRMSL:mean sea level:anl:
+Test 6: DRT=0 (Simple Packing) verification...
+  ✗ DRT=0 not confirmed
+
+========================================
+Test 2/7: gfs_0p25_20260723_f000.grib2
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2
+
+Test 1: Local file verification...
+  ✓ Local file exists: 510275792 bytes
+  ✓ Local file is valid GRIB2
+Test 2: HTTP HEAD request...
+  ✓ PASSED: HTTP 200 (response time: 0.041s)
+Test 3: Authentication check...
+  ✓ No authentication required
+Test 4: Download test (first 5MB)...
+  ✓ Downloaded 5242880 bytes in 0.525s
+    Speed: 9.52 MB/s
+Test 5: GRIB2 format validation...
+  ✓ Valid GRIB2 format detected
+    First record: 1:0:d=2026072300:PRMSL:mean sea level:anl:
+Test 6: DRT=0 (Simple Packing) verification...
+  ✗ DRT=0 not confirmed
+
+========================================
+Test 3/7: gefs_0p50_f000.grib2
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000
+Local: /home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2
+
+Test 1: Local file verification...
+  ✓ Local file exists: 14272610 bytes
+  ✓ Local file is valid GRIB2
+Test 2: HTTP HEAD request...
+  ✓ PASSED: HTTP 200 (response time: 0.077s)
+Test 3: Authentication check...
+  ✓ No authentication required
+Test 4: Download test (first 5MB)...
+  ✓ Downloaded 5242880 bytes in 0.600s
+    Speed: 8.33 MB/s
+Test 5: GRIB2 format validation...
+  ✓ Valid GRIB2 format detected
+    First record: 1:0:d=2026072400:HGT:10 mb:anl:ens mean
+Test 6: DRT=0 (Simple Packing) verification...
+  ✗ DRT=0 not confirmed
+
+========================================
+Test 4/7: gefs_0p50_f003.grib2
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003
+Local: /home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2
+
+Test 1: Local file verification...
+  ✓ Local file exists: 15343992 bytes
+  ✓ Local file is valid GRIB2
+Test 2: HTTP HEAD request...
+  ✓ PASSED: HTTP 200 (response time: 0.069s)
+Test 3: Authentication check...
+  ✓ No authentication required
+Test 4: Download test (first 5MB)...
+  ✓ Downloaded 5242880 bytes in 0.622s
+    Speed: 8.04 MB/s
+Test 5: GRIB2 format validation...
+  ✓ Valid GRIB2 format detected
+    First record: 1:0:d=2026072400:HGT:10 mb:3 hour fcst:ens mean
+Test 6: DRT=0 (Simple Packing) verification...
+  ✗ DRT=0 not confirmed
+
+========================================
+Test 5/7: gfs_1p00_20260723_f000.grib2
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2
+
+Test 1: Local file verification...
+  ✓ Local file exists: 42460488 bytes
+  ✓ Local file is valid GRIB2
+Test 2: HTTP HEAD request...
+  ✓ PASSED: HTTP 200 (response time: 0.044s)
+Test 3: Authentication check...
+  ✓ No authentication required
+Test 4: Download test (first 5MB)...
+  ✓ Downloaded 5242880 bytes in 0.547s
+    Speed: 9.14 MB/s
+Test 5: GRIB2 format validation...
+  ✓ Valid GRIB2 format detected
+    First record: 1:0:d=2026072300:PRMSL:mean sea level:anl:
+Test 6: DRT=0 (Simple Packing) verification...
+  ✗ DRT=0 not confirmed
+
+========================================
+Test 6/7: gfs_0p50_20260724_f000.grib2
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2
+
+Test 1: Local file verification...
+  ✓ Local file exists: 152106356 bytes
+  ✓ Local file is valid GRIB2
+Test 2: HTTP HEAD request...
+  ✓ PASSED: HTTP 200 (response time: 0.046s)
+Test 3: Authentication check...
+  ✓ No authentication required
+Test 4: Download test (first 5MB)...
+  ✓ Downloaded 5242880 bytes in 0.595s
+    Speed: 8.40 MB/s
+Test 5: GRIB2 format validation...
+  ✓ Valid GRIB2 format detected
+    First record: 1:0:d=2026072400:PRMSL:mean sea level:anl:
+Test 6: DRT=0 (Simple Packing) verification...
+  ✗ DRT=0 not confirmed
+
+========================================
+Test 7/7: gefs_0p50_f006.grib2
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006
+Local: /home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2
+
+Test 1: Local file verification...
+  ✓ Local file exists: 14723500 bytes
+  ✓ Local file is valid GRIB2
+Test 2: HTTP HEAD request...
+  ✓ PASSED: HTTP 200 (response time: 0.072s)
+Test 3: Authentication check...
+  ✓ No authentication required
+Test 4: Download test (first 5MB)...
+  ✓ Downloaded 5242880 bytes in 0.619s
+    Speed: 8.08 MB/s
+Test 5: GRIB2 format validation...
+  ✓ Valid GRIB2 format detected
+    First record: 1:0:d=2026072400:HGT:10 mb:6 hour fcst:ens mean
+Test 6: DRT=0 (Simple Packing) verification...
+  ✗ DRT=0 not confirmed
+
+========================================
+SUMMARY
+========================================
+Total files tested: 7
+Successful: 0
+Failed: 0
+Success rate: 0.00%
+
+Results saved to: /home/coding/gribtract/accessibility_test/drt0_conus_accessibility_results.json
