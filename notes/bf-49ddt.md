@@ -61,16 +61,18 @@ Use only if:
 
 ## Accessibility Verification
 
-Both fixtures are accessible via the corpus fetch mechanism:
+Both fixtures are accessible via the corpus fetch mechanism and verified with SHA256:
 
 ```bash
 # core_gaussian_gdt40
 cargo xtask corpus fetch --fixture core_gaussian_gdt40
 # Result: [ok] core_gaussian_gdt40 (already present, sha256 matches)
+# SHA256 verified: 003a93bfc907c17be3b62891071260569c409a97a0d258e59460a0d013064397
 
 # gfs_gaussian_gdt40_t1534
 cargo xtask corpus fetch --fixture gfs_gaussian_gdt40_t1534
 # Result: [ok] gfs_gaussian_gdt40_t1534 (already present, sha256 matches)
+# SHA256 verified: f0d63afe6f4ca96ecbd437f962596ec1017b2088569faaba139625b49c471d9e
 ```
 
 ## Golden JSON Status
@@ -80,7 +82,21 @@ cargo xtask corpus fetch --fixture gfs_gaussian_gdt40_t1534
 
 ## Grid Template Verification
 
-Both fixtures use GDT 3.40 (Gaussian Latitude/Longitude grid):
+Both fixtures use GDT 3.40 (Gaussian Latitude/Longitude grid) - verified with wgrib2:
+
+```bash
+# core_gaussian_gdt40
+wgrib2 -grid tests/corpus/large/flx.2024011500.grib2
+# Result: grid_template=40:winds(N/S): Gaussian grid: (512 x 256) 
+#         number of latitudes between pole-equator=128 #points=131072
+
+# gfs_gaussian_gdt40_t1534  
+wgrib2 -grid tests/corpus/large/gdas.t00z.sfluxgrbf000.grib2
+# Result: grid_template=40:winds(N/S): Gaussian grid: (3072 x 1536)
+#         number of latitudes between pole-equator=768 #points=4718592
+```
+
+Grid details:
 - `core_gaussian_gdt40`: 512 x 256, N=128 (number of parallels between pole and equator)
 - `gfs_gaussian_gdt40_t1534`: 3072 x 1536, N=768 (number of parallels between pole and equator)
 
