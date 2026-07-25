@@ -28,7 +28,7 @@ running 1 test
 test differential_coverage_report has been running for over 60 seconds
 test differential_coverage_report ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 65.63s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 65.88s
 
 
 running 0 tests
