@@ -10,10 +10,10 @@ use gribtract_testutil::diff::{compare_fixture, CoverageReport};
 use gribtract_testutil::golden;
 
 /// Minimum acceptable agreement percentage. Raise this as templates are implemented.
-/// Ratcheted to 80.0% after adding GEFS ensemble fixtures (bf-124k):
-/// - gefs_ensemble_mean_pdt48: PDT 4.8 decode not implemented yet
-/// - gefs_member01_pdt41: DRT mismatches (gribtract reads DRT=3, golden has DRT=0)
-const AGREEMENT_FLOOR: f64 = 80.0;
+/// Ratcheted to 84.0% after PDT ensemble improvements (bf-3nohy):
+/// - GDT=30 PDT=8 DRT=3: 9/18 matches
+/// - GDT=30 PDT=0 DRT=3: 187/374 matches (partial)
+const AGREEMENT_FLOOR: f64 = 84.0;
 
 #[test]
 fn differential_coverage_report() {
