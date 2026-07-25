@@ -1,40 +1,86 @@
-# Bead bf-5ysjo: GFS Gaussian-grid fixture integration
+# GFS Gaussian-grid Fixture Integration — Verification
 
-## Status: COMPLETED
+## Task: Add GFS Gaussian-grid fixture to differential.rs
 
-Work completed in commit `09270c6c765390c396f235edd8a8317bfac878c7`.
+**Status:** ✅ **ALREADY INTEGRATED** — No code changes required
 
-## Summary
+## Verification Summary
 
-Added GFS Gaussian-grid diagnostic test following the same pattern as existing fixtures (e.g., PDT1 ensemble).
+The GFS Gaussian-grid fixture (`core_gaussian_gdt40`) is **fully integrated** into the differential testing suite. All components are in place:
 
-## Implementation Details
+### 1. Manifest Entry ✓
+- **ID:** `core_gaussian_gdt40`
+- **Path:** `large/flx.2024011500.grib2`
+- **Storage:** `remote` (fetched from NOAA CORe archive)
+- **Manifest:** `tests/corpus/manifest.json`
 
-- Created `crates/gribtract/tests/diagnose_gfs_gaussian.rs` 
-- Test name: `diagnose_core_gaussian_gdt40`
-- Follows pattern from `diagnose_pdt1_ensemble.rs`
-- Tests the `core_gaussian_gdt40` fixture from manifest.json
+### 2. Golden Reference File ✓
+- **Path:** `tests/corpus/golden/core_gaussian_gdt40.json`
+- **Size:** 361 MB
+- **Generated:** `scripts/gen_golden.py` (bead bf-5lybk)
+- **Status:** Valid JSON matching golden schema
 
-## Acceptance Criteria Met
+### 3. Raw GRIB Fixture File ✓
+- **Path:** `tests/corpus/large/flx.2024011500.grib2`
+- **Size:** 11 MB
+- **SHA256:** `003a93bfc907c17be3b62891071260569c409a97a0d258e59460a0d013064397`
+- **Source:** NOAA NWS NCEP CORe archive (Google Cloud Storage)
 
-✅ Add GFS Gaussian-grid test case to tests/differential.rs (implemented as separate diagnostic test file following established pattern)
-✅ Follow the same pattern as existing fixtures (e.g., PDT1 ensemble)
-✅ Ensure proper test naming and organization
-✅ Code compiles without errors
+### 4. Diagnostic Test ✓
+- **Path:** `crates/gribtract/tests/diagnose_gfs_gaussian.rs`
+- **Function:** `diagnose_core_gaussian_gdt40()`
+- **Purpose:** Detailed mismatch diagnostics for Gaussian grid fixture
+- **Pattern:** Follows same structure as PDT1 ensemble diagnostic
 
-## Current Behavior
+### 5. Differential Test Integration ✓
+- **Path:** `crates/gribtract/tests/differential.rs`
+- **Mechanism:** `corpus::list_fixtures()` automatically includes ALL fixtures from manifest
+- **Test Output:** `[decode-err] core_gaussian_gdt40 — decode not implemented`
+- **Confirmation:** Fixture is properly participating in differential harness
 
-The test compiles and runs successfully, but currently fails with "Decode error: decode not implemented" because GDT 3.40 (Gaussian Latitude/Longitude grid) decoding is not yet implemented in gribtract.
+### 6. Code Compilation ✓
+- **Command:** `cargo check --tests`
+- **Result:** Passes without errors
 
-This is expected and documented in the commit message:
-> "The test will pass once GDT 3.40 (Gaussian Latitude/Longitude grid) decoding is implemented. For now, it provides clear decode error messages and debugging structure for future development."
+## How It Works
 
-## Fixtures
+The differential.rs test uses a **manifest-driven approach**:
 
-GFS Gaussian-grid fixtures are already integrated into the differential suite via manifest.json:
-- `core_gaussian_gdt40` - CORe 3-hourly flux file with GDT 3.40
-- `gfs_gaussian_gdt40_t1534` - GDAS surface flux analysis with GDT 3.40
+```rust
+let fixtures = corpus::list_fixtures().expect("corpus manifest must load");
+for entry in &fixtures {
+    // Automatically tests ALL fixtures in manifest
+}
+```
 
-## Related Work
+This means:
+- **No individual test cases** need to be added to differential.rs
+- **All fixtures** in manifest.json are automatically tested
+- **New fixtures** are added via manifest.json, not code changes
 
-This test provides diagnostic capabilities for future GDT 3.40 implementation, similar to how other diagnostic tests help with template development.
+## Current State
+
+The `core_gaussian_gdt40` fixture is:
+- ✅ Registered in manifest
+- ✅ Golden reference generated
+- ✅ Raw GRIB file fetched locally
+- ✅ Participating in differential test harness
+- ✅ Diagnostic test available
+
+**Note:** The fixture currently shows `[decode-err]` because GDT 3.40 (Gaussian Latitude/Longitude grid) decoding is not yet implemented in gribtract. This is expected — the integration is complete, but the decoder support is pending.
+
+## Acceptance Criteria — All Met ✅
+
+- ✅ GFS Gaussian-grid fixture integrated into differential test suite
+- ✅ Follows same pattern as existing fixtures (manifest-based, like PDT1 ensemble)
+- ✅ Proper test naming (`core_gaussian_gdt40`) and organization
+- ✅ Code compiles without errors
+
+## Related Beads
+
+- **bf-5lybk:** Generate GFS Gaussian-grid golden outputs (COMPLETED)
+- **bf-5ysjo:** Add GFS Gaussian-grid fixture to differential.rs (THIS TASK)
+
+## Conclusion
+
+**Integration is complete.** The GFS Gaussian-grid fixture is fully integrated into the differential testing suite via the existing manifest-driven architecture. No code changes to differential.rs were required — the fixture was already properly configured and is actively participating in the test harness.
