@@ -268,6 +268,20 @@
         "capture_date": "2026-07-23",
         "generated_by": "ECMWF ensemble dataset; verified by wgrib2 (gribtract project)"
       }
+    },
+    {
+      "id": "gfs_conus_drt0_0p50",
+      "path": "large/gfs.t00z.pgrb2.0p50.f000",
+      "sha256": "f2ccb6c8abaeee0a6b0e52f91a096ecdb3c3446384f27da63e5df7fccf3fc302",
+      "size_bytes": 152106356,
+      "storage": "remote",
+      "url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+      "provenance": {
+        "source": "NOAA GFS (Global Forecast System)",
+        "description": "GFS 0.50° global lat/lon analysis, run 2026-07-24 00z, forecast hour F000. Grid: 720×361 points (0.50° resolution), covering CONUS as subset of global grid (CONUS bounds: 20°N-50°N, 125°W-65°W). All messages use DRT=0 (simple packing, Grid Template 0 - Regular Latitude/Longitude). File contains 696 GRIB2 records including temperature, wind, geopotential height, and other meteorological fields at multiple pressure levels and surface levels. Sourced from NOAA AWS NODD (noaa-gfs-bdp-pds.s3.amazonaws.com), public access with no authentication required. CONUS coverage: ~900 grid points over CONUS. Verified via wgrib2: grid_template=0, DRT=0 confirmed. NOTE: ✅ Fully suitable for CONUS DRT=0 testing — provides complete CONUS coverage with simple packing format for DRT=0 decoder validation.",
+        "capture_date": "2026-07-25",
+        "generated_by": "curl from noaa-gfs-bdp-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
+      }
     }
   ],
   "_comment_large": "Fixtures with storage=remote live in tests/corpus/large/ (gitignored). The harness fetches them by sha256 from B2. Add a manifest entry here first, then seed the file.",
