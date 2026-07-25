@@ -1,55 +1,47 @@
-# GFS Gaussian-grid Fixture Verification
+# BF-4gtjr: Verify GFS Gaussian-grid Fixture in Test Output
 
-**Task:** Verify GFS Gaussian-grid fixture appears in differential test output
-**Date:** 2026-07-25
-**Bead:** bf-4gtjr
+## Task
+Verify that the new GFS Gaussian-grid fixture is present in the differential test output.
 
 ## Verification Results
 
-✅ **CONFIRMED**: GFS Gaussian-grid fixture `gfs_gaussian_gdt40_t1534` appears in differential test output
-
-## Evidence
-
-### 1. Fixture present in corpus manifest
+### ✅ Fixture Present in Corpus
+The `gfs_gaussian_gdt40_t1534` fixture is properly registered in the corpus manifest:
 ```bash
-cargo xtask corpus list
-```
-Shows `gfs_gaussian_gdt40_t1534` as a remote fixture (present locally).
-
-### 2. Fixture appears in differential test coverage report
-The differential test output shows:
-```
-Fixtures : 21 total (13 comparable, 6 no-golden, 2 skipped-feature, 0 skipped-remote-not-fetched)
+$ cargo xtask corpus list | grep gfs_gaussian
+gfs_gaussian_gdt40_t1534        remote      yes         /home/coding/gribtract/tests/corpus/large/gdas.t00z.sfluxgrbf000.grib2
 ```
 
-The 6 fixtures without golden references are:
-1. `ecmwf_ensemble_pdt41_enso`
-2. `gfs_conus_drt0_0p50`
-3. **`gfs_gaussian_gdt40_t1534`** ← GFS Gaussian-grid fixture
-4. `hrrr_conus_drt0_lambert_20260723`
-5. `hrrr_conus_drt3_lambert`
-6. `rotated_latlon_5x5`
-
-### 3. Fixture properly loaded from manifest
-- Fixture ID `gfs_gaussian_gdt40_t1534` is recognized by the corpus system
-- Storage type: `remote` (fetched locally)
+### ✅ GRIB Data File Available
+The fixture's GRIB file is present locally:
 - Path: `/home/coding/gribtract/tests/corpus/large/gdas.t00z.sfluxgrbf000.grib2`
-- Status: `present` in corpus
+- Size: 122M
+- Status: Successfully fetched
 
-## Test Execution Summary
+### ✅ Fixture Loaded in Differential Test
+The differential test suite recognizes and processes the fixture:
+```
+Fixtures : 21 total  (13 comparable, 6 no-golden, 2 skipped-feature, 0 skipped-remote-not-fetched)
+```
 
-The differential test `differential_coverage_report` successfully:
-- Loaded all 21 fixtures from the corpus manifest
-- Processed `gfs_gaussian_gdt40_t1534` (counted in "6 no-golden" since it lacks a golden reference)
-- Completed without errors
-- Achieved 84.6% agreement rate (above 84.0% floor)
+The `gfs_gaussian_gdt40_t1534` fixture is counted among the 21 total fixtures. It appears in the "no-golden" category (6 fixtures) because the golden reference JSON has not yet been generated - this is expected behavior.
 
-## Acceptance Criteria Met
+### Test Output
+```
+=== Differential Harness Coverage ===
+Fixtures : 21 total  (13 comparable, 6 no-golden, 2 skipped-feature, 0 skipped-remote-not-fetched)
+  matched      : 11
+  decode errors: 1
+Agreement: 11/13 (84.6%)
+```
 
-- ✅ Reviewed test output from previous step
-- ✅ Confirmed 'GFS Gaussian-grid' fixture (`gfs_gaussian_gdt40_t1534`) appears in output
-- ✅ Fixture is properly loaded from manifest
+## Conclusion
+✅ **Verification Complete**
 
-## Notes
+The GFS Gaussian-grid fixture (`gfs_gaussian_gdt40_t1534`) is:
+1. Properly registered in the corpus manifest
+2. Successfully loaded and recognized by the differential test suite
+3. Included in the fixture count (21 total fixtures)
+4. Marked as "no-golden" pending golden reference generation
 
-The fixture is counted as "no-golden" because there is no corresponding golden reference file at `tests/corpus/golden/gfs_gaussian_gdt40_t1534.json`. This is expected behavior - the test reports fixtures without golden references separately from fixtures that are actively compared.
+The fixture integration is working correctly. The next step would be to generate the golden reference file for this fixture to move it from "no-golden" to "comparable" status.
