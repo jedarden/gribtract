@@ -36,3 +36,6 @@ GDT=30 PDT=8 DRT=3: 9/9
 
 ## Notes
 This establishes the baseline after adding the GFS Gaussian-grid fixture to the manifest (from bf-dag1f). The 91.7% agreement rate indicates strong consistency between the live GRIB decoding and the golden JSON fixtures. The 1 decode error and 7 no-golden fixtures represent areas for improvement in future work.
+
+## Push Status
+Commit created locally but push failed due to HTTP 413 (Payload Too Large) error. This is due to 82 accumulated commits including large golden JSON files (1.1G, 361M, 434M) that exceed the server's push size limit. The commit is available locally and will be pushed when the large file issue is resolved.
