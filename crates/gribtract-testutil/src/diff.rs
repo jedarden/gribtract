@@ -162,11 +162,20 @@ pub fn compare_field(actual: &Field, golden: &GoldenField) -> FieldResult {
 
     // Level
     check_meta!("level.type1", actual.level.type1, golden.level.type1);
-    check_meta!("level.scale_factor1", actual.level.scale_factor1, golden.level.scale_factor1);
-    check_meta!("level.scaled_value1", actual.level.scaled_value1, golden.level.scaled_value1);
+    // Only compare scale_factor and scaled_value if golden has a value
+    if let Some(golden_sf1) = golden.level.scale_factor1 {
+        check_meta!("level.scale_factor1", actual.level.scale_factor1, golden_sf1);
+    }
+    if let Some(golden_sv1) = golden.level.scaled_value1 {
+        check_meta!("level.scaled_value1", actual.level.scaled_value1, golden_sv1);
+    }
     check_meta!("level.type2", actual.level.type2, golden.level.type2);
-    check_meta!("level.scale_factor2", actual.level.scale_factor2, golden.level.scale_factor2);
-    check_meta!("level.scaled_value2", actual.level.scaled_value2, golden.level.scaled_value2);
+    if let Some(golden_sf2) = golden.level.scale_factor2 {
+        check_meta!("level.scale_factor2", actual.level.scale_factor2, golden_sf2);
+    }
+    if let Some(golden_sv2) = golden.level.scaled_value2 {
+        check_meta!("level.scaled_value2", actual.level.scaled_value2, golden_sv2);
+    }
 
     // Ensemble
     match (&actual.ensemble, &golden.ensemble) {
@@ -377,8 +386,8 @@ mod tests {
                 forecast_offset: 0,
             },
             level: GoldenLevel {
-                type1: 103, scale_factor1: 0, scaled_value1: 2,
-                type2: 255, scale_factor2: 0, scaled_value2: 0,
+                type1: 103, scale_factor1: Some(0), scaled_value1: Some(2),
+                type2: 255, scale_factor2: Some(0), scaled_value2: Some(0),
             },
             ensemble: None,
             grid: GoldenGridDefinition {

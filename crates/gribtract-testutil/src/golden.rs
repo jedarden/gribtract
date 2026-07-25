@@ -40,11 +40,15 @@ pub struct GoldenForecastTime {
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct GoldenLevel {
     pub type1: u8,
-    pub scale_factor1: i8,
-    pub scaled_value1: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scale_factor1: Option<i8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scaled_value1: Option<i32>,
     pub type2: u8,
-    pub scale_factor2: i8,
-    pub scaled_value2: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scale_factor2: Option<i8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scaled_value2: Option<i32>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]

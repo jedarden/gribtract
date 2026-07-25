@@ -1,0 +1,109 @@
+{
+  "test_date": "2026-07-25T00:22:53-04:00",
+  "files": [
+    {
+      "filename": "gfs_1p00_20260724_f000",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2",
+      "accessible": true,
+      "http_status": "200",
+      "can_download": true,
+      "local_exists": true,
+      "local_size": 42755881,
+      "grib2_valid": true,
+      "drt_zero": false,
+      "errors": []
+    }
+    ,
+    {
+      "filename": "gfs_0p25_20260723_f000",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2",
+      "accessible": true,
+      "http_status": "200",
+      "can_download": true,
+      "local_exists": true,
+      "local_size": 510275792,
+      "grib2_valid": true,
+      "drt_zero": false,
+      "errors": []
+    }
+    ,
+    {
+      "filename": "gefs_0p50_20260724_f000",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2",
+      "accessible": true,
+      "http_status": "200",
+      "can_download": true,
+      "local_exists": true,
+      "local_size": 14272610,
+      "grib2_valid": true,
+      "drt_zero": false,
+      "errors": []
+    }
+    ,
+    {
+      "filename": "gefs_0p50_20260724_f003",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2",
+      "accessible": true,
+      "http_status": "200",
+      "can_download": true,
+      "local_exists": true,
+      "local_size": 15343992,
+      "grib2_valid": true,
+      "drt_zero": false,
+      "errors": []
+    }
+    ,
+    {
+      "filename": "gfs_1p00_20260723_f000",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2",
+      "accessible": true,
+      "http_status": "200",
+      "can_download": true,
+      "local_exists": true,
+      "local_size": 42460488,
+      "grib2_valid": true,
+      "drt_zero": false,
+      "errors": []
+    }
+    ,
+    {
+      "filename": "gfs_0p50_20260724_f000",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2",
+      "accessible": true,
+      "http_status": "200",
+      "can_download": true,
+      "local_exists": true,
+      "local_size": 152106356,
+      "grib2_valid": true,
+      "drt_zero": false,
+      "errors": []
+    }
+    ,
+    {
+      "filename": "gefs_0p50_20260724_f006",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2",
+      "accessible": true,
+      "http_status": "200",
+      "can_download": true,
+      "local_exists": true,
+      "local_size": 14723500,
+      "grib2_valid": true,
+      "drt_zero": false,
+      "errors": []
+    }
+  ]
+  "summary": {
+    "total_files": 7,
+    "http_accessible": 7,
+    "downloadable": 7,
+    "local_valid": 7,
+    "http_access_rate": 100.00
+  }
+}

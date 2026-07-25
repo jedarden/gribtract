@@ -686,6 +686,12 @@ fn parse_section4(
             let (param, fore, lvl, ens) = parse_pdt_1(&mut b, discipline)?;
             Ok((1, param, fore, lvl, ens))
         }
+        2 => {
+            // Product Definition Template 4.2: Analysis or forecast at a horizontal level
+            // Same as PDT 4.0 for our purposes (uses common header only)
+            let (param, fore, lvl, ens) = parse_pdt_0(&mut b, discipline)?;
+            Ok((2, param, fore, lvl, ens))
+        }
         8 => {
             let (param, fore, lvl, ens) = parse_pdt_8(&mut b, discipline)?;
             Ok((8, param, fore, lvl, ens))

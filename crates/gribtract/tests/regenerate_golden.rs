@@ -52,11 +52,11 @@ fn convert_field_to_golden(field: &gribtract_core::types::Field) -> GoldenField 
 
     let level = GoldenLevel {
         type1: field.level.type1,
-        scale_factor1: field.level.scale_factor1,
-        scaled_value1: field.level.scaled_value1,
+        scale_factor1: Some(field.level.scale_factor1),
+        scaled_value1: Some(field.level.scaled_value1),
         type2: field.level.type2,
-        scale_factor2: field.level.scale_factor2,
-        scaled_value2: field.level.scaled_value2,
+        scale_factor2: Some(field.level.scale_factor2),
+        scaled_value2: Some(field.level.scaled_value2),
     };
 
     let ensemble = field.ensemble.as_ref().map(|e| GoldenEnsemble {
@@ -127,4 +127,10 @@ fn regenerate_nam_awip12_lambert_drt3() {
 #[ignore] // Manual use only
 fn regenerate_mrms_carib_refl_drt41() {
     generate_golden("mrms_carib_refl_drt41").expect("should generate golden");
+}
+
+#[test]
+#[ignore] // Manual use only
+fn regenerate_gfs_gaussian_gdt40_t1534() {
+    generate_golden("gfs_gaussian_gdt40_t1534").expect("should generate golden");
 }

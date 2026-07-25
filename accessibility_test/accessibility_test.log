@@ -1,0 +1,384 @@
+=== DRT=0 CONUS File Accessibility Test ===
+Date: Sat Jul 25 12:21:50 AM EDT 2026
+
+========================================
+Test 1/7: //nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000:gfs_1p00_20260724_f000
+URL: https
+
+Test 1: HTTP HEAD request...
+  ❌ FAILED: HTTP 000000
+
+========================================
+Test 2/7: //nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000:gfs_0p25_20260723_f000
+URL: https
+
+Test 1: HTTP HEAD request...
+  ❌ FAILED: HTTP 000000
+
+========================================
+Test 3/7: //noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000:gefs_0p50_20260724_f000
+URL: https
+
+Test 1: HTTP HEAD request...
+  ❌ FAILED: HTTP 000000
+
+========================================
+Test 4/7: //noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003:gefs_0p50_20260724_f003
+URL: https
+
+Test 1: HTTP HEAD request...
+  ❌ FAILED: HTTP 000000
+
+========================================
+Test 5/7: //nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000:gfs_1p00_20260723_f000
+URL: https
+
+Test 1: HTTP HEAD request...
+  ❌ FAILED: HTTP 000000
+
+========================================
+Test 6/7: //nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000:gfs_0p50_20260724_f000
+URL: https
+
+Test 1: HTTP HEAD request...
+  ❌ FAILED: HTTP 000000
+
+========================================
+Test 7/7: //noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006:gefs_0p50_20260724_f006
+URL: https
+
+Test 1: HTTP HEAD request...
+  ❌ FAILED: HTTP 000000
+
+========================================
+SUMMARY
+========================================
+Total files tested: 7
+Successful: 0
+Failed: 7
+Success rate: %
+
+Results saved to: /home/coding/gribtract/accessibility_test/accessibility_results.json
+=== DRT=0 CONUS File Accessibility Test ===
+Date: Sat Jul 25 12:22:07 AM EDT 2026
+
+========================================
+Test 1/7: gfs_1p00_20260724_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 2/7: gfs_0p25_20260723_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 3/7: gefs_0p50_20260724_f000
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 4/7: gefs_0p50_20260724_f003
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 5/7: gfs_1p00_20260723_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 6/7: gfs_0p50_20260724_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+Test 7/7: gefs_0p50_20260724_f006
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Partial download (first 1MB)...
+  ✅ PASSED: Downloaded 1048576 bytes
+Test 3: GRIB2 format validation...
+  ❌ FAILED: Not valid GRIB2 format
+
+========================================
+SUMMARY
+========================================
+Total files tested: 7
+Successful: 0
+Failed: 7
+Success rate: %
+
+Results saved to: /home/coding/gribtract/accessibility_test/accessibility_results.json
+=== DRT=0 CONUS File Accessibility Test ===
+Date: Sat Jul 25 12:22:38 AM EDT 2026
+
+========================================
+Test 1/7: gfs_1p00_20260724_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2
+  File size: 42755881 bytes
+  ❌ FAILED: Invalid GRIB2 format
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 2/7: gfs_0p25_20260723_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2
+  File size: 510275792 bytes
+  ❌ FAILED: Invalid GRIB2 format
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 3/7: gefs_0p50_20260724_f000
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000
+Local: /home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2
+  File size: 14272610 bytes
+  ❌ FAILED: Invalid GRIB2 format
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 4/7: gefs_0p50_20260724_f003
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003
+Local: /home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2
+  File size: 15343992 bytes
+  ❌ FAILED: Invalid GRIB2 format
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 5/7: gfs_1p00_20260723_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2
+  File size: 42460488 bytes
+  ❌ FAILED: Invalid GRIB2 format
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 6/7: gfs_0p50_20260724_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2
+  File size: 152106356 bytes
+  ❌ FAILED: Invalid GRIB2 format
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 7/7: gefs_0p50_20260724_f006
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006
+Local: /home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2
+  File size: 14723500 bytes
+  ❌ FAILED: Invalid GRIB2 format
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+SUMMARY
+========================================
+Total files tested: 7
+HTTP accessible: 7 (100.00%)
+Downloadable: 7 (100.00%)
+Local valid GRIB2: 0 (0.00%)
+
+Results saved to: /home/coding/gribtract/accessibility_test/accessibility_results.json
+=== DRT=0 CONUS File Accessibility Test ===
+Date: Sat Jul 25 12:22:53 AM EDT 2026
+
+========================================
+Test 1/7: gfs_1p00_20260724_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2
+  File size: 42755881 bytes
+  ✅ PASSED: Valid GRIB2 format
+  ⚠️  WARNING: DRT=0 not confirmed
+  DRT info: 1:0:packing=Grid point data - complex packing and spatial differencing,c3
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 2/7: gfs_0p25_20260723_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2
+  File size: 510275792 bytes
+  ✅ PASSED: Valid GRIB2 format
+  ⚠️  WARNING: DRT=0 not confirmed
+  DRT info: 1:0:packing=Grid point data - complex packing and spatial differencing,c3
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 3/7: gefs_0p50_20260724_f000
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000
+Local: /home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2
+  File size: 14272610 bytes
+  ✅ PASSED: Valid GRIB2 format
+  ⚠️  WARNING: DRT=0 not confirmed
+  DRT info: 1:0:packing=Grid point data - complex packing and spatial differencing,c3
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 4/7: gefs_0p50_20260724_f003
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003
+Local: /home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2
+  File size: 15343992 bytes
+  ✅ PASSED: Valid GRIB2 format
+  ⚠️  WARNING: DRT=0 not confirmed
+  DRT info: 1:0:packing=Grid point data - complex packing and spatial differencing,c3
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 5/7: gfs_1p00_20260723_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2
+  File size: 42460488 bytes
+  ✅ PASSED: Valid GRIB2 format
+  ⚠️  WARNING: DRT=0 not confirmed
+  DRT info: 1:0:packing=Grid point data - complex packing and spatial differencing,c3
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 6/7: gfs_0p50_20260724_f000
+URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000
+Local: /home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2
+  File size: 152106356 bytes
+  ✅ PASSED: Valid GRIB2 format
+  ⚠️  WARNING: DRT=0 not confirmed
+  DRT info: 1:0:packing=Grid point data - complex packing and spatial differencing,c3
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+Test 7/7: gefs_0p50_20260724_f006
+URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006
+Local: /home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2
+
+Test 1: HTTP HEAD request...
+  ✅ PASSED: HTTP 200
+Test 2: Local file validation...
+  File exists: /home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2
+  File size: 14723500 bytes
+  ✅ PASSED: Valid GRIB2 format
+  ⚠️  WARNING: DRT=0 not confirmed
+  DRT info: 1:0:packing=Grid point data - complex packing and spatial differencing,c3
+Test 3: Sample download capability...
+  ✅ PASSED: Downloaded 102400 bytes sample
+
+========================================
+SUMMARY
+========================================
+Total files tested: 7
+HTTP accessible: 7 (100.00%)
+Downloadable: 7 (100.00%)
+Local valid GRIB2: 7 (100.00%)
+
+Results saved to: /home/coding/gribtract/accessibility_test/accessibility_results.json
