@@ -1,202 +1,108 @@
-# GFS Gaussian-Grid Fixture Analysis
+# GFS Gaussian-Grid Fixture — Locate & Understand (bf-x6om68)
 
-## Task Completion Summary
+## Task
 
-Located and documented the GFS Gaussian-grid fixture (`core_gaussian_gdt40`) in the gribtract codebase.
+Locate the GFS Gaussian-grid fixture, document its structure, compare it to existing fixtures, and
+confirm integration readiness. **All facts below were re-verified directly against the live workspace
+on 2026-07-26** (not transcribed from prior docs) — see §6 for the verification commands and what they
+correct.
 
-## Fixture Location
+## TL;DR
 
-**Golden Reference JSON:**
-- Path: `/home/coding/gribtract/tests/corpus/golden/core_gaussian_gdt40.json`
-- Size: 378.3 MB
-- Structure: Complete golden reference with field metadata and values arrays
+- One real GFS Gaussian fixture exists on disk: **`tests/corpus/large/flx.2024011500.grib2`** (10.5 MiB,
+  sha256-verified), registered as fixture ID **`core_gaussian_gdt40`**. A second Gaussian fixture
+  (`gfs_gaussian_gdt40_t1534`, T1534) is manifest-declared only — its file is a **0-byte placeholder**.
+- Grid is **GDT 3.40 (Gaussian Lat/Lon), 512×256, N=128, T254**, 131 072 points. GDT 3.40 is **already
+  parsed** (`parse_gdt_40`); DRT 5.3/5.2 are **already decoded**.
+- **Integration status: NOT ready end-to-end.** The single blocker is **PDT 4.12** (49 fields): it has
+  no arm in `parse_section4` (`crates/gribtract-core/src/decode.rs:703` → `Err(NotImplemented)`), so
+  `gribtract::decode()` returns `Err` for the whole file. A golden reference is also **absent**.
+- The canonical single-source-of-truth doc is
+  [`docs/fixtures/gfs-gaussian-fixture.md`](../docs/fixtures/gfs-gaussian-fixture.md) (consolidated by
+  bead bf-4yvt7s). This note is the bead-level pointer into it; refer there for full detail.
 
-**Source GRIB2 Data:**
-- Manifest ID: `core_gaussian_gdt40`
-- Storage: `remote` (not committed to git, lives in `tests/corpus/large/`)
-- Source: NOAA CORe Archive (Climate Data Record)
-- URL: `https://storage.googleapis.com/noaa-nws-ncep-core/grib/3hour/flx/2024/01/flx.2024011500.grb`
-- Size: 10.5 MB
-- SHA-256: `003a93bfc907c17be3b62891071260569c409a97a0d258e59460a0d013064397`
+## 1. Fixture location
 
-## Fixture Structure
+| Fixture ID | Path on disk | Status |
+|-----------|--------------|--------|
+| `core_gaussian_gdt40` | `tests/corpus/large/flx.2024011500.grib2` | ✅ Present, 10 968 510 B, sha256 matches manifest |
+| `gfs_gaussian_gdt40_t1534` | `tests/corpus/large/gdas.t00z.sfluxgrbf000.grib2` | ⚠️ 0-byte placeholder (never fetched) |
 
-### Grid Definition (GDT 3.40 - Gaussian Latitude/Longitude)
+- `storage: remote` — `tests/corpus/large/` is gitignored; fetched + sha256-verified via
+  `cargo xtask corpus fetch core_gaussian_gdt40`.
+- Source: NOAA **CORe** archive on Google Cloud Storage (public, no auth):
+  `https://storage.googleapis.com/noaa-nws-ncep-core/grib/3hour/flx/2024/01/flx.2024011500.grb`
+  (source object has `.grb` extension but is GRIB2 edition 2 content).
+- Registry: `tests/corpus/manifest.json` — entry carries `id`, `path`, `sha256`, `size_bytes`,
+  `storage`, `url`, and a full `provenance` block.
 
-```json
-"grid": {
-    "template": 40,              // GDT 3.40 (Gaussian Lat/Lon)
-    "num_data_points": 131072,     // Total grid points (512 × 256)
-    "nx": 512,                     // Longitudinal points
-    "ny": 256,                     // Latitudinal points
-    "lat_first": 89.4629,         // Northernmost latitude
-    "lon_first": 0,                // Western longitude
-    "lat_last": -89.4629,          // Southernmost latitude
-    "lon_last": 359.297,          // Eastern longitude
-    "di": 0.703125,               // Longitudinal increment (uniform)
-    "dj": null,                    // Latitudinal increment (non-uniform Gaussian)
-    "scanning_mode": 0,
-    "resolution_flags": 48,
-    "shape_of_earth": 6
-}
-```
+## 2. Fixture structure (verified from bytes)
 
-### Key Characteristics
+- **Grid (GDT 3.40 — Gaussian Latitude/Longitude):** `grid_template=40`; Gaussian 512×256; number of
+  latitudes pole→equator `N=128`; **131 072 points**; La1/La2 = ±89.4629° (Gaussian quadrature
+  spacing); Lo1=0° → Lo2=359.297° (uniform, di = 0.703125°); centre `kwbc` (NCEP=7), sub-centre 3;
+  discipline 0. **T254** resolution.
+- **104 GRIB2 messages** — CORe 3-hourly flux: radiative, heat, land-surface, soil, cloud-layer fields.
+- **Packing (DRT):** DRT 5.3 (complex packing **with** spatial differencing) ×102 fields, and DRT 5.2
+  (complex packing, no spatial differencing) ×2 fields (the file's last two records). Bitmap indicator
+  255 (no bitmap) throughout.
+- **Product templates (PDT):** PDT 4.2 (55 fields) + **PDT 4.12 (49 fields)**. The 49 PDT-4.12 fields
+  are the time-averaged/accumulated fluxes (DLWRF, ULWRF, DSWRF, LHTFL, SHTFL, GFLUX, PEVPR, PRATE,
+  CPRATE, …).
 
-1. **Grid Type**: GDT 3.40 (Gaussian Latitude/Longitude)
-   - Uses Gaussian latitudes based on Legendre polynomial zeros
-   - More efficient for spectral models than regular lat/lon grids
-   - Superior for global weather prediction models
+## 3. How it differs from existing fixtures
 
-2. **Parameter**: 
-   - Discipline: 0 (Meteorological)
-   - Category: 5 (Radiation)
-   - Number: 3 (Downward long-wave radiation flux)
+- **Grid:** GDT 3.40 (Gaussian — uniform longitude, *non-uniform Gaussian* latitude spacing, `dj` is
+  null/N-driven) vs. the regular **GDT 3.0** lat/lon fixtures (uniform `di` and `dj`, e.g.
+  `gfs_conus_drt0_0p50`, `gfs_anl_t2m_5x5`) and the **GDT 3.30** Lambert fixtures (HRRR/NAM CONUS).
+- **Metadata/golden layout:** identical field-object schema to all golden fixtures (`parameter`,
+  `forecast`, `level`, `grid`, `packing`, `values`) — see `docs/golden-json-schema.md`.
+- **GFS files under `crates/gribtract/fixtures/noaa-samples/` and `gfs_conus_drt0_0p50` are regular
+  lat/lon (GDT 3.0), NOT Gaussian** — easy to confuse with the Gaussian fixtures.
+- `GaussianLatLonParams { n_parallels }` (in `crates/gribtract-core/src/types.rs`) is the only
+  Gaussian-specific state; `nearest_index` approximates latitude spacing as linear between La1/La2
+  (exact at corners; true Legendre-zero placement is a noted future optimization).
 
-3. **Temporal Coverage**:
-   - Reference time: 2024-01-15T00:00:00Z
-   - Forecast offset: 0 (analysis)
-   - Significance: 0 (analysis time)
+## 4. Integration readiness — ❌ NOT ready end-to-end
 
-4. **Source**: NOAA CORe (Climate Data Record) Archive
-   - File type: `flx` (flux files from FV3GFS model)
-   - Contains radiative fluxes, heat fluxes, land surface data
-   - Coverage: 1950-present
+| Component | Status |
+|-----------|--------|
+| GDT 3.40 grid parsing (`parse_gdt_40`) | ✅ Implemented |
+| DRT 5.2 / 5.3 decoding (`decode_drt3`) | ✅ Implemented |
+| PDT 4.2 (`parse_section4` → `parse_pdt_0`) | ✅ Implemented (common-header) |
+| **PDT 4.12** | ❌ **Not implemented — `decode.rs:703` → `Err(NotImplemented)`** |
+| Golden `core_gaussian_gdt40.json` | ❌ Absent (corpus rule: only `small/` fixtures carry goldens) |
+| Diagnostic test `diagnose_core_gaussian_gdt40` | ❌ Fails at golden load (line 13), before reaching `decode` |
 
-5. **Center**: 7 (US NCEP), Subcenter: 3
+**Single critical blocker:** add a PDT 4.12 arm to `parse_section4` (likely dispatching through the
+`parse_pdt_8` common-header path + a time-range skip). Until it lands, `gribtract::decode()` returns
+`Err` with 0 fields decoded for this fixture. Grid and packing are **not** blockers — they work.
 
-## How Gaussian Grids Differ from Regular Lat/Lon
+## 5. Next steps for full integration
 
-### Regular Latitude/Longitude (GDT 0)
+1. Implement PDT 4.12 in `parse_section4` (`crates/gribtract-core/src/decode.rs`).
+2. Generate + commit `tests/corpus/golden/core_gaussian_gdt40.json` (via `scripts/gen_golden.py` /
+   eccodes) once PDT 4.12 is decodable.
+3. Re-run `cargo test -p gribtract --test diagnose_gfs_gaussian`.
+4. (Optional) Fetch + sha256-verify the T1534 `gdas.t00z.sfluxgrbf000.grib2` (currently 0-byte).
+5. (Optional) Model PDT 4.2/4.12 tail octets for full metadata fidelity.
 
-```json
-"grid": {
-    "template": 0,
-    "nx": 360,
-    "ny": 181,
-    "di": 1.0,     // Uniform longitude spacing
-    "dj": 1.0,     // Uniform latitude spacing
-    "lat_first": 90.0,
-    "lat_last": -90.0
-}
-```
+## 6. Verification performed this session (commands + corrections)
 
-- **Uniform spacing** in both dimensions (di and dj are numbers)
-- Regular grid geometry
-- Simpler but less efficient for spectral models
+Every claim above was checked directly, not transcribed:
 
-### Gaussian Latitude/Longitude (GDT 3.40)
+- `ls -la tests/corpus/large/flx.2024011500.grib2` → 10 968 510 B; `ls tests/corpus/golden/` → 8 files,
+  **no** `core_gaussian_gdt40.json`.
+- Manifest entry in `tests/corpus/manifest.json` → sha256/size/path/url/provenance match.
+- `wgrib2 tests/corpus/large/flx.2024011500.grib2 -grid` → `grid_template=40`, Gaussian 512×256,
+  N=128, `#points=131072`.
+- `wgrib2 … -packing` → 102× complex-with-spatial-differencing + 2× complex.
+- `sed -n '672,705p' crates/gribtract-core/src/decode.rs` → `parse_section4` arms for PDT 0/1/2/8/11
+  only; `_ => Err(Error::NotImplemented)` ⇒ PDT 4.12 unsupported.
 
-```json
-"grid": {
-    "template": 40,
-    "nx": 512,
-    "ny": 256,
-    "di": 0.703125,  // Uniform longitude spacing
-    "dj": null,       // Non-uniform latitude spacing (Gaussian)
-    "lat_first": 89.4629,  // First Gaussian latitude
-    "lat_last": -89.4629   // Last Gaussian latitude
-}
-```
-
-- **Non-uniform latitude spacing** (dj is null)
-- Latitudes are zeros of associated Legendre polynomial P_N
-- More points near equator, fewer near poles
-- Optimized for spectral transform methods
-- Better numerical stability for global models
-
-## Implementation Status
-
-**Current Status**: ❌ **Not Yet Implemented**
-
-- Test `diagnose_core_gaussian_gdt40` exists in `/home/coding/gribtract/crates/gribtract/tests/diagnose_gfs_gaussian.rs`
-- Test fails with: `Decode error: decode not implemented`
-- Golden reference JSON exists and is properly structured
-- Source GRIB2 data is available (can be fetched with `cargo xtask corpus fetch --fixture core_gaussian_gdt40`)
-
-**Required Implementation**:
-
-1. **Grid Definition Template 3.40 decoder** in `gribtract-core`
-   - Parse Gaussian grid parameters
-   - Handle `dj: null` case
-   - Implement Gaussian latitude computation (Legendre polynomial zeros)
-
-2. **Gaussian grid support in nearest-point queries**
-   - See `GaussianLatLonParams` struct in `gribtract-core/src/types.rs`
-   - Currently approximates latitudes as linearly spaced
-   - Future optimization: true Gaussian quadrature placement
-
-## Comparison with Other Fixtures
-
-### Similarities
-
-- **Metadata structure**: Same field layout as all golden fixtures
-- **GRIB2 sections**: Uses standard Section 3 (GDT) with template 40
-- **Data values**: Dense array format in golden JSON
-- **Packing**: Uses simple or complex packing (varies by field)
-
-### Differences
-
-| Aspect | Regular Lat/Lon (GDT 0) | Gaussian (GDT 3.40) |
-|--------|------------------------|---------------------|
-| Grid template | 0 | 40 |
-| Latitude spacing | Uniform (dj = number) | Non-uniform (dj = null) |
-| Points distribution | Even spacing | Clustered near equator |
-| Model use | General purpose | Spectral models (FV3GFS) |
-| Computational efficiency | Lower for spectral methods | Higher for spectral methods |
-| Implementation | ✅ Complete | ❌ Pending |
-
-## Integration Readiness
-
-**Fixture Status**: ✅ **Ready for Integration**
-
-The fixture is fully prepared for integration:
-
-1. ✅ **Golden reference exists**: 378MB JSON with complete field data
-2. ✅ **Manifest entry exists**: Properly configured in `tests/corpus/manifest.json`
-3. ✅ **Source data accessible**: Available from NOAA CORe archive (public URL)
-4. ✅ **Test infrastructure exists**: Diagnostic test ready for use
-5. ✅ **Type definitions ready**: `GaussianLatLonParams` struct defined
-6. ❌ **Decoder pending**: GDT 3.40 decoder not yet implemented
-
-## Next Steps for Integration
-
-To fully integrate this fixture:
-
-1. Implement GDT 3.40 decoder in `gribtract-core`
-2. Handle Gaussian latitude computation (Legendre polynomial zeros)
-3. Update nearest-point query logic for Gaussian grids
-4. Run diagnostic test to verify metadata parsing
-5. Add integration test for full decode cycle
-6. Update differential testing suite to include Gaussian grid validation
-
-## Technical Notes
-
-### Gaussian Grid Mathematics
-
-Gaussian latitudes are computed as the zeros of the Legendre polynomial P_N, where N is the number of parallels between pole and equator:
-
-- For N=128 (ny=256): 128 latitudes in each hemisphere
-- Total parallels: 256 (2N)
-- Excludes poles in some implementations
-- Optimal for spectral transform numerical methods
-
-### Source File Details
-
-- **Filename**: `flx.2024011500.grb`
-- **Contents**: Flux files from FV3GFS model
-- **Variables**: Radiation, heat fluxes, land surface, soil conditions, cloud layers
-- **Archive**: NOAA CORe (1950-present, 3-hourly)
-
-### Why Gaussian Grids Matter
-
-Gaussian grids are the standard for modern numerical weather prediction (NWP) models like:
-- NOAA FV3GFS (Finite-Volume Cubed-Sphere Dynamical Core)
-- ECMWF IFS (Integrated Forecasting System)
-- Other global spectral models
-
-Implementing GDT 3.40 support is therefore critical for gribtract to handle operational weather prediction data.
-
----
-
-**Task Completed**: Successfully located and documented the GFS Gaussian-grid fixture. The fixture is ready for integration once GDT 3.40 decoder is implemented.
+**Corrections to the prior version of this note (commit `4ac2adf`, 2026-07-25):** that version
+predated the canonical consolidation (bead bf-4yvt7s) and asserted two claims now refuted by direct
+verification — (a) "Golden reference JSON exists, 378.3 MB ✅" (it does **not** exist), and (b) "❌
+GDT 3.40 decoder pending" (GDT 3.40 is **already** implemented; the real blocker is PDT 4.12). Both are
+fixed here. The fixture is **not** "Ready for Integration" as previously stated; it is blocked on PDT
+4.12. See `docs/fixtures/gfs-gaussian-fixture.md` §2–§4 for the same conclusion.
