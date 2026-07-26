@@ -50,7 +50,9 @@ cargo 1.96.1 (356927216 2026-06-26)
 rustc 1.96.1 (31fca3adb 2026-06-26)
 ```
 
-Cargo is invoked via its absolute path `/home/coding/.cargo/bin/cargo` (the real cargo, not a shim).
+Cargo is invoked via its absolute path `/home/coding/.cargo/bin/cargo`. That path is a **symlink to
+`rustup`** (the rustup proxy that dispatches to the active 1.96.1 toolchain); `which cargo` on this box
+resolves to a separate wrapper at `/home/coding/.local/bin/cargo`. Both report `cargo 1.96.1`.
 
 ---
 
@@ -65,8 +67,8 @@ timeout 1800 /home/coding/.cargo/bin/cargo build -p gribtract
 
 **Verbatim output (this run):**
 ```
-warning: /home/coding/gribtract/crates/gribtract/Cargo.toml: `default-features` is ignored for gribtract-core, since `default-features` was not specified for `workspace.dependencies.gribtract-core`, this could become a hard error in the future
 warning: /home/coding/gribtract/crates/gribtract-cli/Cargo.toml: `default-features` is ignored for gribtract, since `default-features` was not specified for `workspace.dependencies.gribtract`, this could become a hard error in the future
+warning: /home/coding/gribtract/crates/gribtract/Cargo.toml: `default-features` is ignored for gribtract-core, since `default-features` was not specified for `workspace.dependencies.gribtract-core`, this could become a hard error in the future
 warning: unused variable: `context`
     --> crates/gribtract-core/src/decode.rs:1184:73
      |
@@ -76,7 +78,7 @@ warning: unused variable: `context`
      = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
 
 warning: `gribtract-core` (lib) generated 1 warning (run `cargo fix --lib -p gribtract-core` to apply 1 suggestion)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s
 BUILD_EXIT=0
 ```
 
@@ -85,8 +87,9 @@ BUILD_EXIT=0
 2. `crates/gribtract-cli/Cargo.toml` — `default-features` ignored for `gribtract` (manifest).
 3. `crates/gribtract-core/src/decode.rs:1184:73` — unused variable `context`.
 
-> The `0.04s` finish is the incremental cache (the workspace was already built); this is a real
-> successful `Finished`, not a no-op. The warning set is byte-identical to Child 1's prior capture.
+> The `0.05s` finish is the incremental cache (the workspace was already built); this is a real
+> successful `Finished`, not a no-op. The **set** of 3 warnings is stable; their **order** is
+> non-deterministic — a second invocation emitted the two manifest warnings in the opposite order.
 
 ---
 
@@ -278,5 +281,9 @@ fails with "decode not implemented".**
 | `bf-mzbmba` | Fixture run (Child 3) | `notes/bf-mzbmba.md` + re-run this run (§4, §5) |
 | `bf-4swew5` | **Assembly** (Child 4, this bead) | this document |
 
-Every quoted command and output above was executed at HEAD `f488712` on 2026-07-26 with
-cargo/rustc 1.96.1. Failures are quoted verbatim; no result is asserted from prose.
+Every quoted command and output above was executed with cargo/rustc 1.96.1. Failures are quoted
+verbatim; no result is asserted from prose. Child 4 (`bf-4swew5`) re-ran §1–§5 from scratch at HEAD
+`dcac7b7` on 2026-07-26 and confirmed every value — including the test-binary hash
+`diagnose_gfs_gaussian-02c7634154d88d01`, the `13:10: golden loaded` panic, the matching fixture
+sha256, and the decode.rs source cites at lines 703 / 214 / 1184. `dcac7b7` is `f488712` plus this
+document only (no source diff), so the build/test state is identical at both SHAs.
