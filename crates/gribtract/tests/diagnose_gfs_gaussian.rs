@@ -1,12 +1,20 @@
-//! Detailed mismatch diagnostic test for GFS Gaussian-grid fixture
+//! Detailed mismatch diagnostic test for the GFS Gaussian-grid fixture.
+//!
+//! Runs the field-by-field differential against the committed inline fixture
+//! `gfs_gaussian_gdt40_drt0` (GDT 3.40 Gaussian lat/lon, PDT 4.0, DRT 5.0,
+//! 128 points) and its golden. The two large *remote* Gaussian fixtures
+//! (`core_gaussian_gdt40`, `gfs_gaussian_gdt40_t1534`) are not committed and
+//! have no authored goldens, so they are exercised only via the manifest-driven
+//! `differential` harness (which skips remote-unfetched entries gracefully).
+//! This test targets the one inline Gaussian fixture that can actually run.
 
 use gribtract_testutil::corpus;
 use gribtract_testutil::diff::{compare_field, FieldResult};
 use gribtract_testutil::golden;
 
 #[test]
-fn diagnose_core_gaussian_gdt40() {
-    let entry = corpus::fixture_entry("core_gaussian_gdt40").expect("fixture exists");
+fn diagnose_gfs_gaussian_gdt40() {
+    let entry = corpus::fixture_entry("gfs_gaussian_gdt40_drt0").expect("fixture exists");
 
     let golden_fixture = golden::load_golden(&entry.id)
         .expect("golden exists")
@@ -19,7 +27,7 @@ fn diagnose_core_gaussian_gdt40() {
             panic!("Decode error: {}", e);
         }
         Ok(actual_fields) => {
-            println!("=== CORe GFS Gaussian-grid GDT40 Differential Analysis ===");
+            println!("=== GFS Gaussian-grid GDT40 Differential Analysis ({}) ===", entry.id);
             println!("Total fields: actual={}, golden={}", actual_fields.len(), golden_fixture.fields.len());
             println!();
 
@@ -72,7 +80,7 @@ fn diagnose_core_gaussian_gdt40() {
                     }
                 }
 
-                // Show all fields for CORe Gaussian-grid (usually small number of fields)
+                // Show all fields for the GFS Gaussian-grid fixture (usually a small number of fields)
                 if i >= 10 {
                     break;
                 }
