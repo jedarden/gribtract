@@ -119,6 +119,19 @@
       }
     },
     {
+      "id": "gfs_gaussian_gdt40_drt0",
+      "path": "small/gfs_gaussian_gdt40_drt0.grib2",
+      "sha256": "d9d0814526f2415d2e1c4af28e1e958897e512d003ba32f1ff03b84e3fab0c6a",
+      "size_bytes": 307,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 fixture: 2m temperature analysis on a synthetic GFS Gaussian Latitude/Longitude grid (GDT 3.40). Grid: N=4 (parallels pole->equator), Ni=16 (4N longitudes, di=22.5deg), Nj=8 (2N latitudes), 128 points. Lat bounds +80N to -80N, lon 0E to 337.5E. Section 0 discipline=0 (meteorological), edition=2. Section 1: center=7 (US NCEP), analysis (significance=0), 2024-06-19T00:00:00Z. Section 3 template 3.40 (Gaussian lat/lon): shape=6 (WGS84), Ni=16, Nj=8, scanning_mode=0x00 (+i, -j), octets 68-71 carry N=4 (replaces Dj; latitude spacing is non-uniform Gaussian quadrature). Section 4 template 4.0: discipline=0/cat=0/num=0 (temperature K), level type=103 (height above ground), value=2m, forecast_offset=0h. Section 5 template 5.0 (simple packing): R=270.0, E=0, D=0, nbits=8. Section 6: no bitmap (indicator=255). Section 7: 128 packed bytes X=0..127, unpacked values = 270.0+X K. Small/inline analogue of the large remote core_gaussian_gdt40 (T254) and gfs_gaussian_gdt40_t1534 (T1534) Gaussian fixtures.",
+        "capture_date": "2026-07-26",
+        "generated_by": "scripts/gen_grib2_gaussian.py (gribtract project)"
+      }
+    },
+    {
       "id": "gfswave_arctic_wind_drt40",
       "path": "small/gfswave_arctic_wind_drt40.grib2",
       "sha256": "50cc647b08467d945688d255fafde49b7a52b21263566c6767ce4ee68ef85a5a",
