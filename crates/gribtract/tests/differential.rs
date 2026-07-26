@@ -10,10 +10,13 @@ use gribtract_testutil::diff::{compare_fixture, CoverageReport};
 use gribtract_testutil::golden;
 
 /// Minimum acceptable agreement percentage. Raise this as templates are implemented.
-/// Ratcheted to 84.0% after PDT ensemble improvements (bf-3nohy):
-/// - GDT=30 PDT=8 DRT=3: 9/18 matches
-/// - GDT=30 PDT=0 DRT=3: 187/374 matches (partial)
-const AGREEMENT_FLOOR: f64 = 84.0;
+/// Ratcheted to 100.0% after wiring the GFS Gaussian fixture (bf-91ov1): every
+/// comparable (golden-bearing, feature-available) fixture now matches its golden
+/// reference — 8/8 by default, 9/9 with the `jpeg2000` feature. The last gap was
+/// `gen_golden.py`'s Section-5 packing-key omission (`grib_dump -j` drops
+/// referenceValue/bits-per-value), which left the PDT=1 golden mismatched; the
+/// script now pulls those keys via `grib_ls -p`, regenerating the affected goldens.
+const AGREEMENT_FLOOR: f64 = 100.0;
 
 #[test]
 fn differential_coverage_report() {
