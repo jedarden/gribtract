@@ -1,6 +1,25 @@
+# ⚠️ SUPERSEDED — GFS Fixture Integration Verification (2026-07-25 draft)
+
+> **This note contains a factually wrong root cause and has been superseded.** See
+> [`bf-2pev44.md`](bf-2pev44.md) (the corrected verification, 2026-07-26) and the canonical
+> [`docs/fixtures/gfs-gaussian-fixture.md`](../docs/fixtures/gfs-gaussian-fixture.md).
+>
+> **Known-false claims in this draft** (re-verified against the live workspace):
+> - "Golden file exists: `core_gaussian_gdt40.json` (378 MB)" → **false**; no such file exists.
+> - "core_gaussian_gdt40 (… 54 GRIB2 messages)" → **false**; the file has 104 messages.
+> - Critical blocker = "Missing DRT 2 Decoder" → **false**; DRT 2 decodes via the `decode_drt3`
+>   `order == 0` branch (`decode.rs:1299`). The real sole blocker is **PDT 4.12** (no dispatch arm in
+>   `parse_section4` at `decode.rs:680`).
+> - Test panics at "Decode error: decode not implemented" → **false**; it panics at line 13
+>   `golden loaded`, before `decode` is ever called.
+>
+> This draft is retained only for the audit trail. Do not act on its diagnosis or roadmap.
+
+---
+
 # GFS Fixture Integration Verification
 
-**Bead:** bf-2pev44  
+**Bead:** bf-2pev44
 **Task:** Verify GFS Gaussian-grid fixture integration readiness  
 **Date:** 2026-07-25  
 **Status:** ⚠️ PARTIAL — Core infrastructure ready, DRT decoder incomplete
