@@ -141,3 +141,33 @@ is the blocker.
 **Bottom line:** The GFS Gaussian corpus fixture cannot currently be decoded by gribtract end-to-end,
 because 49 of its 104 fields use PDT 4.12, which is not implemented. The fixture's own grid (GDT 3.40,
 512×256 Gaussian) and the majority of its fields (PDT 4.2, DRT 5.3) are supported.
+
+---
+
+## 5. Independent re-verification (retry run, 2026-07-26)
+
+This bead was retried because the prior session crashed (trace `outcome: failure`,
+`exit_code: 1` — a SessionEnd-hook infrastructure failure, not a task failure; the
+note above was already committed in `4e47c04` but the bead was never closed). On the
+retry, every claim above was independently re-run from scratch under
+`cargo 1.96.1 / rustc 1.96.1`, HEAD `4e47c04`. All confirmed:
+
+| Claim | How re-verified | Result |
+|-------|-----------------|--------|
+| Fixture present, sha256 matches manifest | `sha256sum` vs `manifest.json` | `003a93bf…064397` == manifest ✓ |
+| Exercising test fails at line 13 ("golden loaded") | `cargo test -p gribtract --test diagnose_gfs_gaussian -- --nocapture` | panic at `diagnose_gfs_gaussian.rs:13:10: golden loaded`, exit 101 ✓ |
+| `decode` returns `Err("decode not implemented")` | throwaway probe `probe_decode_core_gaussian.rs` (run, then removed — not committed) | `[probe] DECODE_FAILED: decode not implemented` ✓ |
+| `--features jpeg2000` does not change it | same probe with `--features jpeg2000` | identical `DECODE_FAILED: decode not implemented` ✓ |
+| PDT 4.2 ×55, 4.12 ×49; DRT 5.3 ×102, 5.2 ×2; GDT 3.40 ×104; first unhandled = msg 56 | independent Python GRIB2 section walker (corrected octet offsets: PDT octets 8-9, DRT octets 10-11, GDT octets 13-14), 0 parse errors across all 104 messages | identical distribution ✓ |
+
+**Discrepancy with Child 2 (bf-58omm2) — RESOLVED.** Child 2's close reason records the
+test panic at `diagnose_gfs_gaussian.rs:19:13: Decode error: decode not implemented`. That
+is **stale/incorrect**: line 19 (the `Err(e) => panic!("Decode error: …")` branch) is only
+reachable if the golden file loaded, but `tests/corpus/golden/core_gaussian_gdt40.json` does
+**not** exist (golden dir has 8 files, none for this id), so `load_golden` returns `Ok(None)`
+and the test panics at **line 13** (`None.expect("golden loaded")`) — **before** `gribtract::decode`
+is ever called. Ground truth (reproduced above) is **line 13, "golden loaded"**. Child 2's panic
+string likely dates from an earlier tree state where the golden file was present; the *decode*
+outcome Child 2 attributes to the test is in fact only observable via a direct decode probe, not
+via this test. The decode-stub conclusion itself (decode returns `Err("decode not implemented")`)
+is correct and is corroborated here by the probe.
