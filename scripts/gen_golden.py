@@ -227,6 +227,7 @@ def transform_message_to_golden(message_data):
         'grid_jpeg': 40,
         'grid_png': 41,
         'grid_second_simple': 1,
+        'grid_complex_spatial_differencing': 3,
     }
     drt_template = drt_map.get(packing_type, 0)
 
