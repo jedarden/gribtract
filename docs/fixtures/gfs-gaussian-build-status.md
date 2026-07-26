@@ -8,7 +8,7 @@
 > **Run provenance**
 > - Date: 2026-07-26
 > - Workspace: `/home/coding/gribtract`
-> - HEAD: `f488712` (`chore(beads): Flush checkpoint after closing bf-mzbmba`)
+> - HEAD: `5fa0057` (`chore(beads): Flush checkpoint after closing bf-mzbmba`)
 > - Toolchain: cargo / rustc **1.96.1** (see §1)
 > - Split beads backing each section: Child 1 `bf-1rxcde` (toolchain/build), Child 2 `bf-58omm2`
 >   (test), Child 3 `bf-mzbmba` (fixture). Children 1–2's raw capture files were no longer on
@@ -283,7 +283,9 @@ fails with "decode not implemented".**
 
 Every quoted command and output above was executed with cargo/rustc 1.96.1. Failures are quoted
 verbatim; no result is asserted from prose. Child 4 (`bf-4swew5`) re-ran §1–§5 from scratch at HEAD
-`dcac7b7` on 2026-07-26 and confirmed every value — including the test-binary hash
+`197419e` on 2026-07-26 and confirmed every value — including the test-binary hash
 `diagnose_gfs_gaussian-02c7634154d88d01`, the `13:10: golden loaded` panic, the matching fixture
-sha256, and the decode.rs source cites at lines 703 / 214 / 1184. `dcac7b7` is `f488712` plus this
-document only (no source diff), so the build/test state is identical at both SHAs.
+sha256, and the decode.rs source cites at lines 703 / 214 / 1184. `197419e` is `5fa0057` plus this
+document only (no source diff), so the build/test state is identical at both SHAs. (SHAs refreshed
+2026-07-26 after a history rebase that re-labeled these commits but left all tree contents — and thus
+every result above — unchanged.)
