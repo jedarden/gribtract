@@ -1,6 +1,22 @@
+# ⚠️ SUPERSEDED — GFS Fixture Integration Readiness Verification Report (2026-07-25 draft)
+
+> **This report contains a factually wrong root cause and has been superseded.** See
+> [`bf-2pev44.md`](bf-2pev44.md) (the corrected verification, 2026-07-26) and the canonical
+> [`docs/fixtures/gfs-gaussian-fixture.md`](../docs/fixtures/gfs-gaussian-fixture.md).
+>
+> **Known-false claims in this draft** (re-verified against the live workspace): it asserts a 378 MB
+> golden file exists (none does), counts 54 messages (actual: 104), and names a "missing DRT 2
+> decoder" as the critical blocker — DRT 2 in fact decodes via `decode_drt3` order==0
+> (`decode.rs:1299`); the real sole blocker is **PDT 4.12**. The diagnostic test also panics at the
+> golden-load step (line 13), not at `decode`.
+>
+> Retained only for the audit trail. Do not act on its diagnosis or roadmap.
+
+---
+
 # GFS Fixture Integration Readiness Verification Report
 
-**Task:** bf-2pev44 - Verify GFS fixture integration readiness  
+**Task:** bf-2pev44 - Verify GFS fixture integration readiness
 **Date:** 2026-07-25  
 **Status:** ❌ **NOT READY** - Critical blocking issues found
 
