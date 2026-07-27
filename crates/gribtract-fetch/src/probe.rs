@@ -372,21 +372,47 @@ struct ProbeInnerResult {
 /// alongside the loaded provider-probe.json results.
 ///
 /// # Example
+///
+/// This example shows how to integrate failure tracking with provider probe
+/// results to trigger re-probing on consecutive HTTP errors:
+///
 /// ```no_run
+/// use gribtract::ProviderProbe;
 /// use gribtract_fetch::probe::ProviderFailureTracker;
+/// use std::path::Path;
 ///
-/// let mut tracker = ProviderFailureTracker::new(3); // threshold = 3
+/// // Load provider probe results
+/// let probe = ProviderProbe::load(Path::new("provider-probe.json")).unwrap();
 ///
-/// // After a failed HTTP request to a provider
-/// tracker.record_failure("s3:hrrr-bdp");
+/// // Initialize failure tracker
+/// let mut tracker = ProviderFailureTracker::new(3); // threshold = 3 consecutive errors
 ///
-/// // Before using a provider, check if it should be re-probed
-/// if tracker.should_reprobe("s3:hrrr-bdp") {
-///     // Trigger re-probing to find a better provider
+/// // Check if probe is valid (fresh + no providers need re-probing)
+/// if !probe.is_valid(24 * 3600, &tracker) {
+///     // Get providers needing re-probe for logging
+///     let needing = probe.providers_needing_reprobe(&tracker);
+///     eprintln!("Re-probe triggered by consecutive failures: {}",
+//!         needing.join(", "));
+///     // Trigger re-probe...
 /// }
 ///
-/// // After a successful request, reset the counter
-/// tracker.record_success("s3:hrrr-bdp");
+/// // Use best provider and track results
+/// if let Some(provider) = probe.best_provider("gfs") {
+///     match fetch_data_from_provider(provider).await {
+///         Ok(_) => tracker.record_success(provider),
+///         Err(_) => {
+///             let count = tracker.record_failure(provider);
+///             eprintln!("HTTP error from {provider} (failure {count}/3)");
+///
+///             // Check if we've hit the re-probe threshold
+///             if tracker.should_reprobe(provider) {
+///                 eprintln!("Provider {provider} has {count} consecutive failures, triggering re-probe");
+///                 // Trigger re-probe...
+///             }
+///         }
+///     }
+/// }
+/// # fn fetch_data_from_provider(p: &str) -> Result<(), Box<dyn std::error::Error>> { Ok(()) }
 /// ```
 #[derive(Debug, Clone)]
 pub struct ProviderFailureTracker {

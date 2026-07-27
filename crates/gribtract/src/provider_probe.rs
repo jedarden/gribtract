@@ -17,29 +17,66 @@
 //! HTTP failures per provider at runtime. Use it alongside the staleness check:
 //!
 //! # Example
+//!
+//! This example shows the complete runtime provider selection workflow with
+//! re-probe triggers for staleness and consecutive HTTP errors:
+//!
 //! ```no_run
 //! use gribtract::ProviderProbe;
 //! use gribtract_fetch::probe::ProviderFailureTracker;
 //! use std::path::Path;
 //!
-//! let probe = ProviderProbe::load(Path::new("provider-probe.json")).unwrap();
-//! let mut tracker = ProviderFailureTracker::default_threshold();
+//! // Load provider probe results
+//! let probe = match ProviderProbe::load(Path::new("provider-probe.json")) {
+//!     Ok(p) => p,
+//!     Err(_) => {
+//!         // Case 1: File absent — trigger re-probe
+//!         eprintln!("provider-probe.json not found, running initial probe...");
+//!         run_probe_and_write_json(); // Your implementation
+//!         return;
+//!     }
+//! };
 //!
-//! // Check if we should re-probe (either stale OR consecutive failures)
-//! let needs_reprobe = !probe.is_fresh(24 * 3600)
-//!     || tracker.should_reprobe("s3:hrrr-bdp");
+//! // Initialize failure tracker (threshold = 3 consecutive errors)
+//! let tracker = ProviderFailureTracker::default_threshold();
 //!
-//! if !needs_reprobe {
-//!     if let Some(p) = probe.best_provider("gfs") {
-//!         println!("Best GFS provider: {p}");
+//! // Check if we should re-probe (Case 2 OR Case 3)
+//! // is_valid() checks both: file staleness AND consecutive failures
+//! if !probe.is_valid(24 * 3600, &tracker) {
+//!     // Get specific providers that need re-probing for logging
+//!     let needing = probe.providers_needing_reprobe(&tracker);
+//!
+//!     if !probe.is_fresh(24 * 3600) {
+//!         eprintln!("provider-probe.json is stale (>24h old), triggering re-probe...");
+//!     }
+//!
+//!     if !needing.is_empty() {
+//!         eprintln!("Re-probe triggered by consecutive failures: {}",
+//!             needing.join(", "));
+//!     }
+//!
+//!     run_probe_and_write_json(); // Your implementation
+//!     return;
+//! }
+//!
+//! // Safe to use cached provider rankings
+//! if let Some(provider) = probe.best_provider("gfs") {
+//!     println!("Best GFS provider: {provider}");
+//!
+//!     // After HTTP requests, record success/failure
+//!     match fetch_data_from_provider(provider).await {
+//!         Ok(_) => {
+//!             tracker.record_success(provider);
+//!             println!("Successfully fetched from {provider}");
+//!         }
+//!         Err(_) => {
+//!             let count = tracker.record_failure(provider);
+//!             eprintln!("HTTP error from {provider} (failure {count}/3)");
+//!         }
 //!     }
 //! }
-//!
-//! // After HTTP requests, record success/failure
-//! match fetch_data_from_provider("s3:hrrr-bdp").await {
-//!     Ok(_) => tracker.record_success("s3:hrrr-bdp"),
-//!     Err(_) => { tracker.record_failure("s3:hrrr-bdp"); },
-//! }
+//! # fn fetch_data_from_provider(p: &str) -> Result<(), Box<dyn std::error::Error>> { Ok(()) }
+//! # fn run_probe_and_write_json() { }
 //! ```
 
 use std::collections::HashMap;
