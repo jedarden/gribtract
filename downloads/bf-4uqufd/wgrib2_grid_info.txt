@@ -1,0 +1,1176 @@
+1:0:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+2:236072:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+3:476571:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+4:492741:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+5:492960:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+6:588206:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+7:588425:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+8:708647:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+9:922949:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+10:1136382:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+11:1448519:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+12:1791301:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+13.1:2142353:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+13.2:2142353:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+14:2559654:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+15:2846859:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+16:2937897:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+17:3082147:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+18:3136180:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+19:3306332:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+20:3306551:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+21.1:3690604:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+21.2:3690604:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+22:3967581:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+23:4050229:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+24:4192066:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+25:4241102:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+26:4423459:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+27:4643970:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+28:4831490:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+29:5074072:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+30:5273870:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+31:5377057:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+32:5483555:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+33:5593459:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+34:5801248:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+35:5913026:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+36:6025083:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+37:6244832:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+38:6472330:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+39:6590977:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+40:6714885:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+41:6841419:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+42:6969315:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+43:7101412:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+44:7173268:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+45:7264849:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+46:7505357:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+47:7685382:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+48:7926931:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+49:8104657:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+50:8247721:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+51:8390785:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+52:8567048:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+53:8711038:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+54:8855028:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+55:9031096:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+56:9177123:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+57:9323089:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+58:9496838:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+59:9644731:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+60:9792729:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+61:9878288:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+62:9983298:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+63:10085564:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+64:10104453:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+65:10107979:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+66:10111180:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+67:10116371:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+68:10203479:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+69:10293893:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+70:10517627:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+71:10739277:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+72:10971575:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+73.1:11178605:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+73.2:11178605:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+74:11564422:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+75:11891483:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+76:12012783:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+77:12077473:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+78:12136776:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+79:12171166:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+80:12171409:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+81:12171652:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+82:12171895:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+83:12175475:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+84:12182844:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+85:12238478:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+86:12585685:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+87:12585904:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+88:12586123:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+89:12586342:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+90:12603442:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+91:12699840:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+92:12915633:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+93:13013027:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+94:13143600:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+95:13236003:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+96:13323975:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+97:13417342:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+98:13515978:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+99:13584558:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+100:13671666:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+101:13767864:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+102:13897782:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+103:14056687:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+104:14184049:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+105:14285141:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+106:14419466:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+107:14653771:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+108:14830101:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+109:14976190:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+110:15150554:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+111:15209173:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+112:15261632:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+113:15321998:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+114:15477648:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+115:15529052:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+116:15554767:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+117:15832083:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+118:16223399:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+119:16423997:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+120:16504509:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+121:16810021:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+122:16882768:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+123:16951206:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+124:17025133:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+125:17128428:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+126:17188787:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+127:17228936:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+128:17577730:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+129:17794904:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+130:18128114:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+131:18460938:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+132:18727049:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+133:19096809:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+134:19436583:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+135:19550440:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+136:19901210:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+137:20245518:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+138:20511249:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+139:20603341:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+140:20765942:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+141:20903986:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+142.1:21128479:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+142.2:21128479:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+143:21549075:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+144:21666341:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+145.1:21770043:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+145.2:21770043:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+146:22190424:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+147:22320065:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+148:22435531:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+149.1:22541185:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+149.2:22541185:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+150:22767331:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+151:22883336:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+152.1:22994373:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+152.2:22994373:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+153:23219935:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+154:23336722:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+155.1:23452493:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+155.2:23452493:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+156:23680389:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+157:23799738:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+158.1:23917627:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+158.2:23917627:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+159:24150344:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+160.1:24273078:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+160.2:24273078:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+161:24508311:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+162:24638890:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+163:24872378:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+164:25062782:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+165:25480521:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+166:25840116:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+167:25938822:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+168:26143829:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+169:26340928:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+170:26580435:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+171:26757145:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+172:27025101:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+173:27038004:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+174:27047696:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+175:27048582:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+176:27121792:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+177:27190346:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+178:27285052:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+179:27604099:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+180:27839050:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+181:28007464:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+182:28124826:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+183:28236519:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+184:28477289:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+185:28748506:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+186:28930044:grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
