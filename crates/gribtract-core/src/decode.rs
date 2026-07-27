@@ -12,7 +12,7 @@ use crate::error::{Error, Result};
 use crate::types::{
     ComplexExtra, Ensemble, Field, ForecastTime, GaussianLatLonParams, GridDefinition,
     GridProjection, GridValues, LazyField, LambertConformalParams, Level, PackingInfo,
-    ParameterId, PolarStereographicParams, ReferenceTime,
+    ParameterId, PolarStereographicParams, ReferenceTime, RotatedLatLonParams,
 };
 
 // ── Byte buffer reader ────────────────────────────────────────────────────────
@@ -392,6 +392,10 @@ fn parse_section3(body: &[u8]) -> Result<(u16, GridDefinition)> {
             let grid = parse_gdt_0(&mut b, num_data_points)?;
             Ok((0, grid))
         }
+        1 => {
+            let grid = parse_gdt_1(&mut b, num_data_points)?;
+            Ok((1, grid))
+        }
         20 => {
             let grid = parse_gdt_20(&mut b, num_data_points)?;
             Ok((20, grid))
@@ -450,6 +454,78 @@ fn parse_gdt_0(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
         resolution_flags,
         shape_of_earth,
         projection: GridProjection::LatLon,
+    })
+}
+
+/// Grid Definition Template 3.1: Rotated Latitude/Longitude.
+///
+/// Byte layout (b starts at section octet 15 = first body byte after template number):
+///
+/// | Octets | Field |
+/// |--------|-------|
+/// | 15     | shape of earth |
+/// | 16–20  | earth radius scale + value (skipped) |
+/// | 21–25  | major-axis scale + value (skipped) |
+/// | 26–30  | minor-axis scale + value (skipped) |
+/// | 31–34  | Nx (Ni) |
+/// | 35–38  | Ny (Nj) |
+/// | 39–42  | La1 (signed microdegrees) |
+/// | 43–46  | Lo1 (unsigned microdegrees, 0–360) |
+/// | 47     | resolution/component flags |
+/// | 48–51  | La2 (signed microdegrees) |
+/// | 52–55  | Lo2 (unsigned microdegrees, 0–360) |
+/// | 56–59  | Di (unsigned microdegrees) |
+/// | 60–63  | Dj (unsigned microdegrees) |
+/// | 64–67  | latitude of southern pole (signed microdegrees) |
+/// | 68–71  | longitude of southern pole (unsigned microdegrees, 0–360) |
+/// | 72     | angle of rotation |
+fn parse_gdt_1(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
+    let shape_of_earth = b.read_u8()?;    // oct 15
+
+    // Scale/value for earth shape (spheroid parameters) — not needed for GDT 3.1 geometry.
+    b.skip(1 + 4)?;                       // oct 16–20: earth radius scale + value
+    b.skip(1 + 4)?;                       // oct 21–25: major axis
+    b.skip(1 + 4)?;                       // oct 26–30: minor axis
+
+    let nx = b.read_u32be()?;             // oct 31–34: Nx
+    let ny = b.read_u32be()?;             // oct 35–38: Ny
+
+    let lat_first = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 39–42: La1
+    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 43–46: Lo1
+    let resolution_flags = b.read_u8()?;  // oct 47
+
+    let lat_last = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 48–51: La2
+    let lon_last = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 52–55: Lo2
+    let di = b.read_u32be()? as f64 / 1_000_000.0;               // oct 56–59: Di
+    let dj = b.read_u32be()? as f64 / 1_000_000.0;               // oct 60–63: Dj
+
+    // Rotated pole parameters
+    let lat_pole_rot = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 64–67: south pole latitude
+    let lon_pole_rot = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 68–71: south pole longitude
+    let angle_rot_raw = b.read_u8()? as f64;                         // oct 72: angle of rotation
+    let angle_rot = angle_rot_raw / 100.0;  // Last 2 digits are fractional
+
+    let projection = GridProjection::RotatedLatLon(RotatedLatLonParams {
+        lat_pole_rot,
+        lon_pole_rot,
+        angle_rot,
+    });
+
+    Ok(GridDefinition {
+        template: 1,
+        num_data_points,
+        nx,
+        ny,
+        lat_first,
+        lon_first,
+        lat_last,
+        lon_last,
+        di,
+        dj,
+        scanning_mode: 0, // Not present in GDT 3.1 — use default
+        resolution_flags,
+        shape_of_earth,
+        projection,
     })
 }
 
