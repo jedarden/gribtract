@@ -939,6 +939,11 @@ fn parse_section5(body: &[u8]) -> Result<(u16, PackingInfo, Option<ComplexPackin
             let (packing, extra) = parse_drt_3(&mut b)?;
             Ok((3, packing, Some(extra), n_values))
         }
+        4 => {
+            // Template 5.4: IEEE 754 32-bit floats.
+            let packing = parse_drt_4(&mut b)?;
+            Ok((4, packing, None, n_values))
+        }
         40 => {
             // Template 5.40: JPEG 2000 data compression — same common header as DRT=0.
             let packing = parse_drt_common(&mut b)?;
@@ -1031,6 +1036,24 @@ fn parse_drt_3(b: &mut Buf) -> Result<(PackingInfo, ComplexPackingExtra)> {
         order_spatial_diff,
         extra_octet_count,
     }))
+}
+
+/// Data Representation Template 5.4: IEEE 754 32-bit floats.
+///
+/// WMO GRIB2 Table 5.4:
+/// - Octs 12-21: common packing header (same as DRT=0)
+/// - Oct 22-23: reserved (must be 0)
+fn parse_drt_4(b: &mut Buf) -> Result<PackingInfo> {
+    let packing = parse_drt_common(b)?;  // oct 12-21: common header
+
+    // Oct 22-23: reserved (must be 0 per WMO spec)
+    let reserved1 = b.read_u8()?;  // oct 22
+    let reserved2 = b.read_u8()?;  // oct 23
+    if reserved1 != 0 || reserved2 != 0 {
+        return Err(Error::InvalidData("DRT=4 reserved octets must be 0"));
+    }
+
+    Ok(packing)
 }
 
 // ── Section 6: Bit Map ────────────────────────────────────────────────────────
@@ -1129,6 +1152,10 @@ fn decode_section7(
         return decode_drt41(body, packing, n_points);
     }
 
+    if drt == 4 {
+        return decode_drt4(body, n_points);
+    }
+
     // DRT=0: simple packing.
     let r = packing.reference_value as f64;
     let e = packing.binary_scale_factor as i32;
@@ -1217,6 +1244,24 @@ fn decode_drt41(body: &[u8], packing: &PackingInfo, n_points: usize) -> Result<G
         }
         _ => return Err(Error::NotImplemented),
     };
+
+    Ok(GridValues::Dense(values))
+}
+
+/// Decode Template 5.4: IEEE 754 32-bit floats.
+///
+/// Section 7 contains raw 4-byte big-endian IEEE 754 float values. No
+/// scaling or unpacking is applied — the floats are returned as-is.
+fn decode_drt4(body: &[u8], n_points: usize) -> Result<GridValues> {
+    let bytes_needed = n_points * 4;
+    if body.len() < bytes_needed {
+        return Err(Error::TooShort { needed: bytes_needed, got: body.len() });
+    }
+
+    let values: Vec<f64> = body[..bytes_needed]
+        .chunks_exact(4)
+        .map(|c| f32::from_be_bytes([c[0], c[1], c[2], c[3]]) as f64)
+        .collect();
 
     Ok(GridValues::Dense(values))
 }
