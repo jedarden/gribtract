@@ -335,6 +335,65 @@ impl ProviderProbe {
             .unwrap_or(false)
     }
 
+    /// Check if probe results are valid (fresh AND no providers need re-probing)
+    ///
+    /// This is a convenience method that combines the staleness check with the
+    /// failure tracker check. Returns true if the probe results are fresh AND
+    /// no tracked providers have exceeded the consecutive failure threshold.
+    ///
+    /// # Arguments
+    /// * `results` - The probe results to check for staleness
+    /// * `max_age` - Maximum age for probe results to be considered fresh
+    ///
+    /// # Example
+    /// ```no_run
+    /// use gribtract_fetch::probe::ProviderProbe;
+    /// use std::time::Duration;
+    ///
+    /// let probe = ProviderProbe::new();
+    /// let results = ProviderProbe::load_results(std::path::Path::new("provider-probe.json")).unwrap();
+    ///
+    /// // Check if results are valid (fresh AND no providers need re-probing)
+    /// if !probe.is_valid(&results, Duration::from_secs(24 * 3600)) {
+    ///     // Trigger re-probe...
+    /// }
+    /// ```
+    pub fn is_valid(&self, results: &ProviderProbeResults, max_age: Duration) -> bool {
+        // First check staleness
+        if Self::is_stale(results, max_age) {
+            return false;
+        }
+
+        // Then check if any tracked provider has exceeded the failure threshold
+        // Use should_reprobe() for consistency
+        for provider in self.consecutive_failures.keys() {
+            if self.should_reprobe(provider) {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    /// Get providers that need re-probing due to consecutive failures
+    ///
+    /// Returns a list of provider names that have exceeded the consecutive failure threshold.
+    /// This can be used to log which providers are problematic before triggering a re-probe.
+    ///
+    /// # Returns
+    /// A vector of provider names that need re-probing
+    pub fn providers_needing_reprobe(&self) -> Vec<String> {
+        let mut needing = Vec::new();
+
+        for (provider, &count) in &self.consecutive_failures {
+            if count >= self.consecutive_failure_threshold {
+                needing.push(provider.clone());
+            }
+        }
+
+        needing
+    }
+
     /// Get the current consecutive failure count for a provider
     pub fn failure_count(&self, provider: &str) -> u32 {
         self.consecutive_failures.get(provider).copied().unwrap_or(0)
@@ -373,46 +432,26 @@ struct ProbeInnerResult {
 ///
 /// # Example
 ///
-/// This example shows how to integrate failure tracking with provider probe
-/// results to trigger re-probing on consecutive HTTP errors:
+/// This example shows how to use the failure tracker to monitor provider health:
 ///
 /// ```no_run
-/// use gribtract::ProviderProbe;
 /// use gribtract_fetch::probe::ProviderFailureTracker;
-/// use std::path::Path;
 ///
-/// // Load provider probe results
-/// let probe = ProviderProbe::load(Path::new("provider-probe.json")).unwrap();
+/// // Create a failure tracker with threshold of 3 consecutive errors
+/// let mut tracker = ProviderFailureTracker::new(3);
 ///
-/// // Initialize failure tracker
-/// let mut tracker = ProviderFailureTracker::new(3); // threshold = 3 consecutive errors
+/// // Simulate HTTP request results
+/// // tracker.record_failure("s3:hrrr");
+/// // tracker.record_failure("s3:hrrr");
+/// // tracker.record_failure("s3:hrrr");
 ///
-/// // Check if probe is valid (fresh + no providers need re-probing)
-/// if !probe.is_valid(24 * 3600, &tracker) {
-///     // Get providers needing re-probe for logging
-///     let needing = probe.providers_needing_reprobe(&tracker);
-///     eprintln!("Re-probe triggered by consecutive failures: {}",
-///         needing.join(", "));
-///     // Trigger re-probe...
+/// // Check if re-probing is needed
+/// if tracker.should_reprobe("s3:hrrr") {
+///     println!("Provider s3:hrrr needs re-probing due to consecutive failures");
 /// }
 ///
-/// // Use best provider and track results
-/// if let Some(provider) = probe.best_provider("gfs") {
-///     match fetch_data_from_provider(provider).await {
-///         Ok(_) => tracker.record_success(provider),
-///         Err(_) => {
-///             let count = tracker.record_failure(provider);
-///             eprintln!("HTTP error from {provider} (failure {count}/3)");
-///
-///             // Check if we've hit the re-probe threshold
-///             if tracker.should_reprobe(provider) {
-///                 eprintln!("Provider {provider} has {count} consecutive failures, triggering re-probe");
-///                 // Trigger re-probe...
-///             }
-///         }
-///     }
-/// }
-/// # fn fetch_data_from_provider(p: &str) -> Result<(), Box<dyn std::error::Error>> { Ok(()) }
+/// // Reset after successful request
+/// // tracker.record_success("s3:hrrr");
 /// ```
 #[derive(Debug, Clone)]
 pub struct ProviderFailureTracker {
@@ -809,5 +848,108 @@ mod tests {
         assert!(!files["gefs"].is_empty());
         assert!(!files["nbm"].is_empty());
         assert!(!files["gfs"].is_empty());
+    }
+
+    #[test]
+    fn test_is_valid_with_fresh_results_and_no_failures() {
+        let probe = ProviderProbe::new();
+
+        // Create fresh results (current timestamp)
+        let mut results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Fresh results with no failures should be valid
+        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)));
+    }
+
+    #[test]
+    fn test_is_valid_with_stale_results() {
+        let probe = ProviderProbe::new();
+
+        // Create stale results (25 hours old)
+        let mut timestamp = chrono::Utc::now() - chrono::Duration::hours(25);
+        let mut results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: timestamp.to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Stale results should not be valid even with no failures
+        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)));
+    }
+
+    #[test]
+    fn test_is_valid_with_consecutive_failures() {
+        let mut probe = ProviderProbe::new().with_threshold(3);
+
+        // Create fresh results
+        let mut results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Record 3 consecutive failures for a provider
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr");
+
+        // Fresh results but with failures should not be valid
+        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)));
+    }
+
+    #[test]
+    fn test_is_valid_with_failures_below_threshold() {
+        let mut probe = ProviderProbe::new().with_threshold(3);
+
+        // Create fresh results
+        let mut results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Record only 2 failures (below threshold)
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr");
+
+        // Should be valid since threshold is 3
+        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)));
+    }
+
+    #[test]
+    fn test_providers_needing_reprobe() {
+        let mut probe = ProviderProbe::new().with_threshold(2);
+
+        // Record failures
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr"); // Exceeds threshold of 2
+
+        probe.record_failure("gcs:hrrr"); // Below threshold
+
+        probe.record_failure("s3:gefs");
+        probe.record_failure("s3:gefs");
+        probe.record_failure("s3:gefs"); // Exceeds threshold of 2
+
+        let needing = probe.providers_needing_reprobe();
+
+        // Should include s3:hrrr and s3:gefs, but not gcs:hrrr
+        assert_eq!(needing.len(), 2);
+        assert!(needing.contains(&"s3:hrrr".to_string()));
+        assert!(needing.contains(&"s3:gefs".to_string()));
+        assert!(!needing.contains(&"gcs:hrrr".to_string()));
+    }
+
+    #[test]
+    fn test_providers_needing_reprobe_empty_when_no_failures() {
+        let probe = ProviderProbe::new().with_threshold(3);
+
+        let needing = probe.providers_needing_reprobe();
+
+        // No providers should need re-probing
+        assert!(needing.is_empty());
     }
 }
