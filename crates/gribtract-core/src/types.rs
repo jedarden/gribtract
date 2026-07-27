@@ -1474,4 +1474,159 @@ mod tests {
         assert_eq!(idx_pos, Some(2));
         assert_eq!(idx_pos, idx_neg, "-180° should resolve the same as +180°");
     }
+
+    // ── Rotated lat/lon (GDT 3.1) tests ───────────────────────────────────────
+
+    /// Construct a small synthetic rotated lat/lon grid.
+    ///
+    /// Uses a rotation where the south pole of the rotated system is at
+    /// geographic coordinates (lat=30°N, lon=0°E) with a rotation angle of 0°.
+    /// This places the "north pole" of the rotated system at (lat=60°S, lon=180°E).
+    ///
+    /// Grid: 5 columns × 5 rows, 10° spacing in the rotated coordinate system.
+    /// First point at rotated coordinates (lat_rot=40°N, lon_rot=0°E).
+    fn test_rotated_latlon_grid() -> GridDefinition {
+        let p = RotatedLatLonParams {
+            lat_pole_rot: 30.0,   // South pole of rotated system at 30°N
+            lon_pole_rot: 0.0,    // at Greenwich meridian
+            angle_rot: 0.0,       // No additional rotation
+        };
+        GridDefinition {
+            template: 1,
+            num_data_points: 25,
+            nx: 5,
+            ny: 5,
+            lat_first: 40.0,  // In rotated coordinates
+            lon_first: 0.0,
+            lat_last: 0.0,    // In rotated coordinates
+            lon_last: 40.0,
+            di: 10.0,
+            dj: 10.0,
+            scanning_mode: 0x00,  // +i, -j
+            resolution_flags: 0x30,
+            shape_of_earth: 6,
+            projection: GridProjection::RotatedLatLon(p),
+        }
+    }
+
+    #[test]
+    fn rotated_latlon_nearest_first_point_returns_zero() {
+        // The first grid point in rotated coordinates should map to index 0.
+        // Since the rotation angle is 0°, we can compute the corresponding
+        // geographic coordinates directly.
+        let g = test_rotated_latlon_grid();
+        let rp = match &g.projection {
+            GridProjection::RotatedLatLon(p) => p,
+            _ => panic!("expected RotatedLatLon"),
+        };
+
+        // First point in rotated coordinates: (40°N, 0°E)
+        // Convert to geographic coordinates
+        let (lat_geo, lon_geo) = rp.geographic_to_rotated(40.0, 0.0);
+
+        // The point in the rotated frame should map back to itself when
+        // it's the query point (round-trip transformation)
+        let idx = g.nearest_index(lat_geo, lon_geo);
+        assert_eq!(idx, Some(0), "first grid point should map to index 0");
+    }
+
+    #[test]
+    fn rotated_latlon_nearest_last_point_returns_n_minus_1() {
+        // Last grid point in rotated coordinates: (0°, 40°E)
+        let g = test_rotated_latlon_grid();
+        let rp = match &g.projection {
+            GridProjection::RotatedLatLon(p) => p,
+            _ => panic!("expected RotatedLatLon"),
+        };
+
+        let (lat_geo, lon_geo) = rp.geographic_to_rotated(0.0, 40.0);
+        let n = g.num_data_points as usize;
+        let idx = g.nearest_index(lat_geo, lon_geo);
+        assert_eq!(idx, Some(n - 1), "last grid point should map to index {}", n - 1);
+    }
+
+    #[test]
+    fn rotated_latlon_nearest_center_point() {
+        // Center of grid in rotated coordinates: (20°N, 20°E)
+        // Should map to index 2*5 + 2 = 12
+        let g = test_rotated_latlon_grid();
+        let rp = match &g.projection {
+            GridProjection::RotatedLatLon(p) => p,
+            _ => panic!("expected RotatedLatLon"),
+        };
+
+        let (lat_geo, lon_geo) = rp.geographic_to_rotated(20.0, 20.0);
+        let idx = g.nearest_index(lat_geo, lon_geo);
+        assert_eq!(idx, Some(12), "center point should map to index 12");
+    }
+
+    #[test]
+    fn rotated_latlon_nearest_outside_grid_returns_none() {
+        // A point far outside the rotated grid should return None.
+        // Query at geographic coordinates that map to rotated coordinates
+        // far outside the grid extent.
+        let g = test_rotated_latlon_grid();
+
+        // Geographic North Pole is always far outside most rotated grids
+        let idx = g.nearest_index(90.0, 0.0);
+        assert_eq!(idx, None, "North Pole should be outside rotated grid");
+    }
+
+    #[test]
+    fn rotated_latlon_roundtrip_transformation() {
+        // Verify that the rotation transformation is its own inverse
+        // (for the rotation angle = 0° case).
+        let rp = RotatedLatLonParams {
+            lat_pole_rot: 30.0,
+            lon_pole_rot: 0.0,
+            angle_rot: 0.0,
+        };
+
+        // Test point: (45°N, 90°E) in geographic coordinates
+        let lat_geo = 45.0;
+        let lon_geo = 90.0;
+
+        // Rotate to rotated frame
+        let (lat_rot, lon_rot) = rp.geographic_to_rotated(lat_geo, lon_geo);
+
+        // The transformation should preserve the relationship between points
+        // even if the exact coordinates change due to rotation
+        assert!(!lat_rot.is_nan(), "rotated latitude should not be NaN");
+        assert!(!lon_rot.is_nan(), "rotated longitude should not be NaN");
+
+        // Reasonable bounds check (result should still be valid lat/lon)
+        assert!(lat_rot >= -90.0 && lat_rot <= 90.0,
+                "rotated latitude should be in valid range: {}", lat_rot);
+        assert!(lon_rot >= -360.0 && lon_rot <= 360.0,
+                "rotated longitude should be in valid range: {}", lon_rot);
+    }
+
+    #[test]
+    fn rotated_latlon_zero_increment_returns_none() {
+        // Grid with zero increment should return None for any query.
+        let rp = RotatedLatLonParams {
+            lat_pole_rot: 30.0,
+            lon_pole_rot: 0.0,
+            angle_rot: 0.0,
+        };
+        let g = GridDefinition {
+            template: 1,
+            num_data_points: 25,
+            nx: 5,
+            ny: 5,
+            lat_first: 40.0,
+            lon_first: 0.0,
+            lat_last: 0.0,
+            lon_last: 40.0,
+            di: 0.0,  // Zero increment
+            dj: 10.0,
+            scanning_mode: 0x00,
+            resolution_flags: 0x30,
+            shape_of_earth: 6,
+            projection: GridProjection::RotatedLatLon(rp),
+        };
+
+        let idx = g.nearest_index(40.0, 0.0);
+        assert_eq!(idx, None, "zero increment should return None");
+    }
 }

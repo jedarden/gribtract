@@ -2,6 +2,7 @@
 
 use crate::error::{FetchError, Result};
 use bytes::Bytes;
+use std::collections::HashMap;
 use std::ops::Range;
 use std::time::Duration;
 
@@ -154,6 +155,51 @@ impl FetchClient {
         Self::with_timeout(Duration::from_secs(30))
     }
 
+    /// Extract provider identifier from a URL
+    ///
+    /// Returns a string like "s3:hrrr", "gcs:gefs", "nomads:gfs", etc.
+    /// Returns None if the provider cannot be determined from the URL.
+    fn extract_provider_from_url(url: &str) -> Option<String> {
+        let url = url.to_lowercase();
+
+        // NOAA S3 buckets: https://noaa-{bucket}.s3.amazonaws.com/
+        if url.contains("s3.amazonaws.com") {
+            if url.contains("hrrr") {
+                return Some("s3:hrrr".to_string());
+            } else if url.contains("gefs") {
+                return Some("s3:gefs".to_string());
+            } else if url.contains("nbm") {
+                return Some("s3:nbm".to_string());
+            } else if url.contains("gfs") {
+                return Some("s3:gfs".to_string());
+            }
+        }
+
+        // Google Cloud Storage: https://storage.googleapis.com/{bucket}/
+        if url.contains("storage.googleapis.com") {
+            if url.contains("high-resolution-rapid-refresh") || url.contains("hrrr") {
+                return Some("gcs:hrrr".to_string());
+            } else if url.contains("gfs-ensemble-forecast-system") || url.contains("gefs") {
+                return Some("gcs:gefs".to_string());
+            } else if url.contains("national-blend-of-models") || url.contains("nbm") {
+                return Some("gcs:nbm".to_string());
+            }
+        }
+
+        // NOMADS: https://nomads.ncep.noaa.gov/
+        if url.contains("nomads.ncep.noaa.gov") {
+            if url.contains("/gfs/") {
+                return Some("nomads:gfs".to_string());
+            } else if url.contains("/gefs/") {
+                return Some("nomads:gefs".to_string());
+            } else if url.contains("/nam/") {
+                return Some("nomads:nam".to_string());
+            }
+        }
+
+        None
+    }
+
     /// Create a new fetch client with a specified timeout
     pub fn with_timeout(timeout: Duration) -> Self {
         let client = reqwest::Client::builder()
@@ -180,7 +226,8 @@ impl FetchClient {
     }
 
     /// Fetch a byte range from a URL
-    pub async fn fetch_range(&self, url: &str, range: RangeRequest) -> Result<RangeResponse> {
+    pub async fn fetch_range(&mut self, url: &str, range: RangeRequest) -> Result<RangeResponse> {
+        let provider = Self::extract_provider_from_url(url);
         let header_value = range.to_header_value();
 
         let response = self
@@ -188,55 +235,100 @@ impl FetchClient {
             .get(url)
             .header("Range", header_value)
             .send()
-            .await?;
+            .await;
 
-        let status = response.status();
+        match response {
+            Ok(resp) => {
+                let status = resp.status();
 
-        if !status.is_success() {
-            return Err(FetchError::HttpStatus(status));
-        }
+                if !status.is_success() {
+                    // Record failure for non-success status
+                    if let Some(provider) = provider {
+                        self.record_failure(&provider);
+                    }
+                    return Err(FetchError::HttpStatus(status));
+                }
 
-        let content_range_header = response
-            .headers()
-            .get("content-range")
-            .and_then(|v| v.to_str().ok());
+                let content_range_header = resp
+                    .headers()
+                    .get("content-range")
+                    .and_then(|v| v.to_str().ok());
 
-        let content_range = match content_range_header {
-            Some(header) => ContentRange::parse(header)?,
-            None => {
-                // Some providers might not return Content-Range for 200 OK responses
-                // (they return the full resource instead of a range)
-                return Err(FetchError::InvalidContentRange(
-                    "Missing Content-Range header".into(),
-                ));
+                let content_range = match content_range_header {
+                    Some(header) => ContentRange::parse(header)?,
+                    None => {
+                        // Some providers might not return Content-Range for 200 OK responses
+                        // (they return the full resource instead of a range)
+                        if let Some(provider) = provider {
+                            self.record_failure(&provider);
+                        }
+                        return Err(FetchError::InvalidContentRange(
+                            "Missing Content-Range header".into(),
+                        ));
+                    }
+                };
+
+                let total_size = content_range.total;
+                let data = resp.bytes().await?;
+
+                // Record success on successful request
+                if let Some(provider) = provider {
+                    self.record_success(&provider);
+                }
+
+                Ok(RangeResponse {
+                    data,
+                    content_range,
+                    total_size,
+                })
             }
-        };
-
-        let total_size = content_range.total;
-        let data = response.bytes().await?;
-
-        Ok(RangeResponse {
-            data,
-            content_range,
-            total_size,
-        })
+            Err(e) => {
+                // Record failure for request errors (timeout, connection refused, etc.)
+                if let Some(provider) = provider {
+                    self.record_failure(&provider);
+                }
+                Err(FetchError::Reqwest(e))
+            }
+        }
     }
 
     /// Fetch the first N bytes from a URL
-    pub async fn fetch_head(&self, url: &str, length: u64) -> Result<RangeResponse> {
+    pub async fn fetch_head(&mut self, url: &str, length: u64) -> Result<RangeResponse> {
         self.fetch_range(url, RangeRequest::with_length(0, length)).await
     }
 
     /// Fetch the entire resource (no range request)
-    pub async fn fetch_all(&self, url: &str) -> Result<Bytes> {
-        let response = self.client.get(url).send().await?;
+    pub async fn fetch_all(&mut self, url: &str) -> Result<Bytes> {
+        let provider = Self::extract_provider_from_url(url);
 
-        let status = response.status();
-        if !status.is_success() {
-            return Err(FetchError::HttpStatus(status));
+        let response = self.client.get(url).send().await;
+
+        match response {
+            Ok(resp) => {
+                let status = resp.status();
+                if !status.is_success() {
+                    // Record failure for non-success status
+                    if let Some(provider) = provider {
+                        self.record_failure(&provider);
+                    }
+                    return Err(FetchError::HttpStatus(status));
+                }
+
+                // Record success on successful request
+                if let Some(provider) = provider {
+                    self.record_success(&provider);
+                }
+
+                Ok(resp.bytes().await?)
+            }
+            Err(e) => {
+                // Record failure for request errors (timeout, connection refused, etc.)
+                if let Some(provider) = provider {
+                    self.record_failure(&provider);
+                }
+                Err(FetchError::Reqwest(e))
+            }
         }
-
-        Ok(response.bytes().await?)
     }
 
     /// Get the resource size with a HEAD request (Content-Length header)
