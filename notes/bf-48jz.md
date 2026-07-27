@@ -42,9 +42,10 @@ https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20240601/conus/hrrr.t12z.wrfsfcf
 - **DRT=3 Consistency:** 139/170 messages (~82% of analysis file; forecast files show ~100%)
 
 **Access Verification:**
-- **HTTP Status:** 200 OK (tested 2026-07-03 at 10:17 UTC and 2026-07-03 at ~11:30 UTC)
+- **HTTP Status:** 200 OK (tested 2026-07-03 at 10:17 UTC, 2026-07-03 at ~11:30 UTC, and 2026-07-27 at 18:29 UTC)
 - **Last-Modified:** June 1, 2024, 12:50:44 UTC
 - **Authentication:** None required (public S3 bucket)
+- **Current Content-Length:** 142,393,582 bytes (verified 2026-07-27)
 
 ---
 
@@ -71,8 +72,9 @@ https://noaa-nam-pds.s3.amazonaws.com/nam.20250115/nam.t00z.awphys00.tm00.grib2
 - **DRT=3 Consistency:** 100% (396/396 messages)
 
 **Access Verification:**
-- **HTTP Status:** 200 OK (tested 2026-07-03 at 10:17 UTC)
+- **HTTP Status:** 200 OK (tested 2026-07-03 at 10:17 UTC and 2026-07-27 at 18:29 UTC)
 - **Authentication:** None required (public S3 bucket)
+- **Current Content-Length:** 52,938,055 bytes (~50.5 MB, verified 2026-07-27)
 
 ---
 
