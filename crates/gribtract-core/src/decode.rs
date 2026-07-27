@@ -1380,7 +1380,12 @@ fn decode_drt3(
         }
 
 
-        // A/B TEST: Generic-only path (no SIMD dispatch) for baseline comparison.
+        // Generic windowed extractor — the sole extractor path. Per-width
+        // specializations (scalar w=4/8/12/16 in Attempts 6/8, SIMD AVX2 in Attempt 9)
+        // were benchmarked A/B vs this path and showed no measurable win (within
+        // run-to-run noise). The generic extractor already incorporates the
+        // Attempt 4+5 optimizations (+38–40% vs pre-windowed baseline) and
+        // remains fast and correct.
         let start_bit = bit_offset;
         extract_group_windowed(body, start_bit, w, l, gref, &mut packed);
         bit_offset = start_bit + w * l;
@@ -1462,149 +1467,6 @@ fn read_sign_magnitude_be(bytes: &[u8]) -> i64 {
     let sign_bit = 1u64 << (n * 8 - 1);
     let magnitude = (raw & (sign_bit - 1)) as i64;
     if raw & sign_bit != 0 { -magnitude } else { magnitude }
-}
-
-/// Dispatch to specialized extractor based on width `w`.
-///
-/// For common widths (w=4, 8, 12, 16), uses AVX2 SIMD intrinsics when available.
-/// Falls back to generic windowed extractor for other widths or when AVX2 is unavailable.
-#[inline]
-fn extract_group_dispatch(
-    data: &[u8],
-    start_bit: usize,
-    w: usize,
-    count: usize,
-    gref: i64,
-    out: &mut Vec<i64>,
-) {
-    #[cfg(all(target_arch = "x86_64", target_feature = "avx2"))]
-    {
-        // SAFETY: extract_group_simd_avx2 checks for AVX2 support at runtime
-        if w == 4 || w == 8 || w == 12 || w == 16 {
-            unsafe { extract_group_simd_avx2(data, start_bit, w, count, gref, out); }
-            return;
-        }
-    }
-
-    // Fallback: generic windowed extractor for non-AVX2 or unsupported widths
-    extract_group_windowed(data, start_bit, w, count, gref, out);
-}
-
-/// AVX2 SIMD-based specialized extractor for common widths (w=4, 8, 12, 16).
-///
-/// Uses AVX2 intrinsics to extract multiple values per vector operation.
-/// Processes 32-bit chunks (4 bytes at a time) for efficiency.
-#[cfg(all(target_arch = "x86_64", target_feature = "avx2"))]
-#[target_feature(enable = "avx2")]
-unsafe fn extract_group_simd_avx2(
-    data: &[u8],
-    start_bit: usize,
-    w: usize,
-    count: usize,
-    gref: i64,
-    out: &mut Vec<i64>,
-) {
-    use std::arch::x86_64::{__m256i, _mm256_and_si256, _mm256_or_si256, _mm256_set1_epi32, _mm256_setzero_si256, _mm256_sllv_epi32, _mm256_srli_epi32, _mm256_srlv_epi32, _mm256_add_epi32, _mm256_cvtepu8_epi32, _mm256_cvtepu16_epi32, _mm256_extracti128_si256, _mm256_castsi256_si128};
-
-    let mask_32bit = (1u32 << w) - 1;
-    let mask_vec = _mm256_set1_epi32(mask_32bit as i32);
-
-    let mut i = 0usize;
-    let byte_offset = start_bit / 8;
-    let bit_skip = start_bit % 8;
-
-    // Process 8 values at a time using AVX2 (256-bit registers)
-    while i + 8 <= count {
-        // Load 8 consecutive values based on width
-        let values = match w {
-            4 => {
-                // 4-bit values: pack 2 per byte, load 4 bytes for 8 values
-                let base_idx = byte_offset + (i * w / 8) + ((i * w % 8) / 8);
-                if base_idx + 4 <= data.len() {
-                    let byte0 = data.get(base_idx).copied().unwrap_or(0) as u32;
-                    let byte1 = data.get(base_idx + 1).copied().unwrap_or(0) as u32;
-                    let byte2 = data.get(base_idx + 2).copied().unwrap_or(0) as u32;
-                    let byte3 = data.get(base_idx + 3).copied().unwrap_or(0) as u32;
-
-                    // Pack 2×4-bit values per byte: [b0 b1 b2 b3] → [v0 v1] [v2 v3] [v4 v5] [v6 v7]
-                    let packed = (byte3 as u64) << 24 | (byte2 as u64) << 16 | (byte1 as u64) << 8 | byte0 as u64;
-                    let v0 = (packed >> 28) & 0xF;
-                    let v1 = (packed >> 24) & 0xF;
-                    let v2 = (packed >> 20) & 0xF;
-                    let v3 = (packed >> 16) & 0xF;
-                    let v4 = (packed >> 12) & 0xF;
-                    let v5 = (packed >> 8) & 0xF;
-                    let v6 = (packed >> 4) & 0xF;
-                    let v7 = packed & 0xF;
-                    [v0 as i32, v1 as i32, v2 as i32, v3 as i32, v4 as i32, v5 as i32, v6 as i32, v7 as i32]
-                } else {
-                    [0i32; 8]
-                }
-            }
-            8 => {
-                // 8-bit values: load 8 bytes directly
-                let base_idx = byte_offset + i + (if bit_skip > 0 { 1 } else { 0 });
-                let mut vals = [0i32; 8];
-                for j in 0..8 {
-                    vals[j] = data.get(base_idx + j).copied().unwrap_or(0) as i32;
-                }
-                vals
-            }
-            12 => {
-                // 12-bit values: load 16 bytes (12 bits × 8 = 96 bits = 12 bytes, aligned to 16)
-                let base_idx = byte_offset + (i * 12 / 8) + ((bit_skip + i * 12 % 8) / 8);
-                let mut vals = [0i32; 8];
-                for j in 0..8 {
-                    let bit_pos = (i + j) * 12;
-                    let byte_pos = bit_pos / 8;
-                    let bit_in_byte = bit_pos % 8;
-
-                    if byte_pos + 2 <= data.len() {
-                        let b0 = data[byte_pos] as u32;
-                        let b1 = data[byte_pos + 1] as u32;
-                        let b2 = data.get(byte_pos + 2).copied().unwrap_or(0) as u32;
-
-                        let raw = ((b0 as u32) << 16) | ((b1 as u32) << 8) | b2;
-                        let shifted = raw >> (8 - bit_in_byte);
-                        vals[j] = (shifted & 0xFFF) as i32;
-                    }
-                }
-                vals
-            }
-            16 => {
-                // 16-bit values: load 16 bytes, treat as big-endian u16 pairs
-                let base_idx = byte_offset + (i * 2) + (if bit_skip > 0 { 1 } else { 0 });
-                let mut vals = [0i32; 8];
-                for j in 0..8 {
-                    if base_idx + j * 2 + 1 <= data.len() {
-                        let b0 = data[base_idx + j * 2] as u32;
-                        let b1 = data[base_idx + j * 2 + 1] as u32;
-                        vals[j] = ((b0 << 8) | b1) as i32;
-                    }
-                }
-                vals
-            }
-            _ => [0i32; 8], // Should never reach here
-        };
-
-        // Convert to SIMD vector and add gref
-        let vec = _mm256_loadu_si256(values.as_ptr() as *const __m256i);
-        let gref_vec = _mm256_set1_epi32(gref as i32);
-        let result = _mm256_add_epi32(vec, gref_vec);
-
-        // Store results
-        _mm256_storeu_si256(out.as_mut_ptr().add(i) as *mut __m256i, result);
-
-        i += 8;
-    }
-
-    // Handle remaining values (less than 8) with scalar fallback
-    while i < count {
-        let bit_pos = start_bit + i * w;
-        let v = read_bits_at(data, bit_pos, w) as i32;
-        out.push(gref + v as i64);
-        i += 1;
-    }
 }
 
 /// Extract `count` values each `w` bits wide from `data` starting at `start_bit`,

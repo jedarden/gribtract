@@ -341,3 +341,55 @@ re-attempt scalar specializations.** The next meaningful DRT=3 speedup requires
 attacking the spatial-differencing sequential dependency or eliminating the `packed`
 intermediate allocation (see Attempt 5 "Next headroom"), or SIMD intrinsics operating
 across multiple group values at once.
+
+---
+
+## Attempt 9: SIMD-based per-width specializations with AVX2 intrinsics (2026-07-27)
+
+**Technique:** Add specialized extractors for common widths (w=4, 8, 12, 16) using
+`std::arch::x86_64` AVX2 SIMD intrinsics (`__m256i` vector operations). A dispatch
+function `extract_group_dispatch` checks for AVX2 support at runtime and uses the
+SIMD path for supported widths, falling back to the generic `extract_group_windowed`
+for other widths or when AVX2 is unavailable. This is distinct from the scalar
+specializations in Attempts 6 & 8.
+
+The SIMD implementation processes 8 values per vector operation using 256-bit AVX2
+registers, with dedicated bit-packing logic for each width (4-bit: 2 values/byte,
+8-bit: direct byte loads, 12-bit: cross-byte reads, 16-bit: big-endian u16 pairs).
+
+**Result (DRT=3 / template 5.3, GFS 1-degree fixture — 3 runs/variant):**
+
+| variant                       | runs (MB/s)        | mean           |
+|-------------------------------|--------------------|----------------|
+| SIMD specialized (AVX2)       | 20.8, 20.8, 20.8   | **20.80 MB/s** |
+| Generic-only (windowed)       | 20.8, 20.9, 20.6   | **20.77 MB/s** |
+
+- Delta: +0.03 MB/s (**+0.1%** for SIMD by mean) — **not significant**; well within
+  the host's run-to-run noise (±1–2% on consecutive identical-config runs).
+- Agreement: 100.0% in every run for both variants; full workspace tests pass
+  (83 passed, 0 failed); differential suite reports **6/6 (100.0%)**.
+- SIMD code compiled and executed correctly on AVX2 hardware, all decode tests passed.
+
+**Why no win (consistent with Attempts 6 & 8):** The bit-extraction inner loop
+is no longer the bottleneck after Attempts 4 and 5. `extract_group_windowed`'s
+while-loop refill runs at most `ceil(w/8) ≤ 2` iterations per element for w ≤ 16,
+and the branch predictor learns the pattern. The SIMD paths eliminate this loop,
+but the saved cycles are dwarfed by:
+1. The spatial-differencing running sum (strict sequential dependency, O(n_points)).
+2. The final f64 scaling pass (reads/writes ~520 KB for a 65K-point field).
+3. Vector register pressure and the cross-byte bit-packing complexity for non-power-of-2
+   widths (especially w=12) offset any micro-architectural gains.
+
+**Reverted to generic-only.** The SIMD dispatch function (`extract_group_dispatch`)
+and the AVX2 specialized extractor (`extract_group_simd_avx2`) were removed from
+`decode.rs`. The group loop now calls `extract_group_windowed` directly — the sole
+extractor path. `extract_group_windowed_matches_read_bits_at` is retained (guards
+the surviving function). Per the plan rule, a faster path that does not measurably
+win is reverted.
+
+**Conclusion / dead end:** Per-width **SIMD** specializations of the DRT=3 group
+extractor are a confirmed dead end — benchmarked with AVX2 intrinsics and found to
+provide no measurable benefit over the generic windowed extractor. **Do not
+re-attempt per-width specializations (scalar or SIMD).** The next meaningful DRT=3
+speedup requires attacking the spatial-differencing sequential dependency or
+eliminating the `packed` intermediate allocation (see Attempt 5 "Next headroom").
