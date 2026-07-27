@@ -15,16 +15,18 @@
 pub mod client;
 pub mod error;
 pub mod provider;
+pub mod utils;
 
 pub use client::{FetchClient, RangeRequest};
 pub use error::{FetchError, Result};
 pub use provider::{DataProvider, GcsBucket, NomadsModel, S3Bucket, StorageProvider};
+pub use utils::{civil_date, probe_date_str};
 
 #[cfg(feature = "probe")]
 pub mod probe;
 
 #[cfg(feature = "probe")]
-pub use probe::{ProbeResult, ProviderProbe};
+pub use probe::{ProbeResult, ProviderProbe, ProviderFailureTracker};
 
 /// Re-export reqwest::StatusCode for convenience
 pub use reqwest::StatusCode;
