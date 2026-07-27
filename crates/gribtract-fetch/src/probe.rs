@@ -131,15 +131,21 @@ impl ProviderProbe {
     }
 
     /// Probe all providers for all models
-    pub async fn probe_all(&self) -> ProviderProbeResults {
+    pub async fn probe_all(&mut self) -> ProviderProbeResults {
         let mut results = HashMap::new();
         let timestamp = chrono::Utc::now().to_rfc3339();
 
-        for (model, probe_files) in &self.probe_files {
+        // Collect the models and probe_files to avoid borrow checker issues
+        let models: Vec<(String, Vec<(String, String)>)> = self.probe_files
+            .iter()
+            .map(|(model, probe_files)| (model.clone(), probe_files.clone()))
+            .collect();
+
+        for (model, probe_files) in models {
             let mut model_results = Vec::new();
 
             for (provider, url) in probe_files {
-                let result = self.probe_url(provider, url).await;
+                let result = self.probe_url(&provider, &url).await;
                 model_results.push(result);
             }
 
@@ -148,7 +154,7 @@ impl ProviderProbe {
                 a.score.partial_cmp(&b.score).unwrap_or(std::cmp::Ordering::Equal)
             });
 
-            results.insert(model.clone(), model_results);
+            results.insert(model, model_results);
         }
 
         ProviderProbeResults {
@@ -159,12 +165,12 @@ impl ProviderProbe {
     }
 
     /// Probe a single URL
-    async fn probe_url(&self, provider: &str, url: &str) -> ProbeResult {
+    async fn probe_url(&mut self, provider: &str, url: &str) -> ProbeResult {
         let start = std::time::Instant::now();
 
         match self.probe_url_inner(url).await {
             Ok(result) => {
-                let elapsed = start.elapsed();
+                let _elapsed = start.elapsed();
                 ProbeResult {
                     provider: provider.to_string(),
                     probe_url: url.to_string(),
@@ -196,7 +202,7 @@ impl ProviderProbe {
 
     /// Inner probe logic for a single URL
     async fn probe_url_inner(&mut self, url: &str) -> Result<ProbeInnerResult, crate::FetchError> {
-        let start = std::time::Instant::now();
+        let _start = std::time::Instant::now();
 
         // Use the client's probe method to get basic connection info
         let probe_info = self.client.probe(url).await?;
@@ -556,6 +562,47 @@ mod failure_tracker_tests {
         assert_eq!(cloned.failure_count("gcs:hrrr"), 1);
         assert_eq!(cloned.threshold(), 2);
     }
+
+    #[test]
+    fn test_failure_tracker_edge_cases() {
+        let mut tracker = ProviderFailureTracker::new(3);
+
+        // Test zero failures
+        assert_eq!(tracker.failure_count("s3:hrrr"), 0);
+        assert!(!tracker.should_reprobe("s3:hrrr"));
+
+        // Test exactly threshold failures
+        for _ in 0..3 {
+            tracker.record_failure("s3:hrrr");
+        }
+        assert_eq!(tracker.failure_count("s3:hrrr"), 3);
+        assert!(tracker.should_reprobe("s3:hrrr"));
+
+        // Test threshold+1 failures
+        tracker.record_failure("s3:hrrr");
+        assert_eq!(tracker.failure_count("s3:hrrr"), 4);
+        assert!(tracker.should_reprobe("s3:hrrr"), "should_reprobe should remain true after threshold+1 failures");
+    }
+
+    #[test]
+    fn test_failure_tracker_threshold_boundary() {
+        // Test with different threshold values
+        for threshold in 1..=5 {
+            let mut tracker = ProviderFailureTracker::new(threshold);
+
+            // Record (threshold - 1) failures - should NOT trigger
+            for _ in 0..(threshold - 1) {
+                tracker.record_failure("test_provider");
+            }
+            assert_eq!(tracker.failure_count("test_provider"), threshold - 1);
+            assert!(!tracker.should_reprobe("test_provider"), "Should NOT trigger reprobe at threshold-1");
+
+            // Record one more failure - should trigger
+            tracker.record_failure("test_provider");
+            assert_eq!(tracker.failure_count("test_provider"), threshold);
+            assert!(tracker.should_reprobe("test_provider"), "Should trigger reprobe at exactly threshold");
+        }
+    }
 }
 
 #[cfg(test)]
@@ -565,7 +612,7 @@ mod tests {
     #[tokio::test]
     #[ignore] // Requires network access
     async fn test_probe_hrrr() {
-        let probe = ProviderProbe::new();
+        let mut probe = ProviderProbe::new();
         let results = probe.probe_all().await;
 
         println!("Probe results: {}", serde_json::to_string_pretty(&results).unwrap());
