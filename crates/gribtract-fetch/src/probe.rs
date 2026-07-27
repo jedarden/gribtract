@@ -392,7 +392,7 @@ struct ProbeInnerResult {
 ///     // Get providers needing re-probe for logging
 ///     let needing = probe.providers_needing_reprobe(&tracker);
 ///     eprintln!("Re-probe triggered by consecutive failures: {}",
-//!         needing.join(", "));
+///         needing.join(", "));
 ///     // Trigger re-probe...
 /// }
 ///
