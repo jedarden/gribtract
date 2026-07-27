@@ -222,12 +222,20 @@ renders the comparison and the absolute throughput, both tagged with `git_sha` +
   stereographic, Gaussian, rotated. Geometry must match for point asof-joins.
 - [x] **Phase 6 — Ensembles + statistical products (GEFS).** Product templates for
   members and time-aggregated fields.
-- [x] **Phase 7 — Publish + integrate.** crates.io, Python bindings, and the
+- [ ] **Phase 7 — Publish + integrate.** crates.io, Python bindings, and the
   forecast-timeseries emitter consumed by downstream time-series analysis.
   Includes the **provider probe** (`xtask probe-providers` + runtime `ProviderProbe`):
   each candidate provider for each model is probed at startup (`.idx` fetch + one
   range request); results cached to `provider-probe.json` with a 24h TTL. See the
   "Provider probe & selection" component above for the full spec.
+
+  **Status (2026-07-27):** Python bindings (gribtract-py) and provider probe are
+  implemented. crates.io publish prep is complete (docs/notes/publish-guide.md,
+  dry-run verified), but the actual publish step requires a crates.io API token
+  — an ExternalSecret following the `crates-io-token-pdftract-externalsecret.yml.disabled`
+  pattern needs to be provisioned in declarative-config, then the publish sequence
+  in publish-guide.md must be run by a maintainer. Neither `gribtract` nor
+  `gribtract-core` is currently live on crates.io (verified via crates.io API).
 
 ## Marathon loop contract
 
