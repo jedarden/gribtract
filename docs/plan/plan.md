@@ -31,7 +31,7 @@ repeat.*
 
 ```
                  ┌──────────────────────────────────────────────┐
-   .grib2 bytes  │  gribtract-core (no_std-friendly where able)  │
+   .grib2 bytes  │  gribtract-core (pure parser, no I/O)  │
    ───────────►  │                                                │
                  │  Indicator(0) → Identification(1) → Local(2)   │
                  │   → Grid Def(3) → Product Def(4)               │
@@ -281,9 +281,8 @@ the obvious next pick, advancing this track is always valid work.
 
 gribtract's core value proposition, stated in the README, is "no C toolchain, no
 FFI" for the default build (DRT 5.0/5.2/5.3/5.41 — JPEG2000 is the one deliberate,
-feature-gated exception). `gribtract-core` is already described in
-`docs/plan/plan.md` as "no_std-friendly where able" and has zero I/O dependencies —
-it takes `&[u8]` in, returns typed `Field`s out.
+feature-gated exception). `gribtract-core` has zero I/O dependencies — it takes `&[u8]`
+in, returns typed `Field`s out.
 
 Despite that, the only way anyone can currently *experience* gribtract is `git
 clone` + `cargo build`. The repo is public (6 GitHub stargazers as of 2026-07-20),
@@ -355,8 +354,8 @@ records the decision to take the dependency-shape and target-support hit, and wh
   optional/non-default workspace member so default `cargo build`/`cargo test`
   behavior is unaffected).
 - `wasm32-unknown-unknown` becomes a second target the differential-harness
-  contract implicitly protects: `gribtract-core`'s "no_std-friendly where able"
-  note goes from aspirational to load-bearing. Any future dependency added to
+  contract implicitly protects: `gribtract-core`'s pure-parser constraint
+  (no I/O dependencies) becomes load-bearing. Any future dependency added to
   `gribtract-core` or `gribtract` that breaks a `cargo build --target
   wasm32-unknown-unknown -p gribtract` check is a regression, the same way a
   differential-agreement drop is a regression.
