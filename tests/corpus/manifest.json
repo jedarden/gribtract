@@ -80,6 +80,32 @@
       }
     },
     {
+      "id": "rotated_latlon_gdt1_drt0",
+      "path": "small/rotated_latlon_gdt1_drt0.grib2",
+      "sha256": "535975d670fc07e0a46efb20d2fcbbc90bea96f4b573a7f7bd6250928f735295",
+      "size_bytes": 187,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 GDT=1 fixture: 3x3 rotated lat/lon, south pole at (30°N, 0°E), angle=0°. DRT=0 simple packing: R=270.0 E=0 D=0 N=8. X=[0..8] -> Y=[270..278] K.",
+        "capture_date": "2026-06-21",
+        "generated_by": "scripts/gen_grib2_rotated.py (gribtract project)"
+      }
+    },
+    {
+      "id": "drt4_ieee32_3x3",
+      "path": "small/drt4_ieee32_3x3.grib2",
+      "sha256": "0bc2262db4ce4e07e212cd94fea3a748d96d6ca0392c59a2ee581293423bda6f",
+      "size_bytes": 217,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 DRT=4 fixture: 3x3 lat/lon, IEEE 754 32-bit floats. R=100.0 E=0 D=0 N=32. Values: raw IEEE 32-bit floats [100.0..108.0]. Section 5 template 5.4 (IEEE 754 32-bit floats).",
+        "capture_date": "2026-07-27",
+        "generated_by": "scripts/gen_grib2_drt4.py (gribtract project)"
+      }
+    },
+    {
       "id": "rotated_latlon_5x5",
       "path": "small/rotated_latlon_5x5.grib2",
       "sha256": "8ae9de6cc4cc04d3ada06bed503f44cc4c3395afb43ce84aa10446e2dc081b95",
