@@ -393,3 +393,33 @@ provide no measurable benefit over the generic windowed extractor. **Do not
 re-attempt per-width specializations (scalar or SIMD).** The next meaningful DRT=3
 speedup requires attacking the spatial-differencing sequential dependency or
 eliminating the `packed` intermediate allocation (see Attempt 5 "Next headroom").
+
+---
+
+## Attempt 10: Bead bf-3fh6 - stale duplicate of completed work (2026-07-27)
+
+**Technique:** Bead `bf-3fh6` was created to implement "per-width specialized group extractors
+for DRT=3" based on the "Implication for DRT=3 speed" section from Attempt 2. However,
+that implication has already been fully explored and documented:
+
+- Attempt 6 (2026-07-01): scalar specializations — no measurable win
+- Attempt 8 (2026-07-22): corrected scalar specializations, A/B benchmarked — +3.7% but not
+  significant (within noise floor)
+- Attempt 9 (2026-07-27): SIMD AVX2 specializations — +0.1%, not significant
+
+All three attempts reached the same conclusion: per-width specializations (scalar or SIMD)
+are a dead end because the bit-extraction inner loop is no longer the bottleneck after
+Attempts 4 and 5. The spatial-differencing running sum and final f64 scaling dominate.
+
+**Result:** This bead represents duplicate work. The current code in `decode.rs` already
+uses only the generic `extract_group_windowed` function — the specialized extractors were
+removed in Attempts 6, 8, and 9 after benchmarking showed no measurable benefit.
+
+**Why this bead is stale:** The bead description was seeded from Attempt 2's implication
+("next attempt should specialize per-group extraction for the most common group widths"),
+but that work was completed before this bead was claimed. The parse-speed-log already
+contains three thorough attempts (6, 8, 9) documenting why per-width specializations do
+not improve performance.
+
+**No code change.** The correct state (generic-only extractor) is already in place.
+This log entry documents that bead `bf-3fh6` was closed as a stale/duplicate request.
