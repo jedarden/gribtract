@@ -428,13 +428,30 @@ pub struct GaussianLatLonParams {
 /// Nearest-point queries work by rotating the query point from geographic
 /// coordinates into the rotated coordinate system, then applying the regular
 /// lat/lon arithmetic.
+///
+/// Per WMO Grid Definition Template 1 (rotated lat/lon), the following fields
+/// are defined:
+/// - south_pole_lat: latitude of rotated south pole → stored in `lat_pole_rot`
+/// - south_pole_lon: longitude of rotated south pole → stored in `lon_pole_rot`
+/// - angle_of_rotation: rotation angle → stored in `angle_rot`
+/// - ni: number of points along latitude → stored in `GridDefinition.nx`
+/// - nj: number of points along longitude → stored in `GridDefinition.ny`
+/// - lat_first: latitude of first grid point → stored in `GridDefinition.lat_first`
+/// - lon_first: longitude of first grid point → stored in `GridDefinition.lon_first`
+/// - lat_last: latitude of last grid point → stored in `GridDefinition.lat_last`
+/// - lon_last: longitude of last grid point → stored in `GridDefinition.lon_last`
+/// - di: longitudinal direction increment → stored in `GridDefinition.di`
+/// - dj: latitudinal direction increment → stored in `GridDefinition.dj`
 #[derive(Debug, Clone, PartialEq)]
 pub struct RotatedLatLonParams {
     /// Latitude of the southern pole of the rotation (degrees, positive N).
+    /// WMO field: south_pole_lat
     pub lat_pole_rot: f64,
     /// Longitude of the southern pole of the rotation (degrees, positive E, 0–360).
+    /// WMO field: south_pole_lon
     pub lon_pole_rot: f64,
     /// Angle of rotation of the local coordinate system (degrees, last 2 digits are fractional).
+    /// WMO field: angle_of_rotation
     pub angle_rot: f64,
 }
 
