@@ -1,7 +1,7 @@
 # NOAA Regional Model GRIB2 Archives Research
 
 **Bead:** bf-3l2y
-**Date:** 2026-07-02
+**Date:** 2026-07-27 (updated from 2026-07-02)
 **Task:** Research NOAA's public GRIB2 archives for regional weather models
 
 ## Summary
@@ -350,6 +350,109 @@ Some archives may provide THREDDS/OPeNDAP services for subsetting and remote acc
    - RAP: Hourly
    - RTMA: Hourly
    - SREF: 4x daily (03Z, 09Z, 15Z, 21Z) - proposed for termination
+
+---
+
+## 2026-07-27 Research Update
+
+### Additional Archive URLs and File Details
+
+**NOMADS Operational Access (Short-term retention):**
+- Base URL: `https://nomads.ncep.noaa.gov/pub/data/nccf/com/[MODEL]/prod/`
+- Retention: **2-14 days only** (designed for operational access, not archival)
+- Purpose: Real-time and recent operational data access
+
+**HRRR Specific Details:**
+- **Projection Parameters (GDT 3.30):**
+  - Central Latitude: 38.5°N
+  - Central Longitude: 262.5°W (97.5°W)
+- **File Sizes (revised):**
+  - Surface (wrfsfc): **~140-147 MB** (e.g., 146,626,878 bytes)
+  - Pressure (wrfprs): **>380 MB**
+- **GRIB2 Compression:** Reduces file size to 20-50% compared to GRIB1
+- **NOMADS GRIB Filter:** https://nomads.ncep.noaa.gov/gribfilter.php?ds=hrrr
+
+**NAM Specific Details:**
+- **NOMADS File Sizes:** 
+  - `awphys00.grib2`: **~525 MB** (per NOMADS GRIB filter)
+  - Other products: 425-500 MB range
+- **NOMADS Base URL:** https://nomads.ncep.noaa.gov/pub/data/nccf/com/nam/prod
+- **File Naming Pattern:** `nam.tCCz.[PRODUCT]fFH.tm00.grib2`
+  - CC: 00, 06, 12, 18 UTC
+  - Products: conusnest.hiresf, awphysf, awip12f, firewxnest.hiresf, alaskanest.hiresf
+  - FH: forecast hour (00, 03, 06, etc.)
+
+**RAP Specific Details:**
+- **File Sizes (13km CONUS):** **~17-18 MB** per file
+  - Example: `rap.t00z.awp130pgrbf00.grib2` = 18,500,189 bytes (~17.6 MB)
+- **Grid Types:**
+  - Lambert Conformal: CONUS (13km, 20km, 40km), Puerto Rico (16km)
+  - Polar Stereographic: Alaska (11km)
+  - Lat/Lon: Eastern North Pacific (0.4°)
+- **Run Schedule:**
+  - Standard: 21-hour forecasts (most hours)
+  - Extended: 51-hour forecasts (03, 09, 15, 21 UTC only)
+
+### Long-term Archival Alternatives to NOMADS
+
+Since NOMADS has very short retention (2-14 days), use these for historical data:
+
+| Model | AWS Registry | Azure | Microsoft PC | University Archive |
+|-------|-------------|-------|--------------|-------------------|
+| HRRR | ✅ | ✅ | ✅ | Utah CHPC |
+| NAM | ✅ | - | - | - |
+| RAP | ✅ | ✅ | ✅ | - |
+| NBM | ✅ | - | - | - |
+| RTMA | ✅ | - | - | - |
+
+**Cloud Storage Patterns:**
+- AWS S3: `https://[MODEL]-pds.s3.amazonaws.com/`
+- Azure: `https://noaa[MODEL].blob.core.windows.net/`
+- Utah HRRR: https://home.chpc.utah.edu/~u0553130/Brian_Blaylock/
+
+### Download Tools and Resources
+
+**Python Tools:**
+- **Herbie:** Unified download tool for all NOAA models
+  - Docs: https://herbie.readthedocs.io/
+  - Handles source selection automatically
+- **GribStream API:** Commercial API access
+  - https://gribstream.com/
+
+**Command Line Tools:**
+- **wgrib2:** GRIB2 decoder/encoder
+  - https://www.cpc.ncep.noaa.gov/products/tools/wgrib2/
+- **NOMADS GRIB Filter:** Web interface for subsetting
+  - https://nomads.ncep.noaa.gov/gribfilter.php
+
+**Fast Download Guide:**
+- NOMADS Fast Download Info: https://nomads.ncep.noaa.gov/info.php?page=fastdownload
+- Supports partial HTTP transfers for efficient downloads
+
+### Updated File Size Summary
+
+| Model | Resolution | File Size | Frequency | Archive Source |
+|-------|-----------|-----------|-----------|----------------|
+| HRRR (surface) | 3 km | ~140-147 MB | Hourly | AWS/NOMADS |
+| HRRR (pressure) | 3 km | >380 MB | Hourly | AWS/NOMADS |
+| NAM (awphys) | 12 km | ~525 MB | 4x daily | AWS/NOMADS |
+| RAP (13km CONUS) | 13 km | ~17-18 MB | Hourly | AWS/NOMADS |
+| NBM | 2.5 km | Varies | 4x daily | AWS |
+| RTMA | 2.5 km | Varies | Hourly | AWS |
+
+### Sources Added in 2026-07-27 Update
+
+- [NOMADS GRIB Filter - RAP](https://nomads.ncep.noaa.gov/gribfilter.php?ds=rap)
+- [NOMADS GRIB Filter - HRRR](https://nomads.ncep.noaa.gov/gribfilter.php?ds=hrrr)
+- [NOMADS GRIB Filter - NAM](https://nomads.ncep.noaa.gov/gribfilter.php?ds=nam)
+- [NOMADS Fast Download Guide](https://nomads.ncep.noaa.gov/info.php?page=fastdownload)
+- [Utah HRRR Script Tips](https://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_script_tips.html)
+- [Utah HRRR FAQ](https://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_FAQ.html)
+- [Herbie Documentation - RAP](https://herbie.readthedocs.io/en/latest/gallery/noaa_models/rap.html)
+- [Herbie Documentation - NAM](https://herbie.readthedocs.io/en/latest/gallery/noaa_models/nam.html)
+- [Azure NOAA RAP Dataset](https://microsoft.github.io/AIforEarthDataSets/data/noaa-rap.html)
+- [Microsoft Planetary Computer - HRRR](https://planetarycomputer.microsoft.com/dataset/storage/noaa-hrrr)
+- [Microsoft Planetary Computer - RAP](https://planetarycomputer.microsoft.com/dataset/storage/noaa-rap)
 
 ---
 
