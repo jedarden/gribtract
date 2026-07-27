@@ -142,6 +142,10 @@ impl ContentRange {
 pub struct FetchClient {
     client: reqwest::Client,
     default_timeout: Duration,
+    /// Consecutive failure count per provider (provider identifier -> failure count)
+    consecutive_failures: std::collections::HashMap<String, u32>,
+    /// Threshold for consecutive failures before re-probe trigger
+    consecutive_failure_threshold: u32,
 }
 
 impl FetchClient {
@@ -160,6 +164,8 @@ impl FetchClient {
         Self {
             client,
             default_timeout: timeout,
+            consecutive_failures: std::collections::HashMap::new(),
+            consecutive_failure_threshold: 3, // Default threshold
         }
     }
 
@@ -168,6 +174,8 @@ impl FetchClient {
         Self {
             default_timeout: Duration::from_secs(30),
             client,
+            consecutive_failures: std::collections::HashMap::new(),
+            consecutive_failure_threshold: 3, // Default threshold
         }
     }
 
@@ -283,6 +291,55 @@ impl FetchClient {
             content_length,
         })
     }
+
+    // === Failure tracking methods ===
+
+    /// Get the current consecutive failure count for a provider
+    pub fn get_failure_count(&self, provider: &str) -> u32 {
+        self.consecutive_failures.get(provider).copied().unwrap_or(0)
+    }
+
+    /// Set the consecutive failure threshold
+    pub fn set_threshold(&mut self, threshold: u32) {
+        self.consecutive_failure_threshold = threshold;
+    }
+
+    /// Get the current consecutive failure threshold
+    pub fn get_threshold(&self) -> u32 {
+        self.consecutive_failure_threshold
+    }
+
+    /// Record a failure for the given provider
+    ///
+    /// Increments the consecutive failure counter for the provider.
+    /// Returns the current failure count after incrementing.
+    pub fn record_failure(&mut self, provider: &str) -> u32 {
+        let count = self.consecutive_failures.entry(provider.to_string()).or_insert(0);
+        *count += 1;
+        *count
+    }
+
+    /// Record a success for the given provider
+    ///
+    /// Resets the consecutive failure counter for the provider to zero.
+    pub fn record_success(&mut self, provider: &str) {
+        self.consecutive_failures.insert(provider.to_string(), 0);
+    }
+
+    /// Check if a provider should be re-probed due to consecutive failures
+    ///
+    /// Returns true if the provider has exceeded the consecutive failure threshold.
+    pub fn should_reprobe(&self, provider: &str) -> bool {
+        self.consecutive_failures
+            .get(provider)
+            .map(|&count| count >= self.consecutive_failure_threshold)
+            .unwrap_or(false)
+    }
+
+    /// Reset all failure counters
+    pub fn reset_failures(&mut self) {
+        self.consecutive_failures.clear();
+    }
 }
 
 impl Default for FetchClient {
@@ -360,5 +417,100 @@ mod tests {
 
         let gfs = NomadsModel::Gfs;
         assert_eq!(gfs.base_url(), "https://nomads.ncep.noaa.gov/gfs/");
+    }
+
+    #[test]
+    fn test_failure_tracking_basic() {
+        let mut client = FetchClient::new();
+
+        // Initially, no failures recorded
+        assert_eq!(client.get_failure_count("s3:hrrr"), 0);
+        assert_eq!(client.get_threshold(), 3);
+        assert!(!client.should_reprobe("s3:hrrr"));
+
+        // Record first failure
+        assert_eq!(client.record_failure("s3:hrrr"), 1);
+        assert_eq!(client.get_failure_count("s3:hrrr"), 1);
+        assert!(!client.should_reprobe("s3:hrrr"));
+
+        // Record second failure
+        assert_eq!(client.record_failure("s3:hrrr"), 2);
+        assert_eq!(client.get_failure_count("s3:hrrr"), 2);
+        assert!(!client.should_reprobe("s3:hrrr"));
+
+        // Record third failure - reaches threshold
+        assert_eq!(client.record_failure("s3:hrrr"), 3);
+        assert_eq!(client.get_failure_count("s3:hrrr"), 3);
+        assert!(client.should_reprobe("s3:hrrr"));
+
+        // Record a success - should reset the counter
+        client.record_success("s3:hrrr");
+        assert_eq!(client.get_failure_count("s3:hrrr"), 0);
+        assert!(!client.should_reprobe("s3:hrrr"));
+    }
+
+    #[test]
+    fn test_failure_tracking_multiple_providers() {
+        let mut client = FetchClient::new();
+
+        // Record failures for provider A (need 3 to reach threshold)
+        assert_eq!(client.record_failure("s3:hrrr"), 1);
+        assert_eq!(client.record_failure("s3:hrrr"), 2);
+        assert!(!client.should_reprobe("s3:hrrr")); // Not at threshold yet
+        assert_eq!(client.record_failure("s3:hrrr"), 3);
+        assert!(client.should_reprobe("s3:hrrr")); // Now at threshold
+
+        // Provider B should not be affected
+        assert_eq!(client.get_failure_count("gcs:hrrr"), 0);
+        assert!(!client.should_reprobe("gcs:hrrr"));
+
+        // Record failures for provider B
+        assert_eq!(client.record_failure("gcs:hrrr"), 1);
+        assert!(!client.should_reprobe("gcs:hrrr"));
+
+        // Provider A should still be at threshold
+        assert!(client.should_reprobe("s3:hrrr"));
+    }
+
+    #[test]
+    fn test_failure_threshold_configurable() {
+        let mut client = FetchClient::new();
+
+        // Set custom threshold
+        client.set_threshold(5);
+        assert_eq!(client.get_threshold(), 5);
+
+        // Record 4 failures
+        for _ in 0..4 {
+            client.record_failure("s3:hrrr");
+        }
+
+        assert_eq!(client.get_failure_count("s3:hrrr"), 4);
+        assert!(!client.should_reprobe("s3:hrrr"));
+
+        // Record 5th failure - reaches custom threshold
+        client.record_failure("s3:hrrr");
+        assert!(client.should_reprobe("s3:hrrr"));
+    }
+
+    #[test]
+    fn test_reset_failures() {
+        let mut client = FetchClient::new();
+
+        // Record some failures
+        client.record_failure("s3:hrrr");
+        client.record_failure("gcs:hrrr");
+        client.record_failure("s3:gefs");
+
+        assert_eq!(client.get_failure_count("s3:hrrr"), 1);
+        assert_eq!(client.get_failure_count("gcs:hrrr"), 1);
+        assert_eq!(client.get_failure_count("s3:gefs"), 1);
+
+        // Reset all failures
+        client.reset_failures();
+
+        assert_eq!(client.get_failure_count("s3:hrrr"), 0);
+        assert_eq!(client.get_failure_count("gcs:hrrr"), 0);
+        assert_eq!(client.get_failure_count("s3:gefs"), 0);
     }
 }
