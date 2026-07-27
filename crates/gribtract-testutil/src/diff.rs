@@ -250,7 +250,12 @@ pub fn compare_field(actual: &Field, golden: &GoldenField) -> FieldResult {
     }
 
     // Grid values
-    let tolerance = actual.packing.tolerance();
+    // DRT 4 (IEEE 32-bit float) uses exact bit-identical comparison
+    let tolerance = if actual.drt_template == 4 {
+        0.0
+    } else {
+        actual.packing.tolerance()
+    };
     let actual_pts: Vec<(f64, bool)> = actual.values.iter().collect();
     let golden_pts: Vec<(f64, bool)> = golden.values.iter().collect();
 
@@ -399,7 +404,7 @@ mod tests {
             values: GoldenGridValues::Dense(values),
             gdt_template: 0,
             pdt_template: 0,
-            drt_template: 0,
+            drt_template: 0,  // Default to DRT 0
             packing: GoldenPackingInfo {
                 reference_value: 270.0,
                 binary_scale_factor: 0,
@@ -408,6 +413,12 @@ mod tests {
                 original_field_type: 0,
             },
         }
+    }
+
+    fn sample_golden_with_drt(values: Vec<f64>, drt: u16) -> GoldenField {
+        let mut golden = sample_golden(values);
+        golden.drt_template = drt;
+        golden
     }
 
     #[test]
@@ -514,5 +525,45 @@ mod tests {
         let expected = 100.0 * 5.0 / 8.0;
         assert!((report.agreement_pct() - expected).abs() < 0.01);
         assert!(report.agreement_pct() < 100.0);
+    }
+
+    #[test]
+    fn drt_4_uses_exact_bit_identical_comparison() {
+        // DRT 4 should use bit-identical comparison (tolerance = 0.0)
+        let mut actual = sample_field();
+        actual.drt_template = 4;
+
+        // Exact match should succeed
+        let golden = sample_golden_with_drt(vec![270.0, 271.0, 272.0, 273.0], 4);
+        assert!(compare_field(&actual, &golden).is_match());
+
+        // Even the smallest difference should fail (no tolerance)
+        let mut actual_different = actual.clone();
+        actual_different.values = GridValues::Dense(vec![270.0, 271.0, 272.0, 273.0000001]); // tiny difference
+        let golden = sample_golden_with_drt(vec![270.0, 271.0, 272.0, 273.0], 4);
+        let result = compare_field(&actual_different, &golden);
+        assert!(!result.is_match());
+
+        // Verify it's a ValuesMismatch with tolerance = 0.0
+        if let FieldResult::ValuesMismatch(mismatches) = result {
+            assert_eq!(mismatches.len(), 1);
+            assert_eq!(mismatches[0].index, 3);
+            assert_eq!(mismatches[0].tolerance, 0.0);
+        } else {
+            panic!("Expected ValuesMismatch for DRT 4 with tiny difference");
+        }
+    }
+
+    #[test]
+    fn drt_0_uses_tolerance_based_comparison() {
+        // DRT 0 should use tolerance-based comparison (not bit-identical)
+        let actual = sample_field(); // DRT 0 by default
+        assert_eq!(actual.drt_template, 0);
+
+        // Within tolerance should pass (tolerance = 0.5 * 2^0 / 10^0 = 0.5)
+        let mut actual_within_tolerance = actual.clone();
+        actual_within_tolerance.values = GridValues::Dense(vec![270.3, 271.3, 272.3, 273.3]);
+        let golden = sample_golden(vec![270.0, 271.0, 272.0, 273.0]);
+        assert!(compare_field(&actual_within_tolerance, &golden).is_match());
     }
 }
