@@ -952,4 +952,258 @@ mod tests {
         // No providers should need re-probing
         assert!(needing.is_empty());
     }
+
+    #[test]
+    fn test_is_valid_returns_false_when_should_reprobe_returns_true() {
+        let mut probe = ProviderProbe::new().with_threshold(3);
+
+        // Create fresh results
+        let results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Record failures to reach the threshold
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr");
+
+        // Verify should_reprobe returns true
+        assert!(probe.should_reprobe("s3:hrrr"), "should_reprobe should return true after 3 failures");
+
+        // Verify is_valid returns false when should_reprobe is true
+        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should return false when should_reprobe returns true");
+    }
+
+    #[test]
+    fn test_is_valid_returns_true_when_should_reprobe_false_and_fresh() {
+        let mut probe = ProviderProbe::new().with_threshold(3);
+
+        // Create fresh results
+        let results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Record failures below threshold
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr");
+
+        // Verify should_reprobe returns false
+        assert!(!probe.should_reprobe("s3:hrrr"), "should_reprobe should return false with only 2 failures");
+
+        // Verify is_valid returns true when should_reprobe is false and file is fresh
+        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should return true when should_reprobe returns false and file is fresh");
+    }
+
+    #[test]
+    fn test_is_valid_returns_false_when_stale_regardless_of_should_reprobe() {
+        let mut probe = ProviderProbe::new().with_threshold(3);
+
+        // Create stale results (25 hours old)
+        let timestamp = chrono::Utc::now() - chrono::Duration::hours(25);
+        let results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: timestamp.to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Verify is_valid returns false for stale results with no failures
+        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should return false for stale results with no failures");
+
+        // Now add failures that would trigger should_reprobe
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr");
+
+        // Verify should_reprobe returns true
+        assert!(probe.should_reprobe("s3:hrrr"), "should_reprobe should return true");
+
+        // Verify is_valid still returns false (stale trumps everything)
+        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should return false for stale results even when should_reprobe is true");
+    }
+
+    #[test]
+    fn test_is_valid_handles_multiple_providers_correctly() {
+        let mut probe = ProviderProbe::new().with_threshold(2);
+
+        // Create fresh results
+        let results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Record failures for multiple providers
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr"); // Exceeds threshold of 2
+
+        probe.record_failure("gcs:hrrr"); // Below threshold
+
+        probe.record_failure("s3:gefs");
+        probe.record_failure("s3:gefs"); // Exceeds threshold of 2
+
+        probe.record_failure("gcs:gefs"); // Below threshold
+
+        // Verify individual should_reprobe states
+        assert!(probe.should_reprobe("s3:hrrr"), "s3:hrrr should need reprobe");
+        assert!(!probe.should_reprobe("gcs:hrrr"), "gcs:hrrr should not need reprobe");
+        assert!(probe.should_reprobe("s3:gefs"), "s3:gefs should need reprobe");
+        assert!(!probe.should_reprobe("gcs:gefs"), "gcs:gefs should not need reprobe");
+
+        // Verify is_valid returns false when ANY provider needs reprobe
+        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should return false when at least one provider needs reprobe");
+
+        // Reset one of the failing providers
+        probe.record_success("s3:hrrr");
+
+        // Verify is_valid still returns false (s3:gefs still needs reprobe)
+        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should still return false when s3:gefs needs reprobe");
+
+        // Reset the other failing provider
+        probe.record_success("s3:gefs");
+
+        // Now all providers are below threshold - should be valid
+        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should return true when all providers are below threshold");
+    }
+
+    #[test]
+    fn test_integration_triggers_reprobe_on_consecutive_http_errors() {
+        let mut probe = ProviderProbe::new().with_threshold(3);
+
+        // Create fresh results
+        let results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Simulate consecutive HTTP errors for a provider
+        // Initially is_valid should return true
+        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should return true initially with no failures");
+
+        // First HTTP error
+        probe.record_failure("s3:hrrr");
+        assert!(!probe.should_reprobe("s3:hrrr"), "should_reprobe should be false after 1 failure");
+        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should still be true after 1 failure");
+
+        // Second HTTP error
+        probe.record_failure("s3:hrrr");
+        assert!(!probe.should_reprobe("s3:hrrr"), "should_reprobe should be false after 2 failures");
+        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should still be true after 2 failures");
+
+        // Third HTTP error - this should trigger reprobe
+        probe.record_failure("s3:hrrr");
+        assert!(probe.should_reprobe("s3:hrrr"), "should_reprobe should be true after 3 failures");
+        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should be false after 3 consecutive failures");
+
+        // Verify the consecutive error counter is being tracked correctly
+        assert_eq!(probe.failure_count("s3:hrrr"), 3, "failure count should be 3");
+
+        // Simulate a successful request - should reset the counter
+        probe.record_success("s3:hrrr");
+        assert_eq!(probe.failure_count("s3:hrrr"), 0, "failure count should be reset to 0");
+        assert!(!probe.should_reprobe("s3:hrrr"), "should_reprobe should be false after success");
+        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should be true after counter is reset");
+    }
+
+    #[test]
+    fn test_is_valid_dual_trigger_logic() {
+        let mut probe = ProviderProbe::new().with_threshold(3);
+
+        // Test that is_valid returns false if EITHER staleness OR should_reprobe is true
+        // (dual-trigger logic: stale OR should_reprobe)
+
+        // Test 1: Fresh results, no failures - should be valid
+        let fresh_results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+        assert!(probe.is_valid(&fresh_results, Duration::from_secs(24 * 3600)),
+                "Fresh results with no failures should be valid");
+
+        // Test 2: Stale results, no failures - should be invalid (staleness trigger)
+        let stale_results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: (chrono::Utc::now() - chrono::Duration::hours(25)).to_rfc3339(),
+            git_sha: None,
+        };
+        assert!(!probe.is_valid(&stale_results, Duration::from_secs(24 * 3600)),
+                "Stale results should be invalid even with no failures");
+
+        // Test 3: Fresh results, with failures - should be invalid (should_reprobe trigger)
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr");
+        probe.record_failure("s3:hrrr");
+        assert!(!probe.is_valid(&fresh_results, Duration::from_secs(24 * 3600)),
+                "Fresh results with failures should be invalid");
+
+        // Test 4: Stale results, with failures - should be invalid (both triggers)
+        assert!(!probe.is_valid(&stale_results, Duration::from_secs(24 * 3600)),
+                "Stale results with failures should be invalid (both triggers active)");
+
+        // Test 5: Fresh results, with failures below threshold - should be valid
+        let mut probe2 = ProviderProbe::new().with_threshold(5);
+        probe2.record_failure("s3:hrrr");
+        probe2.record_failure("s3:hrrr");
+        assert!(probe2.is_valid(&fresh_results, Duration::from_secs(24 * 3600)),
+                "Fresh results with failures below threshold should be valid");
+    }
+
+    #[test]
+    fn test_should_reprobe_boundary_conditions() {
+        let probe = ProviderProbe::new().with_threshold(3);
+
+        // Test with different thresholds to ensure boundary is handled correctly
+        for threshold in 1..=5 {
+            let mut probe = ProviderProbe::new().with_threshold(threshold);
+
+            // Record (threshold - 1) failures - should NOT trigger reprobe
+            for _ in 0..(threshold - 1) {
+                probe.record_failure("test_provider");
+            }
+            assert!(!probe.should_reprobe("test_provider"),
+                    "should_reprobe should be false at threshold-1 for threshold={}", threshold);
+
+            // Record one more failure - should trigger reprobe
+            probe.record_failure("test_provider");
+            assert!(probe.should_reprobe("test_provider"),
+                   "should_reprobe should be true at exactly threshold for threshold={}", threshold);
+        }
+    }
+
+    #[test]
+    fn test_is_valid_with_no_tracked_providers() {
+        let probe = ProviderProbe::new().with_threshold(3);
+
+        // Create fresh results
+        let results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // When no providers are tracked, is_valid should only depend on staleness
+        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+                "is_valid should be true for fresh results with no tracked providers");
+
+        // Verify should_reprobe returns false for untracked providers
+        assert!(!probe.should_reprobe("unknown:provider"),
+                "should_reprobe should return false for untracked providers");
+    }
 }
