@@ -287,7 +287,7 @@ impl FetchClient {
                 if let Some(provider) = provider {
                     self.record_failure(&provider);
                 }
-                Err(FetchError::Reqwest(e))
+                Err(FetchError::HttpError(e))
             }
         }
     }
@@ -326,62 +326,102 @@ impl FetchClient {
                 if let Some(provider) = provider {
                     self.record_failure(&provider);
                 }
-                Err(FetchError::Reqwest(e))
+                Err(FetchError::HttpError(e))
             }
         }
     }
 
     /// Get the resource size with a HEAD request (Content-Length header)
-    pub async fn resource_size(&self, url: &str) -> Result<Option<u64>> {
-        let response = self.client.head(url).send().await?;
-        let status = response.status();
+    pub async fn resource_size(&mut self, url: &str) -> Result<Option<u64>> {
+        let provider = Self::extract_provider_from_url(url);
 
-        if !status.is_success() {
-            return Err(FetchError::HttpStatus(status));
+        let response = self.client.head(url).send().await;
+
+        match response {
+            Ok(resp) => {
+                let status = resp.status();
+
+                if !status.is_success() {
+                    // Record failure for non-success status
+                    if let Some(provider) = provider {
+                        self.record_failure(&provider);
+                    }
+                    return Err(FetchError::HttpStatus(status));
+                }
+
+                // Record success on successful request
+                if let Some(provider) = provider {
+                    self.record_success(&provider);
+                }
+
+                Ok(resp
+                    .headers()
+                    .get("content-length")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|s| s.parse::<u64>().ok()))
+            }
+            Err(e) => {
+                // Record failure for request errors (timeout, connection refused, etc.)
+                if let Some(provider) = provider {
+                    self.record_failure(&provider);
+                }
+                Err(FetchError::HttpError(e))
+            }
         }
-
-        Ok(response
-            .headers()
-            .get("content-length")
-            .and_then(|v| v.to_str().ok())
-            .and_then(|s| s.parse::<u64>().ok()))
     }
 
     /// Check if the URL is accessible and supports range requests
-    pub async fn probe(&self, url: &str) -> Result<ProbeInfo> {
+    pub async fn probe(&mut self, url: &str) -> Result<ProbeInfo> {
+        let provider = Self::extract_provider_from_url(url);
         let start = std::time::Instant::now();
 
-        let response = self
-            .client
-            .head(url)
-            .send()
-            .await?;
+        let response = self.client.head(url).send().await;
 
-        let status = response.status();
-        if !status.is_success() {
-            return Err(FetchError::HttpStatus(status));
+        match response {
+            Ok(resp) => {
+                let status = resp.status();
+                if !status.is_success() {
+                    // Record failure for non-success status
+                    if let Some(provider) = provider {
+                        self.record_failure(&provider);
+                    }
+                    return Err(FetchError::HttpStatus(status));
+                }
+
+                let connect_time = start.elapsed();
+                let supports_range = resp
+                    .headers()
+                    .get("accept-ranges")
+                    .and_then(|v| v.to_str().ok())
+                    .map(|v| v.to_lowercase() == "bytes")
+                    .unwrap_or(false);
+
+                let content_length = resp
+                    .headers()
+                    .get("content-length")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|s| s.parse::<u64>().ok());
+
+                // Record success on successful request
+                if let Some(provider) = provider {
+                    self.record_success(&provider);
+                }
+
+                Ok(ProbeInfo {
+                    url: url.to_string(),
+                    connect_time,
+                    supports_range,
+                    content_length,
+                })
+            }
+            Err(e) => {
+                // Record failure for request errors (timeout, connection refused, etc.)
+                if let Some(provider) = provider {
+                    self.record_failure(&provider);
+                }
+                Err(FetchError::HttpError(e))
+            }
         }
-
-        let connect_time = start.elapsed();
-        let supports_range = response
-            .headers()
-            .get("accept-ranges")
-            .and_then(|v| v.to_str().ok())
-            .map(|v| v.to_lowercase() == "bytes")
-            .unwrap_or(false);
-
-        let content_length = response
-            .headers()
-            .get("content-length")
-            .and_then(|v| v.to_str().ok())
-            .and_then(|s| s.parse::<u64>().ok());
-
-        Ok(ProbeInfo {
-            url: url.to_string(),
-            connect_time,
-            supports_range,
-            content_length,
-        })
     }
 
     // === Failure tracking methods ===

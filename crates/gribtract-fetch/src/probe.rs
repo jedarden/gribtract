@@ -195,7 +195,7 @@ impl ProviderProbe {
     }
 
     /// Inner probe logic for a single URL
-    async fn probe_url_inner(&self, url: &str) -> Result<ProbeInnerResult, crate::FetchError> {
+    async fn probe_url_inner(&mut self, url: &str) -> Result<ProbeInnerResult, crate::FetchError> {
         let start = std::time::Instant::now();
 
         // Use the client's probe method to get basic connection info
