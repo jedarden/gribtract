@@ -197,7 +197,7 @@ fn print_field_json(field: &gribtract::Field, include_values: bool) {
     println!("{}  \"scanning_mode\": {},", indent, field.grid.scanning_mode);
     println!("{}  \"resolution_flags\": {},", indent, field.grid.resolution_flags);
     println!("{}  \"shape_of_earth\": {},", indent, field.grid.shape_of_earth);
-    println!("{}  \"projection\": {:?},", indent, field.grid.projection);
+    println!("{}  \"projection\": \"{}\"", indent, format!("{:?}", field.grid.projection));
     println!("{}}},", indent);
 
     println!("{}\"templates\": {{", indent);
@@ -223,16 +223,11 @@ fn print_field_json(field: &gribtract::Field, include_values: bool) {
                 println!("{}  \"type\": \"dense\",", indent);
                 println!("{}  \"len\": {},", indent, v.len());
                 println!("{}  \"data\": [", indent);
-                // Print first 10 values as a preview
-                let preview_count = 10.min(v.len());
-                for (j, val) in v.iter().take(preview_count).enumerate() {
+                for (j, val) in v.iter().enumerate() {
                     if j > 0 {
                         print!(", ");
                     }
                     print!("{}", val);
-                }
-                if v.len() > preview_count {
-                    print!(" ... ({} more)", v.len() - preview_count);
                 }
                 println!();
                 println!("{}  ]", indent);
@@ -240,11 +235,9 @@ fn print_field_json(field: &gribtract::Field, include_values: bool) {
             gribtract::GridValues::Masked { values, present } => {
                 println!("{}  \"type\": \"masked\",", indent);
                 println!("{}  \"len\": {},", indent, values.len());
-                println!("{}  \"present_count\": {}", indent, present.iter().filter(|&&p| p).count());
+                println!("{}  \"present_count\": {},", indent, present.iter().filter(|&&p| p).count());
                 println!("{}  \"data\": [", indent);
-                // Print first 10 values as a preview
-                let preview_count = 10.min(values.len());
-                for (j, (val, is_present)) in values.iter().zip(present.iter()).take(preview_count).enumerate() {
+                for (j, (val, is_present)) in values.iter().zip(present.iter()).enumerate() {
                     if j > 0 {
                         print!(", ");
                     }
@@ -253,9 +246,6 @@ fn print_field_json(field: &gribtract::Field, include_values: bool) {
                     } else {
                         print!("null");
                     }
-                }
-                if values.len() > preview_count {
-                    print!(" ... ({} more)", values.len() - preview_count);
                 }
                 println!();
                 println!("{}  ]", indent);
