@@ -1192,3 +1192,893 @@ fn test_mock_based_selection_path_vs_validation_path() {
     assert_eq!(mock2.invocation_count(), 2,
                "Selection path should invoke should_reprobe for multiple providers");
 }
+
+// ============================================================================
+// EDGE CASE TESTS - Comprehensive edge case coverage
+// ============================================================================
+
+#[test]
+fn test_edge_case_all_providers_need_reprobe_selection_fallback() {
+    // Test edge case: ALL providers need reprobe
+    // Verify selection behavior - should it fail or return fallback?
+
+    let mut probe = ProviderProbe::new().with_threshold(2);
+
+    // Create test results with 3 providers
+    let mut models = HashMap::new();
+    models.insert(
+        "edge_model".to_string(),
+        vec![
+            ProbeResult {
+                provider: "provider_a".to_string(),
+                probe_url: "https://a.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+            ProbeResult {
+                provider: "provider_b".to_string(),
+                probe_url: "https://b.idx".to_string(),
+                connect_ms: 100,
+                ttfb_ms: 150,
+                throughput_mbs: 5.0,
+                score: 350.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+            ProbeResult {
+                provider: "provider_c".to_string(),
+                probe_url: "https://c.idx".to_string(),
+                connect_ms: 150,
+                ttfb_ms: 200,
+                throughput_mbs: 3.0,
+                score: 483.3,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // Make ALL providers exceed threshold
+    probe.record_failure("provider_a");
+    probe.record_failure("provider_a");
+    probe.record_failure("provider_b");
+    probe.record_failure("provider_b");
+    probe.record_failure("provider_c");
+    probe.record_failure("provider_c");
+
+    // Verify all need reprobe
+    assert!(probe.should_reprobe("provider_a"));
+    assert!(probe.should_reprobe("provider_b"));
+    assert!(probe.should_reprobe("provider_c"));
+
+    // Call selection - what happens?
+    let selected = probe.get_best_provider_with_tracker(&results, "edge_model");
+
+    // EXPECTED: Selection should return fallback (first provider) rather than None
+    // This is a design decision - when all providers need reprobe, we still need
+    // to return something rather than fail completely
+    assert!(selected.is_some(),
+            "Selection should return fallback provider when all need reprobe, not None");
+
+    let fallback = selected.unwrap();
+    assert_eq!(fallback.provider, "provider_a",
+               "Fallback should be the first provider even when it needs reprobe");
+}
+
+#[test]
+fn test_edge_case_empty_provider_list_for_model() {
+    // Test edge case: Model exists but has empty provider list
+
+    let probe = ProviderProbe::new().with_threshold(3);
+
+    // Create test results with empty provider list
+    let mut models = HashMap::new();
+    models.insert("empty_model".to_string(), vec![]);
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // Selection should return None for empty provider list
+    let selected = probe.get_best_provider_with_tracker(&results, "empty_model");
+    assert!(selected.is_none(),
+            "Selection should return None for empty provider list");
+}
+
+#[test]
+fn test_edge_case_all_providers_unsuccessful() {
+    // Test edge case: All providers have success=false
+
+    let probe = ProviderProbe::new().with_threshold(2);
+
+    // Create test results where all providers failed probing
+    let mut models = HashMap::new();
+    models.insert(
+        "failed_model".to_string(),
+        vec![
+            ProbeResult {
+                provider: "failed_provider_a".to_string(),
+                probe_url: "https://a.idx".to_string(),
+                connect_ms: 0,
+                ttfb_ms: 0,
+                throughput_mbs: 0.0,
+                score: f64::MAX,
+                success: false,
+                error: Some("Connection timeout".to_string()),
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+            ProbeResult {
+                provider: "failed_provider_b".to_string(),
+                probe_url: "https://b.idx".to_string(),
+                connect_ms: 0,
+                ttfb_ms: 0,
+                throughput_mbs: 0.0,
+                score: f64::MAX,
+                success: false,
+                error: Some("Connection refused".to_string()),
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // Selection should return None when all providers are unsuccessful
+    let selected = probe.get_best_provider_with_tracker(&results, "failed_model");
+    assert!(selected.is_none(),
+            "Selection should return None when all providers have success=false");
+}
+
+#[test]
+fn test_edge_case_zero_threshold_always_reprobe() {
+    // Test edge case: threshold=0 means even 0 failures should trigger reprobe
+    // (but only for providers that are in the failure tracking map)
+
+    let probe = ProviderProbe::new().with_threshold(0);
+
+    // Create test results
+    let mut models = HashMap::new();
+    models.insert(
+        "test".to_string(),
+        vec![
+            ProbeResult {
+                provider: "provider_x".to_string(),
+                probe_url: "https://x.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // With threshold=0, a provider needs to be in the tracking map first
+    // For providers not in the map, should_reprobe returns false
+    assert!(!probe.should_reprobe("provider_x"),
+            "With threshold=0, should_reprobe returns false for providers not in tracking map");
+
+    // Record 0 failures (provider enters map with 0 failures)
+    let mut probe = probe;
+    probe.record_failure("provider_x"); // This brings count to 1, not 0
+
+    // With threshold=0, count=1 >= 0 is true, so should_reprobe returns true
+    assert!(probe.should_reprobe("provider_x"),
+            "With threshold=0, once provider is in map, should_reprobe returns true (1 >= 0)");
+
+    // Verify selection behavior - should skip the provider that needs reprobe
+    let selected = probe.get_best_provider_with_tracker(&results, "test");
+    // Since provider_x needs reprobe, selection should return fallback
+    assert!(selected.is_some(),
+            "Selection should return fallback when threshold=0 triggers reprobe");
+    assert_eq!(selected.unwrap().provider, "provider_x",
+               "Fallback should be provider_x when it's the only provider");
+}
+
+#[test]
+fn test_edge_case_very_high_threshold_never_reprobe() {
+    // Test edge case: Very high threshold means practically never reprobe
+
+    let probe = ProviderProbe::new().with_threshold(999999);
+
+    // Create test results
+    let mut models = HashMap::new();
+    models.insert(
+        "test".to_string(),
+        vec![
+            ProbeResult {
+                provider: "provider_y".to_string(),
+                probe_url: "https://y.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // Record some failures
+    let mut probe = probe;
+    for _ in 0..100 {
+        probe.record_failure("provider_y");
+    }
+
+    // With very high threshold, should_reprobe should still return false
+    assert!(!probe.should_reprobe("provider_y"),
+            "With very high threshold, should_reprobe should return false even after many failures");
+
+    // Verify selection works normally
+    let selected = probe.get_best_provider_with_tracker(&results, "test");
+    assert!(selected.is_some(),
+            "Selection should work normally with very high threshold");
+    assert_eq!(selected.unwrap().provider, "provider_y");
+}
+
+#[test]
+fn test_edge_case_large_scale_provider_selection() {
+    // Test edge case: Large-scale scenario with 100+ providers
+    // This tests performance and scalability
+
+    let mut probe = ProviderProbe::new().with_threshold(5);
+
+    // Create test results with 100 providers
+    let mut models = HashMap::new();
+    let providers: Vec<ProbeResult> = (0..100).map(|i| ProbeResult {
+        provider: format!("provider_{:03}", i),
+        probe_url: format!("https://test{:03}.idx", i),
+        connect_ms: 50 + i as u64 * 10,
+        ttfb_ms: 75 + i as u64 * 15,
+        throughput_mbs: 10.0,
+        score: 125.0 + i as f64 * 10.0,
+        success: true,
+        error: None,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+    }).collect();
+
+    models.insert("large_scale".to_string(), providers);
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // Make first 10 providers exceed threshold
+    for i in 0..10 {
+        for _ in 0..6 {
+            probe.record_failure(&format!("provider_{:03}", i));
+        }
+    }
+
+    // Verify selection works efficiently with large provider list
+    let selected = probe.get_best_provider_with_tracker(&results, "large_scale");
+
+    assert!(selected.is_some(),
+            "Selection should succeed with large provider list");
+
+    let selected_provider = selected.unwrap();
+    let provider_num = selected_provider.provider.strip_prefix("provider_")
+        .unwrap()
+        .parse::<usize>()
+        .unwrap();
+
+    // With parallel execution (par_iter().find_any()), the selection is non-deterministic
+    // It can return ANY provider that matches the condition (success=true AND !should_reprobe)
+    // So we just verify it selected a provider that doesn't need reprobe
+    assert!(provider_num >= 10,
+           "Should select a provider that doesn't exceed threshold (>= 10), got provider_{:03}",
+           provider_num);
+
+    // Verify the selected provider doesn't need reprobe
+    assert!(!probe.should_reprobe(&selected_provider.provider),
+            "Selected provider should not need reprobe");
+}
+
+#[test]
+fn test_edge_case_provider_name_with_special_characters() {
+    // Test edge case: Provider names with special characters
+
+    let probe = ProviderProbe::new().with_threshold(2);
+
+    // Create test results with special provider names
+    let mut models = HashMap::new();
+    models.insert(
+        "special".to_string(),
+        vec![
+            ProbeResult {
+                provider: "s3:bucket-name-with-dashes".to_string(),
+                probe_url: "https://special1.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+            ProbeResult {
+                provider: "gcs:bucket.name.with.dots".to_string(),
+                probe_url: "https://special2.idx".to_string(),
+                connect_ms: 100,
+                ttfb_ms: 150,
+                throughput_mbs: 5.0,
+                score: 350.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // Record failures for provider with dashes
+    let mut probe = probe;
+    probe.record_failure("s3:bucket-name-with-dashes");
+    probe.record_failure("s3:bucket-name-with-dashes");
+
+    // Verify should_reprobe works with special characters
+    assert!(probe.should_reprobe("s3:bucket-name-with-dashes"),
+            "should_reprobe should work with provider names containing dashes");
+
+    // Verify selection works with special characters
+    let selected = probe.get_best_provider_with_tracker(&results, "special");
+    assert!(selected.is_some(),
+            "Selection should work with provider names containing special characters");
+    assert_eq!(selected.unwrap().provider, "gcs:bucket.name.with.dots");
+}
+
+#[test]
+fn test_edge_case_boundary_conditions_exact_threshold() {
+    // Test edge case: Boundary conditions at exact threshold values
+    // Test threshold=1, threshold=2, threshold=5 to ensure exact boundary works
+
+    for threshold in 1..=5 {
+        let mut probe = ProviderProbe::new().with_threshold(threshold);
+
+        // Create test results
+        let mut models = HashMap::new();
+        models.insert(
+            "boundary".to_string(),
+            vec![
+                ProbeResult {
+                    provider: format!("provider_t{}", threshold),
+                    probe_url: "https://test.idx".to_string(),
+                    connect_ms: 50,
+                    ttfb_ms: 75,
+                    throughput_mbs: 10.0,
+                    score: 125.0,
+                    success: true,
+                    error: None,
+                    timestamp: chrono::Utc::now().to_rfc3339(),
+                },
+            ],
+        );
+
+        let results = ProviderProbeResults {
+            models,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Test exactly at threshold-1 (should NOT trigger reprobe)
+        for _ in 0..(threshold - 1) {
+            probe.record_failure(&format!("provider_t{}", threshold));
+        }
+        assert!(!probe.should_reprobe(&format!("provider_t{}", threshold)),
+                "should_reprobe should be false at threshold-1 for threshold={}", threshold);
+
+        // Test exactly at threshold (should trigger reprobe)
+        probe.record_failure(&format!("provider_t{}", threshold));
+        assert!(probe.should_reprobe(&format!("provider_t{}", threshold)),
+                "should_reprobe should be true at exactly threshold={}", threshold);
+
+        // Test at threshold+1 (should still trigger reprobe)
+        probe.record_failure(&format!("provider_t{}", threshold));
+        assert!(probe.should_reprobe(&format!("provider_t{}", threshold)),
+                "should_reprobe should remain true at threshold+1 for threshold={}", threshold);
+    }
+}
+
+#[test]
+fn test_edge_case_mixed_success_and_failure_providers() {
+    // Test edge case: Mix of successful (success=true) and unsuccessful (success=false) providers
+    // with some exceeding threshold and some not
+
+    let mut probe = ProviderProbe::new().with_threshold(3);
+
+    // Create test results with mixed success/failure
+    let mut models = HashMap::new();
+    models.insert(
+        "mixed".to_string(),
+        vec![
+            ProbeResult {
+                provider: "successful_but_exceeds".to_string(),
+                probe_url: "https://test1.idx".to_string(),
+                connect_ms: 20,
+                ttfb_ms: 30,
+                throughput_mbs: 20.0,
+                score: 70.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+            ProbeResult {
+                provider: "unsuccessful_provider".to_string(),
+                probe_url: "https://test2.idx".to_string(),
+                connect_ms: 0,
+                ttfb_ms: 0,
+                throughput_mbs: 0.0,
+                score: f64::MAX,
+                success: false,
+                error: Some("Failed".to_string()),
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+            ProbeResult {
+                provider: "successful_good".to_string(),
+                probe_url: "https://test3.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 175.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // Make first successful provider exceed threshold
+    probe.record_failure("successful_but_exceeds");
+    probe.record_failure("successful_but_exceeds");
+    probe.record_failure("successful_but_exceeds");
+
+    // Verify selection skips both unsuccessful and exceeds-threshold providers
+    let selected = probe.get_best_provider_with_tracker(&results, "mixed");
+
+    assert!(selected.is_some(),
+            "Selection should find a valid provider");
+    assert_eq!(selected.unwrap().provider, "successful_good",
+               "Selection should skip both unsuccessful and exceeds-threshold providers");
+}
+
+#[test]
+fn test_edge_case_single_provider_exceeds_threshold() {
+    // Test edge case: Single provider that exceeds threshold
+
+    let mut probe = ProviderProbe::new().with_threshold(2);
+
+    // Create test results with single provider
+    let mut models = HashMap::new();
+    models.insert(
+        "single".to_string(),
+        vec![
+            ProbeResult {
+                provider: "only_provider".to_string(),
+                probe_url: "https://test.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // Make the single provider exceed threshold
+    probe.record_failure("only_provider");
+    probe.record_failure("only_provider");
+
+    // Verify selection returns fallback (the only provider)
+    let selected = probe.get_best_provider_with_tracker(&results, "single");
+
+    assert!(selected.is_some(),
+            "Selection should return fallback when single provider exceeds threshold");
+    assert_eq!(selected.unwrap().provider, "only_provider",
+               "Fallback should be the only provider even when it exceeds threshold");
+}
+
+#[test]
+fn test_edge_case_providers_with_identical_scores() {
+    // Test edge case: Multiple providers with identical scores
+
+    let probe = ProviderProbe::new().with_threshold(2);
+
+    // Create test results with identical scores
+    let mut models = HashMap::new();
+    models.insert(
+        "identical".to_string(),
+        vec![
+            ProbeResult {
+                provider: "provider_a".to_string(),
+                probe_url: "https://a.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+            ProbeResult {
+                provider: "provider_b".to_string(),
+                probe_url: "https://b.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // With identical scores, should select the first one
+    let selected = probe.get_best_provider_with_tracker(&results, "identical");
+    assert_eq!(selected.unwrap().provider, "provider_a",
+               "With identical scores, should select the first provider in list");
+}
+
+#[test]
+fn test_edge_case_no_providers_need_reprobe() {
+    // Test edge case: No providers need reprobe (normal case)
+
+    let probe = ProviderProbe::new().with_threshold(3);
+
+    // Create test results
+    let mut models = HashMap::new();
+    models.insert(
+        "normal".to_string(),
+        vec![
+            ProbeResult {
+                provider: "provider_a".to_string(),
+                probe_url: "https://a.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+            ProbeResult {
+                provider: "provider_b".to_string(),
+                probe_url: "https://b.idx".to_string(),
+                connect_ms: 100,
+                ttfb_ms: 150,
+                throughput_mbs: 5.0,
+                score: 350.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // No failures recorded, so no providers need reprobe
+    assert!(!probe.should_reprobe("provider_a"));
+    assert!(!probe.should_reprobe("provider_b"));
+
+    // Selection should work normally
+    let selected = probe.get_best_provider_with_tracker(&results, "normal");
+    assert_eq!(selected.unwrap().provider, "provider_a",
+               "Should select fastest provider when no providers need reprobe");
+}
+
+#[test]
+fn test_edge_case_threshold_of_one() {
+    // Test edge case: threshold=1 (reprobe after single failure)
+
+    let mut probe = ProviderProbe::new().with_threshold(1);
+
+    // Create test results
+    let mut models = HashMap::new();
+    models.insert(
+        "threshold_one".to_string(),
+        vec![
+            ProbeResult {
+                provider: "provider_x".to_string(),
+                probe_url: "https://x.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // Initially should not need reprobe
+    assert!(!probe.should_reprobe("provider_x"));
+
+    // After single failure, should need reprobe
+    probe.record_failure("provider_x");
+    assert!(probe.should_reprobe("provider_x"),
+            "With threshold=1, should need reprobe after single failure");
+
+    // Selection should return fallback when single failure triggers reprobe
+    let selected = probe.get_best_provider_with_tracker(&results, "threshold_one");
+    assert!(selected.is_some(),
+            "Selection should return fallback when threshold=1 triggers reprobe");
+}
+
+#[test]
+fn test_edge_case_concurrent_access_thread_safety() {
+    // Test edge case: Concurrent access to provider selection (thread safety)
+    use std::sync::Arc;
+    use std::thread;
+
+    let probe = Arc::new(std::sync::Mutex::new(ProviderProbe::new().with_threshold(3)));
+
+    // Create test results
+    let mut models = HashMap::new();
+    models.insert(
+        "concurrent".to_string(),
+        vec![
+            ProbeResult {
+                provider: "provider_a".to_string(),
+                probe_url: "https://a.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = Arc::new(ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    });
+
+    // Spawn multiple threads accessing the same probe
+    let mut handles = vec![];
+    for i in 0..5 {
+        let probe_clone = Arc::clone(&probe);
+        let results_clone = Arc::clone(&results);
+
+        handles.push(thread::spawn(move || {
+            let probe = probe_clone.lock().unwrap();
+            // Each thread calls should_reprobe
+            probe.should_reprobe("provider_a")
+        }));
+    }
+
+    // All threads should complete without deadlock
+    for handle in handles {
+        let result = handle.join().unwrap();
+        assert!(!result, "should_reprobe should return false in concurrent access");
+    }
+
+    // Verify selection still works after concurrent access
+    let probe = probe.lock().unwrap();
+    let selected = probe.get_best_provider_with_tracker(&results, "concurrent");
+    assert!(selected.is_some(),
+            "Selection should work correctly after concurrent access");
+}
+
+#[test]
+fn test_edge_case_provider_reset_during_selection_scenario() {
+    // Test edge case: What happens if a provider is reset (success recorded)
+    // during a selection scenario?
+
+    let mut probe = ProviderProbe::new().with_threshold(3);
+
+    // Create test results
+    let mut models = HashMap::new();
+    models.insert(
+        "reset_scenario".to_string(),
+        vec![
+            ProbeResult {
+                provider: "provider_a".to_string(),
+                probe_url: "https://a.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+            ProbeResult {
+                provider: "provider_b".to_string(),
+                probe_url: "https://b.idx".to_string(),
+                connect_ms: 100,
+                ttfb_ms: 150,
+                throughput_mbs: 5.0,
+                score: 350.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // Record failures for provider_a to exceed threshold
+    probe.record_failure("provider_a");
+    probe.record_failure("provider_a");
+    probe.record_failure("provider_a");
+
+    // Verify provider_a needs reprobe
+    assert!(probe.should_reprobe("provider_a"));
+
+    // Selection should skip provider_a
+    let selected = probe.get_best_provider_with_tracker(&results, "reset_scenario");
+    assert_eq!(selected.unwrap().provider, "provider_b",
+               "Should select provider_b when provider_a exceeds threshold");
+
+    // Now reset provider_a (simulating successful request)
+    probe.record_success("provider_a");
+
+    // Verify provider_a no longer needs reprobe
+    assert!(!probe.should_reprobe("provider_a"));
+
+    // Selection should now select provider_a (fastest provider)
+    let selected = probe.get_best_provider_with_tracker(&results, "reset_scenario");
+    assert_eq!(selected.unwrap().provider, "provider_a",
+               "Should select provider_a after it's reset");
+}
+
+#[test]
+fn test_edge_case_fallback_when_all_providers_exceed_threshold() {
+    // Test edge case: Verify fallback behavior is consistent when all providers exceed threshold
+    // This tests the implementation's fallback strategy
+
+    let mut probe = ProviderProbe::new().with_threshold(2);
+
+    // Create test results with providers in different rank orders
+    let mut models = HashMap::new();
+    models.insert(
+        "fallback_test".to_string(),
+        vec![
+            ProbeResult {
+                provider: "rank1_provider".to_string(),
+                probe_url: "https://rank1.idx".to_string(),
+                connect_ms: 10,
+                ttfb_ms: 20,
+                throughput_mbs: 25.0,
+                score: 50.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+            ProbeResult {
+                provider: "rank2_provider".to_string(),
+                probe_url: "https://rank2.idx".to_string(),
+                connect_ms: 50,
+                ttfb_ms: 75,
+                throughput_mbs: 10.0,
+                score: 175.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+            ProbeResult {
+                provider: "rank3_provider".to_string(),
+                probe_url: "https://rank3.idx".to_string(),
+                connect_ms: 100,
+                ttfb_ms: 150,
+                throughput_mbs: 5.0,
+                score: 350.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        ],
+    );
+
+    let results = ProviderProbeResults {
+        models,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        git_sha: None,
+    };
+
+    // Make ALL providers exceed threshold
+    probe.record_failure("rank1_provider");
+    probe.record_failure("rank1_provider");
+    probe.record_failure("rank2_provider");
+    probe.record_failure("rank2_provider");
+    probe.record_failure("rank3_provider");
+    probe.record_failure("rank3_provider");
+
+    // Verify all need reprobe
+    assert!(probe.should_reprobe("rank1_provider"));
+    assert!(probe.should_reprobe("rank2_provider"));
+    assert!(probe.should_reprobe("rank3_provider"));
+
+    // Test fallback behavior
+    let selected = probe.get_best_provider_with_tracker(&results, "fallback_test");
+
+    assert!(selected.is_some(),
+            "Should return fallback provider when all exceed threshold");
+
+    // Fallback should be the FIRST provider (rank1_provider)
+    // even though it exceeds threshold
+    assert_eq!(selected.unwrap().provider, "rank1_provider",
+               "Fallback should return the first provider when all exceed threshold");
+}
