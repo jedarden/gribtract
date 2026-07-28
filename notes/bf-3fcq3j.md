@@ -3,43 +3,59 @@
 ## Issue
 The WorkflowTemplate `gribtract-ci` synced to iad-ci cluster does NOT match the committed version in git.
 
+**Verification Date:** 2026-07-28
+
 ## Evidence
 
+### Cluster WorkflowTemplate Status
+- **Exists:** Yes (AGE: 23h, created 2026-07-27T19:06:20Z)
+- **Location:** `iad-ci` cluster, `argo-workflows` namespace
+
 ### Remote template (kubectl get) differences:
-1. **Missing gh CLI installation** - The remote template omits the GitHub CLI setup steps
-2. **Different artifact names**: 
+1. **Different artifact names**:
    - Remote: `bench-results-json`, `dashboard-html`
    - Local: `bench-results`, `dashboard`
-3. **Different resource limits**:
+2. **Different resource limits**:
    - Remote: `cpu: 2000m, memory: 4Gi`
    - Local: `cpu: 1500m, memory: 3Gi`
-4. **Different script messages**:
-   - Remote: `echo "Building commit: ${COMMIT}"`, `echo "Benchmark artifacts generated successfully!"`, `ls -la bench-results.json dashboard.html`
-   - Local: `echo "Benchmark results:"`, `cat bench-results.json`, `echo "Benchmark run completed successfully!"`
-5. **Different error messages**:
-   - Remote: `"Error: bench-results.json not generated"`
-   - Local: `"bench-results.json not generated!"`
+3. **Missing echo statement**: Remote lacks `echo "Building commit: ${COMMIT}"`
 
 ### What matches
 - Basic structure (entrypoint, serviceAccountName)
 - Container image: `debian:bookworm`
 - Core CI checks: `cargo fmt --check`, `cargo check`, `cargo clippy`, `cargo test`
 - Core benchmark command: `cargo run --bin xtask -- bench`
-- File existence checks for artifacts
 - Environment variables for Git credential helper
 
-### ArgoCD tracking annotation present
-```yaml
-argocd.argoproj.io/tracking-id: argo-workflows-ns-iad-ci:argoproj.io/WorkflowTemplate:argo-workflows/gribtract-ci
+## Root Cause: ArgoCD Application BROKEN
+
+**Application:** `argo-workflows-resources-iad-ci`
+- **Responsible for:** Syncing `k8s/iad-ci/argo-workflows` from `jedarden/declarative-config`
+- **Sync Status:** Unknown (cannot generate manifests)
+- **Health Status:** Healthy (incorrect - app is actually broken)
+- **Last Reconciled:** 2026-07-28T18:20:52Z
+
+**Error:**
+```
+ComparisonError: Failed to load target state: failed to generate manifest for source 1 of 1:
+`kustomize edit add annotation managed-by:argocd` failed exit status 1:
+Error: annotation managed-by already in kustomization file. Use --force to override.
 ```
 
-## Root cause hypothesis
-ArgoCD may have synced a stale version or there was a race condition during initial sync. The remote template's creation timestamp shows `2026-07-27T19:06:20Z` (approximately 61 minutes ago at time of verification).
+**Issue:** ArgoCD's kustomize build is failing due to duplicate `managed-by: argocd` annotations in the kustomization file. This prevents manifest generation, so no syncs can occur.
+
+The cluster version is from a previous manual apply or earlier successful sync, but current committed changes cannot sync.
 
 ## Next steps required
-1. **Force ArgoCD resync** of the argo-workflows-ns-iad-ci application
-2. **Re-verify** the remote template matches the committed version
-3. **Consider** if there's a declarative-config drift issue
+To fix ArgoCD sync:
+1. Check `k8s/iad-ci/argo-workflows/kustomization.yaml` in `jedarden/declarative-config` repo
+2. Remove duplicate `managed-by: argocd` annotation from kustomization
+3. Trigger ArgoCD refresh/sync once fixed
+4. Re-verify gribtract-ci template matches
+
+## Acceptance Criteria Status
+- ✅ `kubectl get workflowtemplate gribtract-ci` returns successfully (template exists)
+- ❌ Template spec matches committed YAML (significant discrepancies found)
 
 ## Status
-⚠️ **SYNC MISMATCH DETECTED** - ArgoCD sync verification failed
+❌ **ARGOCD SYNC FAILED** - Application broken due to kustomize annotation error
