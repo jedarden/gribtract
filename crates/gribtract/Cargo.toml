@@ -12,8 +12,10 @@ readme = "README.md"
 
 [dependencies]
 gribtract-core = { workspace = true, default-features = false }
+gribtract-fetch = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+rayon = { workspace = true, optional = true }
 
 [dev-dependencies]
 gribtract-testutil.workspace = true
@@ -21,3 +23,5 @@ gribtract-testutil.workspace = true
 [features]
 # Re-export jpeg2000 feature from gribtract-core for test cfg checks
 jpeg2000 = ["gribtract-core/jpeg2000"]
+# Enable provider probe functionality with failure tracking
+provider-probe = ["gribtract-fetch/probe", "rayon"]
