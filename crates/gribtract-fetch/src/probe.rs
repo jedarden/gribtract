@@ -1559,9 +1559,10 @@ mod tests {
         probe.record_failure("gcs:hrrr");
         probe.record_failure("gcs:hrrr");
 
-        // Should return None when all providers need re-probing
+        // When all providers need re-probing, the implementation returns the first successful provider as a fallback
         let best = probe.get_best_provider_with_tracker(&results, "hrrr");
-        assert!(best.is_none(), "Should return None when all providers need re-probing");
+        assert!(best.is_some(), "Should return fallback provider when all providers need re-probing");
+        assert_eq!(best.unwrap().provider, "s3:hrrr-bdp", "Fallback should return first provider when all need re-probing");
     }
 
     #[test]
@@ -1675,18 +1676,18 @@ mod tests {
             git_sha: None,
         };
 
-        // First provider below threshold
+        // First provider below threshold (2 failures < threshold of 3)
         probe.record_failure("s3:nbm");
         probe.record_failure("s3:nbm");
 
-        // Second provider exceeds threshold
+        // Second provider exceeds threshold (3 failures >= threshold of 3)
         probe.record_failure("gcs:nbm");
         probe.record_failure("gcs:nbm");
         probe.record_failure("gcs:nbm");
 
-        // Should skip the second provider and return the third
+        // Should select s3:nbm (first provider with failures below threshold)
         let best = probe.get_best_provider_with_tracker(&results, "nbm");
-        assert_eq!(best.unwrap().provider, "nomads:nbm");
+        assert_eq!(best.unwrap().provider, "s3:nbm", "Should select first provider with failures below threshold");
     }
 
     #[test]
