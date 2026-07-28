@@ -229,3 +229,56 @@ fn test_save_minimal_file() {
     println!("✓ Minimal GRIB2 file saved to: {}", corpus_path.display());
     println!("  Size: {} bytes (reduction from 187 bytes)", minimal_grib2.len());
 }
+
+#[test]
+fn test_load_minimal_fixture_file() {
+    // Test that loads the minimal GRIB2 fixture file created in step 1 (bf-2dyk5k)
+    // This test is self-contained and only depends on the fixture file
+    // The fixture file (minimal_buffer_underrun.grib2, 159 bytes) contains Section 3
+    // with claimed length > actual length, which triggers the buffer underrun
+
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
+        .unwrap_or_else(|_| ".".to_string());
+    let corpus_path = std::path::Path::new(&manifest_dir)
+        .join("tests")
+        .join("corpus")
+        .join("small")
+        .join("minimal_buffer_underrun.grib2");
+
+    // Verify the fixture file exists
+    assert!(
+        corpus_path.exists(),
+        "Minimal GRIB2 fixture file not found at: {}",
+        corpus_path.display()
+    );
+
+    // Load the fixture file
+    let fixture_bytes = fs::read(&corpus_path)
+        .expect("Failed to read minimal GRIB2 fixture file");
+
+    println!("Testing minimal GRIB2 fixture file: {} ({} bytes)",
+             corpus_path.display(), fixture_bytes.len());
+
+    // Verify basic file structure
+    assert_eq!(&fixture_bytes[0..4], b"GRIB", "Missing GRIB magic");
+    assert_eq!(fixture_bytes[7], 2, "Wrong edition (should be 2)");
+
+    // Attempt to decode - should fail with TooShort error
+    let result = gribtract::decode(&fixture_bytes);
+
+    match result {
+        Ok(_) => panic!("Expected buffer underrun error, but decoding succeeded"),
+        Err(e) => {
+            let error_msg = format!("{:?}", e);
+
+            // Verify we get the expected buffer underrun error
+            assert!(
+                error_msg.contains("TooShort"),
+                "Expected 'TooShort' error, got: {:?}", e
+            );
+
+            println!("✓ Successfully reproduced buffer underrun from fixture: {:?}", e);
+        }
+    }
+}
+
