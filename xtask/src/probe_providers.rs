@@ -226,8 +226,11 @@ pub fn rank_providers(results: &[ProviderResult]) -> HashMap<String, Vec<String>
             // Failures sort last; among successes sort by ascending score.
             let a_ok = a.ok as u8;
             let b_ok = b.ok as u8;
-            b_ok.cmp(&a_ok)
-                .then(a.score.partial_cmp(&b.score).unwrap_or(std::cmp::Ordering::Equal))
+            b_ok.cmp(&a_ok).then(
+                a.score
+                    .partial_cmp(&b.score)
+                    .unwrap_or(std::cmp::Ordering::Equal),
+            )
         });
         rankings.insert(model, entries.iter().map(|r| r.provider.clone()).collect());
     }
@@ -356,7 +359,10 @@ mod tests {
     #[test]
     fn probe_output_rankings() {
         let mut rankings = HashMap::new();
-        rankings.insert("gfs".to_string(), vec!["noaa-s3".to_string(), "gcs".to_string()]);
+        rankings.insert(
+            "gfs".to_string(),
+            vec!["noaa-s3".to_string(), "gcs".to_string()],
+        );
         let output = ProbeOutput {
             timestamp: "2026-06-22T00:00:00Z".into(),
             probe_date: "20260620".into(),
@@ -366,7 +372,11 @@ mod tests {
         // Access rankings directly (ProbeOutput is the xtask-local write struct;
         // the runtime best_provider API lives in gribtract::ProviderProbe).
         assert_eq!(
-            output.rankings.get("gfs").and_then(|v| v.first()).map(|s| s.as_str()),
+            output
+                .rankings
+                .get("gfs")
+                .and_then(|v| v.first())
+                .map(|s| s.as_str()),
             Some("noaa-s3")
         );
         assert!(!output.rankings.contains_key("hrrr"));

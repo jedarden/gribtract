@@ -4,14 +4,16 @@ pub mod provider_probe;
 pub use provider_probe::{ProviderProbe, ProviderResult};
 
 pub mod timeseries;
-pub use timeseries::{extract_timeseries, ForecastTimeseries, Station, TimeseriesRequest, TimeseriesRow};
+pub use timeseries::{
+    extract_timeseries, ForecastTimeseries, Station, TimeseriesRequest, TimeseriesRow,
+};
 
+pub use gribtract_core::error::{Error, Result};
 pub use gribtract_core::types::{
     BilinearCorners, ComplexExtra, Ensemble, Field, ForecastTime, GaussianLatLonParams,
-    GridDefinition, GridProjection, GridValues, LazyField, LambertConformalParams, Level, Message,
+    GridDefinition, GridProjection, GridValues, LambertConformalParams, LazyField, Level, Message,
     PackingInfo, ParameterId, ReferenceTime,
 };
-pub use gribtract_core::error::{Error, Result};
 
 /// Decode all fields from raw GRIB2 bytes.
 ///
@@ -38,11 +40,7 @@ pub fn decode_lazy(bytes: &[u8]) -> Result<Vec<LazyField>> {
 ///
 /// Returns `None` when `idx` is out of range for the given body length and packing.
 /// For constant fields (`bits_per_value == 0`) returns a value for any `idx`.
-pub fn decode_point_drt0(
-    body: &[u8],
-    packing: &PackingInfo,
-    idx: usize,
-) -> Option<f64> {
+pub fn decode_point_drt0(body: &[u8], packing: &PackingInfo, idx: usize) -> Option<f64> {
     gribtract_core::decode::decode_point_drt0(body, packing, idx)
 }
 

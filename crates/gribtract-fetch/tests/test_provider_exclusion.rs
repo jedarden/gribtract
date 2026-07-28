@@ -5,9 +5,9 @@
 
 #![cfg(feature = "probe")]
 
-use gribtract_fetch::probe::{ProviderProbe, ProviderProbeResults, ProbeResult};
-use std::collections::HashMap;
+use gribtract_fetch::probe::{ProbeResult, ProviderProbe, ProviderProbeResults};
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 /// A mock wrapper that allows controlling should_reprobe return values
@@ -30,7 +30,9 @@ impl MockProviderProbe {
 
     /// Set a mock return value for should_reprobe
     fn set_mock_should_reprobe(&self, provider: &str, value: bool) {
-        self.mock_should_reprobe.borrow_mut().insert(provider.to_string(), value);
+        self.mock_should_reprobe
+            .borrow_mut()
+            .insert(provider.to_string(), value);
     }
 
     /// Clear all mock values
@@ -40,7 +42,9 @@ impl MockProviderProbe {
 
     /// Track should_reprobe calls during selection
     fn track_should_reprobe(&self, provider: &str) -> bool {
-        self.should_reprobe_calls.borrow_mut().push(provider.to_string());
+        self.should_reprobe_calls
+            .borrow_mut()
+            .push(provider.to_string());
 
         // Use mock value if set, otherwise use real implementation
         if let Some(&mock_value) = self.mock_should_reprobe.borrow().get(provider) {
@@ -77,9 +81,9 @@ impl MockProviderProbe {
         model: &str,
     ) -> Option<&'a ProbeResult> {
         results.models.get(model).and_then(|model_results| {
-            model_results.iter().find(|r| {
-                r.success && !self.track_should_reprobe(&r.provider)
-            })
+            model_results
+                .iter()
+                .find(|r| r.success && !self.track_should_reprobe(&r.provider))
         })
     }
 
@@ -89,11 +93,15 @@ impl MockProviderProbe {
         results: &'a ProviderProbeResults,
         model: &str,
     ) -> Vec<&'a ProbeResult> {
-        results.models.get(model).map_or_else(Vec::new, |model_results| {
-            model_results.iter().filter(|r| {
-                r.success && !self.track_should_reprobe(&r.provider)
-            }).collect()
-        })
+        results
+            .models
+            .get(model)
+            .map_or_else(Vec::new, |model_results| {
+                model_results
+                    .iter()
+                    .filter(|r| r.success && !self.track_should_reprobe(&r.provider))
+                    .collect()
+            })
     }
 }
 
@@ -160,22 +168,31 @@ fn test_single_provider_exclusion_on_should_reprobe_failure() {
     let candidates = mock.get_candidate_providers(&results, "test_model");
 
     // Verify fast_provider is excluded
-    assert!(!candidates.iter().any(|c| c.provider == "fast_provider"),
-            "fast_provider should be excluded when should_reprobe returns true");
+    assert!(
+        !candidates.iter().any(|c| c.provider == "fast_provider"),
+        "fast_provider should be excluded when should_reprobe returns true"
+    );
 
     // Verify medium_provider and slow_provider remain as candidates
-    assert!(candidates.iter().any(|c| c.provider == "medium_provider"),
-            "medium_provider should remain a candidate when should_reprobe returns false");
-    assert!(candidates.iter().any(|c| c.provider == "slow_provider"),
-            "slow_provider should remain a candidate when should_reprobe returns false");
+    assert!(
+        candidates.iter().any(|c| c.provider == "medium_provider"),
+        "medium_provider should remain a candidate when should_reprobe returns false"
+    );
+    assert!(
+        candidates.iter().any(|c| c.provider == "slow_provider"),
+        "slow_provider should remain a candidate when should_reprobe returns false"
+    );
 
     // Clear calls from get_candidate_providers
     mock.clear_calls();
 
     // Verify selection skips fast_provider and selects medium_provider
     let selected = mock.simulate_selection_with_exclusion(&results, "test_model");
-    assert_eq!(selected.unwrap().provider, "medium_provider",
-                "Selection should skip excluded fast_provider and select medium_provider");
+    assert_eq!(
+        selected.unwrap().provider,
+        "medium_provider",
+        "Selection should skip excluded fast_provider and select medium_provider"
+    );
 }
 
 #[test]
@@ -265,39 +282,71 @@ fn test_multiple_providers_exclusion_on_should_reprobe_failure() {
     let candidates = mock.get_candidate_providers(&results, "test_model");
 
     // Verify excluded providers are not in candidate list
-    assert!(!candidates.iter().any(|c| c.provider == "provider_1"),
-            "provider_1 should be excluded when should_reprobe returns true");
-    assert!(!candidates.iter().any(|c| c.provider == "provider_2"),
-            "provider_2 should be excluded when should_reprobe returns true");
-    assert!(!candidates.iter().any(|c| c.provider == "provider_3"),
-            "provider_3 should be excluded when should_reprobe returns true");
+    assert!(
+        !candidates.iter().any(|c| c.provider == "provider_1"),
+        "provider_1 should be excluded when should_reprobe returns true"
+    );
+    assert!(
+        !candidates.iter().any(|c| c.provider == "provider_2"),
+        "provider_2 should be excluded when should_reprobe returns true"
+    );
+    assert!(
+        !candidates.iter().any(|c| c.provider == "provider_3"),
+        "provider_3 should be excluded when should_reprobe returns true"
+    );
 
     // Verify providers passing should_reprobe remain as candidates
-    assert!(candidates.iter().any(|c| c.provider == "provider_4"),
-            "provider_4 should remain a candidate when should_reprobe returns false");
-    assert!(candidates.iter().any(|c| c.provider == "provider_5"),
-            "provider_5 should remain a candidate when should_reprobe returns false");
+    assert!(
+        candidates.iter().any(|c| c.provider == "provider_4"),
+        "provider_4 should remain a candidate when should_reprobe returns false"
+    );
+    assert!(
+        candidates.iter().any(|c| c.provider == "provider_5"),
+        "provider_5 should remain a candidate when should_reprobe returns false"
+    );
 
     // Verify selection selects provider_4 (first non-excluded provider)
     let selected = mock.simulate_selection_with_exclusion(&results, "test_model");
-    assert_eq!(selected.unwrap().provider, "provider_4",
-                "Selection should skip all excluded providers and select provider_4");
+    assert_eq!(
+        selected.unwrap().provider,
+        "provider_4",
+        "Selection should skip all excluded providers and select provider_4"
+    );
 
     // Clear calls from get_candidate_providers
     mock.clear_calls();
 
     // Verify selection selects provider_4 (first non-excluded provider)
     let selected = mock.simulate_selection_with_exclusion(&results, "test_model");
-    assert_eq!(selected.unwrap().provider, "provider_4",
-                "Selection should skip all excluded providers and select provider_4");
+    assert_eq!(
+        selected.unwrap().provider,
+        "provider_4",
+        "Selection should skip all excluded providers and select provider_4"
+    );
 
     // Verify should_reprobe was called for providers in rank order during selection
     let calls = mock.get_should_reprobe_calls();
-    assert_eq!(calls.len(), 4, "should_reprobe should be called for 4 providers before finding valid one");
-    assert_eq!(calls[0], "provider_1", "First call should be for provider_1");
-    assert_eq!(calls[1], "provider_2", "Second call should be for provider_2");
-    assert_eq!(calls[2], "provider_3", "Third call should be for provider_3");
-    assert_eq!(calls[3], "provider_4", "Fourth call should be for provider_4");
+    assert_eq!(
+        calls.len(),
+        4,
+        "should_reprobe should be called for 4 providers before finding valid one"
+    );
+    assert_eq!(
+        calls[0], "provider_1",
+        "First call should be for provider_1"
+    );
+    assert_eq!(
+        calls[1], "provider_2",
+        "Second call should be for provider_2"
+    );
+    assert_eq!(
+        calls[2], "provider_3",
+        "Third call should be for provider_3"
+    );
+    assert_eq!(
+        calls[3], "provider_4",
+        "Fourth call should be for provider_4"
+    );
 }
 
 #[test]
@@ -362,20 +411,28 @@ fn test_all_providers_excluded_when_all_should_reprobe_return_true() {
     let candidates = mock.get_candidate_providers(&results, "test_model");
 
     // Verify all providers are excluded
-    assert!(candidates.is_empty(),
-            "All providers should be excluded when should_reprobe returns true for all");
+    assert!(
+        candidates.is_empty(),
+        "All providers should be excluded when should_reprobe returns true for all"
+    );
 
     // Clear calls from get_candidate_providers
     mock.clear_calls();
 
     // Verify selection returns None
     let selected = mock.simulate_selection_with_exclusion(&results, "test_model");
-    assert!(selected.is_none(),
-            "Selection should return None when all providers are excluded");
+    assert!(
+        selected.is_none(),
+        "Selection should return None when all providers are excluded"
+    );
 
     // Verify should_reprobe was called for all providers
     let calls = mock.get_should_reprobe_calls();
-    assert_eq!(calls.len(), 3, "should_reprobe should be called for all 3 providers");
+    assert_eq!(
+        calls.len(),
+        3,
+        "should_reprobe should be called for all 3 providers"
+    );
     assert!(calls.contains(&"provider_a".to_string()));
     assert!(calls.contains(&"provider_b".to_string()));
     assert!(calls.contains(&"provider_c".to_string()));
@@ -443,8 +500,11 @@ fn test_no_providers_excluded_when_all_should_reprobe_return_false() {
     let candidates = mock.get_candidate_providers(&results, "test_model");
 
     // Verify all providers remain as candidates
-    assert_eq!(candidates.len(), 3,
-               "All providers should be candidates when should_reprobe returns false for all");
+    assert_eq!(
+        candidates.len(),
+        3,
+        "All providers should be candidates when should_reprobe returns false for all"
+    );
     assert!(candidates.iter().any(|c| c.provider == "fast_provider"));
     assert!(candidates.iter().any(|c| c.provider == "medium_provider"));
     assert!(candidates.iter().any(|c| c.provider == "slow_provider"));
@@ -454,8 +514,11 @@ fn test_no_providers_excluded_when_all_should_reprobe_return_false() {
 
     // Verify selection selects the fastest provider (first in rank order)
     let selected = mock.simulate_selection_with_exclusion(&results, "test_model");
-    assert_eq!(selected.unwrap().provider, "fast_provider",
-                "Selection should select fastest provider when none are excluded");
+    assert_eq!(
+        selected.unwrap().provider,
+        "fast_provider",
+        "Selection should select fastest provider when none are excluded"
+    );
 
     // Verify should_reprobe was called only once (for first provider)
     let calls = mock.get_should_reprobe_calls();
@@ -528,10 +591,10 @@ fn test_provider_exclusion_with_mixed_results() {
     };
 
     // Mix of passing and failing should_reprobe
-    mock.set_mock_should_reprobe("rank1", true);   // excluded
-    mock.set_mock_should_reprobe("rank2", false);  // candidate
-    mock.set_mock_should_reprobe("rank3", true);   // excluded
-    mock.set_mock_should_reprobe("rank4", false);  // candidate
+    mock.set_mock_should_reprobe("rank1", true); // excluded
+    mock.set_mock_should_reprobe("rank2", false); // candidate
+    mock.set_mock_should_reprobe("rank3", true); // excluded
+    mock.set_mock_should_reprobe("rank4", false); // candidate
 
     // Get candidate providers
     let candidates = mock.get_candidate_providers(&results, "test_model");
@@ -550,12 +613,19 @@ fn test_provider_exclusion_with_mixed_results() {
 
     // Verify selection picks rank2 (first non-excluded provider)
     let selected = mock.simulate_selection_with_exclusion(&results, "test_model");
-    assert_eq!(selected.unwrap().provider, "rank2",
-                "Selection should select rank2 (first non-excluded provider)");
+    assert_eq!(
+        selected.unwrap().provider,
+        "rank2",
+        "Selection should select rank2 (first non-excluded provider)"
+    );
 
     // Verify should_reprobe was called in rank order during selection
     let calls = mock.get_should_reprobe_calls();
-    assert_eq!(calls.len(), 2, "should_reprobe should be called for 2 providers during selection");
+    assert_eq!(
+        calls.len(),
+        2,
+        "should_reprobe should be called for 2 providers during selection"
+    );
     assert_eq!(calls[0], "rank1");
     assert_eq!(calls[1], "rank2");
 }
@@ -626,8 +696,12 @@ fn test_provider_exclusion_with_unsuccessful_providers() {
     assert_eq!(candidates[0].provider, "successful_and_included");
 
     // Verify unsuccessful_provider is not a candidate (even though should_reprobe returns false)
-    assert!(!candidates.iter().any(|c| c.provider == "unsuccessful_provider"),
-            "Unsuccessful providers should not be candidates regardless of should_reprobe");
+    assert!(
+        !candidates
+            .iter()
+            .any(|c| c.provider == "unsuccessful_provider"),
+        "Unsuccessful providers should not be candidates regardless of should_reprobe"
+    );
 
     // Verify selection picks successful_and_included
     let selected = mock.simulate_selection_with_exclusion(&results, "test_model");
@@ -642,17 +716,19 @@ fn test_provider_exclusion_calls_should_reprobe_for_each_provider() {
 
     // Create test results with 5 providers
     let mut models = HashMap::new();
-    let providers: Vec<ProbeResult> = (0..5).map(|i| ProbeResult {
-        provider: format!("provider_{}", i),
-        probe_url: format!("https://test{}.idx", i),
-        connect_ms: 50 + i as u64 * 10,
-        ttfb_ms: 75 + i as u64 * 15,
-        throughput_mbs: 10.0,
-        score: 125.0,
-        success: true,
-        error: None,
-        timestamp: chrono::Utc::now().to_rfc3339(),
-    }).collect();
+    let providers: Vec<ProbeResult> = (0..5)
+        .map(|i| ProbeResult {
+            provider: format!("provider_{}", i),
+            probe_url: format!("https://test{}.idx", i),
+            connect_ms: 50 + i as u64 * 10,
+            ttfb_ms: 75 + i as u64 * 15,
+            throughput_mbs: 10.0,
+            score: 125.0,
+            success: true,
+            error: None,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        })
+        .collect();
 
     models.insert("test".to_string(), providers);
 
@@ -678,12 +754,19 @@ fn test_provider_exclusion_calls_should_reprobe_for_each_provider() {
 
     // Verify should_reprobe was called for all providers
     let calls = mock.get_should_reprobe_calls();
-    assert_eq!(calls.len(), 5, "should_reprobe should be called for all 5 providers");
+    assert_eq!(
+        calls.len(),
+        5,
+        "should_reprobe should be called for all 5 providers"
+    );
 
     // Verify calls were in rank order
     for i in 0..5 {
-        assert_eq!(calls[i], format!("provider_{}", i),
-                   "should_reprobe should be called in rank order");
+        assert_eq!(
+            calls[i],
+            format!("provider_{}", i),
+            "should_reprobe should be called in rank order"
+        );
     }
 }
 
@@ -744,8 +827,10 @@ fn test_provider_exclusion_updates_dynamically() {
 
     let candidates = mock.get_candidate_providers(&results, "test_model");
     assert_eq!(candidates.len(), 1, "Should have 1 candidate after update");
-    assert_eq!(candidates[0].provider, "provider_a",
-                "Candidate list should update when should_reprobe results change");
+    assert_eq!(
+        candidates[0].provider, "provider_a",
+        "Candidate list should update when should_reprobe results change"
+    );
 
     // Update: both providers are included
     mock.clear_calls();
@@ -753,7 +838,11 @@ fn test_provider_exclusion_updates_dynamically() {
     mock.set_mock_should_reprobe("provider_b", false);
 
     let candidates = mock.get_candidate_providers(&results, "test_model");
-    assert_eq!(candidates.len(), 2, "Should have 2 candidates when both are included");
+    assert_eq!(
+        candidates.len(),
+        2,
+        "Should have 2 candidates when both are included"
+    );
 
     // Selection should pick provider_a (faster)
     let selected = mock.simulate_selection_with_exclusion(&results, "test_model");
@@ -805,7 +894,11 @@ fn test_provider_exclusion_with_real_failure_tracking() {
     // Initially, no failures - no providers should be excluded
     mock.clear_mocks(); // Use real implementation
     let candidates = mock.get_candidate_providers(&results, "test_model");
-    assert_eq!(candidates.len(), 2, "Should have 2 candidates with no failures");
+    assert_eq!(
+        candidates.len(),
+        2,
+        "Should have 2 candidates with no failures"
+    );
 
     // Record failures for s3:provider to exceed threshold
     mock.record_failure("s3:provider");
@@ -818,12 +911,21 @@ fn test_provider_exclusion_with_real_failure_tracking() {
 
     // Now s3:provider should be excluded based on real failure tracking
     let candidates = mock.get_candidate_providers(&results, "test_model");
-    assert_eq!(candidates.len(), 1, "Should have 1 candidate after failures");
-    assert_eq!(candidates[0].provider, "gcs:provider",
-                "gcs:provider should be the only candidate after s3:provider exceeds threshold");
+    assert_eq!(
+        candidates.len(),
+        1,
+        "Should have 1 candidate after failures"
+    );
+    assert_eq!(
+        candidates[0].provider, "gcs:provider",
+        "gcs:provider should be the only candidate after s3:provider exceeds threshold"
+    );
 
     // Verify selection picks gcs:provider
     let selected = mock.simulate_selection_with_exclusion(&results, "test_model");
-    assert_eq!(selected.unwrap().provider, "gcs:provider",
-                "Selection should pick gcs:provider when s3:provider is excluded by real failure tracking");
+    assert_eq!(
+        selected.unwrap().provider,
+        "gcs:provider",
+        "Selection should pick gcs:provider when s3:provider is excluded by real failure tracking"
+    );
 }

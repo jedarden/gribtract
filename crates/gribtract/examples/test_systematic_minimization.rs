@@ -1,5 +1,5 @@
-use std::fs;
 use gribtract::decode;
+use std::fs;
 
 fn main() {
     println!("=== SYSTEMATIC MINIMIZATION ANALYSIS ===\n");
@@ -49,7 +49,7 @@ fn test_file(filename: &str) {
                 }
             }
         }
-        Err(e) => println!("  {}: Failed to read: {:?}", filename, e)
+        Err(e) => println!("  {}: Failed to read: {:?}", filename, e),
     }
 }
 
@@ -142,18 +142,32 @@ fn analyze_structure(bytes: &[u8]) {
 
     // Section 1
     if pos + 5 <= bytes.len() {
-        let s1_len = u32::from_be_bytes([bytes[pos], bytes[pos+1], bytes[pos+2], bytes[pos+3]]) as usize;
-        println!("    Section 1: bytes {}-{} ({} bytes) - Identification", pos, pos + s1_len - 1, s1_len);
+        let s1_len =
+            u32::from_be_bytes([bytes[pos], bytes[pos + 1], bytes[pos + 2], bytes[pos + 3]])
+                as usize;
+        println!(
+            "    Section 1: bytes {}-{} ({} bytes) - Identification",
+            pos,
+            pos + s1_len - 1,
+            s1_len
+        );
         pos += s1_len;
     }
 
     // Section 3 (note: Section 2 is optional/local use)
     if pos + 5 <= bytes.len() {
-        let s3_len = u32::from_be_bytes([bytes[pos], bytes[pos+1], bytes[pos+2], bytes[pos+3]]) as usize;
+        let s3_len =
+            u32::from_be_bytes([bytes[pos], bytes[pos + 1], bytes[pos + 2], bytes[pos + 3]])
+                as usize;
         let section_num = bytes[pos + 4];
         if section_num == 3 {
-            println!("    Section 3: bytes {}-{} ({} bytes claimed, {} body) - Grid Definition",
-                pos, pos + s3_len - 1, s3_len, s3_len - 5);
+            println!(
+                "    Section 3: bytes {}-{} ({} bytes claimed, {} body) - Grid Definition",
+                pos,
+                pos + s3_len - 1,
+                s3_len,
+                s3_len - 5
+            );
             pos += s3_len;
         }
     }
@@ -161,13 +175,20 @@ fn analyze_structure(bytes: &[u8]) {
     // Continue through remaining sections
     let mut section_num = 4;
     while pos + 5 <= bytes.len() && section_num <= 7 {
-        let s_len = u32::from_be_bytes([bytes[pos], bytes[pos+1], bytes[pos+2], bytes[pos+3]]) as usize;
+        let s_len = u32::from_be_bytes([bytes[pos], bytes[pos + 1], bytes[pos + 2], bytes[pos + 3]])
+            as usize;
         let s_num = bytes[pos + 4];
 
         if s_num == section_num as u8 {
             let names = ["", "", "", "", "Product Def", "Data Rep", "Bitmap", "Data"];
-            println!("    Section {}: bytes {}-{} ({} bytes) - {}",
-                section_num, pos, pos + s_len - 1, s_len, names.get(section_num).unwrap_or(&""));
+            println!(
+                "    Section {}: bytes {}-{} ({} bytes) - {}",
+                section_num,
+                pos,
+                pos + s_len - 1,
+                s_len,
+                names.get(section_num).unwrap_or(&"")
+            );
             pos += s_len;
             section_num += 1;
         } else {

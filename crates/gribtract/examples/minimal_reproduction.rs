@@ -1,5 +1,5 @@
-use std::fs;
 use gribtract::decode;
+use std::fs;
 
 fn main() {
     let fixture_path = "tests/corpus/small/rotated_latlon_gdt1_drt0.grib2";

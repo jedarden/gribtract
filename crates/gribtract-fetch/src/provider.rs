@@ -146,7 +146,10 @@ impl NomadsModel {
             "gfs" => Ok(NomadsModel::Gfs),
             "gefs" => Ok(NomadsModel::Gefs),
             "nam" => Ok(NomadsModel::Nam),
-            _ => Err(FetchError::InvalidUrl(format!("Unknown NOMADS model: {}", s))),
+            _ => Err(FetchError::InvalidUrl(format!(
+                "Unknown NOMADS model: {}",
+                s
+            ))),
         }
     }
 }
@@ -174,7 +177,10 @@ impl DataProvider {
             "s3" => Ok(DataProvider::S3(S3Bucket::from_str(parts[1])?)),
             "gcs" => Ok(DataProvider::Gcs(GcsBucket::from_str(parts[1])?)),
             "nomads" => Ok(DataProvider::Nomads(NomadsModel::from_str(parts[1])?)),
-            _ => Err(FetchError::InvalidUrl(format!("Unknown provider type: {}", parts[0]))),
+            _ => Err(FetchError::InvalidUrl(format!(
+                "Unknown provider type: {}",
+                parts[0]
+            ))),
         }
     }
 }

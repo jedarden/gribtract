@@ -9,9 +9,9 @@
 //! We walk two levels up to find the workspace root. This is fragile only if the
 //! crate moves within the workspace; callers can override with `GRIBTRACT_CORPUS_ROOT`.
 
-use std::path::{Path, PathBuf};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Deserialize)]
 struct Manifest {
@@ -42,9 +42,7 @@ pub fn corpus_root() -> PathBuf {
         return PathBuf::from(root);
     }
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    Path::new(manifest_dir)
-        .join("../..")
-        .join("tests/corpus")
+    Path::new(manifest_dir).join("../..").join("tests/corpus")
 }
 
 /// Load and parse the fixture manifest.
@@ -52,10 +50,13 @@ fn load_manifest() -> Result<Manifest, String> {
     let manifest_path = corpus_root().join("manifest.json");
     let json = std::fs::read_to_string(&manifest_path)
         .map_err(|e| format!("cannot read manifest {}: {}", manifest_path.display(), e))?;
-    let manifest: Manifest = serde_json::from_str(&json)
-        .map_err(|e| format!("cannot parse manifest: {}", e))?;
+    let manifest: Manifest =
+        serde_json::from_str(&json).map_err(|e| format!("cannot parse manifest: {}", e))?;
     if manifest.version != 1 {
-        return Err(format!("unsupported manifest version: {}", manifest.version));
+        return Err(format!(
+            "unsupported manifest version: {}",
+            manifest.version
+        ));
     }
     Ok(manifest)
 }
@@ -116,7 +117,9 @@ pub fn load(id: &str) -> Result<Vec<u8>, String> {
     if bytes.len() as u64 != entry.size_bytes {
         return Err(format!(
             "fixture '{}' size mismatch: manifest says {} bytes, file is {}",
-            id, entry.size_bytes, bytes.len()
+            id,
+            entry.size_bytes,
+            bytes.len()
         ));
     }
 
@@ -140,7 +143,10 @@ mod tests {
     fn manifest_parses() {
         let manifest = load_manifest().expect("manifest should parse");
         assert_eq!(manifest.version, 1);
-        assert!(!manifest.fixtures.is_empty(), "manifest should have at least one fixture");
+        assert!(
+            !manifest.fixtures.is_empty(),
+            "manifest should have at least one fixture"
+        );
     }
 
     #[test]
@@ -155,10 +161,18 @@ mod tests {
 
         // Total length encoded in bytes 8-15 (big-endian u64)
         let msg_len = u64::from_be_bytes(bytes[8..16].try_into().unwrap());
-        assert_eq!(msg_len as usize, bytes.len(), "encoded length should match file size");
+        assert_eq!(
+            msg_len as usize,
+            bytes.len(),
+            "encoded length should match file size"
+        );
 
         // End marker "7777"
-        assert_eq!(&bytes[bytes.len() - 4..], b"7777", "missing 7777 end marker");
+        assert_eq!(
+            &bytes[bytes.len() - 4..],
+            b"7777",
+            "missing 7777 end marker"
+        );
 
         // Discipline = 0 (meteorological products)
         assert_eq!(bytes[6], 0, "discipline should be 0 (meteorological)");

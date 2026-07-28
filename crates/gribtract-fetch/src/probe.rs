@@ -136,7 +136,8 @@ impl ProviderProbe {
         let timestamp = chrono::Utc::now().to_rfc3339();
 
         // Collect the models and probe_files to avoid borrow checker issues
-        let models: Vec<(String, Vec<(String, String)>)> = self.probe_files
+        let models: Vec<(String, Vec<(String, String)>)> = self
+            .probe_files
             .iter()
             .map(|(model, probe_files)| (model.clone(), probe_files.clone()))
             .collect();
@@ -151,7 +152,9 @@ impl ProviderProbe {
 
             // Sort by score (lower is better)
             model_results.sort_by(|a, b| {
-                a.score.partial_cmp(&b.score).unwrap_or(std::cmp::Ordering::Equal)
+                a.score
+                    .partial_cmp(&b.score)
+                    .unwrap_or(std::cmp::Ordering::Equal)
             });
 
             results.insert(model, model_results);
@@ -299,9 +302,10 @@ impl ProviderProbe {
         results: &'a ProviderProbeResults,
         model: &str,
     ) -> Option<&'a ProbeResult> {
-        results.models.get(model).and_then(|model_results| {
-            model_results.iter().find(|r| r.success)
-        })
+        results
+            .models
+            .get(model)
+            .and_then(|model_results| model_results.iter().find(|r| r.success))
     }
 
     /// Get the best provider for a model that does NOT need re-probing
@@ -389,12 +393,13 @@ impl ProviderProbe {
             //
             // INTEGRATION: This is where should_reprobe() is called during provider selection.
             // The par_iter() ensures all providers are checked concurrently for efficiency.
-            model_results.par_iter().find_any(|r| {
-                r.success && !self.should_reprobe(&r.provider)
-            }).or_else(|| {
-                // Fallback: if all providers need re-probing, return the first successful one
-                model_results.iter().find(|r| r.success)
-            })
+            model_results
+                .par_iter()
+                .find_any(|r| r.success && !self.should_reprobe(&r.provider))
+                .or_else(|| {
+                    // Fallback: if all providers need re-probing, return the first successful one
+                    model_results.iter().find(|r| r.success)
+                })
         })
     }
 
@@ -426,14 +431,17 @@ impl ProviderProbe {
         model: &str,
     ) -> Option<&'a ProbeResult> {
         results.models.get(model).and_then(|model_results| {
-            model_results.iter().find(|r| {
-                r.success && !self.should_reprobe(&r.provider)
-            })
+            model_results
+                .iter()
+                .find(|r| r.success && !self.should_reprobe(&r.provider))
         })
     }
 
     /// Write probe results to a JSON file
-    pub fn write_results(results: &ProviderProbeResults, path: &std::path::Path) -> std::io::Result<()> {
+    pub fn write_results(
+        results: &ProviderProbeResults,
+        path: &std::path::Path,
+    ) -> std::io::Result<()> {
         let json = serde_json::to_string_pretty(results)?;
         std::fs::write(path, json)
     }
@@ -462,7 +470,10 @@ impl ProviderProbe {
     /// Increments the consecutive failure counter for the provider.
     /// Returns the current failure count after incrementing.
     pub fn record_failure(&mut self, provider: &str) -> u32 {
-        let count = self.consecutive_failures.entry(provider.to_string()).or_insert(0);
+        let count = self
+            .consecutive_failures
+            .entry(provider.to_string())
+            .or_insert(0);
         *count += 1;
         *count
     }
@@ -556,9 +567,9 @@ impl ProviderProbe {
         // INTEGRATION: This is where should_reprobe() is called in parallel to implement the
         // failure-tracking half of the dual-trigger re-probe logic.
         let all_providers: Vec<&String> = self.consecutive_failures.keys().collect();
-        !all_providers.par_iter().any(|provider| {
-            self.should_reprobe(provider)
-        })
+        !all_providers
+            .par_iter()
+            .any(|provider| self.should_reprobe(provider))
     }
 
     /// Check if probe results are valid (fresh AND no providers need re-probing)
@@ -648,7 +659,10 @@ impl ProviderProbe {
 
     /// Get the current consecutive failure count for a provider
     pub fn failure_count(&self, provider: &str) -> u32 {
-        self.consecutive_failures.get(provider).copied().unwrap_or(0)
+        self.consecutive_failures
+            .get(provider)
+            .copied()
+            .unwrap_or(0)
     }
 
     /// Get the consecutive failure threshold
@@ -898,7 +912,10 @@ mod failure_tracker_tests {
         // Test threshold+1 failures
         tracker.record_failure("s3:hrrr");
         assert_eq!(tracker.failure_count("s3:hrrr"), 4);
-        assert!(tracker.should_reprobe("s3:hrrr"), "should_reprobe should remain true after threshold+1 failures");
+        assert!(
+            tracker.should_reprobe("s3:hrrr"),
+            "should_reprobe should remain true after threshold+1 failures"
+        );
     }
 
     #[test]
@@ -912,12 +929,18 @@ mod failure_tracker_tests {
                 tracker.record_failure("test_provider");
             }
             assert_eq!(tracker.failure_count("test_provider"), threshold - 1);
-            assert!(!tracker.should_reprobe("test_provider"), "Should NOT trigger reprobe at threshold-1");
+            assert!(
+                !tracker.should_reprobe("test_provider"),
+                "Should NOT trigger reprobe at threshold-1"
+            );
 
             // Record one more failure - should trigger
             tracker.record_failure("test_provider");
             assert_eq!(tracker.failure_count("test_provider"), threshold);
-            assert!(tracker.should_reprobe("test_provider"), "Should trigger reprobe at exactly threshold");
+            assert!(
+                tracker.should_reprobe("test_provider"),
+                "Should trigger reprobe at exactly threshold"
+            );
         }
     }
 }
@@ -932,7 +955,10 @@ mod tests {
         let mut probe = ProviderProbe::new();
         let results = probe.probe_all().await;
 
-        println!("Probe results: {}", serde_json::to_string_pretty(&results).unwrap());
+        println!(
+            "Probe results: {}",
+            serde_json::to_string_pretty(&results).unwrap()
+        );
 
         // Check that we got results for HRRR
         assert!(results.models.contains_key("hrrr"));
@@ -1071,9 +1097,9 @@ mod tests {
         for (model, probe_list) in &files {
             for (provider, url) in probe_list {
                 // URLs should contain a date (one of the recent dates)
-                let has_recent_date = url.contains(&two_days_ago) ||
-                                     url.contains(&one_day_ago) ||
-                                     url.contains(&today);
+                let has_recent_date = url.contains(&two_days_ago)
+                    || url.contains(&one_day_ago)
+                    || url.contains(&today);
 
                 assert!(
                     has_recent_date,
@@ -1082,9 +1108,9 @@ mod tests {
 
                 // Verify the URL contains a date-like pattern (8 digits)
                 // by checking if it contains any of our generated dates
-                let has_date_pattern = url.contains(&two_days_ago) ||
-                                     url.contains(&one_day_ago) ||
-                                     url.contains(&today);
+                let has_date_pattern = url.contains(&two_days_ago)
+                    || url.contains(&one_day_ago)
+                    || url.contains(&today);
                 assert!(has_date_pattern, "URL should contain date pattern: {url}");
             }
         }
@@ -1222,11 +1248,16 @@ mod tests {
         probe.record_failure("s3:hrrr");
 
         // Verify should_reprobe returns true
-        assert!(probe.should_reprobe("s3:hrrr"), "should_reprobe should return true after 3 failures");
+        assert!(
+            probe.should_reprobe("s3:hrrr"),
+            "should_reprobe should return true after 3 failures"
+        );
 
         // Verify is_valid returns false when should_reprobe is true
-        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should return false when should_reprobe returns true");
+        assert!(
+            !probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should return false when should_reprobe returns true"
+        );
     }
 
     #[test]
@@ -1245,11 +1276,16 @@ mod tests {
         probe.record_failure("s3:hrrr");
 
         // Verify should_reprobe returns false
-        assert!(!probe.should_reprobe("s3:hrrr"), "should_reprobe should return false with only 2 failures");
+        assert!(
+            !probe.should_reprobe("s3:hrrr"),
+            "should_reprobe should return false with only 2 failures"
+        );
 
         // Verify is_valid returns true when should_reprobe is false and file is fresh
-        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should return true when should_reprobe returns false and file is fresh");
+        assert!(
+            probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should return true when should_reprobe returns false and file is fresh"
+        );
     }
 
     #[test]
@@ -1265,8 +1301,10 @@ mod tests {
         };
 
         // Verify is_valid returns false for stale results with no failures
-        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should return false for stale results with no failures");
+        assert!(
+            !probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should return false for stale results with no failures"
+        );
 
         // Now add failures that would trigger should_reprobe
         probe.record_failure("s3:hrrr");
@@ -1274,11 +1312,16 @@ mod tests {
         probe.record_failure("s3:hrrr");
 
         // Verify should_reprobe returns true
-        assert!(probe.should_reprobe("s3:hrrr"), "should_reprobe should return true");
+        assert!(
+            probe.should_reprobe("s3:hrrr"),
+            "should_reprobe should return true"
+        );
 
         // Verify is_valid still returns false (stale trumps everything)
-        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should return false for stale results even when should_reprobe is true");
+        assert!(
+            !probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should return false for stale results even when should_reprobe is true"
+        );
     }
 
     #[test]
@@ -1304,28 +1347,46 @@ mod tests {
         probe.record_failure("gcs:gefs"); // Below threshold
 
         // Verify individual should_reprobe states
-        assert!(probe.should_reprobe("s3:hrrr"), "s3:hrrr should need reprobe");
-        assert!(!probe.should_reprobe("gcs:hrrr"), "gcs:hrrr should not need reprobe");
-        assert!(probe.should_reprobe("s3:gefs"), "s3:gefs should need reprobe");
-        assert!(!probe.should_reprobe("gcs:gefs"), "gcs:gefs should not need reprobe");
+        assert!(
+            probe.should_reprobe("s3:hrrr"),
+            "s3:hrrr should need reprobe"
+        );
+        assert!(
+            !probe.should_reprobe("gcs:hrrr"),
+            "gcs:hrrr should not need reprobe"
+        );
+        assert!(
+            probe.should_reprobe("s3:gefs"),
+            "s3:gefs should need reprobe"
+        );
+        assert!(
+            !probe.should_reprobe("gcs:gefs"),
+            "gcs:gefs should not need reprobe"
+        );
 
         // Verify is_valid returns false when ANY provider needs reprobe
-        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should return false when at least one provider needs reprobe");
+        assert!(
+            !probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should return false when at least one provider needs reprobe"
+        );
 
         // Reset one of the failing providers
         probe.record_success("s3:hrrr");
 
         // Verify is_valid still returns false (s3:gefs still needs reprobe)
-        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should still return false when s3:gefs needs reprobe");
+        assert!(
+            !probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should still return false when s3:gefs needs reprobe"
+        );
 
         // Reset the other failing provider
         probe.record_success("s3:gefs");
 
         // Now all providers are below threshold - should be valid
-        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should return true when all providers are below threshold");
+        assert!(
+            probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should return true when all providers are below threshold"
+        );
     }
 
     #[test]
@@ -1341,36 +1402,66 @@ mod tests {
 
         // Simulate consecutive HTTP errors for a provider
         // Initially is_valid should return true
-        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should return true initially with no failures");
+        assert!(
+            probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should return true initially with no failures"
+        );
 
         // First HTTP error
         probe.record_failure("s3:hrrr");
-        assert!(!probe.should_reprobe("s3:hrrr"), "should_reprobe should be false after 1 failure");
-        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should still be true after 1 failure");
+        assert!(
+            !probe.should_reprobe("s3:hrrr"),
+            "should_reprobe should be false after 1 failure"
+        );
+        assert!(
+            probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should still be true after 1 failure"
+        );
 
         // Second HTTP error
         probe.record_failure("s3:hrrr");
-        assert!(!probe.should_reprobe("s3:hrrr"), "should_reprobe should be false after 2 failures");
-        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should still be true after 2 failures");
+        assert!(
+            !probe.should_reprobe("s3:hrrr"),
+            "should_reprobe should be false after 2 failures"
+        );
+        assert!(
+            probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should still be true after 2 failures"
+        );
 
         // Third HTTP error - this should trigger reprobe
         probe.record_failure("s3:hrrr");
-        assert!(probe.should_reprobe("s3:hrrr"), "should_reprobe should be true after 3 failures");
-        assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should be false after 3 consecutive failures");
+        assert!(
+            probe.should_reprobe("s3:hrrr"),
+            "should_reprobe should be true after 3 failures"
+        );
+        assert!(
+            !probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should be false after 3 consecutive failures"
+        );
 
         // Verify the consecutive error counter is being tracked correctly
-        assert_eq!(probe.failure_count("s3:hrrr"), 3, "failure count should be 3");
+        assert_eq!(
+            probe.failure_count("s3:hrrr"),
+            3,
+            "failure count should be 3"
+        );
 
         // Simulate a successful request - should reset the counter
         probe.record_success("s3:hrrr");
-        assert_eq!(probe.failure_count("s3:hrrr"), 0, "failure count should be reset to 0");
-        assert!(!probe.should_reprobe("s3:hrrr"), "should_reprobe should be false after success");
-        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should be true after counter is reset");
+        assert_eq!(
+            probe.failure_count("s3:hrrr"),
+            0,
+            "failure count should be reset to 0"
+        );
+        assert!(
+            !probe.should_reprobe("s3:hrrr"),
+            "should_reprobe should be false after success"
+        );
+        assert!(
+            probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should be true after counter is reset"
+        );
     }
 
     #[test]
@@ -1386,8 +1477,10 @@ mod tests {
             timestamp: chrono::Utc::now().to_rfc3339(),
             git_sha: None,
         };
-        assert!(probe.is_valid(&fresh_results, Duration::from_secs(24 * 3600)),
-                "Fresh results with no failures should be valid");
+        assert!(
+            probe.is_valid(&fresh_results, Duration::from_secs(24 * 3600)),
+            "Fresh results with no failures should be valid"
+        );
 
         // Test 2: Stale results, no failures - should be invalid (staleness trigger)
         let stale_results = ProviderProbeResults {
@@ -1395,26 +1488,34 @@ mod tests {
             timestamp: (chrono::Utc::now() - chrono::Duration::hours(25)).to_rfc3339(),
             git_sha: None,
         };
-        assert!(!probe.is_valid(&stale_results, Duration::from_secs(24 * 3600)),
-                "Stale results should be invalid even with no failures");
+        assert!(
+            !probe.is_valid(&stale_results, Duration::from_secs(24 * 3600)),
+            "Stale results should be invalid even with no failures"
+        );
 
         // Test 3: Fresh results, with failures - should be invalid (should_reprobe trigger)
         probe.record_failure("s3:hrrr");
         probe.record_failure("s3:hrrr");
         probe.record_failure("s3:hrrr");
-        assert!(!probe.is_valid(&fresh_results, Duration::from_secs(24 * 3600)),
-                "Fresh results with failures should be invalid");
+        assert!(
+            !probe.is_valid(&fresh_results, Duration::from_secs(24 * 3600)),
+            "Fresh results with failures should be invalid"
+        );
 
         // Test 4: Stale results, with failures - should be invalid (both triggers)
-        assert!(!probe.is_valid(&stale_results, Duration::from_secs(24 * 3600)),
-                "Stale results with failures should be invalid (both triggers active)");
+        assert!(
+            !probe.is_valid(&stale_results, Duration::from_secs(24 * 3600)),
+            "Stale results with failures should be invalid (both triggers active)"
+        );
 
         // Test 5: Fresh results, with failures below threshold - should be valid
         let mut probe2 = ProviderProbe::new().with_threshold(5);
         probe2.record_failure("s3:hrrr");
         probe2.record_failure("s3:hrrr");
-        assert!(probe2.is_valid(&fresh_results, Duration::from_secs(24 * 3600)),
-                "Fresh results with failures below threshold should be valid");
+        assert!(
+            probe2.is_valid(&fresh_results, Duration::from_secs(24 * 3600)),
+            "Fresh results with failures below threshold should be valid"
+        );
     }
 
     #[test]
@@ -1429,13 +1530,19 @@ mod tests {
             for _ in 0..(threshold - 1) {
                 probe.record_failure("test_provider");
             }
-            assert!(!probe.should_reprobe("test_provider"),
-                    "should_reprobe should be false at threshold-1 for threshold={}", threshold);
+            assert!(
+                !probe.should_reprobe("test_provider"),
+                "should_reprobe should be false at threshold-1 for threshold={}",
+                threshold
+            );
 
             // Record one more failure - should trigger reprobe
             probe.record_failure("test_provider");
-            assert!(probe.should_reprobe("test_provider"),
-                   "should_reprobe should be true at exactly threshold for threshold={}", threshold);
+            assert!(
+                probe.should_reprobe("test_provider"),
+                "should_reprobe should be true at exactly threshold for threshold={}",
+                threshold
+            );
         }
     }
 
@@ -1451,12 +1558,16 @@ mod tests {
         };
 
         // When no providers are tracked, is_valid should only depend on staleness
-        assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-                "is_valid should be true for fresh results with no tracked providers");
+        assert!(
+            probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+            "is_valid should be true for fresh results with no tracked providers"
+        );
 
         // Verify should_reprobe returns false for untracked providers
-        assert!(!probe.should_reprobe("unknown:provider"),
-                "should_reprobe should return false for untracked providers");
+        assert!(
+            !probe.should_reprobe("unknown:provider"),
+            "should_reprobe should return false for untracked providers"
+        );
     }
 
     #[test]
@@ -1561,8 +1672,15 @@ mod tests {
 
         // When all providers need re-probing, the implementation returns the first successful provider as a fallback
         let best = probe.get_best_provider_with_tracker(&results, "hrrr");
-        assert!(best.is_some(), "Should return fallback provider when all providers need re-probing");
-        assert_eq!(best.unwrap().provider, "s3:hrrr-bdp", "Fallback should return first provider when all need re-probing");
+        assert!(
+            best.is_some(),
+            "Should return fallback provider when all providers need re-probing"
+        );
+        assert_eq!(
+            best.unwrap().provider,
+            "s3:hrrr-bdp",
+            "Fallback should return first provider when all need re-probing"
+        );
     }
 
     #[test]
@@ -1687,7 +1805,11 @@ mod tests {
 
         // Should select s3:nbm (first provider with failures below threshold)
         let best = probe.get_best_provider_with_tracker(&results, "nbm");
-        assert_eq!(best.unwrap().provider, "s3:nbm", "Should select first provider with failures below threshold");
+        assert_eq!(
+            best.unwrap().provider,
+            "s3:nbm",
+            "Should select first provider with failures below threshold"
+        );
     }
 
     #[test]
@@ -1796,12 +1918,16 @@ mod tests {
         probe.record_failure("fast_provider");
 
         // Verify should_reprobe returns true for fast_provider
-        assert!(probe.should_reprobe("fast_provider"),
-                "fast_provider should need reprobe after 2 failures");
+        assert!(
+            probe.should_reprobe("fast_provider"),
+            "fast_provider should need reprobe after 2 failures"
+        );
 
         // Verify should_reprobe returns false for medium_provider
-        assert!(!probe.should_reprobe("medium_provider"),
-                "medium_provider should not need reprobe");
+        assert!(
+            !probe.should_reprobe("medium_provider"),
+            "medium_provider should not need reprobe"
+        );
 
         // Call selection again - the implementation MUST call should_reprobe
         // during selection to skip fast_provider and select medium_provider
@@ -1810,8 +1936,11 @@ mod tests {
         // The fact that medium_provider is selected (not fast_provider)
         // PROVES that should_reprobe was called during selection.
         // There's no other way the implementation could know to skip fast_provider.
-        assert_eq!(best.unwrap().provider, "medium_provider",
-                    "Selection should skip fast_provider, proving should_reprobe was called");
+        assert_eq!(
+            best.unwrap().provider,
+            "medium_provider",
+            "Selection should skip fast_provider, proving should_reprobe was called"
+        );
     }
 
     /// Test that should_reprobe is called for multiple providers during selection
@@ -1884,8 +2013,11 @@ mod tests {
         // 1. provider_a (returned true, so skipped)
         // 2. provider_b (returned true, so skipped)
         // 3. provider_c (returned false, so selected)
-        assert_eq!(best.unwrap().provider, "provider_c",
-                    "Selection should skip both a and b, proving should_reprobe was called for all");
+        assert_eq!(
+            best.unwrap().provider,
+            "provider_c",
+            "Selection should skip both a and b, proving should_reprobe was called for all"
+        );
     }
 
     /// Test that should_reprobe selection is distinct from validation path
@@ -1934,31 +2066,47 @@ mod tests {
         probe.record_failure("s3:gfs");
 
         // VALIDATION PATH: should return true (fresh + below threshold)
-        assert!(!probe.should_reprobe("s3:gfs"),
-                "s3:gfs should not need reprobe with 2 failures");
+        assert!(
+            !probe.should_reprobe("s3:gfs"),
+            "s3:gfs should not need reprobe with 2 failures"
+        );
         let is_valid = probe.is_valid(&results, std::time::Duration::from_secs(24 * 3600));
-        assert!(is_valid, "Validation should succeed with no providers exceeding threshold");
+        assert!(
+            is_valid,
+            "Validation should succeed with no providers exceeding threshold"
+        );
 
         // SELECTION PATH: should select s3:gfs (doesn't need reprobe)
         let best = probe.get_best_provider_with_tracker(&results, "gfs");
-        assert_eq!(best.unwrap().provider, "s3:gfs",
-                    "Selection should choose s3:gfs when should_reprobe returns false");
+        assert_eq!(
+            best.unwrap().provider,
+            "s3:gfs",
+            "Selection should choose s3:gfs when should_reprobe returns false"
+        );
 
         // Now record one more failure to exceed threshold
         probe.record_failure("s3:gfs");
 
         // Verify should_reprobe state changed
-        assert!(probe.should_reprobe("s3:gfs"),
-                "s3:gfs should need reprobe with 3 failures");
+        assert!(
+            probe.should_reprobe("s3:gfs"),
+            "s3:gfs should need reprobe with 3 failures"
+        );
 
         // VALIDATION PATH: should now return false
         let is_valid = probe.is_valid(&results, std::time::Duration::from_secs(24 * 3600));
-        assert!(!is_valid, "Validation should fail when a provider exceeds threshold");
+        assert!(
+            !is_valid,
+            "Validation should fail when a provider exceeds threshold"
+        );
 
         // SELECTION PATH: should skip s3:gfs and select nomads:gfs
         let best = probe.get_best_provider_with_tracker(&results, "gfs");
-        assert_eq!(best.unwrap().provider, "nomads:gfs",
-                    "Selection should skip s3:gfs when should_reprobe returns true");
+        assert_eq!(
+            best.unwrap().provider,
+            "nomads:gfs",
+            "Selection should skip s3:gfs when should_reprobe returns true"
+        );
 
         // This proves that both paths use should_reprobe but for different purposes:
         // - VALIDATION: causes is_valid to return false (rejects entire results)
@@ -1972,17 +2120,19 @@ mod tests {
 
         // Create test results with many providers to trigger parallel execution
         let mut models = std::collections::HashMap::new();
-        let providers: Vec<ProbeResult> = (0..10).map(|i| ProbeResult {
-            provider: format!("provider_{}", i),
-            probe_url: format!("https://test{}.idx", i),
-            connect_ms: 50 + i as u64 * 10,
-            ttfb_ms: 75 + i as u64 * 15,
-            throughput_mbs: 10.0,
-            score: 125.0,
-            success: true,
-            error: None,
-            timestamp: chrono::Utc::now().to_rfc3339(),
-        }).collect();
+        let providers: Vec<ProbeResult> = (0..10)
+            .map(|i| ProbeResult {
+                provider: format!("provider_{}", i),
+                probe_url: format!("https://test{}.idx", i),
+                connect_ms: 50 + i as u64 * 10,
+                ttfb_ms: 75 + i as u64 * 15,
+                throughput_mbs: 10.0,
+                score: 125.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            })
+            .collect();
 
         models.insert("parallel".to_string(), providers);
 
@@ -2000,12 +2150,18 @@ mod tests {
 
         // Verify should_reprobe state
         for i in 0..5 {
-            assert!(probe.should_reprobe(&format!("provider_{}", i)),
-                    "provider_{} should need reprobe", i);
+            assert!(
+                probe.should_reprobe(&format!("provider_{}", i)),
+                "provider_{} should need reprobe",
+                i
+            );
         }
         for i in 5..10 {
-            assert!(!probe.should_reprobe(&format!("provider_{}", i)),
-                    "provider_{} should not need reprobe", i);
+            assert!(
+                !probe.should_reprobe(&format!("provider_{}", i)),
+                "provider_{} should not need reprobe",
+                i
+            );
         }
 
         // Call selection - parallel execution must still call should_reprobe
@@ -2013,12 +2169,17 @@ mod tests {
 
         // Should select one of the providers that doesn't need reprobe (5-9)
         let selected_provider = best.unwrap().provider.clone();
-        let provider_num = selected_provider.strip_prefix("provider_").unwrap()
-            .parse::<usize>().unwrap();
+        let provider_num = selected_provider
+            .strip_prefix("provider_")
+            .unwrap()
+            .parse::<usize>()
+            .unwrap();
 
-        assert!(provider_num >= 5,
-                "Should select a provider that doesn't need reprobe, got {}",
-                selected_provider);
+        assert!(
+            provider_num >= 5,
+            "Should select a provider that doesn't need reprobe, got {}",
+            selected_provider
+        );
 
         // This proves that should_reprobe was called during parallel selection:
         // - The implementation had to check each provider's failure state
@@ -2091,8 +2252,11 @@ mod tests {
 
         // Now selection should skip rank1 and select rank2
         let best = probe.get_best_provider_with_tracker(&results, "hrrr");
-        assert_eq!(best.unwrap().provider, "rank2",
-                    "Selection should skip rank1 when should_reprobe returns true");
+        assert_eq!(
+            best.unwrap().provider,
+            "rank2",
+            "Selection should skip rank1 when should_reprobe returns true"
+        );
 
         // Record failures for rank2 as well
         probe.record_failure("rank2");
@@ -2103,8 +2267,11 @@ mod tests {
 
         // Now selection should skip rank1 and rank2, select rank3
         let best = probe.get_best_provider_with_tracker(&results, "hrrr");
-        assert_eq!(best.unwrap().provider, "rank3",
-                    "Selection should skip rank1 and rank2 when both need reprobe");
+        assert_eq!(
+            best.unwrap().provider,
+            "rank3",
+            "Selection should skip rank1 and rank2 when both need reprobe"
+        );
 
         // This progressive selection proves that should_reprobe is called
         // for each provider in turn during the selection process.
@@ -2165,10 +2332,14 @@ mod tests {
         let provider_a_needs_reprobe = probe.should_reprobe("tracked_provider_a");
         let provider_b_needs_reprobe = probe.should_reprobe("tracked_provider_b");
 
-        assert!(provider_a_needs_reprobe,
-                "tracked_provider_a should need reprobe after 2 failures");
-        assert!(!provider_b_needs_reprobe,
-                "tracked_provider_b should not need reprobe");
+        assert!(
+            provider_a_needs_reprobe,
+            "tracked_provider_a should need reprobe after 2 failures"
+        );
+        assert!(
+            !provider_b_needs_reprobe,
+            "tracked_provider_b should not need reprobe"
+        );
 
         // Execute selection and track the outcome
         let best = probe.get_best_provider_with_tracker(&results, "selection_test");
@@ -2181,13 +2352,17 @@ mod tests {
         // The call pattern during selection MUST have been:
         // 1. should_reprobe("tracked_provider_a") -> true (skipped)
         // 2. should_reprobe("tracked_provider_b") -> false (selected)
-        assert_eq!(selected_provider.provider, "tracked_provider_b",
-                    "Selection of provider_b proves should_reprobe was called for both providers");
+        assert_eq!(
+            selected_provider.provider, "tracked_provider_b",
+            "Selection of provider_b proves should_reprobe was called for both providers"
+        );
 
         // Additional verification: confirm the selection logic works correctly
         // by testing that it uses should_reprobe results correctly
-        assert_ne!(selected_provider.provider, "tracked_provider_a",
-                   "tracked_provider_a should be skipped due to should_reprobe returning true");
+        assert_ne!(
+            selected_provider.provider, "tracked_provider_a",
+            "tracked_provider_a should be skipped due to should_reprobe returning true"
+        );
     }
 
     /// Test that verifies should_reprobe call pattern in validation vs selection paths
@@ -2243,22 +2418,30 @@ mod tests {
         let validation_result = probe.is_valid(&results, std::time::Duration::from_secs(24 * 3600));
 
         // Verify should_reprobe state affects validation
-        assert!(!probe.should_reprobe("provider_alpha"),
-                "provider_alpha should not need reprobe with only 2 failures");
-        assert!(validation_result,
-                "Validation should succeed when should_reprobe returns false for all providers");
+        assert!(
+            !probe.should_reprobe("provider_alpha"),
+            "provider_alpha should not need reprobe with only 2 failures"
+        );
+        assert!(
+            validation_result,
+            "Validation should succeed when should_reprobe returns false for all providers"
+        );
 
         // Record one more failure to exceed threshold
         probe.record_failure("provider_alpha");
 
         // Verify should_reprobe state changed
-        assert!(probe.should_reprobe("provider_alpha"),
-                "provider_alpha should need reprobe with 3 failures");
+        assert!(
+            probe.should_reprobe("provider_alpha"),
+            "provider_alpha should need reprobe with 3 failures"
+        );
 
         // VALIDATION PATH TEST: validation should now fail
         let validation_result = probe.is_valid(&results, std::time::Duration::from_secs(24 * 3600));
-        assert!(!validation_result,
-                "Validation should fail when should_reprobe returns true for any provider");
+        assert!(
+            !validation_result,
+            "Validation should fail when should_reprobe returns true for any provider"
+        );
 
         // SELECTION PATH TEST: get_best_provider_with_tracker calls should_reprobe
         // during provider iteration (distinct from validation path)

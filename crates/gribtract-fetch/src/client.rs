@@ -98,13 +98,13 @@ impl ContentRange {
             )));
         }
 
-        let total = match parts[1] {
-            "*" => None,
-            s => Some(
-                s.parse::<u64>()
-                    .map_err(|_| FetchError::InvalidContentRange(format!("Invalid total: {}", s)))?,
-            ),
-        };
+        let total =
+            match parts[1] {
+                "*" => None,
+                s => Some(s.parse::<u64>().map_err(|_| {
+                    FetchError::InvalidContentRange(format!("Invalid total: {}", s))
+                })?),
+            };
 
         if parts[0] == "*" {
             return Ok(ContentRange {
@@ -122,12 +122,12 @@ impl ContentRange {
             )));
         }
 
-        let start = range_parts[0]
-            .parse::<u64>()
-            .map_err(|_| FetchError::InvalidContentRange(format!("Invalid start: {}", range_parts[0])))?;
-        let end = range_parts[1]
-            .parse::<u64>()
-            .map_err(|_| FetchError::InvalidContentRange(format!("Invalid end: {}", range_parts[1])))?;
+        let start = range_parts[0].parse::<u64>().map_err(|_| {
+            FetchError::InvalidContentRange(format!("Invalid start: {}", range_parts[0]))
+        })?;
+        let end = range_parts[1].parse::<u64>().map_err(|_| {
+            FetchError::InvalidContentRange(format!("Invalid end: {}", range_parts[1]))
+        })?;
 
         Ok(ContentRange { start, end, total })
     }
@@ -294,7 +294,8 @@ impl FetchClient {
 
     /// Fetch the first N bytes from a URL
     pub async fn fetch_head(&mut self, url: &str, length: u64) -> Result<RangeResponse> {
-        self.fetch_range(url, RangeRequest::with_length(0, length)).await
+        self.fetch_range(url, RangeRequest::with_length(0, length))
+            .await
     }
 
     /// Fetch the entire resource (no range request)
@@ -428,7 +429,10 @@ impl FetchClient {
 
     /// Get the current consecutive failure count for a provider
     pub fn get_failure_count(&self, provider: &str) -> u32 {
-        self.consecutive_failures.get(provider).copied().unwrap_or(0)
+        self.consecutive_failures
+            .get(provider)
+            .copied()
+            .unwrap_or(0)
     }
 
     /// Set the consecutive failure threshold
@@ -446,7 +450,10 @@ impl FetchClient {
     /// Increments the consecutive failure counter for the provider.
     /// Returns the current failure count after incrementing.
     pub fn record_failure(&mut self, provider: &str) -> u32 {
-        let count = self.consecutive_failures.entry(provider.to_string()).or_insert(0);
+        let count = self
+            .consecutive_failures
+            .entry(provider.to_string())
+            .or_insert(0);
         *count += 1;
         *count
     }
@@ -533,7 +540,7 @@ mod tests {
 
     #[test]
     fn test_provider_urls() {
-        use crate::provider::{S3Bucket, GcsBucket, NomadsModel};
+        use crate::provider::{GcsBucket, NomadsModel, S3Bucket};
 
         let hrrr = S3Bucket::HrrrBdp;
         assert_eq!(

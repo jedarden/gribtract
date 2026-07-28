@@ -27,8 +27,8 @@
 //! cargo run --example test_minimal_underrun
 //! ```
 
-use std::fs;
 use gribtract::decode;
+use std::fs;
 
 fn main() {
     println!("=== TESTING MINIMAL BUFFER UNDERRUN CASES ===\n");

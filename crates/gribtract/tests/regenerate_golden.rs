@@ -111,7 +111,11 @@ fn generate_golden(fixture_id: &str) -> Result<(), Box<dyn std::error::Error>> {
     let json_string = serde_json::to_string_pretty(&golden_fixture)?;
     fs::write(&golden_path, json_string)?;
 
-    println!("Generated golden reference for {} with {} fields", fixture_id, fields.len());
+    println!(
+        "Generated golden reference for {} with {} fields",
+        fixture_id,
+        fields.len()
+    );
     println!("Written to: {}", golden_path.display());
 
     Ok(())

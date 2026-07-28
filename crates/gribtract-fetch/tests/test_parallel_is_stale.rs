@@ -9,11 +9,11 @@
 
 #![cfg(feature = "probe")]
 
-use gribtract_fetch::probe::{ProviderProbe, ProviderProbeResults, ProbeResult};
-use std::collections::HashMap;
-use std::time::Duration;
-use std::sync::{Arc, Mutex};
+use gribtract_fetch::probe::{ProbeResult, ProviderProbe, ProviderProbeResults};
 use std::cell::RefCell;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 /// A test wrapper that tracks both is_stale and should_reprobe calls
 struct ParallelExecutionTracker {
@@ -38,14 +38,20 @@ impl ParallelExecutionTracker {
 
     /// Track and call should_reprobe
     fn tracked_should_reprobe(&self, provider: &str) -> bool {
-        self.execution_log.borrow_mut().push(format!("should_reprobe({})", provider));
-        self.should_reprobe_calls.borrow_mut().push(provider.to_string());
+        self.execution_log
+            .borrow_mut()
+            .push(format!("should_reprobe({})", provider));
+        self.should_reprobe_calls
+            .borrow_mut()
+            .push(provider.to_string());
         self.probe.should_reprobe(provider)
     }
 
     /// Track and call is_stale
     fn tracked_is_stale(&self, results: &ProviderProbeResults, max_age: Duration) -> bool {
-        self.execution_log.borrow_mut().push("is_stale()".to_string());
+        self.execution_log
+            .borrow_mut()
+            .push("is_stale()".to_string());
         *self.is_stale_called.borrow_mut() = true;
         ProviderProbe::is_stale(results, max_age)
     }
@@ -84,19 +90,17 @@ fn test_is_stale_and_should_reprobe_both_checked_during_validation() {
     let mut models = HashMap::new();
     models.insert(
         "hrrr".to_string(),
-        vec![
-            ProbeResult {
-                provider: "s3:hrrr".to_string(),
-                probe_url: "https://test1.idx".to_string(),
-                connect_ms: 50,
-                ttfb_ms: 75,
-                throughput_mbs: 10.0,
-                score: 125.0,
-                success: true,
-                error: None,
-                timestamp: chrono::Utc::now().to_rfc3339(),
-            },
-        ],
+        vec![ProbeResult {
+            provider: "s3:hrrr".to_string(),
+            probe_url: "https://test1.idx".to_string(),
+            connect_ms: 50,
+            ttfb_ms: 75,
+            throughput_mbs: 10.0,
+            score: 125.0,
+            success: true,
+            error: None,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        }],
     );
 
     let results = ProviderProbeResults {
@@ -120,17 +124,27 @@ fn test_is_stale_and_should_reprobe_both_checked_during_validation() {
     let _needs_reprobe = tracker.tracked_should_reprobe("s3:hrrr");
 
     // Verify both were called
-    assert!(tracker.was_is_stale_called(),
-            "is_stale should be called during validation");
-    assert!(tracker.get_should_reprobe_calls().contains(&"s3:hrrr".to_string()),
-            "should_reprobe should be called for s3:hrrr during validation");
+    assert!(
+        tracker.was_is_stale_called(),
+        "is_stale should be called during validation"
+    );
+    assert!(
+        tracker
+            .get_should_reprobe_calls()
+            .contains(&"s3:hrrr".to_string()),
+        "should_reprobe should be called for s3:hrrr during validation"
+    );
 
     // Verify execution log contains both calls
     let log = tracker.get_execution_log();
-    assert!(log.iter().any(|entry| entry.starts_with("is_stale")),
-            "Execution log should contain is_stale call");
-    assert!(log.iter().any(|entry| entry.starts_with("should_reprobe")),
-            "Execution log should contain should_reprobe call");
+    assert!(
+        log.iter().any(|entry| entry.starts_with("is_stale")),
+        "Execution log should contain is_stale call"
+    );
+    assert!(
+        log.iter().any(|entry| entry.starts_with("should_reprobe")),
+        "Execution log should contain should_reprobe call"
+    );
 }
 
 #[test]
@@ -142,17 +156,19 @@ fn test_parallel_execution_no_deadlock() {
 
     // Create test results with multiple providers
     let mut models = HashMap::new();
-    let providers: Vec<ProbeResult> = (0..5).map(|i| ProbeResult {
-        provider: format!("provider_{}", i),
-        probe_url: format!("https://test{}.idx", i),
-        connect_ms: 50 + i as u64 * 10,
-        ttfb_ms: 75 + i as u64 * 15,
-        throughput_mbs: 10.0,
-        score: 125.0,
-        success: true,
-        error: None,
-        timestamp: chrono::Utc::now().to_rfc3339(),
-    }).collect();
+    let providers: Vec<ProbeResult> = (0..5)
+        .map(|i| ProbeResult {
+            provider: format!("provider_{}", i),
+            probe_url: format!("https://test{}.idx", i),
+            connect_ms: 50 + i as u64 * 10,
+            ttfb_ms: 75 + i as u64 * 15,
+            throughput_mbs: 10.0,
+            score: 125.0,
+            success: true,
+            error: None,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        })
+        .collect();
 
     models.insert("test".to_string(), providers);
 
@@ -182,14 +198,22 @@ fn test_parallel_execution_no_deadlock() {
     }
 
     // Verify all calls completed
-    assert!(tracker.was_is_stale_called(),
-            "is_stale should complete without deadlock");
-    assert_eq!(tracker.get_should_reprobe_calls().len(), 5,
-            "should_reprobe should be called for all 5 providers without deadlock");
+    assert!(
+        tracker.was_is_stale_called(),
+        "is_stale should complete without deadlock"
+    );
+    assert_eq!(
+        tracker.get_should_reprobe_calls().len(),
+        5,
+        "should_reprobe should be called for all 5 providers without deadlock"
+    );
 
     // Verify no deadlock occurred by checking execution completed
     let log = tracker.get_execution_log();
-    assert!(log.len() >= 6, "All calls should complete (is_stale + 5 should_reprobe calls)");
+    assert!(
+        log.len() >= 6,
+        "All calls should complete (is_stale + 5 should_reprobe calls)"
+    );
 }
 
 #[test]
@@ -267,13 +291,24 @@ fn test_parallel_execution_timing_both_complete_before_selection() {
     assert!(is_stale_position.is_some(), "is_stale should be called");
 
     // Verify should_reprobe was called for both providers before selection
-    let should_reprobe_count = log.iter().filter(|entry| entry.starts_with("should_reprobe")).count();
-    assert_eq!(should_reprobe_count, 2, "should_reprobe should be called for both providers");
+    let should_reprobe_count = log
+        .iter()
+        .filter(|entry| entry.starts_with("should_reprobe"))
+        .count();
+    assert_eq!(
+        should_reprobe_count, 2,
+        "should_reprobe should be called for both providers"
+    );
 
     // Verify timing: both checks complete before we make selection decision
-    assert!(tracker.was_is_stale_called(), "is_stale must complete before selection");
-    assert!(tracker.get_should_reprobe_calls().len() >= 2,
-            "should_reprobe must complete for providers before selection");
+    assert!(
+        tracker.was_is_stale_called(),
+        "is_stale must complete before selection"
+    );
+    assert!(
+        tracker.get_should_reprobe_calls().len() >= 2,
+        "should_reprobe must complete for providers before selection"
+    );
 }
 
 #[test]
@@ -333,17 +368,27 @@ fn test_combined_parallel_execution_behavior_with_fresh_results() {
     // Verify combined behavior
     assert!(!is_stale, "is_stale should return false for fresh results");
     assert!(s3_reprobe, "should_reprobe should return true for s3:nbm");
-    assert!(!gcs_reprobe, "should_reprobe should return false for gcs:nbm");
+    assert!(
+        !gcs_reprobe,
+        "should_reprobe should return false for gcs:nbm"
+    );
 
     // Verify both were called
     assert!(tracker.was_is_stale_called());
-    assert!(tracker.get_should_reprobe_calls().contains(&"s3:nbm".to_string()));
-    assert!(tracker.get_should_reprobe_calls().contains(&"gcs:nbm".to_string()));
+    assert!(tracker
+        .get_should_reprobe_calls()
+        .contains(&"s3:nbm".to_string()));
+    assert!(tracker
+        .get_should_reprobe_calls()
+        .contains(&"gcs:nbm".to_string()));
 
     // The combined result: fresh but some providers need reprobe
     // This is the dual-trigger behavior
     let log = tracker.get_execution_log();
-    assert!(log.len() >= 3, "Should have 3 calls: is_stale + 2 should_reprobe");
+    assert!(
+        log.len() >= 3,
+        "Should have 3 calls: is_stale + 2 should_reprobe"
+    );
 }
 
 #[test]
@@ -358,19 +403,17 @@ fn test_combined_parallel_execution_behavior_with_stale_results() {
     let mut models = HashMap::new();
     models.insert(
         "hrrr".to_string(),
-        vec![
-            ProbeResult {
-                provider: "s3:hrrr".to_string(),
-                probe_url: "https://test1.idx".to_string(),
-                connect_ms: 50,
-                ttfb_ms: 75,
-                throughput_mbs: 10.0,
-                score: 125.0,
-                success: true,
-                error: None,
-                timestamp: timestamp.to_rfc3339(),
-            },
-        ],
+        vec![ProbeResult {
+            provider: "s3:hrrr".to_string(),
+            probe_url: "https://test1.idx".to_string(),
+            connect_ms: 50,
+            ttfb_ms: 75,
+            throughput_mbs: 10.0,
+            score: 125.0,
+            success: true,
+            error: None,
+            timestamp: timestamp.to_rfc3339(),
+        }],
     );
 
     let results = ProviderProbeResults {
@@ -391,16 +434,24 @@ fn test_combined_parallel_execution_behavior_with_stale_results() {
 
     // Verify combined behavior
     assert!(is_stale, "is_stale should return true for stale results");
-    assert!(!s3_reprobe, "should_reprobe should return false (below threshold)");
+    assert!(
+        !s3_reprobe,
+        "should_reprobe should return false (below threshold)"
+    );
 
     // Verify both were called
     assert!(tracker.was_is_stale_called());
-    assert!(tracker.get_should_reprobe_calls().contains(&"s3:hrrr".to_string()));
+    assert!(tracker
+        .get_should_reprobe_calls()
+        .contains(&"s3:hrrr".to_string()));
 
     // The combined result: stale results invalidate everything
     // This is the dual-trigger behavior where staleness trumps should_reprobe
     let log = tracker.get_execution_log();
-    assert!(log.len() >= 2, "Should have 2 calls: is_stale + should_reprobe");
+    assert!(
+        log.len() >= 2,
+        "Should have 2 calls: is_stale + should_reprobe"
+    );
 }
 
 #[test]
@@ -453,13 +504,18 @@ fn test_parallel_execution_order_preserves_semantics() {
     tracker.record_failure("s3:gefs");
 
     // Test the actual is_valid implementation which uses parallel execution
-    let is_valid = tracker.probe.is_valid(&results, Duration::from_secs(24 * 3600));
+    let is_valid = tracker
+        .probe
+        .is_valid(&results, Duration::from_secs(24 * 3600));
 
     // Verify the dual-trigger semantics:
     // - is_stale would return false (fresh)
     // - should_reprobe returns true for s3:gefs
     // - Combined result: is_valid should return false
-    assert!(!is_valid, "is_valid should return false when should_reprobe returns true");
+    assert!(
+        !is_valid,
+        "is_valid should return false when should_reprobe returns true"
+    );
 
     // Manually verify the semantics with tracking
     tracker.clear_tracking();
@@ -487,17 +543,19 @@ fn test_rayon_parallel_execution_of_should_reprobe() {
 
     // Create test results with multiple providers
     let mut models = HashMap::new();
-    let providers: Vec<ProbeResult> = (0..10).map(|i| ProbeResult {
-        provider: format!("provider_{}", i),
-        probe_url: format!("https://test{}.idx", i),
-        connect_ms: 50 + i as u64 * 10,
-        ttfb_ms: 75 + i as u64 * 15,
-        throughput_mbs: 10.0,
-        score: 125.0,
-        success: true,
-        error: None,
-        timestamp: chrono::Utc::now().to_rfc3339(),
-    }).collect();
+    let providers: Vec<ProbeResult> = (0..10)
+        .map(|i| ProbeResult {
+            provider: format!("provider_{}", i),
+            probe_url: format!("https://test{}.idx", i),
+            connect_ms: 50 + i as u64 * 10,
+            ttfb_ms: 75 + i as u64 * 15,
+            throughput_mbs: 10.0,
+            score: 125.0,
+            success: true,
+            error: None,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        })
+        .collect();
 
     models.insert("test".to_string(), providers);
 
@@ -518,16 +576,24 @@ fn test_rayon_parallel_execution_of_should_reprobe() {
     let selected = probe.get_best_provider_with_tracker(&results, "test");
 
     // Verify selection completed
-    assert!(selected.is_some(), "Parallel selection should complete without deadlock");
+    assert!(
+        selected.is_some(),
+        "Parallel selection should complete without deadlock"
+    );
 
     // Verify it skipped the providers that need reprobe
     let selected_provider = selected.unwrap();
-    let provider_num = selected_provider.provider.strip_prefix("provider_")
+    let provider_num = selected_provider
+        .provider
+        .strip_prefix("provider_")
         .unwrap()
         .parse::<usize>()
         .unwrap();
 
-    assert!(provider_num >= 5, "Should select a provider that doesn't need reprobe");
+    assert!(
+        provider_num >= 5,
+        "Should select a provider that doesn't need reprobe"
+    );
 
     // Verify parallel execution worked by checking that should_reprobe was called
     // We can't directly verify this without instrumentation, but the selection
@@ -545,19 +611,17 @@ fn test_concurrent_calls_to_is_stale_and_should_reprobe() {
     let mut models = HashMap::new();
     models.insert(
         "test".to_string(),
-        vec![
-            ProbeResult {
-                provider: "provider_a".to_string(),
-                probe_url: "https://test1.idx".to_string(),
-                connect_ms: 50,
-                ttfb_ms: 75,
-                throughput_mbs: 10.0,
-                score: 125.0,
-                success: true,
-                error: None,
-                timestamp: chrono::Utc::now().to_rfc3339(),
-            },
-        ],
+        vec![ProbeResult {
+            provider: "provider_a".to_string(),
+            probe_url: "https://test1.idx".to_string(),
+            connect_ms: 50,
+            ttfb_ms: 75,
+            throughput_mbs: 10.0,
+            score: 125.0,
+            success: true,
+            error: None,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        }],
     );
 
     let results = Arc::new(ProviderProbeResults {
@@ -588,13 +652,20 @@ fn test_concurrent_calls_to_is_stale_and_should_reprobe() {
 
     // Verify both completed successfully
     assert!(!is_stale_result, "is_stale should complete successfully");
-    assert!(!should_reprobe_result, "should_reprobe should complete successfully");
+    assert!(
+        !should_reprobe_result,
+        "should_reprobe should complete successfully"
+    );
 
     // Verify both were tracked
     let tracker = tracker.lock().unwrap();
     assert!(tracker.was_is_stale_called(), "is_stale should be tracked");
-    assert!(tracker.get_should_reprobe_calls().contains(&"provider_a".to_string()),
-            "should_reprobe should be tracked");
+    assert!(
+        tracker
+            .get_should_reprobe_calls()
+            .contains(&"provider_a".to_string()),
+        "should_reprobe should be tracked"
+    );
 }
 
 #[test]
@@ -611,19 +682,17 @@ fn test_parallel_execution_with_edge_cases() {
     let mut models = HashMap::new();
     models.insert(
         "single".to_string(),
-        vec![
-            ProbeResult {
-                provider: "only_provider".to_string(),
-                probe_url: "https://test.idx".to_string(),
-                connect_ms: 50,
-                ttfb_ms: 75,
-                throughput_mbs: 10.0,
-                score: 125.0,
-                success: true,
-                error: None,
-                timestamp: chrono::Utc::now().to_rfc3339(),
-            },
-        ],
+        vec![ProbeResult {
+            provider: "only_provider".to_string(),
+            probe_url: "https://test.idx".to_string(),
+            connect_ms: 50,
+            ttfb_ms: 75,
+            throughput_mbs: 10.0,
+            score: 125.0,
+            success: true,
+            error: None,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        }],
     );
 
     let results = ProviderProbeResults {
@@ -639,7 +708,10 @@ fn test_parallel_execution_with_edge_cases() {
     let needs_reprobe = tracker.tracked_should_reprobe("only_provider");
 
     assert!(!is_stale, "is_stale should handle single provider");
-    assert!(needs_reprobe, "should_reprobe should handle single provider");
+    assert!(
+        needs_reprobe,
+        "should_reprobe should handle single provider"
+    );
     assert!(tracker.was_is_stale_called());
 
     // Test Case 2: Empty model (no providers)
@@ -670,15 +742,19 @@ fn test_dual_trigger_semantics_preserved_in_parallel_execution() {
     };
 
     // Case 1: Neither trigger active
-    assert!(probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-            "is_valid should return true when neither trigger is active");
+    assert!(
+        probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+        "is_valid should return true when neither trigger is active"
+    );
 
     // Case 2: should_reprobe trigger active
     probe.record_failure("test_provider");
     probe.record_failure("test_provider");
     probe.record_failure("test_provider");
-    assert!(!probe.is_valid(&results, Duration::from_secs(24 * 3600)),
-            "is_valid should return false when should_reprobe trigger is active");
+    assert!(
+        !probe.is_valid(&results, Duration::from_secs(24 * 3600)),
+        "is_valid should return false when should_reprobe trigger is active"
+    );
 
     // Case 3: is_stale trigger active
     let probe2 = ProviderProbe::new().with_threshold(3);
@@ -687,16 +763,20 @@ fn test_dual_trigger_semantics_preserved_in_parallel_execution() {
         timestamp: (chrono::Utc::now() - chrono::Duration::hours(25)).to_rfc3339(),
         git_sha: None,
     };
-    assert!(!probe2.is_valid(&stale_results, Duration::from_secs(24 * 3600)),
-            "is_valid should return false when is_stale trigger is active");
+    assert!(
+        !probe2.is_valid(&stale_results, Duration::from_secs(24 * 3600)),
+        "is_valid should return false when is_stale trigger is active"
+    );
 
     // Case 4: Both triggers active
     let mut probe3 = ProviderProbe::new().with_threshold(3);
     probe3.record_failure("test_provider");
     probe3.record_failure("test_provider");
     probe3.record_failure("test_provider");
-    assert!(!probe3.is_valid(&stale_results, Duration::from_secs(24 * 3600)),
-            "is_valid should return false when both triggers are active");
+    assert!(
+        !probe3.is_valid(&stale_results, Duration::from_secs(24 * 3600)),
+        "is_valid should return false when both triggers are active"
+    );
 
     // This verifies that the OR semantics are preserved:
     // valid = !stale AND !should_reprobe

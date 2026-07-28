@@ -19,8 +19,7 @@ use std::time::Instant;
 fn integration_nam_lambert_end_to_end() {
     let corpus_root = {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
-        std::path::Path::new(manifest_dir)
-            .join("../../tests/corpus")
+        std::path::Path::new(manifest_dir).join("../../tests/corpus")
     };
 
     let fixture_path = corpus_root.join("large/nam.t00z.awip1200.tm00.grib2");
@@ -39,7 +38,11 @@ fn integration_nam_lambert_end_to_end() {
 
     println!("=== NAM Lambert-Conformal End-to-End Integration Test ===");
     println!("Fixture: nam.t00z.awip1200.tm00.grib2");
-    println!("Size: {:.2} MiB ({} bytes)", bytes.len() as f64 / 1024.0 / 1024.0, bytes.len());
+    println!(
+        "Size: {:.2} MiB ({} bytes)",
+        bytes.len() as f64 / 1024.0 / 1024.0,
+        bytes.len()
+    );
     println!("Expected: 196 fields, GDT 3.30, DRT 3 (2nd-order spatial differencing)");
     println!();
 
@@ -61,7 +64,10 @@ fn integration_nam_lambert_end_to_end() {
     // GRIB2 message structure - some fields may be embedded in multi-field messages
     // that aren't fully parsed until full decode. This is expected behavior.
     if lazy_fields.len() != 196 {
-        println!("⚠️  Lazy decode returned {} fields (expected 196)", lazy_fields.len());
+        println!(
+            "⚠️  Lazy decode returned {} fields (expected 196)",
+            lazy_fields.len()
+        );
         println!("    This is acceptable - lazy decode may not parse all embedded fields");
     } else {
         println!("✅ Lazy decode successful - all 196 fields found");
@@ -89,7 +95,10 @@ fn integration_nam_lambert_end_to_end() {
     println!("--- Test 3: Grid Metadata Consistency ---");
     let first_grid = &fields[0].grid;
     println!("Grid template: {}", first_grid.template);
-    println!("Grid dimensions: {}×{} ({} points)", first_grid.nx, first_grid.ny, first_grid.num_data_points);
+    println!(
+        "Grid dimensions: {}×{} ({} points)",
+        first_grid.nx, first_grid.ny, first_grid.num_data_points
+    );
     println!("Lambert Conformal parameters:");
 
     match &first_grid.projection {
@@ -104,17 +113,31 @@ fn integration_nam_lambert_end_to_end() {
         _ => panic!("Expected Lambert Conformal projection"),
     }
 
-    assert_eq!(first_grid.template, 30, "Expected GDT 3.30 (Lambert Conformal)");
+    assert_eq!(
+        first_grid.template, 30,
+        "Expected GDT 3.30 (Lambert Conformal)"
+    );
     assert_eq!(first_grid.nx, 614, "Expected Nx=614");
     assert_eq!(first_grid.ny, 428, "Expected Ny=428");
-    assert_eq!(first_grid.num_data_points, 262792, "Expected 262,792 points");
+    assert_eq!(
+        first_grid.num_data_points, 262792,
+        "Expected 262,792 points"
+    );
 
     // Verify all fields have consistent grid metadata
     for (i, field) in fields.iter().enumerate() {
-        assert_eq!(field.grid.template, 30, "Field {}: GDT template mismatch", i);
+        assert_eq!(
+            field.grid.template, 30,
+            "Field {}: GDT template mismatch",
+            i
+        );
         assert_eq!(field.grid.nx, 614, "Field {}: Nx mismatch", i);
         assert_eq!(field.grid.ny, 428, "Field {}: Ny mismatch", i);
-        assert_eq!(field.grid.num_data_points, 262792, "Field {}: point count mismatch", i);
+        assert_eq!(
+            field.grid.num_data_points, 262792,
+            "Field {}: point count mismatch",
+            i
+        );
     }
     println!("✅ All 196 fields have consistent grid metadata");
     println!();
@@ -140,10 +163,17 @@ fn integration_nam_lambert_end_to_end() {
         }
     }
 
-    println!("Fields with non-zero values: {} / {}", non_empty_fields, fields.len());
+    println!(
+        "Fields with non-zero values: {} / {}",
+        non_empty_fields,
+        fields.len()
+    );
     println!("Total values across all fields: {}", total_values);
 
-    assert_eq!(non_empty_fields, 196, "Expected all 196 fields to have values");
+    assert_eq!(
+        non_empty_fields, 196,
+        "Expected all 196 fields to have values"
+    );
     assert!(total_values > 0, "Expected non-zero total values");
     println!("✅ All fields decoded with non-zero value counts");
     println!();
@@ -154,13 +184,24 @@ fn integration_nam_lambert_end_to_end() {
     let mb_per_second = bytes_per_second / 1024.0 / 1024.0;
 
     println!("Full decode throughput: {:.2} MiB/s", mb_per_second);
-    println!("Lazy decode throughput: {:.2} MiB/s",
-             (bytes.len() as f64 / lazy_duration.as_secs_f64()) / 1024.0 / 1024.0);
-    println!("Time per field: {:.2} ms", full_duration.as_millis() as f64 / fields.len() as f64);
+    println!(
+        "Lazy decode throughput: {:.2} MiB/s",
+        (bytes.len() as f64 / lazy_duration.as_secs_f64()) / 1024.0 / 1024.0
+    );
+    println!(
+        "Time per field: {:.2} ms",
+        full_duration.as_millis() as f64 / fields.len() as f64
+    );
 
     // Sanity checks on performance
-    assert!(full_duration.as_secs() < 60, "Full decode should complete within 60 seconds");
-    assert!(lazy_duration.as_secs() < 10, "Lazy decode should complete within 10 seconds");
+    assert!(
+        full_duration.as_secs() < 60,
+        "Full decode should complete within 60 seconds"
+    );
+    assert!(
+        lazy_duration.as_secs() < 10,
+        "Lazy decode should complete within 10 seconds"
+    );
     println!("✅ Performance within acceptable bounds");
     println!();
 
@@ -180,8 +221,7 @@ fn integration_nam_lambert_end_to_end() {
 fn integration_nam_lambert_decode_error_coverage() {
     let corpus_root = {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
-        std::path::Path::new(manifest_dir)
-            .join("../../tests/corpus")
+        std::path::Path::new(manifest_dir).join("../../tests/corpus")
     };
 
     let fixture_path = corpus_root.join("large/nam.t00z.awip1200.tm00.grib2");
@@ -200,7 +240,10 @@ fn integration_nam_lambert_decode_error_coverage() {
 
     match decode_bytes(&bytes) {
         Ok(fields) => {
-            println!("✅ Successfully decoded {} fields with no errors", fields.len());
+            println!(
+                "✅ Successfully decoded {} fields with no errors",
+                fields.len()
+            );
             assert_eq!(fields.len(), 196, "Expected 196 fields");
         }
         Err(e) => {
@@ -215,8 +258,7 @@ fn integration_nam_lambert_decode_error_coverage() {
 fn integration_nam_lambert_fixture_manifest_validation() {
     let corpus_root = {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
-        std::path::Path::new(manifest_dir)
-            .join("../../tests/corpus")
+        std::path::Path::new(manifest_dir).join("../../tests/corpus")
     };
 
     let fixture_path = corpus_root.join("large/nam.t00z.awip1200.tm00.grib2");
@@ -243,14 +285,24 @@ fn integration_nam_lambert_fixture_manifest_validation() {
         .iter()
         .find(|f| f["id"] == "nam_awip12_lambert_drt3");
 
-    assert!(nam_fixture.is_some(), "nam_awip12_lambert_drt3 should exist in manifest");
+    assert!(
+        nam_fixture.is_some(),
+        "nam_awip12_lambert_drt3 should exist in manifest"
+    );
 
     let fixture = nam_fixture.unwrap();
     println!("Manifest ID: {}", fixture["id"]);
     println!("Manifest size: {} bytes", fixture["size_bytes"]);
 
-    assert_eq!(fixture["size_bytes"], bytes.len(), "File size should match manifest");
-    assert_eq!(fixture["id"], "nam_awip12_lambert_drt3", "Fixture ID should match");
+    assert_eq!(
+        fixture["size_bytes"],
+        bytes.len(),
+        "File size should match manifest"
+    );
+    assert_eq!(
+        fixture["id"], "nam_awip12_lambert_drt3",
+        "Fixture ID should match"
+    );
 
     println!("✅ Fixture manifest validated against actual file");
     println!("✅ Storage: remote (fetched from NOAA NAM PDS S3)");

@@ -1,5 +1,5 @@
-use std::fs;
 use gribtract::decode;
+use std::fs;
 
 fn main() {
     println!("=== MINIMIZATION ANALYSIS ===\n");
@@ -35,9 +35,9 @@ fn test_file(filename: &str) {
             println!("  {} ({} bytes)", filename, bytes.len());
             match decode(&bytes) {
                 Ok(fields) => println!("    ✓ Decoded {} fields", fields.len()),
-                Err(e) => println!("    ✗ Error: {:?}", e)
+                Err(e) => println!("    ✗ Error: {:?}", e),
             }
         }
-        Err(e) => println!("  {}: Failed to read: {:?}", filename, e)
+        Err(e) => println!("  {}: Failed to read: {:?}", filename, e),
     }
 }

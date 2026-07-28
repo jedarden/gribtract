@@ -1,5 +1,5 @@
-use std::fs;
 use gribtract::decode;
+use std::fs;
 
 fn main() {
     println!("=== SECTION 3 BODY THRESHOLD TESTING ===\n");
@@ -26,7 +26,7 @@ fn main() {
 fn test_decode(bytes: &[u8]) {
     match decode(bytes) {
         Ok(fields) => println!("    ✓ Decoded {} fields", fields.len()),
-        Err(e) => println!("    ✗ Error: {:?}", e)
+        Err(e) => println!("    ✗ Error: {:?}", e),
     }
 }
 
@@ -42,11 +42,11 @@ fn test_truncated_variants(original: &[u8]) {
     // Test different body sizes while keeping claimed length at 72
     let test_sizes = vec![
         ("Full body", body_claimed),           // 67 bytes (original)
-        ("Minus 1 byte", body_claimed - 1),     // 66 bytes
-        ("Minus 10 bytes", body_claimed - 10),  // 57 bytes
-        ("Minus 20 bytes", body_claimed - 20),  // 47 bytes
-        ("Minus 30 bytes", body_claimed - 30),  // 37 bytes
-        ("Minimal (10 bytes)", 10),             // 10 bytes
+        ("Minus 1 byte", body_claimed - 1),    // 66 bytes
+        ("Minus 10 bytes", body_claimed - 10), // 57 bytes
+        ("Minus 20 bytes", body_claimed - 20), // 47 bytes
+        ("Minus 30 bytes", body_claimed - 30), // 37 bytes
+        ("Minimal (10 bytes)", 10),            // 10 bytes
     ];
 
     for (name, new_body_size) in test_sizes {
@@ -63,7 +63,8 @@ fn test_truncated_variants(original: &[u8]) {
         variant.extend_from_slice(&original[..section3_header_end]);
 
         // Copy truncated body
-        variant.extend_from_slice(&original[section3_header_end..section3_header_end + new_body_size]);
+        variant
+            .extend_from_slice(&original[section3_header_end..section3_header_end + new_body_size]);
 
         // Skip the rest of Section 3 and copy everything after
         // Section 3 ends at: section3_start + 72 = 109
@@ -88,7 +89,12 @@ fn test_truncated_variants(original: &[u8]) {
     binary_search_threshold(original, section3_start, section3_header_end, body_claimed);
 }
 
-fn binary_search_threshold(original: &[u8], section3_start: usize, section3_header_end: usize, max_body: usize) {
+fn binary_search_threshold(
+    original: &[u8],
+    section3_start: usize,
+    section3_header_end: usize,
+    max_body: usize,
+) {
     let section3_claimed = 72; // Section 3 claimed length
     let section3_end = section3_start + section3_claimed;
 
@@ -134,7 +140,10 @@ fn binary_search_threshold(original: &[u8], section3_start: usize, section3_head
     }
 
     if let (Some(min), Some(max)) = (min_triggering, max_non_triggering) {
-        println!("\n  THRESHOLD: Body size {} is minimum that triggers TooShort", min);
+        println!(
+            "\n  THRESHOLD: Body size {} is minimum that triggers TooShort",
+            min
+        );
         println!("  Body size {} does NOT trigger TooShort", max);
     }
 }

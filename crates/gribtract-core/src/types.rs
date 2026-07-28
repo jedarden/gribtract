@@ -36,10 +36,7 @@ impl ReferenceTime {
             + d
             - 32075;
         let unix_days = jdn - 2440588; // JDN of 1970-01-01
-        unix_days * 86400
-            + self.hour as i64 * 3600
-            + self.minute as i64 * 60
-            + self.second as i64
+        unix_days * 86400 + self.hour as i64 * 3600 + self.minute as i64 * 60 + self.second as i64
     }
 }
 
@@ -242,8 +239,12 @@ impl LambertConformalParams {
 
         // Normalise longitude to within ±π of the central meridian.
         let mut lam = lon * to_rad;
-        while lam - lam0 > PI { lam -= 2.0 * PI; }
-        while lam0 - lam > PI { lam += 2.0 * PI; }
+        while lam - lam0 > PI {
+            lam -= 2.0 * PI;
+        }
+        while lam0 - lam > PI {
+            lam += 2.0 * PI;
+        }
 
         let r = Self::EARTH_R;
 
@@ -290,14 +291,20 @@ impl LambertConformalParams {
         };
 
         // Half-cell tolerance for boundary snapping.
-        if di_f < -0.5 || dj_f < -0.5 { return None; }
+        if di_f < -0.5 || dj_f < -0.5 {
+            return None;
+        }
         let nx_f = grid.nx as f64;
         let ny_f = grid.ny as f64;
-        if di_f > nx_f - 0.5 || dj_f > ny_f - 0.5 { return None; }
+        if di_f > nx_f - 0.5 || dj_f > ny_f - 0.5 {
+            return None;
+        }
 
         let i = di_f.round() as usize;
         let j = dj_f.round() as usize;
-        if i >= grid.nx as usize || j >= grid.ny as usize { return None; }
+        if i >= grid.nx as usize || j >= grid.ny as usize {
+            return None;
+        }
 
         Some(j * grid.nx as usize + i)
     }
@@ -342,27 +349,31 @@ impl PolarStereographicParams {
         use std::f64::consts::PI;
         let to_rad = PI / 180.0;
 
-        let phi    = lat * to_rad;
-        let lam    = lon * to_rad;
-        let lam0   = self.lov * to_rad;
-        let phi_d  = self.lad * to_rad;
+        let phi = lat * to_rad;
+        let lam = lon * to_rad;
+        let lam0 = self.lov * to_rad;
+        let phi_d = self.lad * to_rad;
 
         // Normalise longitude difference to (−π, π].
         let mut theta = lam - lam0;
-        while theta >  PI { theta -= 2.0 * PI; }
-        while theta < -PI { theta += 2.0 * PI; }
+        while theta > PI {
+            theta -= 2.0 * PI;
+        }
+        while theta < -PI {
+            theta += 2.0 * PI;
+        }
 
         let r = Self::EARTH_R;
         let north_pole = self.proj_centre & 0x80 == 0;
 
         let (rho, y) = if north_pole {
             let rho = r * (1.0 + phi_d.sin()) * phi.cos() / (1.0 + phi.sin());
-            let y   = -rho * theta.cos();
+            let y = -rho * theta.cos();
             (rho, y)
         } else {
             // South Polar: phi_d is negative (e.g. −60°), so (1 − sin φ_d) > 1.
             let rho = r * (1.0 - phi_d.sin()) * phi.cos() / (1.0 - phi.sin());
-            let y   = rho * theta.cos();
+            let y = rho * theta.cos();
             (rho, y)
         };
 
@@ -386,14 +397,20 @@ impl PolarStereographicParams {
         };
 
         // Half-cell tolerance for boundary snapping.
-        if di_f < -0.5 || dj_f < -0.5 { return None; }
+        if di_f < -0.5 || dj_f < -0.5 {
+            return None;
+        }
         let nx_f = grid.nx as f64;
         let ny_f = grid.ny as f64;
-        if di_f > nx_f - 0.5 || dj_f > ny_f - 0.5 { return None; }
+        if di_f > nx_f - 0.5 || dj_f > ny_f - 0.5 {
+            return None;
+        }
 
         let i = di_f.round() as usize;
         let j = dj_f.round() as usize;
-        if i >= grid.nx as usize || j >= grid.ny as usize { return None; }
+        if i >= grid.nx as usize || j >= grid.ny as usize {
+            return None;
+        }
 
         Some(j * grid.nx as usize + i)
     }
@@ -463,26 +480,41 @@ impl GaussianLatLonParams {
     /// (Nj steps), which is exact at the corners and a close approximation
     /// elsewhere.  Returns `None` if the query is outside the grid extent.
     pub fn nearest_index(&self, grid: &GridDefinition, lat: f64, lon: f64) -> Option<usize> {
-        if grid.di == 0.0 { return None; }
+        if grid.di == 0.0 {
+            return None;
+        }
         let nj = grid.ny as f64;
-        if nj <= 1.0 { return None; }
+        if nj <= 1.0 {
+            return None;
+        }
 
         // Longitude: same uniform arithmetic as GDT 3.0.
         let mut fi = GridDefinition::lon_to_fi(lon, grid.lon_first, grid.di, grid.nx);
         let nx_f = grid.nx as f64;
-        if fi < -0.5 { fi += 360.0 / grid.di; }
-        else if fi > nx_f - 0.5 { fi -= 360.0 / grid.di; }
-        if fi < -0.5 || fi > nx_f - 0.5 { return None; }
+        if fi < -0.5 {
+            fi += 360.0 / grid.di;
+        } else if fi > nx_f - 0.5 {
+            fi -= 360.0 / grid.di;
+        }
+        if fi < -0.5 || fi > nx_f - 0.5 {
+            return None;
+        }
 
         // Latitude: approximate as uniform between La1 and La2.
         let dlat = (grid.lat_last - grid.lat_first) / (nj - 1.0);
-        if dlat.abs() < 1e-12 { return None; }
+        if dlat.abs() < 1e-12 {
+            return None;
+        }
         let fj = (lat - grid.lat_first) / dlat;
-        if fj < -0.5 || fj > nj - 0.5 { return None; }
+        if fj < -0.5 || fj > nj - 0.5 {
+            return None;
+        }
 
         let i = fi.round() as usize;
         let j = fj.round() as usize;
-        if i >= grid.nx as usize || j >= grid.ny as usize { return None; }
+        if i >= grid.nx as usize || j >= grid.ny as usize {
+            return None;
+        }
         Some(j * grid.nx as usize + i)
     }
 }
@@ -550,17 +582,26 @@ impl RotatedLatLonParams {
         // Use the same arithmetic as GDT 3.0 in the rotated system
         let mut fi = GridDefinition::lon_to_fi(lon_rot, grid.lon_first, grid.di, grid.nx);
         let nx_f = grid.nx as f64;
-        if fi < -0.5 { fi += 360.0 / grid.di; }
-        else if fi > nx_f - 0.5 { fi -= 360.0 / grid.di; }
-        if fi < -0.5 || fi > nx_f - 0.5 { return None; }
+        if fi < -0.5 {
+            fi += 360.0 / grid.di;
+        } else if fi > nx_f - 0.5 {
+            fi -= 360.0 / grid.di;
+        }
+        if fi < -0.5 || fi > nx_f - 0.5 {
+            return None;
+        }
 
         let fj = grid.lat_to_fj(lat_rot);
         let ny_f = grid.ny as f64;
-        if fj < -0.5 || fj > ny_f - 0.5 { return None; }
+        if fj < -0.5 || fj > ny_f - 0.5 {
+            return None;
+        }
 
         let i = fi.round() as usize;
         let j = fj.round() as usize;
-        if i >= grid.nx as usize || j >= grid.ny as usize { return None; }
+        if i >= grid.nx as usize || j >= grid.ny as usize {
+            return None;
+        }
         Some(j * grid.nx as usize + i)
     }
 }
@@ -648,7 +689,10 @@ pub enum GridValues {
     /// All points present; length == grid.num_data_points.
     Dense(Vec<f64>),
     /// `values[i]` is meaningful only when `present[i]` is true.
-    Masked { values: Vec<f64>, present: Vec<bool> },
+    Masked {
+        values: Vec<f64>,
+        present: Vec<bool>,
+    },
 }
 
 impl GridValues {
@@ -688,7 +732,11 @@ impl GridValues {
         match self {
             GridValues::Dense(v) => v.get(idx).copied(),
             GridValues::Masked { values, present } => {
-                if *present.get(idx)? { values.get(idx).copied() } else { None }
+                if *present.get(idx)? {
+                    values.get(idx).copied()
+                } else {
+                    None
+                }
             }
         }
     }
@@ -762,13 +810,20 @@ impl GridDefinition {
         let mut fi = Self::lon_to_fi(lon, self.lon_first, self.di, self.nx);
         // Try ±360° wrap once if out of the [-0.5, nx-0.5] window
         let nx_f = self.nx as f64;
-        if fi < -0.5 { fi += 360.0 / self.di; }
-        else if fi > nx_f - 0.5 { fi -= 360.0 / self.di; }
-        if fi < -0.5 || fi > nx_f - 0.5 { return None; }
+        if fi < -0.5 {
+            fi += 360.0 / self.di;
+        } else if fi > nx_f - 0.5 {
+            fi -= 360.0 / self.di;
+        }
+        if fi < -0.5 || fi > nx_f - 0.5 {
+            return None;
+        }
 
         let fj = self.lat_to_fj(lat);
         let ny_f = self.ny as f64;
-        if fj < -0.5 || fj > ny_f - 0.5 { return None; }
+        if fj < -0.5 || fj > ny_f - 0.5 {
+            return None;
+        }
 
         let i = fi.round() as usize;
         let j = fj.round() as usize;
@@ -780,21 +835,25 @@ impl GridDefinition {
     /// Currently implemented for lat/lon grids only.  Returns `None` for
     /// projected grids, zero-increment grids, or queries outside the grid.
     pub fn bilinear_corners(&self, lat: f64, lon: f64) -> Option<BilinearCorners> {
-        if !matches!(self.projection, GridProjection::LatLon)
-            || self.di == 0.0
-            || self.dj == 0.0
-        {
+        if !matches!(self.projection, GridProjection::LatLon) || self.di == 0.0 || self.dj == 0.0 {
             return None;
         }
         let mut fi = Self::lon_to_fi(lon, self.lon_first, self.di, self.nx);
         let nx1 = (self.nx - 1) as f64;
-        if fi < 0.0 { fi += 360.0 / self.di; }
-        else if fi >= nx1 + 1.0 { fi -= 360.0 / self.di; }
-        if fi < 0.0 || fi >= nx1 { return None; }
+        if fi < 0.0 {
+            fi += 360.0 / self.di;
+        } else if fi >= nx1 + 1.0 {
+            fi -= 360.0 / self.di;
+        }
+        if fi < 0.0 || fi >= nx1 {
+            return None;
+        }
 
         let fj = self.lat_to_fj(lat);
         let ny1 = (self.ny - 1) as f64;
-        if fj < 0.0 || fj >= ny1 { return None; }
+        if fj < 0.0 || fj >= ny1 {
+            return None;
+        }
 
         let i0 = fi.floor() as usize;
         let j0 = fj.floor() as usize;
@@ -813,7 +872,9 @@ impl GridDefinition {
     fn lon_to_fi(lon: f64, lon_first: f64, di: f64, _nx: u32) -> f64 {
         // Normalize to [0, 360) to match GRIB2 convention, then compute offset
         let mut lon_n = lon % 360.0;
-        if lon_n < 0.0 { lon_n += 360.0; }
+        if lon_n < 0.0 {
+            lon_n += 360.0;
+        }
         (lon_n - lon_first) / di
     }
 
@@ -928,23 +989,35 @@ mod tests {
     #[test]
     fn reference_time_unix() {
         let t = ReferenceTime {
-            year: 1970, month: 1, day: 1,
-            hour: 0, minute: 0, second: 0,
+            year: 1970,
+            month: 1,
+            day: 1,
+            hour: 0,
+            minute: 0,
+            second: 0,
             significance: 1,
         };
         assert_eq!(t.unix_seconds(), 0);
 
         let t2 = ReferenceTime {
-            year: 1970, month: 1, day: 1,
-            hour: 0, minute: 0, second: 60,
+            year: 1970,
+            month: 1,
+            day: 1,
+            hour: 0,
+            minute: 0,
+            second: 60,
             significance: 0,
         };
         assert_eq!(t2.unix_seconds(), 60);
 
         // 2024-01-01T00:00:00Z
         let t3 = ReferenceTime {
-            year: 2024, month: 1, day: 1,
-            hour: 0, minute: 0, second: 0,
+            year: 2024,
+            month: 1,
+            day: 1,
+            hour: 0,
+            minute: 0,
+            second: 0,
             significance: 1,
         };
         // Verified with: date -d "2024-01-01" +%s → 1704067200
@@ -956,15 +1029,23 @@ mod tests {
         // 500 hPa isobaric level: type=100, scale_factor=0, scaled_value=50000
         // value = 50000 * 10^0 = 50000 Pa
         let level = Level {
-            type1: 100, scale_factor1: 0, scaled_value1: 50000,
-            type2: 255, scale_factor2: 0, scaled_value2: 0,
+            type1: 100,
+            scale_factor1: 0,
+            scaled_value1: 50000,
+            type2: 255,
+            scale_factor2: 0,
+            scaled_value2: 0,
         };
         assert!((level.value1() - 50000.0).abs() < 1e-9);
 
         // 1.5m above ground: scale_factor=1, scaled_value=15 → 15 * 10^-1 = 1.5
         let level2 = Level {
-            type1: 103, scale_factor1: 1, scaled_value1: 15,
-            type2: 255, scale_factor2: 0, scaled_value2: 0,
+            type1: 103,
+            scale_factor1: 1,
+            scaled_value1: 15,
+            type2: 255,
+            scale_factor2: 0,
+            scaled_value2: 0,
         };
         assert!((level2.value1() - 1.5).abs() < 1e-9);
     }
@@ -972,11 +1053,19 @@ mod tests {
     #[test]
     fn forecast_time_offset_seconds() {
         let ref_time = ReferenceTime {
-            year: 2024, month: 6, day: 1,
-            hour: 0, minute: 0, second: 0,
+            year: 2024,
+            month: 6,
+            day: 1,
+            hour: 0,
+            minute: 0,
+            second: 0,
             significance: 1,
         };
-        let ft = ForecastTime { reference_time: ref_time, time_range_unit: 1, forecast_offset: 6 };
+        let ft = ForecastTime {
+            reference_time: ref_time,
+            time_range_unit: 1,
+            forecast_offset: 6,
+        };
         assert_eq!(ft.offset_seconds(), 6 * 3600);
         assert_eq!(ft.valid_unix_seconds(), ref_time.unix_seconds() + 6 * 3600);
     }
@@ -1025,17 +1114,30 @@ mod tests {
     fn grid_scanning_flags() {
         // scanning_mode=0b00000000: +i (west→east), −j (north→south), no alternating
         let g = GridDefinition {
-            template: 0, num_data_points: 100, nx: 10, ny: 10,
-            lat_first: 90.0, lon_first: 0.0, lat_last: -90.0, lon_last: 350.0,
-            di: 1.0, dj: 1.0, scanning_mode: 0x00, resolution_flags: 0x30,
-            shape_of_earth: 6, projection: GridProjection::LatLon,
+            template: 0,
+            num_data_points: 100,
+            nx: 10,
+            ny: 10,
+            lat_first: 90.0,
+            lon_first: 0.0,
+            lat_last: -90.0,
+            lon_last: 350.0,
+            di: 1.0,
+            dj: 1.0,
+            scanning_mode: 0x00,
+            resolution_flags: 0x30,
+            shape_of_earth: 6,
+            projection: GridProjection::LatLon,
         };
         assert!(g.i_positive());
         assert!(!g.j_positive());
         assert!(!g.alternating_rows());
 
         // scanning_mode=0b01100000: +i, +j, alternating
-        let g2 = GridDefinition { scanning_mode: 0x60, ..g };
+        let g2 = GridDefinition {
+            scanning_mode: 0x60,
+            ..g
+        };
         assert!(g2.i_positive());
         assert!(g2.j_positive());
         assert!(g2.alternating_rows());
@@ -1062,10 +1164,14 @@ mod tests {
         GridDefinition {
             template: 0,
             num_data_points: 25,
-            nx: 5, ny: 5,
-            lat_first: 40.0, lon_first: 0.0,
-            lat_last: 0.0, lon_last: 40.0,
-            di: 10.0, dj: 10.0,
+            nx: 5,
+            ny: 5,
+            lat_first: 40.0,
+            lon_first: 0.0,
+            lat_last: 0.0,
+            lon_last: 40.0,
+            di: 10.0,
+            dj: 10.0,
             scanning_mode: 0x00, // +i, -j
             resolution_flags: 0x30,
             shape_of_earth: 6,
@@ -1094,7 +1200,11 @@ mod tests {
         // Longitude too far west (negative longitude, not in grid)
         assert_eq!(g.nearest_index(20.0, -10.0), None);
         // Zero-increment lat/lon grid — no way to locate a point
-        let g2 = GridDefinition { di: 0.0, dj: 0.0, ..g };
+        let g2 = GridDefinition {
+            di: 0.0,
+            dj: 0.0,
+            ..g
+        };
         assert_eq!(g2.nearest_index(20.0, 20.0), None);
     }
 
@@ -1102,13 +1212,19 @@ mod tests {
     fn nearest_index_negative_lon_normalized() {
         // A global grid starting at 0E with 1° spacing, 360 points
         let g = GridDefinition {
-            template: 0, num_data_points: 360,
-            nx: 360, ny: 1,
-            lat_first: 0.0, lon_first: 0.0,
-            lat_last: 0.0, lon_last: 359.0,
-            di: 1.0, dj: 1.0,
+            template: 0,
+            num_data_points: 360,
+            nx: 360,
+            ny: 1,
+            lat_first: 0.0,
+            lon_first: 0.0,
+            lat_last: 0.0,
+            lon_last: 359.0,
+            di: 1.0,
+            dj: 1.0,
             scanning_mode: 0x00,
-            resolution_flags: 0x30, shape_of_earth: 6,
+            resolution_flags: 0x30,
+            shape_of_earth: 6,
             projection: GridProjection::LatLon,
         };
         // -73.97° E = 286.03° E
@@ -1122,10 +1238,10 @@ mod tests {
         // Query at the exact centre of the NW cell: lat=35, lon=5
         // fi = (5-0)/10 = 0.5, fj = (40-35)/10 = 0.5
         let c = g.bilinear_corners(35.0, 5.0).expect("should find corners");
-        assert_eq!(c.idx_nw, 0);  // j=0, i=0
-        assert_eq!(c.idx_ne, 1);  // j=0, i=1
-        assert_eq!(c.idx_sw, 5);  // j=1, i=0
-        assert_eq!(c.idx_se, 6);  // j=1, i=1
+        assert_eq!(c.idx_nw, 0); // j=0, i=0
+        assert_eq!(c.idx_ne, 1); // j=0, i=1
+        assert_eq!(c.idx_sw, 5); // j=1, i=0
+        assert_eq!(c.idx_se, 6); // j=1, i=1
         assert!((c.fx - 0.5).abs() < 1e-9);
         assert!((c.fy - 0.5).abs() < 1e-9);
     }
@@ -1144,7 +1260,14 @@ mod tests {
         // A 2×2 Dense grid with known values, query at centre
         // Grid: NW=1, NE=2, SW=3, SE=4
         let gv = GridValues::Dense(vec![1.0, 2.0, 3.0, 4.0]);
-        let c = BilinearCorners { idx_nw: 0, idx_ne: 1, idx_sw: 2, idx_se: 3, fx: 0.5, fy: 0.5 };
+        let c = BilinearCorners {
+            idx_nw: 0,
+            idx_ne: 1,
+            idx_sw: 2,
+            idx_se: 3,
+            fx: 0.5,
+            fy: 0.5,
+        };
         let v = gv.bilinear(&c).expect("should interpolate");
         // (0.5*0.5*1 + 0.5*0.5*2 + 0.5*0.5*3 + 0.5*0.5*4) = 0.25*(1+2+3+4) = 2.5
         assert!((v - 2.5).abs() < 1e-9);
@@ -1191,8 +1314,8 @@ mod tests {
             ny: 10,
             lat_first: 25.0,
             lon_first: 230.0,
-            lat_last: 0.0,  // not used for Lambert
-            lon_last: 0.0,  // not used for Lambert
+            lat_last: 0.0, // not used for Lambert
+            lon_last: 0.0, // not used for Lambert
             di: 0.0,
             dj: 0.0,
             scanning_mode: 0x40, // +i (west→east), +j (south→north)
@@ -1322,7 +1445,11 @@ mod tests {
         let expected_rho = PolarStereographicParams::EARTH_R * (pp.lad.to_radians()).cos();
         // At (LaD, LoV): θ=0 → x=0, y = -ρ
         assert!(x.abs() < 1e-3, "x should be 0, got {x}");
-        assert!((y.abs() - expected_rho).abs() < 1.0, "ρ at LaD = {}, expected ≈ {expected_rho}", y.abs());
+        assert!(
+            (y.abs() - expected_rho).abs() < 1.0,
+            "ρ at LaD = {}, expected ≈ {expected_rho}",
+            y.abs()
+        );
     }
 
     #[test]
@@ -1340,8 +1467,14 @@ mod tests {
 
         let di_f = (x1 - x0) / pp.dx_m;
         let dj_f = (y1 - y0) / pp.dy_m;
-        assert!((di_f - 1.0).abs() < 1e-9, "i offset should be 1.0, got {di_f}");
-        assert!((dj_f - 1.0).abs() < 1e-9, "j offset should be 1.0, got {dj_f}");
+        assert!(
+            (di_f - 1.0).abs() < 1e-9,
+            "i offset should be 1.0, got {di_f}"
+        );
+        assert!(
+            (dj_f - 1.0).abs() < 1e-9,
+            "j offset should be 1.0, got {dj_f}"
+        );
     }
 
     #[test]
@@ -1378,8 +1511,14 @@ mod tests {
         let (_x30, y30) = pp.project_xy(30.0, pp.lov);
         let (_x60, y60) = pp.project_xy(60.0, pp.lov);
         let (_x80, y80) = pp.project_xy(80.0, pp.lov);
-        assert!(y60 > y30, "y should increase northward: y30={y30}, y60={y60}");
-        assert!(y80 > y60, "y should increase northward: y60={y60}, y80={y80}");
+        assert!(
+            y60 > y30,
+            "y should increase northward: y30={y30}, y60={y60}"
+        );
+        assert!(
+            y80 > y60,
+            "y should increase northward: y60={y60}, y80={y80}"
+        );
     }
 
     // ── Gaussian lat/lon (GDT 3.40) tests ────────────────────────────────────
@@ -1400,8 +1539,8 @@ mod tests {
             lat_last: -60.0,
             lon_last: 270.0,
             di: 90.0,
-            dj: 0.0,        // not stored in GDT 3.40; N below replaces it
-            scanning_mode: 0x00,  // +i, -j
+            dj: 0.0,             // not stored in GDT 3.40; N below replaces it
+            scanning_mode: 0x00, // +i, -j
             resolution_flags: 0x30,
             shape_of_earth: 6,
             projection: GridProjection::GaussianLatLon(GaussianLatLonParams { n_parallels: 1 }),
@@ -1423,7 +1562,12 @@ mod tests {
         let g = test_gaussian_latlon_grid();
         let idx = g.nearest_index(g.lat_last, g.lon_last);
         let n = g.num_data_points as usize;
-        assert_eq!(idx, Some(n - 1), "last grid point should map to index {}", n - 1);
+        assert_eq!(
+            idx,
+            Some(n - 1),
+            "last grid point should map to index {}",
+            n - 1
+        );
     }
 
     #[test]
@@ -1460,9 +1604,17 @@ mod tests {
             projection: GridProjection::GaussianLatLon(GaussianLatLonParams { n_parallels: 1 }),
         };
         // 90°N is 40° north of La1=50°N — well outside.
-        assert_eq!(narrow.nearest_index(90.0, 0.0), None, "90°N should be outside grid");
+        assert_eq!(
+            narrow.nearest_index(90.0, 0.0),
+            None,
+            "90°N should be outside grid"
+        );
         // 0°N is 30° south of La2=30°N — well outside.
-        assert_eq!(narrow.nearest_index(0.0, 0.0), None, "0°N should be outside grid");
+        assert_eq!(
+            narrow.nearest_index(0.0, 0.0),
+            None,
+            "0°N should be outside grid"
+        );
     }
 
     #[test]
@@ -1487,22 +1639,22 @@ mod tests {
     /// First point at rotated coordinates (lat_rot=40°N, lon_rot=0°E).
     fn test_rotated_latlon_grid() -> GridDefinition {
         let p = RotatedLatLonParams {
-            lat_pole_rot: 30.0,   // South pole of rotated system at 30°N
-            lon_pole_rot: 0.0,    // at Greenwich meridian
-            angle_rot: 0.0,       // No additional rotation
+            lat_pole_rot: 30.0, // South pole of rotated system at 30°N
+            lon_pole_rot: 0.0,  // at Greenwich meridian
+            angle_rot: 0.0,     // No additional rotation
         };
         GridDefinition {
             template: 1,
             num_data_points: 25,
             nx: 5,
             ny: 5,
-            lat_first: 40.0,  // In rotated coordinates
+            lat_first: 40.0, // In rotated coordinates
             lon_first: 0.0,
-            lat_last: 0.0,    // In rotated coordinates
+            lat_last: 0.0, // In rotated coordinates
             lon_last: 40.0,
             di: 10.0,
             dj: 10.0,
-            scanning_mode: 0x00,  // +i, -j
+            scanning_mode: 0x00, // +i, -j
             resolution_flags: 0x30,
             shape_of_earth: 6,
             projection: GridProjection::RotatedLatLon(p),
@@ -1542,7 +1694,12 @@ mod tests {
         let (lat_geo, lon_geo) = rp.geographic_to_rotated(0.0, 40.0);
         let n = g.num_data_points as usize;
         let idx = g.nearest_index(lat_geo, lon_geo);
-        assert_eq!(idx, Some(n - 1), "last grid point should map to index {}", n - 1);
+        assert_eq!(
+            idx,
+            Some(n - 1),
+            "last grid point should map to index {}",
+            n - 1
+        );
     }
 
     #[test]
@@ -1595,10 +1752,16 @@ mod tests {
         assert!(!lon_rot.is_nan(), "rotated longitude should not be NaN");
 
         // Reasonable bounds check (result should still be valid lat/lon)
-        assert!(lat_rot >= -90.0 && lat_rot <= 90.0,
-                "rotated latitude should be in valid range: {}", lat_rot);
-        assert!(lon_rot >= -360.0 && lon_rot <= 360.0,
-                "rotated longitude should be in valid range: {}", lon_rot);
+        assert!(
+            lat_rot >= -90.0 && lat_rot <= 90.0,
+            "rotated latitude should be in valid range: {}",
+            lat_rot
+        );
+        assert!(
+            lon_rot >= -360.0 && lon_rot <= 360.0,
+            "rotated longitude should be in valid range: {}",
+            lon_rot
+        );
     }
 
     #[test]
@@ -1618,7 +1781,7 @@ mod tests {
             lon_first: 0.0,
             lat_last: 0.0,
             lon_last: 40.0,
-            di: 0.0,  // Zero increment
+            di: 0.0, // Zero increment
             dj: 10.0,
             scanning_mode: 0x00,
             resolution_flags: 0x30,

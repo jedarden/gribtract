@@ -248,9 +248,11 @@ impl ProviderProbe {
     ) -> Option<&str> {
         use rayon::prelude::*;
 
-        self.rankings.get(model)?.par_iter().find_any(|provider| {
-            !tracker.should_reprobe(provider)
-        }).map(|s| s.as_str())
+        self.rankings
+            .get(model)?
+            .par_iter()
+            .find_any(|provider| !tracker.should_reprobe(provider))
+            .map(|s| s.as_str())
     }
 
     /// Best (lowest-score) provider for `model` that does NOT need re-probing.
@@ -280,14 +282,19 @@ impl ProviderProbe {
         model: &str,
         tracker: &gribtract_fetch::probe::ProviderFailureTracker,
     ) -> Option<&str> {
-        self.rankings.get(model)?.iter().find(|provider| {
-            !tracker.should_reprobe(provider)
-        }).map(|s| s.as_str())
+        self.rankings
+            .get(model)?
+            .iter()
+            .find(|provider| !tracker.should_reprobe(provider))
+            .map(|s| s.as_str())
     }
 
     /// All providers for `model` in rank order (best first).
     pub fn ranked_providers(&self, model: &str) -> &[String] {
-        self.rankings.get(model).map(|v| v.as_slice()).unwrap_or(&[])
+        self.rankings
+            .get(model)
+            .map(|v| v.as_slice())
+            .unwrap_or(&[])
     }
 
     /// Returns `true` if the probe timestamp is less than `max_age_secs` old.
@@ -379,7 +386,11 @@ impl ProviderProbe {
     /// }
     /// ```
     #[cfg(all(feature = "provider-probe", feature = "rayon"))]
-    pub fn is_valid(&self, max_age_secs: u64, tracker: &gribtract_fetch::probe::ProviderFailureTracker) -> bool {
+    pub fn is_valid(
+        &self,
+        max_age_secs: u64,
+        tracker: &gribtract_fetch::probe::ProviderFailureTracker,
+    ) -> bool {
         // First check staleness
         if !self.is_fresh(max_age_secs) {
             return false;
@@ -391,12 +402,16 @@ impl ProviderProbe {
         use std::collections::HashSet;
 
         // Collect all unique provider names
-        let all_providers: HashSet<&str> = self.rankings.values()
+        let all_providers: HashSet<&str> = self
+            .rankings
+            .values()
             .flat_map(|providers| providers.iter().map(|s| s.as_str()))
             .collect();
 
         // Check all providers in parallel - return false if any needs re-probing
-        !all_providers.par_iter().any(|provider| tracker.should_reprobe(provider))
+        !all_providers
+            .par_iter()
+            .any(|provider| tracker.should_reprobe(provider))
     }
 
     /// Check if probe results are fresh AND no provider needs re-probing due to consecutive failures.
@@ -420,7 +435,11 @@ impl ProviderProbe {
     /// * `true` - If probe is fresh AND no providers need re-probing
     /// * `false` - If probe is stale OR any provider needs re-probing
     #[cfg(all(feature = "provider-probe", not(feature = "rayon")))]
-    pub fn is_valid(&self, max_age_secs: u64, tracker: &gribtract_fetch::probe::ProviderFailureTracker) -> bool {
+    pub fn is_valid(
+        &self,
+        max_age_secs: u64,
+        tracker: &gribtract_fetch::probe::ProviderFailureTracker,
+    ) -> bool {
         // First check staleness
         if !self.is_fresh(max_age_secs) {
             return false;
@@ -460,7 +479,9 @@ impl ProviderProbe {
         use std::collections::HashSet;
 
         // Collect all unique provider names
-        let all_providers: HashSet<&str> = self.rankings.values()
+        let all_providers: HashSet<&str> = self
+            .rankings
+            .values()
             .flat_map(|providers| providers.iter().map(|s| s.as_str()))
             .collect();
 
@@ -581,7 +602,10 @@ mod tests {
         let min = (secs_within_day % 3600) / 60;
         let sec = secs_within_day % 60;
 
-        format!("{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z", year, month, day, hour, min, sec)
+        format!(
+            "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z",
+            year, month, day, hour, min, sec
+        )
     }
 
     /// Convert days since epoch to (year, month, day)
@@ -735,8 +759,14 @@ mod tests {
         use gribtract_fetch::probe::ProviderFailureTracker;
 
         let mut rankings = HashMap::new();
-        rankings.insert("gfs".to_string(), vec!["noaa-s3".to_string(), "nomads".to_string()]);
-        rankings.insert("hrrr".to_string(), vec!["s3:hrrr-bdp".to_string(), "gcs:hrrr".to_string()]);
+        rankings.insert(
+            "gfs".to_string(),
+            vec!["noaa-s3".to_string(), "nomads".to_string()],
+        );
+        rankings.insert(
+            "hrrr".to_string(),
+            vec!["s3:hrrr-bdp".to_string(), "gcs:hrrr".to_string()],
+        );
 
         // Use a timestamp that is less than 24 hours old
         let probe = ProviderProbe {
@@ -779,7 +809,10 @@ mod tests {
         use gribtract_fetch::probe::ProviderFailureTracker;
 
         let mut rankings = HashMap::new();
-        rankings.insert("hrrr".to_string(), vec!["s3:hrrr-bdp".to_string(), "gcs:hrrr".to_string()]);
+        rankings.insert(
+            "hrrr".to_string(),
+            vec!["s3:hrrr-bdp".to_string(), "gcs:hrrr".to_string()],
+        );
 
         // Use a timestamp that is less than 24 hours old
         let probe = ProviderProbe {
@@ -832,7 +865,10 @@ mod tests {
         use gribtract_fetch::probe::ProviderFailureTracker;
 
         let mut rankings = HashMap::new();
-        rankings.insert("hrrr".to_string(), vec!["s3:hrrr-bdp".to_string(), "gcs:hrrr".to_string()]);
+        rankings.insert(
+            "hrrr".to_string(),
+            vec!["s3:hrrr-bdp".to_string(), "gcs:hrrr".to_string()],
+        );
         rankings.insert("gfs".to_string(), vec!["s3:gfs".to_string()]);
 
         let probe = ProviderProbe {
@@ -978,10 +1014,7 @@ mod tests {
         tracker.record_failure("gcs:hrrr");
 
         // Should return None when all providers need re-probing
-        assert_eq!(
-            probe.best_provider_with_tracker("hrrr", &tracker),
-            None
-        );
+        assert_eq!(probe.best_provider_with_tracker("hrrr", &tracker), None);
     }
 
     #[cfg(feature = "provider-probe")]

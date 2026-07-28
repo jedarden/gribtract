@@ -1,5 +1,5 @@
-use std::fs;
 use gribtract::{decode, Error};
+use std::fs;
 
 fn main() {
     let fixture_path = "tests/corpus/small/rotated_latlon_gdt1_drt0.grib2";
@@ -33,7 +33,10 @@ fn main() {
     let sec3_start = 37;
     println!("SECTION 3 STRUCTURE:");
     println!("  Section 3 length: bytes 37-40");
-    println!("    Bytes: {:02x} {:02x} {:02x} {:02x}", bytes[37], bytes[38], bytes[39], bytes[40]);
+    println!(
+        "    Bytes: {:02x} {:02x} {:02x} {:02x}",
+        bytes[37], bytes[38], bytes[39], bytes[40]
+    );
     let sec3_len = u32::from_be_bytes([bytes[37], bytes[38], bytes[39], bytes[40]]);
     println!("    Value: {} bytes", sec3_len);
     println!();
@@ -51,21 +54,36 @@ fn main() {
 
     println!("BUFFER CALCULATIONS:");
     println!("  File size: {} bytes", bytes.len());
-    println!("  Bytes available from GDT start: {}", bytes.len() - gdt_start);
-    println!("  If GDT 3.1 (72 bytes), needs to end at: {}", gdt_start + 72);
+    println!(
+        "  Bytes available from GDT start: {}",
+        bytes.len() - gdt_start
+    );
+    println!(
+        "  If GDT 3.1 (72 bytes), needs to end at: {}",
+        gdt_start + 72
+    );
     println!("  If GDT 0 (has variable size), depends on actual template");
     println!();
 
     // Try to find what template this actually is
     println!("TEMPLATE ANALYSIS:");
     let gdt_bytes_remaining = bytes.len() - gdt_start;
-    println!("  Bytes available for GDT template: {}", gdt_bytes_remaining);
+    println!(
+        "  Bytes available for GDT template: {}",
+        gdt_bytes_remaining
+    );
 
     if gdt_bytes_remaining >= 8 {
         println!("  First 8 bytes of GDT:");
         for i in 0..8 {
             if gdt_start + i < bytes.len() {
-                println!("    Byte {} (offset {}): 0x{:02x} = {}", gdt_start + i, i, bytes[gdt_start + i], bytes[gdt_start + i]);
+                println!(
+                    "    Byte {} (offset {}): 0x{:02x} = {}",
+                    gdt_start + i,
+                    i,
+                    bytes[gdt_start + i],
+                    bytes[gdt_start + i]
+                );
             }
         }
     }

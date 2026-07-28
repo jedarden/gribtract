@@ -11,8 +11,8 @@
 use crate::error::{Error, Result};
 use crate::types::{
     ComplexExtra, Ensemble, Field, ForecastTime, GaussianLatLonParams, GridDefinition,
-    GridProjection, GridValues, LazyField, LambertConformalParams, Level, PackingInfo,
-    ParameterId, PolarStereographicParams, ReferenceTime, RotatedLatLonParams,
+    GridProjection, GridValues, LambertConformalParams, LazyField, Level, PackingInfo, ParameterId,
+    PolarStereographicParams, ReferenceTime, RotatedLatLonParams,
 };
 
 // ── Byte buffer reader ────────────────────────────────────────────────────────
@@ -39,7 +39,10 @@ impl<'a> Buf<'a> {
             eprintln!("Current position: {}", self.pos);
             eprintln!("Total buffer length: {}", self.data.len());
             eprintln!("========================================");
-            Err(Error::TooShort { needed: n, got: self.remaining() })
+            Err(Error::TooShort {
+                needed: n,
+                got: self.remaining(),
+            })
         } else {
             Ok(())
         }
@@ -65,27 +68,21 @@ impl<'a> Buf<'a> {
 
     fn read_u32be(&mut self) -> Result<u32> {
         self.need(4)?;
-        let v = u32::from_be_bytes(
-            self.data[self.pos..self.pos + 4].try_into().unwrap(),
-        );
+        let v = u32::from_be_bytes(self.data[self.pos..self.pos + 4].try_into().unwrap());
         self.pos += 4;
         Ok(v)
     }
 
     fn read_u64be(&mut self) -> Result<u64> {
         self.need(8)?;
-        let v = u64::from_be_bytes(
-            self.data[self.pos..self.pos + 8].try_into().unwrap(),
-        );
+        let v = u64::from_be_bytes(self.data[self.pos..self.pos + 8].try_into().unwrap());
         self.pos += 8;
         Ok(v)
     }
 
     fn read_f32be(&mut self) -> Result<f32> {
         self.need(4)?;
-        let v = f32::from_be_bytes(
-            self.data[self.pos..self.pos + 4].try_into().unwrap(),
-        );
+        let v = f32::from_be_bytes(self.data[self.pos..self.pos + 4].try_into().unwrap());
         self.pos += 4;
         Ok(v)
     }
@@ -94,7 +91,11 @@ impl<'a> Buf<'a> {
     fn read_scale_factor_i16(&mut self) -> Result<i16> {
         let raw = self.read_u16be()?;
         let magnitude = (raw & 0x7FFF) as i16;
-        if raw & 0x8000 != 0 { Ok(-magnitude) } else { Ok(magnitude) }
+        if raw & 0x8000 != 0 {
+            Ok(-magnitude)
+        } else {
+            Ok(magnitude)
+        }
     }
 
     // Lat/lon values are signed 32-bit in GRIB2 template 3.0:
@@ -102,7 +103,11 @@ impl<'a> Buf<'a> {
     fn read_latlon_micro(&mut self) -> Result<i64> {
         let raw = self.read_u32be()?;
         let magnitude = (raw & 0x7FFF_FFFF) as i64;
-        if raw & 0x8000_0000 != 0 { Ok(-magnitude) } else { Ok(magnitude) }
+        if raw & 0x8000_0000 != 0 {
+            Ok(-magnitude)
+        } else {
+            Ok(magnitude)
+        }
     }
 
     // Longitude is always 0..360 (unsigned micro-degrees).
@@ -234,7 +239,12 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
 
     // ── Section 0 (Indicator, 16 bytes fixed) ────────────────────────────────
     // oct 1-4: "GRIB"
-    let magic = [buf.read_u8()?, buf.read_u8()?, buf.read_u8()?, buf.read_u8()?];
+    let magic = [
+        buf.read_u8()?,
+        buf.read_u8()?,
+        buf.read_u8()?,
+        buf.read_u8()?,
+    ];
     if &magic != b"GRIB" {
         return Err(Error::BadMagic(magic));
     }
@@ -251,7 +261,10 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
 
     // Validate total length against buffer.
     if msg.len() < total_len {
-        return Err(Error::TooShort { needed: total_len, got: msg.len() });
+        return Err(Error::TooShort {
+            needed: total_len,
+            got: msg.len(),
+        });
     }
 
     // ── Section iterator (sections 1-7 + "7777") ─────────────────────────────
@@ -264,15 +277,28 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
         // Each section starts with: 4-byte length, 1-byte section number.
         let sec_start = buf.pos;
         eprintln!("=== Section header at pos {} ===", sec_start);
-        eprintln!("Bytes remaining in message: {}", msg.len().saturating_sub(sec_start));
+        eprintln!(
+            "Bytes remaining in message: {}",
+            msg.len().saturating_sub(sec_start)
+        );
 
         let sec_len = buf.read_u32be()? as usize;
         let sec_num = buf.read_u8()?;
-        eprintln!("Section {}: length={}, starts at pos {}", sec_num, sec_len, sec_start);
-        eprintln!("Section body will span: {}..{}", buf.pos, buf.pos + (sec_len - 5));
+        eprintln!(
+            "Section {}: length={}, starts at pos {}",
+            sec_num, sec_len, sec_start
+        );
+        eprintln!(
+            "Section body will span: {}..{}",
+            buf.pos,
+            buf.pos + (sec_len - 5)
+        );
 
         if sec_len < 5 {
-            return Err(Error::TooShort { needed: 5, got: sec_len });
+            return Err(Error::TooShort {
+                needed: 5,
+                got: sec_len,
+            });
         }
         // Remaining bytes in this section (after the 5-byte header).
         let body_start = buf.pos;
@@ -313,7 +339,11 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
                 builder.bitmap = bitmap;
             }
             7 => {
-                let n_grid = builder.grid.as_ref().map(|g| g.num_data_points as usize).unwrap_or(0);
+                let n_grid = builder
+                    .grid
+                    .as_ref()
+                    .map(|g| g.num_data_points as usize)
+                    .unwrap_or(0);
                 let has_bitmap = builder.has_bitmap.unwrap_or(false);
                 // When a bitmap is present, Section 5 n_packed < n_grid. Use n_packed
                 // for the data unpackers (which only see the "present" subset).
@@ -325,7 +355,11 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
                 let packing = builder.packing.as_ref().ok_or(Error::NotImplemented)?;
                 let drt = builder.drt_template.unwrap_or(0);
                 let packed_values = decode_section7(
-                    sec_body, packing, drt, builder.complex_extra.as_ref(), n_decode,
+                    sec_body,
+                    packing,
+                    drt,
+                    builder.complex_extra.as_ref(),
+                    n_decode,
                 )?;
                 // Expand packed values into the full grid using the bitmap (if present).
                 let values = if has_bitmap {
@@ -364,8 +398,10 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
     eprintln!("Final buf.pos: {}", buf.pos);
     eprintln!("body_end (7777 location): {}", body_end);
     eprintln!("Expected: buf.pos <= body_end");
-    eprintln!("Actual: buf.pos {} body_end", if buf.pos <= body_end { "<=" } else { ">" });
-
+    eprintln!(
+        "Actual: buf.pos {} body_end",
+        if buf.pos <= body_end { "<=" } else { ">" }
+    );
 
     // Consume "7777" end marker.
     // DEBUG: Print buffer state before reading end marker
@@ -375,12 +411,23 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
     eprintln!("Bytes remaining: {}", msg.len().saturating_sub(body_end));
 
     if body_end + 4 <= msg.len() {
-        eprintln!("Bytes at body_end..body_end+4: {:?}", &msg[body_end..body_end + 4]);
+        eprintln!(
+            "Bytes at body_end..body_end+4: {:?}",
+            &msg[body_end..body_end + 4]
+        );
     } else if body_end < msg.len() {
         let available = msg.len() - body_end;
-        eprintln!("Partial bytes available ({}): {:?}", available, &msg[body_end..]);
+        eprintln!(
+            "Partial bytes available ({}): {:?}",
+            available,
+            &msg[body_end..]
+        );
     } else {
-        eprintln!("body_end {} exceeds message length {}!", body_end, msg.len());
+        eprintln!(
+            "body_end {} exceeds message length {}!",
+            body_end,
+            msg.len()
+        );
     }
     eprintln!("buf.pos after section loop: {}", buf.pos);
     eprintln!("Expected total_len from Section 0: {}", total_len);
@@ -415,7 +462,15 @@ fn parse_section1(body: &[u8]) -> Result<(u16, u16, ReferenceTime)> {
     Ok((
         center,
         subcenter,
-        ReferenceTime { year, month, day, hour, minute, second, significance },
+        ReferenceTime {
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+            significance,
+        },
     ))
 }
 
@@ -470,14 +525,14 @@ fn parse_gdt_0(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
     b.skip(4)?; // subdivisions of basic angle (oct 43-46)
 
     let lat_first = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 47-50
-    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0;   // oct 51-54
+    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 51-54
 
     let resolution_flags = b.read_u8()?; // oct 55
 
     let lat_last = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 56-59
-    let lon_last = b.read_longi_micro()? as f64 / 1_000_000.0;   // oct 60-63
-    let di = b.read_u32be()? as f64 / 1_000_000.0;               // oct 64-67
-    let dj = b.read_u32be()? as f64 / 1_000_000.0;               // oct 68-71
+    let lon_last = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 60-63
+    let di = b.read_u32be()? as f64 / 1_000_000.0; // oct 64-67
+    let dj = b.read_u32be()? as f64 / 1_000_000.0; // oct 68-71
 
     let scanning_mode = b.read_u8()?; // oct 72
 
@@ -522,31 +577,31 @@ fn parse_gdt_0(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
 /// | 68–71  | longitude of southern pole (unsigned microdegrees, 0–360) |
 /// | 72     | angle of rotation |
 fn parse_gdt_1(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
-    let shape_of_earth = b.read_u8()?;    // oct 15
+    let shape_of_earth = b.read_u8()?; // oct 15
 
     // Scale/value for earth shape (spheroid parameters) — not needed for GDT 3.1 geometry.
-    b.skip(1 + 4)?;                       // oct 16–20: earth radius scale + value
-    b.skip(1 + 4)?;                       // oct 21–25: major axis
-    b.skip(1 + 4)?;                       // oct 26–30: minor axis
+    b.skip(1 + 4)?; // oct 16–20: earth radius scale + value
+    b.skip(1 + 4)?; // oct 21–25: major axis
+    b.skip(1 + 4)?; // oct 26–30: minor axis
 
-    let nx = b.read_u32be()?;             // oct 31–34: Nx
-    let ny = b.read_u32be()?;             // oct 35–38: Ny
+    let nx = b.read_u32be()?; // oct 31–34: Nx
+    let ny = b.read_u32be()?; // oct 35–38: Ny
 
     let lat_first = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 39–42: La1
-    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 43–46: Lo1
-    let resolution_flags = b.read_u8()?;  // oct 47
+    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 43–46: Lo1
+    let resolution_flags = b.read_u8()?; // oct 47
 
     let lat_last = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 48–51: La2
-    let lon_last = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 52–55: Lo2
-    let di = b.read_u32be()? as f64 / 1_000_000.0;               // oct 56–59: Di
-    let dj = b.read_u32be()? as f64 / 1_000_000.0;               // oct 60–63: Dj
+    let lon_last = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 52–55: Lo2
+    let di = b.read_u32be()? as f64 / 1_000_000.0; // oct 56–59: Di
+    let dj = b.read_u32be()? as f64 / 1_000_000.0; // oct 60–63: Dj
 
     // Rotated pole parameters
     let lat_pole_rot = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 64–67: south pole latitude
-    let lon_pole_rot = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 68–71: south pole longitude
-    let angle_rot_raw = b.read_u8()? as f64;                         // oct 72: angle of rotation
-    let angle_rot = angle_rot_raw / 100.0;  // Last 2 digits are fractional
-    let scanning_mode = b.read_u8()?;                               // oct 73: scanning mode
+    let lon_pole_rot = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 68–71: south pole longitude
+    let angle_rot_raw = b.read_u8()? as f64; // oct 72: angle of rotation
+    let angle_rot = angle_rot_raw / 100.0; // Last 2 digits are fractional
+    let scanning_mode = b.read_u8()?; // oct 73: scanning mode
 
     let projection = GridProjection::RotatedLatLon(RotatedLatLonParams {
         lat_pole_rot,
@@ -594,33 +649,45 @@ fn parse_gdt_1(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
 /// | 64     | projection centre flag (Table 3.5; bit 7=0 North Pole, bit 7=1 South Pole) |
 /// | 65     | scanning mode |
 fn parse_gdt_20(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
-    let shape_of_earth = b.read_u8()?;    // oct 15
-    b.skip(1 + 4)?;                       // oct 16–20: earth radius scale + value
-    b.skip(1 + 4)?;                       // oct 21–25: major axis
-    b.skip(1 + 4)?;                       // oct 26–30: minor axis
+    let shape_of_earth = b.read_u8()?; // oct 15
+    b.skip(1 + 4)?; // oct 16–20: earth radius scale + value
+    b.skip(1 + 4)?; // oct 21–25: major axis
+    b.skip(1 + 4)?; // oct 26–30: minor axis
 
-    let nx = b.read_u32be()?;             // oct 31–34: Nx
-    let ny = b.read_u32be()?;             // oct 35–38: Ny
+    let nx = b.read_u32be()?; // oct 31–34: Nx
+    let ny = b.read_u32be()?; // oct 35–38: Ny
 
     let lat_first = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 39–42: La1
-    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 43–46: Lo1
-    let resolution_flags = b.read_u8()?;  // oct 47
+    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 43–46: Lo1
+    let resolution_flags = b.read_u8()?; // oct 47
 
-    let lad = b.read_latlon_micro()? as f64 / 1_000_000.0;       // oct 48–51: LaD
-    let lov = b.read_longi_micro()? as f64 / 1_000_000.0;        // oct 52–55: LoV
+    let lad = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 48–51: LaD
+    let lov = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 52–55: LoV
 
     // Dx and Dy units depend on bit 5 of resolution_flags (Table 3.3):
     // 0 = metres, 1 = millimetres
-    let dx_raw = b.read_u32be()? as f64;   // oct 56–59: Dx (units per resolution flags)
-    let dy_raw = b.read_u32be()? as f64;   // oct 60–63: Dy (units per resolution flags)
-    let dx_m = if resolution_flags & 0x20 != 0 { dx_raw / 1000.0 } else { dx_raw };
-    let dy_m = if resolution_flags & 0x20 != 0 { dy_raw / 1000.0 } else { dy_raw };
+    let dx_raw = b.read_u32be()? as f64; // oct 56–59: Dx (units per resolution flags)
+    let dy_raw = b.read_u32be()? as f64; // oct 60–63: Dy (units per resolution flags)
+    let dx_m = if resolution_flags & 0x20 != 0 {
+        dx_raw / 1000.0
+    } else {
+        dx_raw
+    };
+    let dy_m = if resolution_flags & 0x20 != 0 {
+        dy_raw / 1000.0
+    } else {
+        dy_raw
+    };
 
-    let proj_centre = b.read_u8()?;       // oct 64
-    let scanning_mode = b.read_u8()?;     // oct 65
+    let proj_centre = b.read_u8()?; // oct 64
+    let scanning_mode = b.read_u8()?; // oct 65
 
     let projection = GridProjection::PolarStereographic(PolarStereographicParams {
-        lad, lov, dx_m, dy_m, proj_centre,
+        lad,
+        lov,
+        dx_m,
+        dy_m,
+        proj_centre,
     });
 
     Ok(GridDefinition {
@@ -630,9 +697,9 @@ fn parse_gdt_20(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
         ny,
         lat_first,
         lon_first,
-        lat_last: 0.0,  // not stored in GDT 3.20; derive via projection if needed
+        lat_last: 0.0, // not stored in GDT 3.20; derive via projection if needed
         lon_last: 0.0,
-        di: 0.0,        // increment in metres, stored in PolarStereographicParams
+        di: 0.0, // increment in metres, stored in PolarStereographicParams
         dj: 0.0,
         scanning_mode,
         resolution_flags,
@@ -667,38 +734,54 @@ fn parse_gdt_20(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
 /// | 74–77  | lat south pole (signed microdegrees) |
 /// | 78–81  | lon south pole (unsigned microdegrees) |
 fn parse_gdt_30(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
-    let shape_of_earth = b.read_u8()?;    // oct 15
-    b.skip(1 + 4)?;                       // oct 16–20: earth radius scale + value
-    b.skip(1 + 4)?;                       // oct 21–25: major axis
-    b.skip(1 + 4)?;                       // oct 26–30: minor axis
+    let shape_of_earth = b.read_u8()?; // oct 15
+    b.skip(1 + 4)?; // oct 16–20: earth radius scale + value
+    b.skip(1 + 4)?; // oct 21–25: major axis
+    b.skip(1 + 4)?; // oct 26–30: minor axis
 
-    let nx = b.read_u32be()?;             // oct 31–34: Nx
-    let ny = b.read_u32be()?;             // oct 35–38: Ny
+    let nx = b.read_u32be()?; // oct 31–34: Nx
+    let ny = b.read_u32be()?; // oct 35–38: Ny
 
     let lat_first = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 39–42: La1
-    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 43–46: Lo1
-    let resolution_flags = b.read_u8()?;  // oct 47
+    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 43–46: Lo1
+    let resolution_flags = b.read_u8()?; // oct 47
 
-    let lad = b.read_latlon_micro()? as f64 / 1_000_000.0;       // oct 48–51: LaD
-    let lov = b.read_longi_micro()? as f64 / 1_000_000.0;        // oct 52–55: LoV
+    let lad = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 48–51: LaD
+    let lov = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 52–55: LoV
 
     // Dx and Dy units depend on bit 5 of resolution_flags (Table 3.3):
     // 0 = metres, 1 = millimetres
-    let dx_raw = b.read_u32be()? as f64;   // oct 56–59: Dx (units per resolution flags)
-    let dy_raw = b.read_u32be()? as f64;   // oct 60–63: Dy (units per resolution flags)
-    let dx_m = if resolution_flags & 0x20 != 0 { dx_raw / 1000.0 } else { dx_raw };
-    let dy_m = if resolution_flags & 0x20 != 0 { dy_raw / 1000.0 } else { dy_raw };
+    let dx_raw = b.read_u32be()? as f64; // oct 56–59: Dx (units per resolution flags)
+    let dy_raw = b.read_u32be()? as f64; // oct 60–63: Dy (units per resolution flags)
+    let dx_m = if resolution_flags & 0x20 != 0 {
+        dx_raw / 1000.0
+    } else {
+        dx_raw
+    };
+    let dy_m = if resolution_flags & 0x20 != 0 {
+        dy_raw / 1000.0
+    } else {
+        dy_raw
+    };
 
-    let proj_centre = b.read_u8()?;       // oct 64
-    let scanning_mode = b.read_u8()?;     // oct 65
+    let proj_centre = b.read_u8()?; // oct 64
+    let scanning_mode = b.read_u8()?; // oct 65
 
-    let latin1 = b.read_latlon_micro()? as f64 / 1_000_000.0;    // oct 66–69
-    let latin2 = b.read_latlon_micro()? as f64 / 1_000_000.0;    // oct 70–73
+    let latin1 = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 66–69
+    let latin2 = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 70–73
     let lat_south_pole = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 74–77
-    let lon_south_pole = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 78–81
+    let lon_south_pole = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 78–81
 
     let projection = GridProjection::LambertConformal(LambertConformalParams {
-        lad, lov, dx_m, dy_m, proj_centre, latin1, latin2, lat_south_pole, lon_south_pole,
+        lad,
+        lov,
+        dx_m,
+        dy_m,
+        proj_centre,
+        latin1,
+        latin2,
+        lat_south_pole,
+        lon_south_pole,
     });
 
     Ok(GridDefinition {
@@ -710,7 +793,7 @@ fn parse_gdt_30(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
         lon_first,
         lat_last: 0.0, // not stored in GDT 3.30; derive via projection if needed
         lon_last: 0.0,
-        di: 0.0,       // increment in metres, stored in LambertConformalParams
+        di: 0.0, // increment in metres, stored in LambertConformalParams
         dj: 0.0,
         scanning_mode,
         resolution_flags,
@@ -745,26 +828,26 @@ fn parse_gdt_30(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
 /// GDT 3.40 differs from GDT 3.0 only in octets 68–71: these hold N (a raw
 /// unsigned 32-bit integer, not scaled) instead of Dj.  Dj is left as 0.0.
 fn parse_gdt_40(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
-    let shape_of_earth = b.read_u8()?;    // oct 15
-    b.skip(1 + 4)?;                       // oct 16–20: earth radius scale + value
-    b.skip(1 + 4)?;                       // oct 21–25: major axis
-    b.skip(1 + 4)?;                       // oct 26–30: minor axis
+    let shape_of_earth = b.read_u8()?; // oct 15
+    b.skip(1 + 4)?; // oct 16–20: earth radius scale + value
+    b.skip(1 + 4)?; // oct 21–25: major axis
+    b.skip(1 + 4)?; // oct 26–30: minor axis
 
-    let nx = b.read_u32be()?;             // oct 31–34
-    let ny = b.read_u32be()?;             // oct 35–38
+    let nx = b.read_u32be()?; // oct 31–34
+    let ny = b.read_u32be()?; // oct 35–38
 
-    b.skip(4)?;                           // oct 39–42: basic angle
-    b.skip(4)?;                           // oct 43–46: subdivisions
+    b.skip(4)?; // oct 39–42: basic angle
+    b.skip(4)?; // oct 43–46: subdivisions
 
     let lat_first = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 47–50
-    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 51–54
-    let resolution_flags = b.read_u8()?;  // oct 55
-    let lat_last  = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 56–59
-    let lon_last  = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 60–63
+    let lon_first = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 51–54
+    let resolution_flags = b.read_u8()?; // oct 55
+    let lat_last = b.read_latlon_micro()? as f64 / 1_000_000.0; // oct 56–59
+    let lon_last = b.read_longi_micro()? as f64 / 1_000_000.0; // oct 60–63
 
-    let di        = b.read_u32be()? as f64 / 1_000_000.0;        // oct 64–67
-    let n_parallels = b.read_u32be()?;                            // oct 68–71 (N, not Dj)
-    let scanning_mode = b.read_u8()?;     // oct 72
+    let di = b.read_u32be()? as f64 / 1_000_000.0; // oct 64–67
+    let n_parallels = b.read_u32be()?; // oct 68–71 (N, not Dj)
+    let scanning_mode = b.read_u8()?; // oct 72
 
     let projection = GridProjection::GaussianLatLon(GaussianLatLonParams { n_parallels });
 
@@ -778,7 +861,7 @@ fn parse_gdt_40(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
         lat_last,
         lon_last,
         di,
-        dj: 0.0,   // not stored in GDT 3.40; N replaces Dj
+        dj: 0.0, // not stored in GDT 3.40; N replaces Dj
         scanning_mode,
         resolution_flags,
         shape_of_earth,
@@ -831,23 +914,23 @@ fn parse_pdt_common_header(
     b: &mut Buf,
     discipline: u8,
 ) -> Result<(ParameterId, ForecastTime, Level)> {
-    let category = b.read_u8()?;  // oct 10
-    let number = b.read_u8()?;    // oct 11
+    let category = b.read_u8()?; // oct 10
+    let number = b.read_u8()?; // oct 11
     b.skip(1)?; // generating process type (oct 12)
     b.skip(1)?; // background generating process id (oct 13)
     b.skip(1)?; // analysis/forecast generating process id (oct 14)
     b.skip(2)?; // hours of cutoff after reference time (oct 15-16)
     b.skip(1)?; // minutes of cutoff (oct 17)
-    let time_range_unit = b.read_u8()?;    // oct 18
+    let time_range_unit = b.read_u8()?; // oct 18
     let forecast_offset = b.read_u32be()?; // oct 19-22
 
-    let type1 = b.read_u8()?;                     // oct 23
-    let scale_factor1 = b.read_i8()?;             // oct 24
-    let scaled_value1 = b.read_u32be()? as i32;   // oct 25-28
+    let type1 = b.read_u8()?; // oct 23
+    let scale_factor1 = b.read_i8()?; // oct 24
+    let scaled_value1 = b.read_u32be()? as i32; // oct 25-28
 
-    let raw_type2 = b.read_u8()?;                     // oct 29
-    let raw_scale_factor2 = b.read_i8()?;             // oct 30
-    let raw_scaled_value2 = b.read_u32be()? as i32;   // oct 31-34
+    let raw_type2 = b.read_u8()?; // oct 29
+    let raw_scale_factor2 = b.read_i8()?; // oct 30
+    let raw_scaled_value2 = b.read_u32be()? as i32; // oct 31-34
 
     // When second surface type is 255 (missing), zero out its scale/value
     // to match eccodes behavior.
@@ -857,16 +940,33 @@ fn parse_pdt_common_header(
         (raw_type2, raw_scale_factor2, raw_scaled_value2)
     };
 
-    let param = ParameterId { discipline, category, number };
+    let param = ParameterId {
+        discipline,
+        category,
+        number,
+    };
     // Reference time is filled in from Section 1 by the caller.
     let fore = ForecastTime {
         reference_time: ReferenceTime {
-            year: 0, month: 0, day: 0, hour: 0, minute: 0, second: 0, significance: 0,
+            year: 0,
+            month: 0,
+            day: 0,
+            hour: 0,
+            minute: 0,
+            second: 0,
+            significance: 0,
         },
         time_range_unit,
         forecast_offset,
     };
-    let lvl = Level { type1, scale_factor1, scaled_value1, type2, scale_factor2, scaled_value2 };
+    let lvl = Level {
+        type1,
+        scale_factor1,
+        scaled_value1,
+        type2,
+        scale_factor2,
+        scaled_value2,
+    };
 
     Ok((param, fore, lvl))
 }
@@ -894,11 +994,14 @@ fn parse_pdt_1(
 ) -> Result<(ParameterId, ForecastTime, Level, Option<Ensemble>)> {
     let (param, fore, lvl) = parse_pdt_common_header(b, discipline)?;
 
-    let member_type = b.read_u8()?;          // oct 35: Table 4.6
-    let perturbation_number = b.read_u8()?;  // oct 36
-    let _n_ensemble = b.read_u8()?;          // oct 37: number in ensemble (unused by harness)
+    let member_type = b.read_u8()?; // oct 35: Table 4.6
+    let perturbation_number = b.read_u8()?; // oct 36
+    let _n_ensemble = b.read_u8()?; // oct 37: number in ensemble (unused by harness)
 
-    let ens = Ensemble { member_type, number: perturbation_number as i16 };
+    let ens = Ensemble {
+        member_type,
+        number: perturbation_number as i16,
+    };
     Ok((param, fore, lvl, Some(ens)))
 }
 
@@ -948,9 +1051,9 @@ fn parse_pdt_11(
 ) -> Result<(ParameterId, ForecastTime, Level, Option<Ensemble>)> {
     let (param, fore, lvl) = parse_pdt_common_header(b, discipline)?;
 
-    let member_type = b.read_u8()?;          // oct 35
-    let perturbation_number = b.read_u8()?;  // oct 36
-    let _n_ensemble = b.read_u8()?;          // oct 37
+    let member_type = b.read_u8()?; // oct 35
+    let perturbation_number = b.read_u8()?; // oct 36
+    let _n_ensemble = b.read_u8()?; // oct 37
 
     // Oct 38-43: end-of-interval timestamp (7 bytes: year u16 + month + day + hour + min + sec)
     b.skip(7)?;
@@ -958,7 +1061,10 @@ fn parse_pdt_11(
     let n_ranges = b.read_u8()? as usize;
     b.skip(12 * n_ranges)?;
 
-    let ens = Ensemble { member_type, number: perturbation_number as i16 };
+    let ens = Ensemble {
+        member_type,
+        number: perturbation_number as i16,
+    };
     Ok((param, fore, lvl, Some(ens)))
 }
 
@@ -967,7 +1073,7 @@ fn parse_pdt_11(
 fn parse_section5(body: &[u8]) -> Result<(u16, PackingInfo, Option<ComplexPackingExtra>, usize)> {
     let mut b = Buf::new(body);
     let n_values = b.read_u32be()? as usize; // oct 6-9: number of packed values
-    let template = b.read_u16be()?;           // oct 10-11: DRT template number
+    let template = b.read_u16be()?; // oct 10-11: DRT template number
 
     match template {
         0 => {
@@ -1003,11 +1109,11 @@ fn parse_section5(body: &[u8]) -> Result<(u16, PackingInfo, Option<ComplexPackin
 
 /// Parse the common packing header shared by DRT templates 0, 2, and 3.
 fn parse_drt_common(b: &mut Buf) -> Result<PackingInfo> {
-    let reference_value = b.read_f32be()?;               // oct 12-15: R
+    let reference_value = b.read_f32be()?; // oct 12-15: R
     let binary_scale_factor = b.read_scale_factor_i16()?; // oct 16-17: E
     let decimal_scale_factor = b.read_scale_factor_i16()?; // oct 18-19: D
-    let bits_per_value = b.read_u8()?;                   // oct 20: N
-    let original_field_type = b.read_u8()?;              // oct 21
+    let bits_per_value = b.read_u8()?; // oct 20: N
+    let original_field_type = b.read_u8()?; // oct 21
 
     Ok(PackingInfo {
         reference_value,
@@ -1020,65 +1126,71 @@ fn parse_drt_common(b: &mut Buf) -> Result<PackingInfo> {
 
 /// Data Representation Template 5.2: Complex packing (no spatial differencing).
 fn parse_drt_2(b: &mut Buf) -> Result<(PackingInfo, ComplexPackingExtra)> {
-    let packing = parse_drt_common(b)?;  // oct 12-21: common header
+    let packing = parse_drt_common(b)?; // oct 12-21: common header
 
     b.skip(1)?; // oct 22: group splitting method
     b.skip(1)?; // oct 23: missing value management (0 = none)
     b.skip(4)?; // oct 24-27: primary missing value
     b.skip(4)?; // oct 28-31: secondary missing value
 
-    let n_groups = b.read_u32be()?;              // oct 32-35
-    let ref_group_widths = b.read_u8()?;         // oct 36
-    let bits_group_widths = b.read_u8()?;        // oct 37
-    let ref_group_lengths = b.read_u32be()?;     // oct 38-41
-    let length_increment = b.read_u8()?;         // oct 42
+    let n_groups = b.read_u32be()?; // oct 32-35
+    let ref_group_widths = b.read_u8()?; // oct 36
+    let bits_group_widths = b.read_u8()?; // oct 37
+    let ref_group_lengths = b.read_u32be()?; // oct 38-41
+    let length_increment = b.read_u8()?; // oct 42
     let true_last_group_length = b.read_u32be()?; // oct 43-46
     let bits_scaled_group_lengths = b.read_u8()?; // oct 47
-    // Octets 48-49 (order_spatial_diff, extra_octet_count) are absent in template 5.2.
+                                                  // Octets 48-49 (order_spatial_diff, extra_octet_count) are absent in template 5.2.
 
-    Ok((packing, ComplexPackingExtra {
-        n_groups,
-        ref_group_widths,
-        bits_group_widths,
-        ref_group_lengths,
-        length_increment,
-        true_last_group_length,
-        bits_scaled_group_lengths,
-        order_spatial_diff: 0,
-        extra_octet_count: 0,
-    }))
+    Ok((
+        packing,
+        ComplexPackingExtra {
+            n_groups,
+            ref_group_widths,
+            bits_group_widths,
+            ref_group_lengths,
+            length_increment,
+            true_last_group_length,
+            bits_scaled_group_lengths,
+            order_spatial_diff: 0,
+            extra_octet_count: 0,
+        },
+    ))
 }
 
 /// Data Representation Template 5.3: Complex packing with spatial differencing.
 fn parse_drt_3(b: &mut Buf) -> Result<(PackingInfo, ComplexPackingExtra)> {
-    let packing = parse_drt_common(b)?;  // oct 12-21: common header
+    let packing = parse_drt_common(b)?; // oct 12-21: common header
 
     b.skip(1)?; // oct 22: group splitting method
     b.skip(1)?; // oct 23: missing value management (0 = none)
     b.skip(4)?; // oct 24-27: primary missing value
     b.skip(4)?; // oct 28-31: secondary missing value
 
-    let n_groups = b.read_u32be()?;              // oct 32-35
-    let ref_group_widths = b.read_u8()?;         // oct 36
-    let bits_group_widths = b.read_u8()?;        // oct 37
-    let ref_group_lengths = b.read_u32be()?;     // oct 38-41
-    let length_increment = b.read_u8()?;         // oct 42
+    let n_groups = b.read_u32be()?; // oct 32-35
+    let ref_group_widths = b.read_u8()?; // oct 36
+    let bits_group_widths = b.read_u8()?; // oct 37
+    let ref_group_lengths = b.read_u32be()?; // oct 38-41
+    let length_increment = b.read_u8()?; // oct 42
     let true_last_group_length = b.read_u32be()?; // oct 43-46
     let bits_scaled_group_lengths = b.read_u8()?; // oct 47
-    let order_spatial_diff = b.read_u8()?;       // oct 48
-    let extra_octet_count = b.read_u8()?;        // oct 49
+    let order_spatial_diff = b.read_u8()?; // oct 48
+    let extra_octet_count = b.read_u8()?; // oct 49
 
-    Ok((packing, ComplexPackingExtra {
-        n_groups,
-        ref_group_widths,
-        bits_group_widths,
-        ref_group_lengths,
-        length_increment,
-        true_last_group_length,
-        bits_scaled_group_lengths,
-        order_spatial_diff,
-        extra_octet_count,
-    }))
+    Ok((
+        packing,
+        ComplexPackingExtra {
+            n_groups,
+            ref_group_widths,
+            bits_group_widths,
+            ref_group_lengths,
+            length_increment,
+            true_last_group_length,
+            bits_scaled_group_lengths,
+            order_spatial_diff,
+            extra_octet_count,
+        },
+    ))
 }
 
 /// Data Representation Template 5.4: IEEE 754 32-bit floats.
@@ -1087,11 +1199,11 @@ fn parse_drt_3(b: &mut Buf) -> Result<(PackingInfo, ComplexPackingExtra)> {
 /// - Octs 12-21: common packing header (same as DRT=0)
 /// - Oct 22-23: reserved (must be 0)
 fn parse_drt_4(b: &mut Buf) -> Result<PackingInfo> {
-    let packing = parse_drt_common(b)?;  // oct 12-21: common header
+    let packing = parse_drt_common(b)?; // oct 12-21: common header
 
     // Oct 22-23: reserved (must be 0 per WMO spec)
-    let reserved1 = b.read_u8()?;  // oct 22
-    let reserved2 = b.read_u8()?;  // oct 23
+    let reserved1 = b.read_u8()?; // oct 22
+    let reserved2 = b.read_u8()?; // oct 23
     if reserved1 != 0 || reserved2 != 0 {
         return Err(Error::InvalidData("DRT=4 reserved octets must be 0"));
     }
@@ -1131,11 +1243,7 @@ fn parse_section6(body: &[u8]) -> Result<(bool, Option<Vec<u8>>)> {
 /// is absent (value = 0.0, present = false). Returns `GridValues::Masked` if
 /// a bitmap is provided and `n_packed < n_grid`, otherwise returns the input
 /// as a `Dense` grid.
-fn expand_bitmap(
-    packed: GridValues,
-    bitmap: &Option<Vec<u8>>,
-    n_grid: usize,
-) -> GridValues {
+fn expand_bitmap(packed: GridValues, bitmap: &Option<Vec<u8>>, n_grid: usize) -> GridValues {
     let bm = match bitmap {
         Some(bm) => bm,
         None => return packed, // no bitmap — pass through
@@ -1215,7 +1323,10 @@ fn decode_section7(
         n_bits => {
             let packed = unpack_n_bits(body, n_points, n_bits as usize);
             // WMO spec: Y × 10^D = R + X × 2^E  →  Y = (R + X × 2^E) / 10^D
-            let values: Vec<f64> = packed.iter().map(|&x| (r + x as f64 * two_e) / ten_d).collect();
+            let values: Vec<f64> = packed
+                .iter()
+                .map(|&x| (r + x as f64 * two_e) / ten_d)
+                .collect();
             Ok(GridValues::Dense(values))
         }
     }
@@ -1229,7 +1340,9 @@ fn decode_section7(
 fn decode_drt40(body: &[u8], packing: &PackingInfo, n_points: usize) -> Result<GridValues> {
     let img = jpeg2k::Image::from_bytes(body)
         .map_err(|_| Error::InvalidData("JPEG2000 decode failed"))?;
-    let comp = img.components().first()
+    let comp = img
+        .components()
+        .first()
         .ok_or(Error::InvalidData("J2K: no image components"))?;
 
     let r = packing.reference_value as f64;
@@ -1239,7 +1352,8 @@ fn decode_drt40(body: &[u8], packing: &PackingInfo, n_points: usize) -> Result<G
     let ten_d = 10f64.powi(d);
 
     let data = comp.data(); // &[i32] — raw packed integer X values
-    let values: Vec<f64> = data.iter()
+    let values: Vec<f64> = data
+        .iter()
         .take(n_points)
         .map(|&x| (r + x as f64 * two_e) / ten_d)
         .collect();
@@ -1259,11 +1373,17 @@ fn decode_drt40(body: &[u8], packing: &PackingInfo, n_points: usize) -> Result<G
 fn decode_drt41(body: &[u8], packing: &PackingInfo, n_points: usize) -> Result<GridValues> {
     let cursor = std::io::Cursor::new(body);
     let decoder = png::Decoder::new(cursor);
-    let mut reader = decoder.read_info().map_err(|_| Error::InvalidData("PNG header decode failed"))?;
+    let mut reader = decoder
+        .read_info()
+        .map_err(|_| Error::InvalidData("PNG header decode failed"))?;
 
-    let buf_size = reader.output_buffer_size().ok_or(Error::InvalidData("PNG: buffer size unknown"))?;
+    let buf_size = reader
+        .output_buffer_size()
+        .ok_or(Error::InvalidData("PNG: buffer size unknown"))?;
     let mut img_data = vec![0u8; buf_size];
-    let info = reader.next_frame(&mut img_data).map_err(|_| Error::InvalidData("PNG frame decode failed"))?;
+    let info = reader
+        .next_frame(&mut img_data)
+        .map_err(|_| Error::InvalidData("PNG frame decode failed"))?;
 
     let r = packing.reference_value as f64;
     let e = packing.binary_scale_factor as i32;
@@ -1272,19 +1392,15 @@ fn decode_drt41(body: &[u8], packing: &PackingInfo, n_points: usize) -> Result<G
     let ten_d = 10f64.powi(d);
 
     let values: Vec<f64> = match (info.bit_depth, info.color_type) {
-        (png::BitDepth::Eight, png::ColorType::Grayscale) => {
-            img_data[..n_points]
-                .iter()
-                .map(|&x| (r + x as f64 * two_e) / ten_d)
-                .collect()
-        }
-        (png::BitDepth::Sixteen, png::ColorType::Grayscale) => {
-            img_data[..n_points * 2]
-                .chunks_exact(2)
-                .map(|b| u16::from_be_bytes([b[0], b[1]]) as f64)
-                .map(|x| (r + x * two_e) / ten_d)
-                .collect()
-        }
+        (png::BitDepth::Eight, png::ColorType::Grayscale) => img_data[..n_points]
+            .iter()
+            .map(|&x| (r + x as f64 * two_e) / ten_d)
+            .collect(),
+        (png::BitDepth::Sixteen, png::ColorType::Grayscale) => img_data[..n_points * 2]
+            .chunks_exact(2)
+            .map(|b| u16::from_be_bytes([b[0], b[1]]) as f64)
+            .map(|x| (r + x * two_e) / ten_d)
+            .collect(),
         _ => return Err(Error::NotImplemented),
     };
 
@@ -1298,7 +1414,10 @@ fn decode_drt41(body: &[u8], packing: &PackingInfo, n_points: usize) -> Result<G
 fn decode_drt4(body: &[u8], n_points: usize) -> Result<GridValues> {
     let bytes_needed = n_points * 4;
     if body.len() < bytes_needed {
-        return Err(Error::TooShort { needed: bytes_needed, got: body.len() });
+        return Err(Error::TooShort {
+            needed: bytes_needed,
+            got: body.len(),
+        });
     }
 
     let values: Vec<f64> = body[..bytes_needed]
@@ -1333,28 +1452,44 @@ fn decode_drt3(
     let total_seed_bytes = (order + 1) * eo;
 
     if body.len() < total_seed_bytes {
-        return Err(Error::TooShort { needed: total_seed_bytes, got: body.len() });
+        return Err(Error::TooShort {
+            needed: total_seed_bytes,
+            got: body.len(),
+        });
     }
 
     // 1. Read seed values from extra octets (sign-magnitude big-endian).
     //    For DRT=2 (order=0, eo=0) there are no extra octets — skip reads entirely.
-    let ival1 = if eo > 0 { read_sign_magnitude_be(&body[..eo]) } else { 0i64 };
-    let ival2 = if order >= 2 && eo > 0 { read_sign_magnitude_be(&body[eo..2 * eo]) } else { 0i64 };
-    let minsd = if eo > 0 { read_sign_magnitude_be(&body[order * eo..total_seed_bytes]) } else { 0i64 };
+    let ival1 = if eo > 0 {
+        read_sign_magnitude_be(&body[..eo])
+    } else {
+        0i64
+    };
+    let ival2 = if order >= 2 && eo > 0 {
+        read_sign_magnitude_be(&body[eo..2 * eo])
+    } else {
+        0i64
+    };
+    let minsd = if eo > 0 {
+        read_sign_magnitude_be(&body[order * eo..total_seed_bytes])
+    } else {
+        0i64
+    };
 
     let mut byte_pos = total_seed_bytes;
 
     // Helper: check if we have enough bytes remaining for the next operation
-    let check_bytes = |needed: usize, body_len: usize, byte_pos: usize, context: &str| -> Result<()> {
-        let remaining = body_len.saturating_sub(byte_pos);
-        if remaining < needed {
-            return Err(Error::TooShort {
-                needed: byte_pos + needed,
-                got: body_len,
-            });
-        }
-        Ok(())
-    };
+    let check_bytes =
+        |needed: usize, body_len: usize, byte_pos: usize, context: &str| -> Result<()> {
+            let remaining = body_len.saturating_sub(byte_pos);
+            if remaining < needed {
+                return Err(Error::TooShort {
+                    needed: byte_pos + needed,
+                    got: body_len,
+                });
+            }
+            Ok(())
+        };
 
     // 2. Group references: n_groups × bits_per_value bits, byte-aligned.
     let nbits = packing.bits_per_value as usize;
@@ -1368,7 +1503,8 @@ fn decode_drt3(
     let bytes_needed_widths = (n_groups * bw).div_ceil(8);
     check_bytes(bytes_needed_widths, body.len(), byte_pos, "group widths")?;
     let raw_widths = unpack_n_bits(&body[byte_pos..], n_groups, bw);
-    let group_widths: Vec<usize> = raw_widths.iter()
+    let group_widths: Vec<usize> = raw_widths
+        .iter()
         .map(|&w| extra.ref_group_widths as usize + w as usize)
         .collect();
     byte_pos += bytes_needed_widths;
@@ -1379,18 +1515,24 @@ fn decode_drt3(
     let bytes_needed_lengths = (n_groups * bl).div_ceil(8);
     check_bytes(bytes_needed_lengths, body.len(), byte_pos, "group lengths")?;
     let raw_lengths = unpack_n_bits(&body[byte_pos..], n_groups, bl);
-    let group_lengths: Vec<usize> = raw_lengths.iter().enumerate().map(|(g, &l)| {
-        if g == n_groups - 1 {
-            extra.true_last_group_length as usize
-        } else {
-            extra.ref_group_lengths as usize + l as usize * extra.length_increment as usize
-        }
-    }).collect();
+    let group_lengths: Vec<usize> = raw_lengths
+        .iter()
+        .enumerate()
+        .map(|(g, &l)| {
+            if g == n_groups - 1 {
+                extra.true_last_group_length as usize
+            } else {
+                extra.ref_group_lengths as usize + l as usize * extra.length_increment as usize
+            }
+        })
+        .collect();
     byte_pos += bytes_needed_lengths;
 
     // 5. Packed values within groups (variable bit width per group).
     // Calculate the total bits needed for all groups to ensure we have sufficient buffer.
-    let total_bits_needed: usize = group_widths.iter().zip(group_lengths.iter())
+    let total_bits_needed: usize = group_widths
+        .iter()
+        .zip(group_lengths.iter())
         .map(|(&w, &l)| w * l)
         .sum();
     // Account for the starting bit offset when calculating byte requirements.
@@ -1418,10 +1560,11 @@ fn decode_drt3(
         if w == 0 {
             // Zero-width group: all values equal the group reference.
             // Extending without any bit reads — common in flat regions.
-            for _ in 0..l { packed.push(gref); }
+            for _ in 0..l {
+                packed.push(gref);
+            }
             continue;
         }
-
 
         // Generic windowed extractor — the sole extractor path. Per-width
         // specializations (scalar w=4/8/12/16 in Attempts 6/8, SIMD AVX2 in Attempt 9)
@@ -1435,7 +1578,10 @@ fn decode_drt3(
     }
 
     if packed.len() != n_points {
-        return Err(Error::TooShort { needed: n_points, got: packed.len() });
+        return Err(Error::TooShort {
+            needed: n_points,
+            got: packed.len(),
+        });
     }
 
     // 6+7. Reconstruct integers via spatial differencing and apply the packing
@@ -1509,7 +1655,11 @@ fn read_sign_magnitude_be(bytes: &[u8]) -> i64 {
     }
     let sign_bit = 1u64 << (n * 8 - 1);
     let magnitude = (raw & (sign_bit - 1)) as i64;
-    if raw & sign_bit != 0 { -magnitude } else { magnitude }
+    if raw & sign_bit != 0 {
+        -magnitude
+    } else {
+        magnitude
+    }
 }
 
 /// Extract `count` values each `w` bits wide from `data` starting at `start_bit`,
@@ -1539,7 +1689,10 @@ fn extract_group_windowed(
     gref: i64,
     out: &mut Vec<i64>,
 ) {
-    debug_assert!(w > 0 && w <= 32, "w={w} out of range (caller must handle w=0)");
+    debug_assert!(
+        w > 0 && w <= 32,
+        "w={w} out of range (caller must handle w=0)"
+    );
     let mask: u64 = (1u64 << w) - 1;
 
     // `buf` holds up to 64 bits of stream data, left-aligned (MSB = next bit).
@@ -1605,7 +1758,11 @@ fn read_bits_at(data: &[u8], bit_offset: usize, n_bits: usize) -> u64 {
     let bytes_needed = bits_needed.div_ceil(8);
     let mut raw: u64 = 0;
     for i in 0..bytes_needed {
-        let byte = if byte_start + i < data.len() { data[byte_start + i] } else { 0 };
+        let byte = if byte_start + i < data.len() {
+            data[byte_start + i]
+        } else {
+            0
+        };
         raw = (raw << 8) | byte as u64;
     }
     let total_bits = bytes_needed * 8;
@@ -1632,7 +1789,8 @@ fn unpack_n_bits(data: &[u8], count: usize, n_bits: usize) -> Vec<u64> {
         }
         16 => {
             let available = count.min(data.len() / 2);
-            let mut v: Vec<u64> = data.chunks_exact(2)
+            let mut v: Vec<u64> = data
+                .chunks_exact(2)
                 .take(available)
                 .map(|c| u16::from_be_bytes([c[0], c[1]]) as u64)
                 .collect();
@@ -1641,7 +1799,8 @@ fn unpack_n_bits(data: &[u8], count: usize, n_bits: usize) -> Vec<u64> {
         }
         32 => {
             let available = count.min(data.len() / 4);
-            let mut v: Vec<u64> = data.chunks_exact(4)
+            let mut v: Vec<u64> = data
+                .chunks_exact(4)
                 .take(available)
                 .map(|c| u32::from_be_bytes([c[0], c[1], c[2], c[3]]) as u64)
                 .collect();
@@ -1662,7 +1821,11 @@ fn unpack_n_bits(data: &[u8], count: usize, n_bits: usize) -> Vec<u64> {
 
         let mut raw: u64 = 0;
         for i in 0..bytes_needed {
-            let byte = if byte_start + i < data.len() { data[byte_start + i] } else { 0 };
+            let byte = if byte_start + i < data.len() {
+                data[byte_start + i]
+            } else {
+                0
+            };
             raw = (raw << 8) | byte as u64;
         }
 
@@ -1823,16 +1986,32 @@ impl LazyFieldBuilder {
         let section7_raw = self.section7_raw.unwrap_or_default();
         let complex_extra = self.complex_extra;
         Some(LazyField {
-            center, subcenter, parameter, forecast, level, ensemble,
-            grid, packing, gdt_template, pdt_template, drt_template,
-            has_bitmap, section7_raw, complex_extra,
+            center,
+            subcenter,
+            parameter,
+            forecast,
+            level,
+            ensemble,
+            grid,
+            packing,
+            gdt_template,
+            pdt_template,
+            drt_template,
+            has_bitmap,
+            section7_raw,
+            complex_extra,
         })
     }
 }
 
 fn decode_lazy_message(msg: &[u8], out: &mut Vec<LazyField>) -> Result<usize> {
     let mut buf = Buf::new(msg);
-    let magic = [buf.read_u8()?, buf.read_u8()?, buf.read_u8()?, buf.read_u8()?];
+    let magic = [
+        buf.read_u8()?,
+        buf.read_u8()?,
+        buf.read_u8()?,
+        buf.read_u8()?,
+    ];
     if &magic != b"GRIB" {
         return Err(Error::BadMagic(magic));
     }
@@ -1844,7 +2023,10 @@ fn decode_lazy_message(msg: &[u8], out: &mut Vec<LazyField>) -> Result<usize> {
     }
     let total_len = buf.read_u64be()? as usize;
     if msg.len() < total_len {
-        return Err(Error::TooShort { needed: total_len, got: msg.len() });
+        return Err(Error::TooShort {
+            needed: total_len,
+            got: msg.len(),
+        });
     }
 
     let mut builder = LazyFieldBuilder::default();
@@ -1855,7 +2037,10 @@ fn decode_lazy_message(msg: &[u8], out: &mut Vec<LazyField>) -> Result<usize> {
         let sec_len = buf.read_u32be()? as usize;
         let sec_num = buf.read_u8()?;
         if sec_len < 5 {
-            return Err(Error::TooShort { needed: 5, got: sec_len });
+            return Err(Error::TooShort {
+                needed: 5,
+                got: sec_len,
+            });
         }
         let body_start = buf.pos;
         let body_len = sec_len - 5;
@@ -2009,7 +2194,9 @@ mod tests {
         };
         let data: Vec<u8> = (0u8..25).collect();
         let full = decode_section7(&data, &packing, 0, None, 25).unwrap();
-        let GridValues::Dense(full_vals) = full else { panic!() };
+        let GridValues::Dense(full_vals) = full else {
+            panic!()
+        };
 
         for (idx, &full_val) in full_vals.iter().enumerate().take(25) {
             let lazy_val = decode_point_drt0(&data, &packing, idx).expect("idx in range");
@@ -2056,7 +2243,10 @@ mod tests {
             if lf.drt_template != 3 || lf.section7_raw.is_empty() {
                 continue;
             }
-            let extra = lf.complex_extra.as_ref().expect("DRT=3 must have complex_extra");
+            let extra = lf
+                .complex_extra
+                .as_ref()
+                .expect("DRT=3 must have complex_extra");
             let n_pts = lf.grid.num_data_points as usize;
             let all_vals = decode_all_drt3(&lf.section7_raw, &lf.packing, extra, n_pts)
                 .expect("decode_all_drt3 ok");
@@ -2065,12 +2255,12 @@ mod tests {
                 .chain([n_pts / 2, n_pts.saturating_sub(1)])
                 .collect();
             for idx in indices {
-                let point_val = decode_point_drt3(
-                    &lf.section7_raw, &lf.packing, extra, n_pts, idx,
-                ).expect("in-range idx");
+                let point_val = decode_point_drt3(&lf.section7_raw, &lf.packing, extra, n_pts, idx)
+                    .expect("in-range idx");
                 assert!(
                     (point_val - all_vals[idx]).abs() < 1e-9,
-                    "idx={idx}: point={point_val} all={}", all_vals[idx],
+                    "idx={idx}: point={point_val} all={}",
+                    all_vals[idx],
                 );
             }
             // Out-of-range must return None.
@@ -2138,10 +2328,12 @@ mod tests {
             assert!(!lf.has_bitmap);
             assert!(!lf.section7_raw.is_empty(), "DRT=0 should have raw bytes");
 
-            let GridValues::Dense(ref full_vals) = ff.values else { panic!("expected Dense") };
+            let GridValues::Dense(ref full_vals) = ff.values else {
+                panic!("expected Dense")
+            };
             for (idx, &full_val) in full_vals.iter().enumerate() {
-                let lazy_val = decode_point_drt0(&lf.section7_raw, &lf.packing, idx)
-                    .expect("idx in range");
+                let lazy_val =
+                    decode_point_drt0(&lf.section7_raw, &lf.packing, idx).expect("idx in range");
                 let tol = lf.packing.tolerance().max(1e-12);
                 assert!(
                     (lazy_val - full_val).abs() <= tol,

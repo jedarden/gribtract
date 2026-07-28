@@ -5,8 +5,8 @@
 //! for each fixture, produced by an authoritative reference decoder (eccodes/wgrib2)
 //! and checked in for offline comparison.
 
-use serde::{Deserialize, Serialize};
 use crate::corpus::corpus_root;
+use serde::{Deserialize, Serialize};
 
 // ── Mirror types for JSON deserialization ─────────────────────────────────────
 // These mirror gribtract_core::types but carry serde derives. The comparator
@@ -80,9 +80,15 @@ pub struct GoldenGridDefinition {
     pub shape_of_earth: u8,
 }
 
-fn default_nx() -> Option<u32> { None }
-fn default_ny() -> Option<u32> { None }
-fn default_zero_f64() -> Option<f64> { None }
+fn default_nx() -> Option<u32> {
+    None
+}
+fn default_ny() -> Option<u32> {
+    None
+}
+fn default_zero_f64() -> Option<f64> {
+    None
+}
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct GoldenPackingInfo {
@@ -100,7 +106,10 @@ pub struct GoldenPackingInfo {
 #[derive(Debug, Clone, PartialEq)]
 pub enum GoldenGridValues {
     Dense(Vec<f64>),
-    Masked { values: Vec<f64>, present: Vec<bool> },
+    Masked {
+        values: Vec<f64>,
+        present: Vec<bool>,
+    },
 }
 
 // Custom deserializer to handle null values in Dense arrays
@@ -109,7 +118,7 @@ impl<'de> Deserialize<'de> for GoldenGridValues {
     where
         D: serde::Deserializer<'de>,
     {
-        use serde::de::{self, Visitor, MapAccess};
+        use serde::de::{self, MapAccess, Visitor};
         use std::fmt;
 
         struct GoldenGridValuesVisitor;
@@ -135,7 +144,8 @@ impl<'de> Deserialize<'de> for GoldenGridValues {
                             // Deserialize as Vec<Option<f64>> to handle nulls
                             let raw: Vec<Option<f64>> = map.next_value()?;
                             // Convert nulls to NaN
-                            dense_value = Some(raw.into_iter().map(|v| v.unwrap_or(f64::NAN)).collect());
+                            dense_value =
+                                Some(raw.into_iter().map(|v| v.unwrap_or(f64::NAN)).collect());
                         }
                         "values" => {
                             masked_values = Some(map.next_value()?);
@@ -154,7 +164,9 @@ impl<'de> Deserialize<'de> for GoldenGridValues {
                 } else if let (Some(values), Some(present)) = (masked_values, masked_present) {
                     Ok(GoldenGridValues::Masked { values, present })
                 } else {
-                    Err(de::Error::custom("expected 'Dense' key or both 'values' and 'present' keys"))
+                    Err(de::Error::custom(
+                        "expected 'Dense' key or both 'values' and 'present' keys",
+                    ))
                 }
             }
         }

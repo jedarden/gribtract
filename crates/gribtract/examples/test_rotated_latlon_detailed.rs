@@ -1,5 +1,5 @@
-use std::fs;
 use gribtract::{decode, Error};
+use std::fs;
 
 fn main() {
     let fixture_path = "tests/corpus/small/rotated_latlon_gdt1_drt0.grib2";
@@ -17,7 +17,19 @@ fn main() {
     let indicator = &bytes[0..16];
     println!("  GRIB magic: {:02x?}", &indicator[0..4]);
     println!("  Edition: {}", indicator[7]);
-    println!("  Total length: {}", u64::from_be_bytes([indicator[8], indicator[9], indicator[10], indicator[11], indicator[12], indicator[13], indicator[14], indicator[15]]));
+    println!(
+        "  Total length: {}",
+        u64::from_be_bytes([
+            indicator[8],
+            indicator[9],
+            indicator[10],
+            indicator[11],
+            indicator[12],
+            indicator[13],
+            indicator[14],
+            indicator[15]
+        ])
+    );
     println!();
 
     // Section 1 (Identification) - bytes 16-36
@@ -35,8 +47,13 @@ fn main() {
     println!("Section 3 (Grid Definition): starts at byte 37");
     if bytes.len() >= 37 {
         let sec3_start = 37;
-        let sec3_len_bytes = &bytes[sec3_start..sec3_start+4];
-        let sec3_len = u32::from_be_bytes([sec3_len_bytes[0], sec3_len_bytes[1], sec3_len_bytes[2], sec3_len_bytes[3]]);
+        let sec3_len_bytes = &bytes[sec3_start..sec3_start + 4];
+        let sec3_len = u32::from_be_bytes([
+            sec3_len_bytes[0],
+            sec3_len_bytes[1],
+            sec3_len_bytes[2],
+            sec3_len_bytes[3],
+        ]);
         let sec3_num = bytes[sec3_start + 4];
         println!("  Section length field: {:02x?}", sec3_len_bytes);
         println!("  Section length (interpreted): {} bytes", sec3_len);

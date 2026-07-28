@@ -68,8 +68,7 @@ fn differential_coverage_report() {
                 report.fixtures_decode_error += 1;
             }
             Ok(actual_fields) => {
-                let matched =
-                    compare_fixture(&actual_fields, &golden_fixture.fields, &mut report);
+                let matched = compare_fixture(&actual_fields, &golden_fixture.fields, &mut report);
                 if matched {
                     report.fixtures_matched += 1;
                     eprintln!("  [match]      {}", entry.id);

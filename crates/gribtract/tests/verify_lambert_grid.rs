@@ -7,8 +7,7 @@ use gribtract_core::types::{GridDefinition, GridProjection, LambertConformalPara
 fn verify_nam_lambert_grid_metadata() {
     let corpus_root = {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
-        std::path::Path::new(manifest_dir)
-            .join("../../tests/corpus")
+        std::path::Path::new(manifest_dir).join("../../tests/corpus")
     };
 
     // Test the NAM Lambert DRT=3 fixture
@@ -34,7 +33,10 @@ fn verify_nam_lambert_grid_metadata() {
         }
     };
 
-    assert!(!fields.is_empty(), "Expected at least one field in the fixture");
+    assert!(
+        !fields.is_empty(),
+        "Expected at least one field in the fixture"
+    );
 
     // Check first field's grid metadata
     let field = &fields[0];
@@ -121,8 +123,7 @@ fn verify_nam_lambert_grid_metadata() {
 fn verify_lazy_decode_preserves_grid_metadata() {
     let corpus_root = {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
-        std::path::Path::new(manifest_dir)
-            .join("../../tests/corpus")
+        std::path::Path::new(manifest_dir).join("../../tests/corpus")
     };
 
     let fixture_path = corpus_root.join("large/nam.t00z.awip1200.tm00.grib2");
@@ -147,7 +148,10 @@ fn verify_lazy_decode_preserves_grid_metadata() {
     assert!(!lazy_fields.is_empty());
 
     let lazy_grid = &lazy_fields[0].grid;
-    assert_eq!(lazy_grid.template, 30, "Lazy decode should preserve GDT template");
+    assert_eq!(
+        lazy_grid.template, 30,
+        "Lazy decode should preserve GDT template"
+    );
     assert!(lazy_grid.nx > 0, "Lazy decode should preserve Nx");
     assert!(lazy_grid.ny > 0, "Lazy decode should preserve Ny");
 
@@ -167,8 +171,7 @@ fn verify_lazy_decode_preserves_grid_metadata() {
 fn verify_all_nam_fields_have_consistent_grid() {
     let corpus_root = {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
-        std::path::Path::new(manifest_dir)
-            .join("../../tests/corpus")
+        std::path::Path::new(manifest_dir).join("../../tests/corpus")
     };
 
     let fixture_path = corpus_root.join("large/nam.t00z.awip1200.tm00.grib2");
@@ -229,10 +232,7 @@ fn verify_all_nam_fields_have_consistent_grid() {
 
         let params = match &grid.projection {
             GridProjection::LambertConformal(p) => p,
-            _ => panic!(
-                "Field {} should have Lambert projection",
-                i
-            ),
+            _ => panic!("Field {} should have Lambert projection", i),
         };
 
         assert_eq!(

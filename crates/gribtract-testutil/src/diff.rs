@@ -4,9 +4,9 @@
 //! per-field tolerance derived from the packing header (half-ULP of the
 //! quantization step — see `docs/notes/oracle-and-tolerance.md`).
 
-use std::collections::HashMap;
-use gribtract_core::types::Field;
 use crate::golden::GoldenField;
+use gribtract_core::types::Field;
+use std::collections::HashMap;
 
 // ── Single-field comparison result ───────────────────────────────────────────
 
@@ -76,7 +76,8 @@ impl CoverageReport {
     pub fn agreement_pct(&self) -> f64 {
         // Comparable fixtures are those that were actually compared:
         // total - (no golden) - (skipped due to missing features)
-        let denom = self.fixtures_total
+        let denom = self
+            .fixtures_total
             .saturating_sub(self.fixtures_no_golden)
             .saturating_sub(self.fixtures_skipped_feature);
         if denom == 0 {
@@ -88,7 +89,8 @@ impl CoverageReport {
     pub fn print_report(&self) {
         // Comparable fixtures are those that were actually compared:
         // total - (no golden) - (skipped due to missing features)
-        let comparable = self.fixtures_total
+        let comparable = self
+            .fixtures_total
             .saturating_sub(self.fixtures_no_golden)
             .saturating_sub(self.fixtures_skipped_feature);
         println!("=== Differential Harness Coverage ===");
@@ -143,9 +145,21 @@ pub fn compare_field(actual: &Field, golden: &GoldenField) -> FieldResult {
 
     check_meta!("center", actual.center, golden.center);
     check_meta!("subcenter", actual.subcenter, golden.subcenter);
-    check_meta!("parameter.discipline", actual.parameter.discipline, golden.parameter.discipline);
-    check_meta!("parameter.category", actual.parameter.category, golden.parameter.category);
-    check_meta!("parameter.number", actual.parameter.number, golden.parameter.number);
+    check_meta!(
+        "parameter.discipline",
+        actual.parameter.discipline,
+        golden.parameter.discipline
+    );
+    check_meta!(
+        "parameter.category",
+        actual.parameter.category,
+        golden.parameter.category
+    );
+    check_meta!(
+        "parameter.number",
+        actual.parameter.number,
+        golden.parameter.number
+    );
 
     // Forecast reference time
     let rt = &actual.forecast.reference_time;
@@ -156,25 +170,53 @@ pub fn compare_field(actual: &Field, golden: &GoldenField) -> FieldResult {
     check_meta!("forecast.reference_time.hour", rt.hour, grt.hour);
     check_meta!("forecast.reference_time.minute", rt.minute, grt.minute);
     check_meta!("forecast.reference_time.second", rt.second, grt.second);
-    check_meta!("forecast.reference_time.significance", rt.significance, grt.significance);
-    check_meta!("forecast.time_range_unit", actual.forecast.time_range_unit, golden.forecast.time_range_unit);
-    check_meta!("forecast.forecast_offset", actual.forecast.forecast_offset, golden.forecast.forecast_offset);
+    check_meta!(
+        "forecast.reference_time.significance",
+        rt.significance,
+        grt.significance
+    );
+    check_meta!(
+        "forecast.time_range_unit",
+        actual.forecast.time_range_unit,
+        golden.forecast.time_range_unit
+    );
+    check_meta!(
+        "forecast.forecast_offset",
+        actual.forecast.forecast_offset,
+        golden.forecast.forecast_offset
+    );
 
     // Level
     check_meta!("level.type1", actual.level.type1, golden.level.type1);
     // Only compare scale_factor and scaled_value if golden has a value
     if let Some(golden_sf1) = golden.level.scale_factor1 {
-        check_meta!("level.scale_factor1", actual.level.scale_factor1, golden_sf1);
+        check_meta!(
+            "level.scale_factor1",
+            actual.level.scale_factor1,
+            golden_sf1
+        );
     }
     if let Some(golden_sv1) = golden.level.scaled_value1 {
-        check_meta!("level.scaled_value1", actual.level.scaled_value1, golden_sv1);
+        check_meta!(
+            "level.scaled_value1",
+            actual.level.scaled_value1,
+            golden_sv1
+        );
     }
     check_meta!("level.type2", actual.level.type2, golden.level.type2);
     if let Some(golden_sf2) = golden.level.scale_factor2 {
-        check_meta!("level.scale_factor2", actual.level.scale_factor2, golden_sf2);
+        check_meta!(
+            "level.scale_factor2",
+            actual.level.scale_factor2,
+            golden_sf2
+        );
     }
     if let Some(golden_sv2) = golden.level.scaled_value2 {
-        check_meta!("level.scaled_value2", actual.level.scaled_value2, golden_sv2);
+        check_meta!(
+            "level.scaled_value2",
+            actual.level.scaled_value2,
+            golden_sv2
+        );
     }
 
     // Ensemble
@@ -200,7 +242,11 @@ pub fn compare_field(actual: &Field, golden: &GoldenField) -> FieldResult {
     let ag = &actual.grid;
     let gg = &golden.grid;
     check_meta!("grid.template", ag.template, gg.template);
-    check_meta!("grid.num_data_points", ag.num_data_points, gg.num_data_points);
+    check_meta!(
+        "grid.num_data_points",
+        ag.num_data_points,
+        gg.num_data_points
+    );
 
     // nx/ny: only compare if golden has a value (some grid types don't use these)
     if let Some(golden_nx) = gg.nx {
@@ -210,15 +256,31 @@ pub fn compare_field(actual: &Field, golden: &GoldenField) -> FieldResult {
         check_meta!("grid.ny", ag.ny, golden_ny);
     }
 
-    check_meta!("grid.lat_first", ag.lat_first.to_bits(), gg.lat_first.to_bits());
-    check_meta!("grid.lon_first", ag.lon_first.to_bits(), gg.lon_first.to_bits());
+    check_meta!(
+        "grid.lat_first",
+        ag.lat_first.to_bits(),
+        gg.lat_first.to_bits()
+    );
+    check_meta!(
+        "grid.lon_first",
+        ag.lon_first.to_bits(),
+        gg.lon_first.to_bits()
+    );
 
     // lat_last/lon_last: only compare if golden has a value
     if let Some(golden_lat_last) = gg.lat_last {
-        check_meta!("grid.lat_last", ag.lat_last.to_bits(), golden_lat_last.to_bits());
+        check_meta!(
+            "grid.lat_last",
+            ag.lat_last.to_bits(),
+            golden_lat_last.to_bits()
+        );
     }
     if let Some(golden_lon_last) = gg.lon_last {
-        check_meta!("grid.lon_last", ag.lon_last.to_bits(), golden_lon_last.to_bits());
+        check_meta!(
+            "grid.lon_last",
+            ag.lon_last.to_bits(),
+            golden_lon_last.to_bits()
+        );
     }
 
     // di/dj: only compare if golden has a value
@@ -230,7 +292,11 @@ pub fn compare_field(actual: &Field, golden: &GoldenField) -> FieldResult {
     }
 
     check_meta!("grid.scanning_mode", ag.scanning_mode, gg.scanning_mode);
-    check_meta!("grid.resolution_flags", ag.resolution_flags, gg.resolution_flags);
+    check_meta!(
+        "grid.resolution_flags",
+        ag.resolution_flags,
+        gg.resolution_flags
+    );
     check_meta!("grid.shape_of_earth", ag.shape_of_earth, gg.shape_of_earth);
 
     // Template identifiers
@@ -239,11 +305,31 @@ pub fn compare_field(actual: &Field, golden: &GoldenField) -> FieldResult {
     check_meta!("drt_template", actual.drt_template, golden.drt_template);
 
     // Packing metadata
-    check_meta!("packing.reference_value", actual.packing.reference_value.to_bits(), golden.packing.reference_value.to_bits());
-    check_meta!("packing.binary_scale_factor", actual.packing.binary_scale_factor, golden.packing.binary_scale_factor);
-    check_meta!("packing.decimal_scale_factor", actual.packing.decimal_scale_factor, golden.packing.decimal_scale_factor);
-    check_meta!("packing.bits_per_value", actual.packing.bits_per_value, golden.packing.bits_per_value);
-    check_meta!("packing.original_field_type", actual.packing.original_field_type, golden.packing.original_field_type);
+    check_meta!(
+        "packing.reference_value",
+        actual.packing.reference_value.to_bits(),
+        golden.packing.reference_value.to_bits()
+    );
+    check_meta!(
+        "packing.binary_scale_factor",
+        actual.packing.binary_scale_factor,
+        golden.packing.binary_scale_factor
+    );
+    check_meta!(
+        "packing.decimal_scale_factor",
+        actual.packing.decimal_scale_factor,
+        golden.packing.decimal_scale_factor
+    );
+    check_meta!(
+        "packing.bits_per_value",
+        actual.packing.bits_per_value,
+        golden.packing.bits_per_value
+    );
+    check_meta!(
+        "packing.original_field_type",
+        actual.packing.original_field_type,
+        golden.packing.original_field_type
+    );
 
     if !meta_mismatches.is_empty() {
         return FieldResult::MetaMismatch(meta_mismatches);
@@ -311,7 +397,11 @@ pub fn compare_fixture(
 
     let mut all_match = true;
     for (actual, golden) in actual_fields.iter().zip(golden_fields.iter()) {
-        let key = (actual.gdt_template, actual.pdt_template, actual.drt_template);
+        let key = (
+            actual.gdt_template,
+            actual.pdt_template,
+            actual.drt_template,
+        );
         let stat = report.by_template.entry(key).or_default();
         stat.attempts += 1;
 
@@ -328,39 +418,61 @@ pub fn compare_fixture(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::golden::{
+        GoldenField, GoldenForecastTime, GoldenGridDefinition, GoldenGridValues, GoldenLevel,
+        GoldenPackingInfo, GoldenParameterId, GoldenReferenceTime,
+    };
     use gribtract_core::types::{
         Field, ForecastTime, GridDefinition, GridProjection, GridValues, Level, PackingInfo,
         ParameterId, ReferenceTime,
-    };
-    use crate::golden::{
-        GoldenField, GoldenForecastTime, GoldenGridDefinition, GoldenGridValues,
-        GoldenLevel, GoldenPackingInfo, GoldenParameterId, GoldenReferenceTime,
     };
 
     fn sample_field() -> Field {
         Field {
             center: 7,
             subcenter: 0,
-            parameter: ParameterId { discipline: 0, category: 0, number: 0 },
+            parameter: ParameterId {
+                discipline: 0,
+                category: 0,
+                number: 0,
+            },
             forecast: ForecastTime {
                 reference_time: ReferenceTime {
-                    year: 2024, month: 6, day: 19,
-                    hour: 0, minute: 0, second: 0,
+                    year: 2024,
+                    month: 6,
+                    day: 19,
+                    hour: 0,
+                    minute: 0,
+                    second: 0,
                     significance: 0,
                 },
                 time_range_unit: 1,
                 forecast_offset: 0,
             },
             level: Level {
-                type1: 103, scale_factor1: 0, scaled_value1: 2,
-                type2: 255, scale_factor2: 0, scaled_value2: 0,
+                type1: 103,
+                scale_factor1: 0,
+                scaled_value1: 2,
+                type2: 255,
+                scale_factor2: 0,
+                scaled_value2: 0,
             },
             ensemble: None,
             grid: GridDefinition {
-                template: 0, num_data_points: 4, nx: 2, ny: 2,
-                lat_first: 10.0, lon_first: 0.0, lat_last: 0.0, lon_last: 10.0,
-                di: 10.0, dj: 10.0, scanning_mode: 0, resolution_flags: 48,
-                shape_of_earth: 6, projection: GridProjection::LatLon,
+                template: 0,
+                num_data_points: 4,
+                nx: 2,
+                ny: 2,
+                lat_first: 10.0,
+                lon_first: 0.0,
+                lat_last: 0.0,
+                lon_last: 10.0,
+                di: 10.0,
+                dj: 10.0,
+                scanning_mode: 0,
+                resolution_flags: 48,
+                shape_of_earth: 6,
+                projection: GridProjection::LatLon,
             },
             values: GridValues::Dense(vec![270.0, 271.0, 272.0, 273.0]),
             gdt_template: 0,
@@ -380,31 +492,52 @@ mod tests {
         GoldenField {
             center: 7,
             subcenter: 0,
-            parameter: GoldenParameterId { discipline: 0, category: 0, number: 0 },
+            parameter: GoldenParameterId {
+                discipline: 0,
+                category: 0,
+                number: 0,
+            },
             forecast: GoldenForecastTime {
                 reference_time: GoldenReferenceTime {
-                    year: 2024, month: 6, day: 19,
-                    hour: 0, minute: 0, second: 0,
+                    year: 2024,
+                    month: 6,
+                    day: 19,
+                    hour: 0,
+                    minute: 0,
+                    second: 0,
                     significance: 0,
                 },
                 time_range_unit: 1,
                 forecast_offset: 0,
             },
             level: GoldenLevel {
-                type1: 103, scale_factor1: Some(0), scaled_value1: Some(2),
-                type2: 255, scale_factor2: Some(0), scaled_value2: Some(0),
+                type1: 103,
+                scale_factor1: Some(0),
+                scaled_value1: Some(2),
+                type2: 255,
+                scale_factor2: Some(0),
+                scaled_value2: Some(0),
             },
             ensemble: None,
             grid: GoldenGridDefinition {
-                template: 0, num_data_points: 4, nx: Some(2), ny: Some(2),
-                lat_first: 10.0, lon_first: 0.0, lat_last: Some(0.0), lon_last: Some(10.0),
-                di: Some(10.0), dj: Some(10.0), scanning_mode: 0, resolution_flags: 48,
+                template: 0,
+                num_data_points: 4,
+                nx: Some(2),
+                ny: Some(2),
+                lat_first: 10.0,
+                lon_first: 0.0,
+                lat_last: Some(0.0),
+                lon_last: Some(10.0),
+                di: Some(10.0),
+                dj: Some(10.0),
+                scanning_mode: 0,
+                resolution_flags: 48,
                 shape_of_earth: 6,
             },
             values: GoldenGridValues::Dense(values),
             gdt_template: 0,
             pdt_template: 0,
-            drt_template: 0,  // Default to DRT 0
+            drt_template: 0, // Default to DRT 0
             packing: GoldenPackingInfo {
                 reference_value: 270.0,
                 binary_scale_factor: 0,
@@ -451,7 +584,10 @@ mod tests {
         let mut actual = sample_field();
         actual.center = 98; // wrong center
         let golden = sample_golden(vec![270.0, 271.0, 272.0, 273.0]);
-        assert!(matches!(compare_field(&actual, &golden), FieldResult::MetaMismatch(_)));
+        assert!(matches!(
+            compare_field(&actual, &golden),
+            FieldResult::MetaMismatch(_)
+        ));
     }
 
     #[test]
@@ -490,7 +626,7 @@ mod tests {
         // - 6 processed and matched
         // - 0 processed and failed
         let report = CoverageReport {
-            fixtures_total: 9,  // all inline fixtures
+            fixtures_total: 9, // all inline fixtures
             fixtures_matched: 6,
             fixtures_no_golden: 1,
             fixtures_skipped_feature: 2,

@@ -17,8 +17,8 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
-use gribtract_core::types::{Field, GridValues};
 use ::gribtract::decode as gribtract_decode;
+use gribtract_core::types::{Field, GridValues};
 
 /// GRIB2 decoded field exposed to Python.
 ///
@@ -269,7 +269,11 @@ impl PyField {
             self.number(),
             self.level_type1(),
             self.level_value1(),
-            rt.0, rt.1, rt.2, rt.3, rt.4,
+            rt.0,
+            rt.1,
+            rt.2,
+            rt.3,
+            rt.4,
             self.drt_template(),
             self.nx(),
             self.ny(),
@@ -336,9 +340,9 @@ mod tests {
     fn corpus_path(name: &str) -> std::path::PathBuf {
         // Fixture lives at <workspace_root>/tests/corpus/small/<name>
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .parent()  // crates/
+            .parent() // crates/
             .unwrap()
-            .parent()  // workspace root
+            .parent() // workspace root
             .unwrap()
             .to_path_buf();
         root.join("tests/corpus/small").join(name)
@@ -347,14 +351,16 @@ mod tests {
     #[test]
     fn decode_drt0_returns_fields() {
         let path = corpus_path("gfs_anl_t2m_5x5.grib2");
-        let data = std::fs::read(&path)
-            .unwrap_or_else(|_| panic!("missing fixture: {}", path.display()));
+        let data =
+            std::fs::read(&path).unwrap_or_else(|_| panic!("missing fixture: {}", path.display()));
         let fields = gribtract_decode(&data).expect("decode failed");
         assert!(!fields.is_empty(), "expected at least one field");
         let f = &fields[0];
         // DRT=0 simple packing — values should be dense
-        assert!(matches!(f.values, GridValues::Dense(_)),
-            "expected Dense values for DRT=0 fixture");
+        assert!(
+            matches!(f.values, GridValues::Dense(_)),
+            "expected Dense values for DRT=0 fixture"
+        );
         // Grid should have points
         assert!(f.grid.num_data_points > 0);
     }
@@ -363,20 +369,26 @@ mod tests {
     #[cfg(feature = "jpeg2000")]
     fn decode_drt40_jpeg2000_returns_fields() {
         let path = corpus_path("drt40_j2k_3x2.grib2");
-        let data = std::fs::read(&path)
-            .unwrap_or_else(|_| panic!("missing fixture: {}", path.display()));
+        let data =
+            std::fs::read(&path).unwrap_or_else(|_| panic!("missing fixture: {}", path.display()));
         let fields = gribtract_decode(&data).expect("decode failed");
-        assert!(!fields.is_empty(), "expected at least one field from DRT=40 fixture");
+        assert!(
+            !fields.is_empty(),
+            "expected at least one field from DRT=40 fixture"
+        );
         assert_eq!(fields[0].drt_template, 40, "expected DRT=40");
     }
 
     #[test]
     fn decode_drt41_png_returns_fields() {
         let path = corpus_path("drt41_png_3x2.grib2");
-        let data = std::fs::read(&path)
-            .unwrap_or_else(|_| panic!("missing fixture: {}", path.display()));
+        let data =
+            std::fs::read(&path).unwrap_or_else(|_| panic!("missing fixture: {}", path.display()));
         let fields = gribtract_decode(&data).expect("decode failed");
-        assert!(!fields.is_empty(), "expected at least one field from DRT=41 fixture");
+        assert!(
+            !fields.is_empty(),
+            "expected at least one field from DRT=41 fixture"
+        );
         assert_eq!(fields[0].drt_template, 41, "expected DRT=41");
     }
 
@@ -389,7 +401,9 @@ mod tests {
             Err(_) => return, // skip if fixture missing
         };
         let fields = gribtract_decode(&data).expect("decode failed");
-        let py_field = PyField { inner: fields.into_iter().next().unwrap() };
+        let py_field = PyField {
+            inner: fields.into_iter().next().unwrap(),
+        };
         let repr = py_field.__repr__();
         assert!(repr.contains("Field("), "repr should start with Field(");
     }

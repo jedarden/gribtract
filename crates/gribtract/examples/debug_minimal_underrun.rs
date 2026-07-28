@@ -24,8 +24,8 @@
 //! - Detailed TooShort error with needed/got byte counts
 //! - Explanation of the buffer underrun
 
-use std::fs;
 use gribtract::decode;
+use std::fs;
 
 fn main() {
     println!("=== DEBUGGING BUFFER UNDERRUN ===\n");

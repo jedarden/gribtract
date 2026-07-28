@@ -26,7 +26,7 @@ pub use utils::{civil_date, probe_date_str};
 pub mod probe;
 
 #[cfg(feature = "probe")]
-pub use probe::{ProbeResult, ProviderProbe, ProviderFailureTracker};
+pub use probe::{ProbeResult, ProviderFailureTracker, ProviderProbe};
 
 /// Re-export reqwest::StatusCode for convenience
 pub use reqwest::StatusCode;

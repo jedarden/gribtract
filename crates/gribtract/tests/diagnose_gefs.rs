@@ -19,9 +19,17 @@ fn diagnose_gefs_member01_pdt41() {
             panic!("Decode error: {}", e);
         }
         Ok(actual_fields) => {
-            println!("Total fields: actual={}, golden={}", actual_fields.len(), golden_fixture.fields.len());
+            println!(
+                "Total fields: actual={}, golden={}",
+                actual_fields.len(),
+                golden_fixture.fields.len()
+            );
 
-            for (i, (actual, golden)) in actual_fields.iter().zip(golden_fixture.fields.iter()).enumerate() {
+            for (i, (actual, golden)) in actual_fields
+                .iter()
+                .zip(golden_fixture.fields.iter())
+                .enumerate()
+            {
                 let result = compare_field(actual, golden);
                 match result {
                     FieldResult::Match => {
@@ -30,24 +38,46 @@ fn diagnose_gefs_member01_pdt41() {
                         }
                     }
                     FieldResult::MetaMismatch(mismatches) => {
-                        println!("Field {}: META_MISMATCH ({} differences)", i, mismatches.len());
+                        println!(
+                            "Field {}: META_MISMATCH ({} differences)",
+                            i,
+                            mismatches.len()
+                        );
                         for mm in mismatches.iter().take(5) {
-                            println!("  - {}: expected={}, actual={}", mm.field, mm.expected, mm.actual);
+                            println!(
+                                "  - {}: expected={}, actual={}",
+                                mm.field, mm.expected, mm.actual
+                            );
                         }
                         if i == 0 {
-                            println!("  Actual: gdt={}, pdt={}, drt={}", actual.gdt_template, actual.pdt_template, actual.drt_template);
-                            println!("  Golden: gdt={}, pdt={}, drt={}", golden.gdt_template, golden.pdt_template, golden.drt_template);
+                            println!(
+                                "  Actual: gdt={}, pdt={}, drt={}",
+                                actual.gdt_template, actual.pdt_template, actual.drt_template
+                            );
+                            println!(
+                                "  Golden: gdt={}, pdt={}, drt={}",
+                                golden.gdt_template, golden.pdt_template, golden.drt_template
+                            );
                         }
                     }
                     FieldResult::ValuesMismatch(points) => {
-                        println!("Field {}: VALUES_MISMATCH ({} points exceed tolerance)", i, points.len());
+                        println!(
+                            "Field {}: VALUES_MISMATCH ({} points exceed tolerance)",
+                            i,
+                            points.len()
+                        );
                         for pm in points.iter().take(2) {
-                            println!("  - index {}: expected={}, actual={}, delta={}, tolerance={}",
-                                pm.index, pm.expected, pm.actual, pm.delta, pm.tolerance);
+                            println!(
+                                "  - index {}: expected={}, actual={}, delta={}, tolerance={}",
+                                pm.index, pm.expected, pm.actual, pm.delta, pm.tolerance
+                            );
                         }
                     }
                     FieldResult::LengthMismatch { expected, actual } => {
-                        println!("Field {}: LENGTH_MISMATCH (expected={}, actual={})", i, expected, actual);
+                        println!(
+                            "Field {}: LENGTH_MISMATCH (expected={}, actual={})",
+                            i, expected, actual
+                        );
                     }
                     FieldResult::MaskMismatch { index } => {
                         println!("Field {}: MASK_MISMATCH at index {}", i, index);
@@ -82,9 +112,17 @@ fn diagnose_gefs_ensemble_mean_pdt48() {
             println!("This is expected - PDT 4.8 decode is not yet implemented");
         }
         Ok(actual_fields) => {
-            println!("Total fields: actual={}, golden={}", actual_fields.len(), golden_fixture.fields.len());
+            println!(
+                "Total fields: actual={}, golden={}",
+                actual_fields.len(),
+                golden_fixture.fields.len()
+            );
 
-            for (i, (actual, golden)) in actual_fields.iter().zip(golden_fixture.fields.iter()).enumerate() {
+            for (i, (actual, golden)) in actual_fields
+                .iter()
+                .zip(golden_fixture.fields.iter())
+                .enumerate()
+            {
                 let result = compare_field(actual, golden);
                 match result {
                     FieldResult::Match => {
@@ -93,20 +131,40 @@ fn diagnose_gefs_ensemble_mean_pdt48() {
                         }
                     }
                     FieldResult::MetaMismatch(mismatches) => {
-                        println!("Field {}: META_MISMATCH ({} differences)", i, mismatches.len());
+                        println!(
+                            "Field {}: META_MISMATCH ({} differences)",
+                            i,
+                            mismatches.len()
+                        );
                         for mm in mismatches.iter().take(3) {
-                            println!("  - {}: expected={}, actual={}", mm.field, mm.expected, mm.actual);
+                            println!(
+                                "  - {}: expected={}, actual={}",
+                                mm.field, mm.expected, mm.actual
+                            );
                         }
                         if i == 0 {
-                            println!("  Actual: gdt={}, pdt={}, drt={}", actual.gdt_template, actual.pdt_template, actual.drt_template);
-                            println!("  Golden: gdt={}, pdt={}, drt={}", golden.gdt_template, golden.pdt_template, golden.drt_template);
+                            println!(
+                                "  Actual: gdt={}, pdt={}, drt={}",
+                                actual.gdt_template, actual.pdt_template, actual.drt_template
+                            );
+                            println!(
+                                "  Golden: gdt={}, pdt={}, drt={}",
+                                golden.gdt_template, golden.pdt_template, golden.drt_template
+                            );
                         }
                     }
                     FieldResult::ValuesMismatch(points) => {
-                        println!("Field {}: VALUES_MISMATCH ({} points exceed tolerance)", i, points.len());
+                        println!(
+                            "Field {}: VALUES_MISMATCH ({} points exceed tolerance)",
+                            i,
+                            points.len()
+                        );
                     }
                     FieldResult::LengthMismatch { expected, actual } => {
-                        println!("Field {}: LENGTH_MISMATCH (expected={}, actual={})", i, expected, actual);
+                        println!(
+                            "Field {}: LENGTH_MISMATCH (expected={}, actual={})",
+                            i, expected, actual
+                        );
                     }
                     FieldResult::MaskMismatch { index } => {
                         println!("Field {}: MASK_MISMATCH at index {}", i, index);
