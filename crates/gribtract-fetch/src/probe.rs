@@ -448,13 +448,12 @@ impl ProviderProbe {
     /// failure tracking are combined to determine if re-probing is needed.
     ///
     /// **Dual-trigger logic:**
-    /// 1. **Staleness trigger:** Calls `is_stale()` (lines 374-384) to check if
+    /// 1. **Staleness trigger:** Calls `is_stale()` (lines 402-412) to check if
     ///    probe data is older than `max_age` (default 24 hours). Returns `false`
     ///    immediately if stale.
     ///
-    /// 2. **Failure trigger:** Iterates over all tracked providers and calls
-    ///    `should_reprobe()` for each. Returns `false` if ANY provider has
-    ///    exceeded the consecutive failure threshold.
+    /// 2. **Failure trigger:** Checks all tracked providers using `should_reprobe()`.
+    ///    Returns `false` if ANY provider has exceeded the consecutive failure threshold.
     ///
     /// 3. **Re-probe condition:** Returns `false` if **EITHER** trigger fires:
     ///    - `is_stale() == true`  (probe data too old)
@@ -463,10 +462,10 @@ impl ProviderProbe {
     /// This implements the OR logic for the dual-trigger system: staleness OR
     /// consecutive failures should trigger a re-probe.
     ///
-    /// **Note:** This method checks staleness first (serial), then checks failures.
-    /// For parallel execution of the `should_reprobe()` checks across providers,
-    /// see the `ProviderProbe::is_valid()` method in `gribtract/src/provider_probe.rs`
-    /// which uses `par_iter().any()` for concurrent checking.
+    /// **Parallel execution:** Uses `par_iter()` via rayon to check `should_reprobe()`
+    /// for all tracked providers **concurrently**, improving performance when there
+    /// are multiple providers to evaluate. This matches the parallel pattern in
+    /// `ProviderProbe::is_valid()` in `gribtract/src/provider_probe.rs`.
     ///
     /// This is a convenience method that combines the staleness check with the
     /// failure tracker check. Returns true if the probe results are fresh AND
@@ -489,6 +488,34 @@ impl ProviderProbe {
     ///     // Trigger re-probe...
     /// }
     /// ```
+    #[cfg(feature = "rayon")]
+    pub fn is_valid(&self, results: &ProviderProbeResults, max_age: Duration) -> bool {
+        use rayon::prelude::*;
+
+        // First check staleness
+        if Self::is_stale(results, max_age) {
+            return false;
+        }
+
+        // Then check if any tracked provider has exceeded the failure threshold
+        // Use parallel execution to check all providers concurrently
+        //
+        // INTEGRATION: This is where should_reprobe() is called in parallel to implement the
+        // failure-tracking half of the dual-trigger re-probe logic.
+        !self.consecutive_failures.keys().par_iter().any(|provider| {
+            self.should_reprobe(provider)
+        })
+    }
+
+    /// Check if probe results are valid (fresh AND no providers need re-probing)
+    ///
+    /// This is a synchronous version of `is_valid` that does not use parallel execution.
+    /// It's available when the `rayon` feature is not enabled.
+    ///
+    /// # Arguments
+    /// * `results` - The probe results to check for staleness
+    /// * `max_age` - Maximum age for probe results to be considered fresh
+    #[cfg(not(feature = "rayon"))]
     pub fn is_valid(&self, results: &ProviderProbeResults, max_age: Duration) -> bool {
         // First check staleness
         if Self::is_stale(results, max_age) {
@@ -514,8 +541,33 @@ impl ProviderProbe {
     /// Returns a list of provider names that have exceeded the consecutive failure threshold.
     /// This can be used to log which providers are problematic before triggering a re-probe.
     ///
+    /// Uses parallel execution (via rayon) to check all providers concurrently,
+    /// improving performance when there are multiple providers to evaluate.
+    ///
     /// # Returns
     /// A vector of provider names that need re-probing
+    #[cfg(feature = "rayon")]
+    pub fn providers_needing_reprobe(&self) -> Vec<String> {
+        use rayon::prelude::*;
+
+        self.consecutive_failures
+            .par_iter()
+            .filter(|(_provider, &count)| count >= self.consecutive_failure_threshold)
+            .map(|(provider, _count)| provider.clone())
+            .collect()
+    }
+
+    /// Get providers that need re-probing due to consecutive failures
+    ///
+    /// Returns a list of provider names that have exceeded the consecutive failure threshold.
+    /// This can be used to log which providers are problematic before triggering a re-probe.
+    ///
+    /// This is a synchronous version of `providers_needing_reprobe` that does not use parallel execution.
+    /// It's available when the `rayon` feature is not enabled.
+    ///
+    /// # Returns
+    /// A vector of provider names that need re-probing
+    #[cfg(not(feature = "rayon"))]
     pub fn providers_needing_reprobe(&self) -> Vec<String> {
         let mut needing = Vec::new();
 
