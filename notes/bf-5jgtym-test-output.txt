@@ -1,0 +1,36 @@
+=== ROTATED_LATLON_GDT1_DRT0 BUFFER UNDERRUN REPRODUCTION ===
+File size: 187 bytes
+
+First 100 bytes (hex):
+0000: 47 52 49 42 00 00 00 02  00 00 00 00 00 00 00 bb 
+0010: 00 00 00 15 01 00 07 00  00 02 00 00 07 ea 06 15 
+0020: 00 00 00 00 00 00 00 00  48 03 00 00 00 00 09 00 
+0030: 00 00 01 06 00 00 00 00  00 00 00 00 00 00 00 00 
+0040: 00 00 00 00 00 00 03 00  00 00 03 01 31 2d 00 00 
+0050: 00 00 00 30 00 00 00 00  01 31 2d 00 00 98 96 80 
+0060: 00 98 96 80 01 c9 c3 80  00 00 00 00 00 00 00 00 
+
+✗ Decode error: TooShort { needed: 1, got: 0 }
+
+Buffer underrun details:
+  Bytes needed: 1
+  Bytes available: 0
+  Shortfall: 1
+=== ROTATED_LATLON_GDT1_DRT0 BUFFER UNDERRUN REPRODUCTION ===
+File size: 187 bytes
+
+First 100 bytes (hex):
+0000: 47 52 49 42 00 00 00 02  00 00 00 00 00 00 00 bb 
+0010: 00 00 00 15 01 00 07 00  00 02 00 00 07 ea 06 15 
+0020: 00 00 00 00 00 00 00 00  48 03 00 00 00 00 09 00 
+0030: 00 00 01 06 00 00 00 00  00 00 00 00 00 00 00 00 
+0040: 00 00 00 00 00 00 03 00  00 00 03 01 31 2d 00 00 
+0050: 00 00 00 30 00 00 00 00  01 31 2d 00 00 98 96 80 
+0060: 00 98 96 80 01 c9 c3 80  00 00 00 00 00 00 00 00 
+
+✗ Decode error: TooShort { needed: 1, got: 0 }
+
+Buffer underrun details:
+  Bytes needed: 1
+  Bytes available: 0
+  Shortfall: 1
