@@ -273,8 +273,28 @@ impl ProviderProbe {
 
     /// Get the best provider for a model based on probe results
     ///
-    /// This version does NOT check the failure tracker. Use `get_best_provider_with_tracker()`
-    /// to skip providers that need re-probing due to consecutive failures.
+    /// # ⚠️ Use with caution - does NOT check provider health
+    ///
+    /// This method returns the first successful provider in the probe results WITHOUT
+    /// checking if it has experienced consecutive failures. This means you might select
+    /// a provider that is currently experiencing issues (e.g., timeouts, 5xx errors).
+    ///
+    /// **Most callers should use [`get_best_provider_with_tracker()`] instead**, which
+    /// automatically excludes providers that need re-probing due to consecutive failures.
+    ///
+    /// This method is ONLY appropriate when:
+    /// - You're doing a one-off fetch and don't care about reliability
+    /// - You're running in a context where you don't have access to the failure tracker
+    /// - You explicitly want to select the "best" provider regardless of recent failures
+    ///
+    /// # Why use get_best_provider_with_tracker() instead?
+    ///
+    /// Providers can experience consecutive failures (timeouts, 5xx errors, etc.) at runtime.
+    /// The failure tracker monitors these errors and marks providers as needing re-probing.
+    ///
+    /// Using this method ignores that tracking, so you might select a provider that has
+    /// failed 3+ times in a row. [`get_best_provider_with_tracker()`] automatically skips
+    /// those providers and selects the next best one that is healthy.
     pub fn get_best_provider<'a>(
         results: &'a ProviderProbeResults,
         model: &str,
@@ -286,37 +306,54 @@ impl ProviderProbe {
 
     /// Get the best provider for a model that does NOT need re-probing
     ///
-    /// # INTEGRATION POINT: should_reprobe + Provider Selection
+    /// # ✅ Recommended for runtime provider selection
     ///
-    /// This is the **primary integration point** where `should_reprobe()` is called
-    /// during runtime provider selection. The integration works as follows:
+    /// This is the PRIMARY method for provider selection. It integrates the
+    /// `should_reprobe` check directly into the selection logic, ensuring that
+    /// providers experiencing consecutive failures are automatically excluded.
     ///
-    /// 1. **Parallel execution:** Uses `par_iter()` via rayon to check `should_reprobe()`
-    ///    for all provider candidates **concurrently**, improving performance when
-    ///    there are multiple providers to evaluate.
+    /// ## Dual-Check Selection Behavior
     ///
-    /// 2. **Dual-trigger logic:** Combined with `is_stale()` in `is_valid()` method,
-    ///    this implements the dual-trigger re-probe mechanism:
-    ///    - Staleness trigger: `is_stale()` returns true if probe data > 24h old
-    ///    - Failure trigger: `should_reprobe()` returns true if failures >= threshold
-    ///    - Re-probe if **EITHER** trigger fires (OR logic, not AND)
+    /// The provider selection system uses TWO independent checks:
     ///
-    /// 3. **Data flow:**
-    ///    - HTTP requests → automatic failure/success recording in `FetchClient`
-    ///    - `consecutive_failures` HashMap tracks failures per provider
-    ///    - `should_reprobe()` checks: `failures.get(provider) >= threshold`
-    ///    - This method skips providers where `should_reprobe() == true`
+    /// 1. **Staleness check (is_stale)**: A GLOBAL check on the probe data
+    ///    - Checked once for the entire probe file (timestamp vs. current time)
+    ///    - If probe data > 24h old → re-probe ALL providers
+    ///    - Implemented in: [`is_stale()`]
     ///
-    /// 4. **Expected behavior:** Per design requirements, `should_reprobe()` runs in
-    ///    parallel across all provider candidates (not parallel with `is_stale()`, which
-    ///    is checked once globally before this method is called).
+    /// 2. **Provider health check (should_reprobe)**: A PER-PROVIDER check
+    ///    - Checked for EACH provider during selection
+    ///    - If provider has ≥N consecutive failures → skip that provider
+    ///    - Implemented in: [`should_reprobe()`]
     ///
-    /// Returns the first successful provider in the results that has not exceeded the
-    /// consecutive failure threshold. This should be used during runtime provider selection
-    /// to ensure we don't select providers that are experiencing repeated failures.
+    /// ## How This Method Integrates Both Checks
     ///
-    /// Uses parallel execution (via rayon) to check `should_reprobe()` for all providers
-    /// concurrently, improving performance when there are multiple providers to evaluate.
+    /// This method implements the **provider health check** (#2) during selection:
+    ///
+    /// ```text
+    /// Probe results (pre-sorted by score):
+    ///   1. provider_a (score: 50, failures: 0) ✅ SELECTED - no failures
+    ///   2. provider_b (score: 80, failures: 3) ❌ SKIPPED - needs reprobe
+    ///   3. provider_c (score: 120, failures: 0) ✅ FALLBACK - selected if A is failing
+    /// ```
+    ///
+    /// The **staleness check** (#1) should be performed BEFORE calling this method
+    /// using [`is_valid()`], which checks BOTH conditions.
+    ///
+    /// ## Implementation Details
+    ///
+    /// - **Parallel execution**: Uses `par_iter()` via rayon to check `should_reprobe()`
+    ///   for all provider candidates **concurrently**, improving performance when
+    ///   there are multiple providers to evaluate.
+    ///
+    /// - **Data flow**: HTTP requests → automatic failure/success recording in `FetchClient`
+    ///   → `consecutive_failures` HashMap tracks failures per provider → `should_reprobe()`
+    ///   checks: `failures.get(provider) >= threshold` → This method skips providers
+    ///   where `should_reprobe() == true`
+    ///
+    /// - **Fallback behavior**: If all providers need re-probing, this method returns
+    ///   the first successful provider as a fallback (rather than returning None).
+    ///   This ensures you always get a usable provider, even if it's not ideal.
     ///
     /// # Arguments
     /// * `results` - The probe results to select from
@@ -324,7 +361,7 @@ impl ProviderProbe {
     ///
     /// # Returns
     /// * `Some(&ProbeResult)` - The best provider result that doesn't need re-probing
-    /// * `None` - If all providers need re-probing or the model doesn't exist
+    /// * `None` - If no successful providers exist for the model
     ///
     /// # Example
     /// ```no_run
@@ -363,6 +400,15 @@ impl ProviderProbe {
 
     /// Get the best provider for a model that does NOT need re-probing (synchronous version)
     ///
+    /// # ✅ Recommended for runtime provider selection
+    ///
+    /// This is the PRIMARY method for provider selection. It integrates the
+    /// `should_reprobe` check directly into the selection logic, ensuring that
+    /// providers experiencing consecutive failures are automatically excluded.
+    ///
+    /// See the rayon version of [`get_best_provider_with_tracker()`] for detailed
+    /// documentation about the dual-check selection behavior.
+    ///
     /// This is a synchronous version of `get_best_provider_with_tracker` that does not
     /// use parallel execution. It's available when the `rayon` feature is not enabled.
     ///
@@ -372,7 +418,7 @@ impl ProviderProbe {
     ///
     /// # Returns
     /// * `Some(&ProbeResult)` - The best provider result that doesn't need re-probing
-    /// * `None` - If all providers need re-probing or the model doesn't exist
+    /// * `None` - If no successful providers exist for the model
     #[cfg(not(feature = "rayon"))]
     pub fn get_best_provider_with_tracker<'a>(
         &'a self,
@@ -442,38 +488,45 @@ impl ProviderProbe {
 
     /// Check if probe results are valid (fresh AND no providers need re-probing)
     ///
-    /// # INTEGRATION POINT: Dual-Trigger Re-probe Logic (is_stale + should_reprobe)
+    /// # Dual-Check Validation (Staleness + Provider Health)
     ///
-    /// This is the **secondary integration point** where staleness checking and
-    /// failure tracking are combined to determine if re-probing is needed.
+    /// This method implements the **complete validation check** for provider probe data,
+    /// combining BOTH independent checks:
     ///
-    /// **Dual-trigger logic:**
-    /// 1. **Staleness trigger:** Calls `is_stale()` (lines 402-412) to check if
-    ///    probe data is older than `max_age` (default 24 hours). Returns `false`
-    ///    immediately if stale.
+    /// 1. **Staleness check**: Verifies the probe data is fresh (timestamp < max_age)
+    ///    - If stale → returns `false` immediately (re-probe ALL providers)
     ///
-    /// 2. **Failure trigger:** Checks all tracked providers using `should_reprobe()`.
-    ///    Returns `false` if ANY provider has exceeded the consecutive failure threshold.
+    /// 2. **Provider health check**: Verifies no providers need re-probing
+    ///    - Uses parallel execution to check all providers concurrently
+    ///    - If ANY provider needs reprobe → returns `false`
     ///
-    /// 3. **Re-probe condition:** Returns `false` if **EITHER** trigger fires:
-    ///    - `is_stale() == true`  (probe data too old)
-    ///    - `any(should_reprobe()) == true` (any provider has too many failures)
+    /// This is the **recommended validation method** before calling `get_best_provider_with_tracker()`.
+    /// It ensures both conditions are met before using the cached provider rankings.
     ///
-    /// This implements the OR logic for the dual-trigger system: staleness OR
-    /// consecutive failures should trigger a re-probe.
+    /// ## Relationship to Selection Methods
     ///
-    /// **Parallel execution:** Uses `par_iter()` via rayon to check `should_reprobe()`
-    /// for all tracked providers **concurrently**, improving performance when there
-    /// are multiple providers to evaluate. This matches the parallel pattern in
-    /// `ProviderProbe::is_valid()` in `gribtract/src/provider_probe.rs`.
+    /// ```text
+    /// Validation Phase (this method):
+    ///   is_valid() → checks BOTH staleness AND provider health
     ///
-    /// This is a convenience method that combines the staleness check with the
-    /// failure tracker check. Returns true if the probe results are fresh AND
-    /// no tracked providers have exceeded the consecutive failure threshold.
+    /// Selection Phase (get_best_provider_with_tracker):
+    ///   get_best_provider_with_tracker() → checks provider health during selection
+    /// ```
+    ///
+    /// The validation happens ONCE globally, while selection happens PER provider lookup.
+    ///
+    /// ## Performance
+    ///
+    /// Uses parallel execution (via rayon) to check `should_reprobe()` for all providers
+    /// concurrently, improving performance when there are multiple providers to evaluate.
     ///
     /// # Arguments
     /// * `results` - The probe results to check for staleness
     /// * `max_age` - Maximum age for probe results to be considered fresh
+    ///
+    /// # Returns
+    /// * `true` - If probe is fresh AND no providers need re-probing
+    /// * `false` - If probe is stale OR any provider needs re-probing
     ///
     /// # Example
     /// ```no_run
@@ -502,12 +555,21 @@ impl ProviderProbe {
         //
         // INTEGRATION: This is where should_reprobe() is called in parallel to implement the
         // failure-tracking half of the dual-trigger re-probe logic.
-        !self.consecutive_failures.keys().par_iter().any(|provider| {
+        let all_providers: Vec<&String> = self.consecutive_failures.keys().collect();
+        !all_providers.par_iter().any(|provider| {
             self.should_reprobe(provider)
         })
     }
 
     /// Check if probe results are valid (fresh AND no providers need re-probing)
+    ///
+    /// # Dual-Check Validation (Staleness + Provider Health)
+    ///
+    /// This method implements the **complete validation check** for provider probe data,
+    /// combining BOTH independent checks.
+    ///
+    /// See the rayon version of [`is_valid()`] for detailed documentation about the
+    /// dual-check validation behavior.
     ///
     /// This is a synchronous version of `is_valid` that does not use parallel execution.
     /// It's available when the `rayon` feature is not enabled.
@@ -515,6 +577,10 @@ impl ProviderProbe {
     /// # Arguments
     /// * `results` - The probe results to check for staleness
     /// * `max_age` - Maximum age for probe results to be considered fresh
+    ///
+    /// # Returns
+    /// * `true` - If probe is fresh AND no providers need re-probing
+    /// * `false` - If probe is stale OR any provider needs re-probing
     #[cfg(not(feature = "rayon"))]
     pub fn is_valid(&self, results: &ProviderProbeResults, max_age: Duration) -> bool {
         // First check staleness

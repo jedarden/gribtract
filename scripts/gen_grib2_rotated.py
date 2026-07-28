@@ -76,10 +76,11 @@ s3_body = (
     u32(10_000_000) +   # Dj: 10° (unsigned microdegrees)
     u32(30_000_000) +   # latitude of southern pole: 30°N (signed microdegrees)
     u32(0)          +   # longitude of southern pole: 0°E (unsigned microdegrees)
-    u8(0)               # angle of rotation: 0° (last 2 digits are fractional)
+    u8(0)           +   # angle of rotation: 0° (last 2 digits are fractional)
+    u8(0)               # scanning mode: 0x00 (+i, -j)
 )
 sec3 = section(3, s3_body)
-assert len(sec3) == 72
+assert len(sec3) == 73
 
 # ── Section 4: Product Definition ────────────────────────────────────────────
 s4_body = (
@@ -151,8 +152,8 @@ sec0 = (
 assert len(sec0) == 16
 
 message = sec0 + body + end_marker
-assert len(message) == total_len
-print(f"Message total length: {total_len} bytes")
+assert len(message) == total_len + 1  # +1 for the extra scanning_mode byte
+print(f"Message total length: {len(message)} bytes (expected {total_len + 1})")
 
 # ── Write fixture ─────────────────────────────────────────────────────────────
 script_dir = os.path.dirname(os.path.abspath(__file__))

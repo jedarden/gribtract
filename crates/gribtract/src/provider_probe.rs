@@ -127,8 +127,162 @@ impl ProviderProbe {
 
     /// Best (lowest-score) provider for `model`, or `None` if the model has no
     /// successful probe entries.
+    ///
+    /// # ⚠️ Use with caution - does NOT check provider health
+    ///
+    /// This method returns the first provider in the rankings WITHOUT checking if it
+    /// has experienced consecutive failures. This means you might select a provider
+    /// that is currently experiencing issues (e.g., timeouts, 5xx errors).
+    ///
+    /// **Most callers should use [`best_provider_with_tracker()`] instead**, which
+    /// automatically excludes providers that need re-probing due to consecutive failures.
+    ///
+    /// This method is ONLY appropriate when:
+    /// - You're doing a one-off fetch and don't care about reliability
+    /// - You're running in a context where you don't have access to the failure tracker
+    /// - You explicitly want to select the "best" provider regardless of recent failures
+    ///
+    /// # Example
+    /// ```no_run
+    /// use gribtract::ProviderProbe;
+    ///
+    /// let probe = ProviderProbe::load(Path::new("provider-probe.json")).unwrap();
+    ///
+    /// // ⚠️ This might select a failing provider
+    /// if let Some(provider) = probe.best_provider("gfs") {
+    ///     println!("Best GFS provider (may be failing): {provider}");
+    /// }
+    /// ```
+    ///
+    /// # Why use best_provider_with_tracker() instead?
+    ///
+    /// Providers can experience consecutive failures (timeouts, 5xx errors, etc.) at runtime.
+    /// The failure tracker monitors these errors and marks providers as needing re-probing.
+    ///
+    /// Using this method ignores that tracking, so you might select a provider that has
+    /// failed 3+ times in a row. [`best_provider_with_tracker()`] automatically skips
+    /// those providers and selects the next best one that is healthy.
     pub fn best_provider(&self, model: &str) -> Option<&str> {
         self.rankings.get(model)?.first().map(|s| s.as_str())
+    }
+
+    /// Best (lowest-score) provider for `model` that does NOT need re-probing.
+    ///
+    /// # ✅ Recommended for runtime provider selection
+    ///
+    /// This is the PRIMARY method for provider selection. It integrates the
+    /// `should_reprobe` check directly into the selection logic, ensuring that
+    /// providers experiencing consecutive failures are automatically excluded.
+    ///
+    /// ## Dual-Check Selection Behavior
+    ///
+    /// The provider selection system uses TWO independent checks:
+    ///
+    /// 1. **Staleness check (is_fresh)**: A GLOBAL check on the probe data
+    ///    - Checked once for the entire probe file (timestamp vs. current time)
+    ///    - If probe data > 24h old → re-probe ALL providers
+    ///    - Implemented in: [`is_fresh()`](Self::is_fresh)
+    ///
+    /// 2. **Provider health check (should_reprobe)**: A PER-PROVIDER check
+    ///    - Checked for EACH provider during selection
+    ///    - If provider has ≥N consecutive failures → skip that provider
+    ///    - Implemented in: [`gribtract_fetch::probe::ProviderFailureTracker::should_reprobe()`]
+    ///
+    /// ## How This Method Integrates Both Checks
+    ///
+    /// This method implements the **provider health check** (#2) during selection:
+    ///
+    /// ```text
+    /// Rankings (pre-sorted by score):
+    ///   1. provider_a (score: 50, failures: 0) ✅ SELECTED - no failures
+    ///   2. provider_b (score: 80, failures: 3) ❌ SKIPPED - needs reprobe
+    ///   3. provider_c (score: 120, failures: 0) ✅ FALLBACK - selected if A is failing
+    /// ```
+    ///
+    /// The **staleness check** (#1) should be performed BEFORE calling this method:
+    ///
+    /// ```text
+    /// if probe.is_fresh(24 * 3600) {
+    ///     // Safe to select providers with tracker
+    ///     if let Some(provider) = probe.best_provider_with_tracker("gfs", &tracker) {
+    ///         // Use provider
+    ///     }
+    /// } else {
+    ///     // Probe is stale → re-run xtask probe-providers
+    /// }
+    /// ```
+    ///
+    /// Or use the convenience method [`is_valid()`](Self::is_valid) which checks BOTH.
+    ///
+    /// ## Performance
+    ///
+    /// Uses parallel execution (via rayon) to check `should_reprobe()` for all providers
+    /// concurrently, improving performance when there are multiple providers to evaluate.
+    ///
+    /// # Arguments
+    /// * `model` - The model to get the best provider for (e.g., "gfs", "hrrr")
+    /// * `tracker` - The `ProviderFailureTracker` from `gribtract_fetch` that tracks runtime failures
+    ///
+    /// # Returns
+    /// * `Some(provider)` - The best provider that doesn't need re-probing
+    /// * `None` - If all providers need re-probing or the model doesn't exist
+    ///
+    /// # Example
+    /// ```no_run
+    /// use gribtract::ProviderProbe;
+    /// use gribtract_fetch::probe::ProviderFailureTracker;
+    ///
+    /// let probe = ProviderProbe::load(Path::new("provider-probe.json")).unwrap();
+    /// let tracker = ProviderFailureTracker::default_threshold();
+    ///
+    /// // Get the best provider that isn't experiencing repeated failures
+    /// if let Some(provider) = probe.best_provider_with_tracker("gfs", &tracker) {
+    ///     println!("Best GFS provider: {provider}");
+    /// }
+    /// ```
+    #[cfg(all(feature = "provider-probe", feature = "rayon"))]
+    pub fn best_provider_with_tracker(
+        &self,
+        model: &str,
+        tracker: &gribtract_fetch::probe::ProviderFailureTracker,
+    ) -> Option<&str> {
+        use rayon::prelude::*;
+
+        self.rankings.get(model)?.par_iter().find_any(|provider| {
+            !tracker.should_reprobe(provider)
+        }).map(|s| s.as_str())
+    }
+
+    /// Best (lowest-score) provider for `model` that does NOT need re-probing.
+    ///
+    /// # ✅ Recommended for runtime provider selection
+    ///
+    /// This is the PRIMARY method for provider selection. It integrates the
+    /// `should_reprobe` check directly into the selection logic, ensuring that
+    /// providers experiencing consecutive failures are automatically excluded.
+    ///
+    /// See the rayon version of [`best_provider_with_tracker()`] for detailed
+    /// documentation about the dual-check selection behavior.
+    ///
+    /// This is a synchronous version of `best_provider_with_tracker` that does not
+    /// use parallel execution. It's available when the `rayon` feature is not enabled.
+    ///
+    /// # Arguments
+    /// * `model` - The model to get the best provider for (e.g., "gfs", "hrrr")
+    /// * `tracker` - The `ProviderFailureTracker` from `gribtract_fetch` that tracks runtime failures
+    ///
+    /// # Returns
+    /// * `Some(provider)` - The best provider that doesn't need re-probing
+    /// * `None` - If all providers need re-probing or the model doesn't exist
+    #[cfg(all(feature = "provider-probe", not(feature = "rayon")))]
+    pub fn best_provider_with_tracker(
+        &self,
+        model: &str,
+        tracker: &gribtract_fetch::probe::ProviderFailureTracker,
+    ) -> Option<&str> {
+        self.rankings.get(model)?.iter().find(|provider| {
+            !tracker.should_reprobe(provider)
+        }).map(|s| s.as_str())
     }
 
     /// All providers for `model` in rank order (best first).
@@ -159,13 +313,52 @@ impl ProviderProbe {
 
     /// Check if probe results are fresh AND no provider needs re-probing due to consecutive failures.
     ///
-    /// This is a convenience method that combines the staleness check with the failure tracker check.
-    /// Returns `true` if the probe is fresh AND no providers in the rankings have exceeded the
-    /// consecutive failure threshold.
+    /// # Dual-Check Validation (Staleness + Provider Health)
+    ///
+    /// This method implements the **complete validation check** for provider probe data,
+    /// combining BOTH independent checks:
+    ///
+    /// 1. **Staleness check**: Verifies the probe data is fresh (timestamp < max_age_secs)
+    ///    - If stale → returns `false` immediately (re-probe ALL providers)
+    ///
+    /// 2. **Provider health check**: Verifies no providers need re-probing
+    ///    - Uses parallel execution to check all providers concurrently
+    ///    - If ANY provider needs reprobe → returns `false`
+    ///
+    /// This is the **recommended validation method** before calling `best_provider_with_tracker()`.
+    /// It ensures both conditions are met before using the cached provider rankings.
+    ///
+    /// ## Relationship to Selection Methods
+    ///
+    /// ```text
+    /// Validation Phase (this method):
+    ///   is_valid() → checks BOTH staleness AND provider health
+    ///
+    /// Selection Phase (best_provider_with_tracker):
+    ///   best_provider_with_tracker() → checks provider health during selection
+    /// ```
+    ///
+    /// The validation happens ONCE globally, while selection happens PER provider lookup.
+    ///
+    /// ## When to Use This Method
+    ///
+    /// Use this method when you want to:
+    /// - Validate the probe data before using it
+    /// - Check if it's safe to use the cached rankings
+    /// - Determine if re-probing is needed
+    ///
+    /// ## Performance
+    ///
+    /// Uses parallel execution (via rayon) to check `should_reprobe()` for all providers
+    /// concurrently, improving performance when there are multiple providers to evaluate.
     ///
     /// # Arguments
     /// * `max_age_secs` - Maximum age in seconds for the probe to be considered fresh
     /// * `tracker` - The `ProviderFailureTracker` from `gribtract_fetch` that tracks runtime failures
+    ///
+    /// # Returns
+    /// * `true` - If probe is fresh AND no providers need re-probing
+    /// * `false` - If probe is stale OR any provider needs re-probing
     ///
     /// # Example
     /// ```no_run
@@ -178,9 +371,55 @@ impl ProviderProbe {
     /// // Check if probe is fresh AND no provider needs re-probing
     /// if probe.is_valid(24 * 3600, &tracker) {
     ///     // Safe to use cached provider rankings
+    ///     if let Some(provider) = probe.best_provider_with_tracker("gfs", &tracker) {
+    ///         println!("Best GFS provider: {provider}");
+    ///     }
+    /// } else {
+    ///     // Re-probe needed (either stale or providers are failing)
     /// }
     /// ```
-    #[cfg(feature = "provider-probe")]
+    #[cfg(all(feature = "provider-probe", feature = "rayon"))]
+    pub fn is_valid(&self, max_age_secs: u64, tracker: &gribtract_fetch::probe::ProviderFailureTracker) -> bool {
+        // First check staleness
+        if !self.is_fresh(max_age_secs) {
+            return false;
+        }
+
+        // Then check if any tracked provider has exceeded the failure threshold
+        // Use parallel execution to check all providers concurrently
+        use rayon::prelude::*;
+        use std::collections::HashSet;
+
+        // Collect all unique provider names
+        let all_providers: HashSet<&str> = self.rankings.values()
+            .flat_map(|providers| providers.iter().map(|s| s.as_str()))
+            .collect();
+
+        // Check all providers in parallel - return false if any needs re-probing
+        !all_providers.par_iter().any(|provider| tracker.should_reprobe(provider))
+    }
+
+    /// Check if probe results are fresh AND no provider needs re-probing due to consecutive failures.
+    ///
+    /// # Dual-Check Validation (Staleness + Provider Health)
+    ///
+    /// This method implements the **complete validation check** for provider probe data,
+    /// combining BOTH independent checks.
+    ///
+    /// See the rayon version of [`is_valid()`] for detailed documentation about the
+    /// dual-check validation behavior.
+    ///
+    /// This is a synchronous version of `is_valid` that does not use parallel execution.
+    /// It's available when the `rayon` feature is not enabled.
+    ///
+    /// # Arguments
+    /// * `max_age_secs` - Maximum age in seconds for the probe to be considered fresh
+    /// * `tracker` - The `ProviderFailureTracker` from `gribtract_fetch` that tracks runtime failures
+    ///
+    /// # Returns
+    /// * `true` - If probe is fresh AND no providers need re-probing
+    /// * `false` - If probe is stale OR any provider needs re-probing
+    #[cfg(all(feature = "provider-probe", not(feature = "rayon")))]
     pub fn is_valid(&self, max_age_secs: u64, tracker: &gribtract_fetch::probe::ProviderFailureTracker) -> bool {
         // First check staleness
         if !self.is_fresh(max_age_secs) {
@@ -204,12 +443,49 @@ impl ProviderProbe {
     /// Returns a list of provider names that have exceeded the consecutive failure threshold.
     /// This can be used to log which providers are problematic before triggering a re-probe.
     ///
+    /// Uses parallel execution (via rayon) to check `should_reprobe()` for all providers
+    /// concurrently, improving performance when there are multiple providers to evaluate.
+    ///
     /// # Arguments
     /// * `tracker` - The `ProviderFailureTracker` from `gribtract_fetch`
     ///
     /// # Returns
     /// A vector of provider names that need re-probing
-    #[cfg(feature = "provider-probe")]
+    #[cfg(all(feature = "provider-probe", feature = "rayon"))]
+    pub fn providers_needing_reprobe(
+        &self,
+        tracker: &gribtract_fetch::probe::ProviderFailureTracker,
+    ) -> Vec<String> {
+        use rayon::prelude::*;
+        use std::collections::HashSet;
+
+        // Collect all unique provider names
+        let all_providers: HashSet<&str> = self.rankings.values()
+            .flat_map(|providers| providers.iter().map(|s| s.as_str()))
+            .collect();
+
+        // Filter providers in parallel to find those needing re-probing
+        all_providers
+            .into_par_iter()
+            .filter(|provider| tracker.should_reprobe(provider))
+            .map(|s| s.to_string())
+            .collect()
+    }
+
+    /// Get providers that need re-probing due to consecutive failures.
+    ///
+    /// Returns a list of provider names that have exceeded the consecutive failure threshold.
+    /// This can be used to log which providers are problematic before triggering a re-probe.
+    ///
+    /// This is a synchronous version of `providers_needing_reprobe` that does not use parallel execution.
+    /// It's available when the `rayon` feature is not enabled.
+    ///
+    /// # Arguments
+    /// * `tracker` - The `ProviderFailureTracker` from `gribtract_fetch`
+    ///
+    /// # Returns
+    /// A vector of provider names that need re-probing
+    #[cfg(all(feature = "provider-probe", not(feature = "rayon")))]
     pub fn providers_needing_reprobe(
         &self,
         tracker: &gribtract_fetch::probe::ProviderFailureTracker,
@@ -634,5 +910,166 @@ mod tests {
         // Should only list s3:hrrr-bdp once even though it appears in multiple models
         assert_eq!(needing.len(), 1);
         assert_eq!(needing[0], "s3:hrrr-bdp");
+    }
+
+    #[cfg(feature = "provider-probe")]
+    #[test]
+    fn best_provider_with_tracker_skips_failing_providers() {
+        use gribtract_fetch::probe::ProviderFailureTracker;
+
+        let mut rankings = HashMap::new();
+        rankings.insert(
+            "hrrr".to_string(),
+            vec![
+                "s3:hrrr-bdp".to_string(),
+                "gcs:hrrr".to_string(),
+                "nomads:hrrr".to_string(),
+            ],
+        );
+
+        let probe = ProviderProbe {
+            timestamp: fresh_timestamp(),
+            probe_date: "20260620".into(),
+            results: vec![],
+            rankings,
+        };
+
+        let mut tracker = ProviderFailureTracker::new(3);
+
+        // Record 3 failures for the first provider (s3:hrrr-bdp)
+        tracker.record_failure("s3:hrrr-bdp");
+        tracker.record_failure("s3:hrrr-bdp");
+        tracker.record_failure("s3:hrrr-bdp");
+
+        // best_provider_without tracker should still return the first
+        assert_eq!(probe.best_provider("hrrr"), Some("s3:hrrr-bdp"));
+
+        // best_provider_with_tracker should skip the failing provider
+        assert_eq!(
+            probe.best_provider_with_tracker("hrrr", &tracker),
+            Some("gcs:hrrr")
+        );
+    }
+
+    #[cfg(feature = "provider-probe")]
+    #[test]
+    fn best_provider_with_tracker_returns_none_when_all_failing() {
+        use gribtract_fetch::probe::ProviderFailureTracker;
+
+        let mut rankings = HashMap::new();
+        rankings.insert(
+            "hrrr".to_string(),
+            vec!["s3:hrrr-bdp".to_string(), "gcs:hrrr".to_string()],
+        );
+
+        let probe = ProviderProbe {
+            timestamp: fresh_timestamp(),
+            probe_date: "20260620".into(),
+            results: vec![],
+            rankings,
+        };
+
+        let mut tracker = ProviderFailureTracker::new(2);
+
+        // Record failures for ALL providers
+        tracker.record_failure("s3:hrrr-bdp");
+        tracker.record_failure("s3:hrrr-bdp");
+        tracker.record_failure("gcs:hrrr");
+        tracker.record_failure("gcs:hrrr");
+
+        // Should return None when all providers need re-probing
+        assert_eq!(
+            probe.best_provider_with_tracker("hrrr", &tracker),
+            None
+        );
+    }
+
+    #[cfg(feature = "provider-probe")]
+    #[test]
+    fn best_provider_with_tracker_returns_first_when_no_failures() {
+        use gribtract_fetch::probe::ProviderFailureTracker;
+
+        let mut rankings = HashMap::new();
+        rankings.insert(
+            "gfs".to_string(),
+            vec!["s3:gfs".to_string(), "nomads:gfs".to_string()],
+        );
+
+        let probe = ProviderProbe {
+            timestamp: fresh_timestamp(),
+            probe_date: "20260620".into(),
+            results: vec![],
+            rankings,
+        };
+
+        let tracker = ProviderFailureTracker::new(3);
+
+        // When no failures, should return the first provider
+        assert_eq!(
+            probe.best_provider_with_tracker("gfs", &tracker),
+            Some("s3:gfs")
+        );
+    }
+
+    #[cfg(feature = "provider-probe")]
+    #[test]
+    fn best_provider_with_tracker_handles_unknown_model() {
+        use gribtract_fetch::probe::ProviderFailureTracker;
+
+        let rankings = HashMap::new();
+        let probe = ProviderProbe {
+            timestamp: fresh_timestamp(),
+            probe_date: "20260620".into(),
+            results: vec![],
+            rankings,
+        };
+
+        let tracker = ProviderFailureTracker::new(3);
+
+        // Unknown model should return None
+        assert_eq!(
+            probe.best_provider_with_tracker("unknown_model", &tracker),
+            None
+        );
+    }
+
+    #[cfg(feature = "provider-probe")]
+    #[test]
+    fn best_provider_with_tracker_with_partial_failures() {
+        use gribtract_fetch::probe::ProviderFailureTracker;
+
+        let mut rankings = HashMap::new();
+        rankings.insert(
+            "nbm".to_string(),
+            vec![
+                "s3:nbm".to_string(),
+                "gcs:nbm".to_string(),
+                "nomads:nbm".to_string(),
+            ],
+        );
+
+        let probe = ProviderProbe {
+            timestamp: fresh_timestamp(),
+            probe_date: "20260620".into(),
+            results: vec![],
+            rankings,
+        };
+
+        let mut tracker = ProviderFailureTracker::new(3);
+
+        // First provider exceeds threshold
+        tracker.record_failure("s3:nbm");
+        tracker.record_failure("s3:nbm");
+        tracker.record_failure("s3:nbm");
+
+        // Second provider below threshold
+        tracker.record_failure("gcs:nbm");
+        tracker.record_failure("gcs:nbm");
+
+        // Should skip the first provider and return the second
+        assert_eq!(
+            probe.best_provider_with_tracker("nbm", &tracker),
+            Some("gcs:nbm")
+        );
     }
 }

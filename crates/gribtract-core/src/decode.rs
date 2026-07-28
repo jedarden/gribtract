@@ -33,6 +33,12 @@ impl<'a> Buf<'a> {
 
     fn need(&self, n: usize) -> Result<()> {
         if self.remaining() < n {
+            eprintln!("=== BUFFER UNDERRUN in Buf::need ===");
+            eprintln!("Requested: {} bytes", n);
+            eprintln!("Available: {} bytes", self.remaining());
+            eprintln!("Current position: {}", self.pos);
+            eprintln!("Total buffer length: {}", self.data.len());
+            eprintln!("========================================");
             Err(Error::TooShort { needed: n, got: self.remaining() })
         } else {
             Ok(())
@@ -221,6 +227,9 @@ pub fn decode_bytes(bytes: &[u8]) -> Result<Vec<Field>> {
 /// Decode one GRIB2 message (starting at byte 0 of `msg`).
 /// Returns the number of bytes consumed (the total message length).
 fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
+    eprintln!("=== Starting GRIB2 message decode ===");
+    eprintln!("Message buffer size: {} bytes", msg.len());
+
     let mut buf = Buf::new(msg);
 
     // ── Section 0 (Indicator, 16 bytes fixed) ────────────────────────────────
@@ -236,6 +245,8 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
         return Err(Error::UnknownEdition(edition));
     }
     let total_len = buf.read_u64be()? as usize;
+    eprintln!("Section 0 parsed: total_len={} bytes", total_len);
+    eprintln!("Current buf.pos after Section 0: {}", buf.pos);
     // Section 0 is now consumed (16 bytes).
 
     // Validate total length against buffer.
@@ -252,8 +263,13 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
     while buf.pos < body_end {
         // Each section starts with: 4-byte length, 1-byte section number.
         let sec_start = buf.pos;
+        eprintln!("=== Section header at pos {} ===", sec_start);
+        eprintln!("Bytes remaining in message: {}", msg.len().saturating_sub(sec_start));
+
         let sec_len = buf.read_u32be()? as usize;
         let sec_num = buf.read_u8()?;
+        eprintln!("Section {}: length={}, starts at pos {}", sec_num, sec_len, sec_start);
+        eprintln!("Section body will span: {}..{}", buf.pos, buf.pos + (sec_len - 5));
 
         if sec_len < 5 {
             return Err(Error::TooShort { needed: 5, got: sec_len });
@@ -341,9 +357,35 @@ fn decode_message(msg: &[u8], out: &mut Vec<Field>) -> Result<usize> {
 
         // Advance buf.pos to the end of this section.
         buf.pos = sec_start + sec_len;
+        eprintln!("After section {}, buf.pos = {}", sec_num, buf.pos);
     }
 
+    eprintln!("=== All sections parsed ===");
+    eprintln!("Final buf.pos: {}", buf.pos);
+    eprintln!("body_end (7777 location): {}", body_end);
+    eprintln!("Expected: buf.pos <= body_end");
+    eprintln!("Actual: buf.pos {} body_end", if buf.pos <= body_end { "<=" } else { ">" });
+
+
     // Consume "7777" end marker.
+    // DEBUG: Print buffer state before reading end marker
+    eprintln!("=== DEBUG: Buffer state at end marker check ===");
+    eprintln!("Total message length: {}", msg.len());
+    eprintln!("body_end (7777 should start at): {}", body_end);
+    eprintln!("Bytes remaining: {}", msg.len().saturating_sub(body_end));
+
+    if body_end + 4 <= msg.len() {
+        eprintln!("Bytes at body_end..body_end+4: {:?}", &msg[body_end..body_end + 4]);
+    } else if body_end < msg.len() {
+        let available = msg.len() - body_end;
+        eprintln!("Partial bytes available ({}): {:?}", available, &msg[body_end..]);
+    } else {
+        eprintln!("body_end {} exceeds message length {}!", body_end, msg.len());
+    }
+    eprintln!("buf.pos after section loop: {}", buf.pos);
+    eprintln!("Expected total_len from Section 0: {}", total_len);
+    eprintln!("================================================");
+
     let end = &msg[body_end..body_end + 4];
     if end != b"7777" {
         return Err(Error::TooShort { needed: 4, got: 0 });
@@ -504,6 +546,7 @@ fn parse_gdt_1(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
     let lon_pole_rot = b.read_longi_micro()? as f64 / 1_000_000.0;  // oct 68–71: south pole longitude
     let angle_rot_raw = b.read_u8()? as f64;                         // oct 72: angle of rotation
     let angle_rot = angle_rot_raw / 100.0;  // Last 2 digits are fractional
+    let scanning_mode = b.read_u8()?;                               // oct 73: scanning mode
 
     let projection = GridProjection::RotatedLatLon(RotatedLatLonParams {
         lat_pole_rot,
@@ -522,7 +565,7 @@ fn parse_gdt_1(b: &mut Buf, num_data_points: u32) -> Result<GridDefinition> {
         lon_last,
         di,
         dj,
-        scanning_mode: 0, // Not present in GDT 3.1 — use default
+        scanning_mode,
         resolution_flags,
         shape_of_earth,
         projection,
