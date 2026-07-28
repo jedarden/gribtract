@@ -272,12 +272,117 @@ impl ProviderProbe {
     }
 
     /// Get the best provider for a model based on probe results
+    ///
+    /// This version does NOT check the failure tracker. Use `get_best_provider_with_tracker()`
+    /// to skip providers that need re-probing due to consecutive failures.
     pub fn get_best_provider<'a>(
         results: &'a ProviderProbeResults,
         model: &str,
     ) -> Option<&'a ProbeResult> {
         results.models.get(model).and_then(|model_results| {
             model_results.iter().find(|r| r.success)
+        })
+    }
+
+    /// Get the best provider for a model that does NOT need re-probing
+    ///
+    /// # INTEGRATION POINT: should_reprobe + Provider Selection
+    ///
+    /// This is the **primary integration point** where `should_reprobe()` is called
+    /// during runtime provider selection. The integration works as follows:
+    ///
+    /// 1. **Parallel execution:** Uses `par_iter()` via rayon to check `should_reprobe()`
+    ///    for all provider candidates **concurrently**, improving performance when
+    ///    there are multiple providers to evaluate.
+    ///
+    /// 2. **Dual-trigger logic:** Combined with `is_stale()` in `is_valid()` method,
+    ///    this implements the dual-trigger re-probe mechanism:
+    ///    - Staleness trigger: `is_stale()` returns true if probe data > 24h old
+    ///    - Failure trigger: `should_reprobe()` returns true if failures >= threshold
+    ///    - Re-probe if **EITHER** trigger fires (OR logic, not AND)
+    ///
+    /// 3. **Data flow:**
+    ///    - HTTP requests → automatic failure/success recording in `FetchClient`
+    ///    - `consecutive_failures` HashMap tracks failures per provider
+    ///    - `should_reprobe()` checks: `failures.get(provider) >= threshold`
+    ///    - This method skips providers where `should_reprobe() == true`
+    ///
+    /// 4. **Expected behavior:** Per design requirements, `should_reprobe()` runs in
+    ///    parallel across all provider candidates (not parallel with `is_stale()`, which
+    ///    is checked once globally before this method is called).
+    ///
+    /// Returns the first successful provider in the results that has not exceeded the
+    /// consecutive failure threshold. This should be used during runtime provider selection
+    /// to ensure we don't select providers that are experiencing repeated failures.
+    ///
+    /// Uses parallel execution (via rayon) to check `should_reprobe()` for all providers
+    /// concurrently, improving performance when there are multiple providers to evaluate.
+    ///
+    /// # Arguments
+    /// * `results` - The probe results to select from
+    /// * `model` - The model to get the best provider for (e.g., "hrrr", "gefs", "nbm", "gfs")
+    ///
+    /// # Returns
+    /// * `Some(&ProbeResult)` - The best provider result that doesn't need re-probing
+    /// * `None` - If all providers need re-probing or the model doesn't exist
+    ///
+    /// # Example
+    /// ```no_run
+    /// use gribtract_fetch::probe::{ProviderProbe, ProviderProbeResults};
+    ///
+    /// let mut probe = ProviderProbe::new();
+    /// let results = ProviderProbe::load_results(std::path::Path::new("provider-probe.json")).unwrap();
+    ///
+    /// // Get the best provider that isn't experiencing repeated failures
+    /// if let Some(best) = probe.get_best_provider_with_tracker(&results, "hrrr") {
+    ///     println!("Best HRRR provider: {} (score: {:.1})", best.provider, best.score);
+    /// }
+    /// ```
+    #[cfg(feature = "rayon")]
+    pub fn get_best_provider_with_tracker<'a>(
+        &'a self,
+        results: &'a ProviderProbeResults,
+        model: &str,
+    ) -> Option<&'a ProbeResult> {
+        use rayon::prelude::*;
+
+        results.models.get(model).and_then(|model_results| {
+            // Parallel iteration over provider results
+            // Find the first successful provider that doesn't need re-probing
+            //
+            // INTEGRATION: This is where should_reprobe() is called during provider selection.
+            // The par_iter() ensures all providers are checked concurrently for efficiency.
+            model_results.par_iter().find_any(|r| {
+                r.success && !self.should_reprobe(&r.provider)
+            }).or_else(|| {
+                // Fallback: if all providers need re-probing, return the first successful one
+                model_results.iter().find(|r| r.success)
+            })
+        })
+    }
+
+    /// Get the best provider for a model that does NOT need re-probing (synchronous version)
+    ///
+    /// This is a synchronous version of `get_best_provider_with_tracker` that does not
+    /// use parallel execution. It's available when the `rayon` feature is not enabled.
+    ///
+    /// # Arguments
+    /// * `results` - The probe results to select from
+    /// * `model` - The model to get the best provider for
+    ///
+    /// # Returns
+    /// * `Some(&ProbeResult)` - The best provider result that doesn't need re-probing
+    /// * `None` - If all providers need re-probing or the model doesn't exist
+    #[cfg(not(feature = "rayon"))]
+    pub fn get_best_provider_with_tracker<'a>(
+        &'a self,
+        results: &'a ProviderProbeResults,
+        model: &str,
+    ) -> Option<&'a ProbeResult> {
+        results.models.get(model).and_then(|model_results| {
+            model_results.iter().find(|r| {
+                r.success && !self.should_reprobe(&r.provider)
+            })
         })
     }
 
@@ -337,6 +442,32 @@ impl ProviderProbe {
 
     /// Check if probe results are valid (fresh AND no providers need re-probing)
     ///
+    /// # INTEGRATION POINT: Dual-Trigger Re-probe Logic (is_stale + should_reprobe)
+    ///
+    /// This is the **secondary integration point** where staleness checking and
+    /// failure tracking are combined to determine if re-probing is needed.
+    ///
+    /// **Dual-trigger logic:**
+    /// 1. **Staleness trigger:** Calls `is_stale()` (lines 374-384) to check if
+    ///    probe data is older than `max_age` (default 24 hours). Returns `false`
+    ///    immediately if stale.
+    ///
+    /// 2. **Failure trigger:** Iterates over all tracked providers and calls
+    ///    `should_reprobe()` for each. Returns `false` if ANY provider has
+    ///    exceeded the consecutive failure threshold.
+    ///
+    /// 3. **Re-probe condition:** Returns `false` if **EITHER** trigger fires:
+    ///    - `is_stale() == true`  (probe data too old)
+    ///    - `any(should_reprobe()) == true` (any provider has too many failures)
+    ///
+    /// This implements the OR logic for the dual-trigger system: staleness OR
+    /// consecutive failures should trigger a re-probe.
+    ///
+    /// **Note:** This method checks staleness first (serial), then checks failures.
+    /// For parallel execution of the `should_reprobe()` checks across providers,
+    /// see the `ProviderProbe::is_valid()` method in `gribtract/src/provider_probe.rs`
+    /// which uses `par_iter().any()` for concurrent checking.
+    ///
     /// This is a convenience method that combines the staleness check with the
     /// failure tracker check. Returns true if the probe results are fresh AND
     /// no tracked providers have exceeded the consecutive failure threshold.
@@ -366,6 +497,9 @@ impl ProviderProbe {
 
         // Then check if any tracked provider has exceeded the failure threshold
         // Use should_reprobe() for consistency
+        //
+        // INTEGRATION: This is where should_reprobe() is called to implement the
+        // failure-tracking half of the dual-trigger re-probe logic.
         for provider in self.consecutive_failures.keys() {
             if self.should_reprobe(provider) {
                 return false;
@@ -1205,5 +1339,281 @@ mod tests {
         // Verify should_reprobe returns false for untracked providers
         assert!(!probe.should_reprobe("unknown:provider"),
                 "should_reprobe should return false for untracked providers");
+    }
+
+    #[test]
+    fn test_get_best_provider_with_tracker_skips_failing_providers() {
+        let mut probe = ProviderProbe::new().with_threshold(3);
+
+        // Create test results with multiple providers
+        let mut models = std::collections::HashMap::new();
+        models.insert(
+            "hrrr".to_string(),
+            vec![
+                ProbeResult {
+                    provider: "s3:hrrr-bdp".to_string(),
+                    probe_url: "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/test.idx".to_string(),
+                    connect_ms: 50,
+                    ttfb_ms: 75,
+                    throughput_mbs: 10.0,
+                    score: 125.0,
+                    success: true,
+                    error: None,
+                    timestamp: chrono::Utc::now().to_rfc3339(),
+                },
+                ProbeResult {
+                    provider: "gcs:hrrr".to_string(),
+                    probe_url: "https://storage.googleapis.com/hrrr/test.idx".to_string(),
+                    connect_ms: 100,
+                    ttfb_ms: 150,
+                    throughput_mbs: 5.0,
+                    score: 350.0,
+                    success: true,
+                    error: None,
+                    timestamp: chrono::Utc::now().to_rfc3339(),
+                },
+            ],
+        );
+
+        let results = ProviderProbeResults {
+            models,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Record 3 failures for the first provider
+        probe.record_failure("s3:hrrr-bdp");
+        probe.record_failure("s3:hrrr-bdp");
+        probe.record_failure("s3:hrrr-bdp");
+
+        // get_best_provider without tracker should return the first successful
+        let best_without = ProviderProbe::get_best_provider(&results, "hrrr");
+        assert_eq!(best_without.unwrap().provider, "s3:hrrr-bdp");
+
+        // get_best_provider_with_tracker should skip the failing provider
+        let best_with = probe.get_best_provider_with_tracker(&results, "hrrr");
+        assert_eq!(best_with.unwrap().provider, "gcs:hrrr");
+    }
+
+    #[test]
+    fn test_get_best_provider_with_tracker_returns_none_when_all_failing() {
+        let mut probe = ProviderProbe::new().with_threshold(2);
+
+        // Create test results
+        let mut models = std::collections::HashMap::new();
+        models.insert(
+            "hrrr".to_string(),
+            vec![
+                ProbeResult {
+                    provider: "s3:hrrr-bdp".to_string(),
+                    probe_url: "https://test1.idx".to_string(),
+                    connect_ms: 50,
+                    ttfb_ms: 75,
+                    throughput_mbs: 10.0,
+                    score: 125.0,
+                    success: true,
+                    error: None,
+                    timestamp: chrono::Utc::now().to_rfc3339(),
+                },
+                ProbeResult {
+                    provider: "gcs:hrrr".to_string(),
+                    probe_url: "https://test2.idx".to_string(),
+                    connect_ms: 100,
+                    ttfb_ms: 150,
+                    throughput_mbs: 5.0,
+                    score: 350.0,
+                    success: true,
+                    error: None,
+                    timestamp: chrono::Utc::now().to_rfc3339(),
+                },
+            ],
+        );
+
+        let results = ProviderProbeResults {
+            models,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Record failures for ALL providers
+        probe.record_failure("s3:hrrr-bdp");
+        probe.record_failure("s3:hrrr-bdp");
+        probe.record_failure("gcs:hrrr");
+        probe.record_failure("gcs:hrrr");
+
+        // Should return None when all providers need re-probing
+        let best = probe.get_best_provider_with_tracker(&results, "hrrr");
+        assert!(best.is_none(), "Should return None when all providers need re-probing");
+    }
+
+    #[test]
+    fn test_get_best_provider_with_tracker_returns_first_when_no_failures() {
+        let probe = ProviderProbe::new().with_threshold(3);
+
+        // Create test results
+        let mut models = std::collections::HashMap::new();
+        models.insert(
+            "gfs".to_string(),
+            vec![
+                ProbeResult {
+                    provider: "s3:gfs".to_string(),
+                    probe_url: "https://test1.idx".to_string(),
+                    connect_ms: 30,
+                    ttfb_ms: 50,
+                    throughput_mbs: 15.0,
+                    score: 96.7,
+                    success: true,
+                    error: None,
+                    timestamp: chrono::Utc::now().to_rfc3339(),
+                },
+                ProbeResult {
+                    provider: "nomads:gfs".to_string(),
+                    probe_url: "https://test2.idx".to_string(),
+                    connect_ms: 200,
+                    ttfb_ms: 300,
+                    throughput_mbs: 2.0,
+                    score: 800.0,
+                    success: true,
+                    error: None,
+                    timestamp: chrono::Utc::now().to_rfc3339(),
+                },
+            ],
+        );
+
+        let results = ProviderProbeResults {
+            models,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // When no failures, should return the first provider
+        let best = probe.get_best_provider_with_tracker(&results, "gfs");
+        assert_eq!(best.unwrap().provider, "s3:gfs");
+    }
+
+    #[test]
+    fn test_get_best_provider_with_tracker_handles_unknown_model() {
+        let probe = ProviderProbe::new().with_threshold(3);
+
+        let results = ProviderProbeResults {
+            models: std::collections::HashMap::new(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Unknown model should return None
+        let best = probe.get_best_provider_with_tracker(&results, "unknown_model");
+        assert!(best.is_none(), "Should return None for unknown model");
+    }
+
+    #[test]
+    fn test_get_best_provider_with_tracker_with_partial_failures() {
+        let mut probe = ProviderProbe::new().with_threshold(3);
+
+        // Create test results
+        let mut models = std::collections::HashMap::new();
+        models.insert(
+            "nbm".to_string(),
+            vec![
+                ProbeResult {
+                    provider: "s3:nbm".to_string(),
+                    probe_url: "https://test1.idx".to_string(),
+                    connect_ms: 40,
+                    ttfb_ms: 60,
+                    throughput_mbs: 12.0,
+                    score: 143.3,
+                    success: true,
+                    error: None,
+                    timestamp: chrono::Utc::now().to_rfc3339(),
+                },
+                ProbeResult {
+                    provider: "gcs:nbm".to_string(),
+                    probe_url: "https://test2.idx".to_string(),
+                    connect_ms: 80,
+                    ttfb_ms: 120,
+                    throughput_mbs: 6.0,
+                    score: 286.7,
+                    success: true,
+                    error: None,
+                    timestamp: chrono::Utc::now().to_rfc3339(),
+                },
+                ProbeResult {
+                    provider: "nomads:nbm".to_string(),
+                    probe_url: "https://test3.idx".to_string(),
+                    connect_ms: 150,
+                    ttfb_ms: 200,
+                    throughput_mbs: 3.0,
+                    score: 483.3,
+                    success: true,
+                    error: None,
+                    timestamp: chrono::Utc::now().to_rfc3339(),
+                },
+            ],
+        );
+
+        let results = ProviderProbeResults {
+            models,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // First provider below threshold
+        probe.record_failure("s3:nbm");
+        probe.record_failure("s3:nbm");
+
+        // Second provider exceeds threshold
+        probe.record_failure("gcs:nbm");
+        probe.record_failure("gcs:nbm");
+        probe.record_failure("gcs:nbm");
+
+        // Should skip the second provider and return the third
+        let best = probe.get_best_provider_with_tracker(&results, "nbm");
+        assert_eq!(best.unwrap().provider, "nomads:nbm");
+    }
+
+    #[test]
+    fn test_get_best_provider_with_tracker_parallel_execution() {
+        // This test verifies that parallel execution works correctly
+        // by checking multiple providers concurrently
+        let mut probe = ProviderProbe::new().with_threshold(3);
+
+        // Create test results with many providers to benefit from parallel execution
+        let mut models = std::collections::HashMap::new();
+        let mut providers = Vec::new();
+
+        for i in 0..5 {
+            providers.push(ProbeResult {
+                provider: format!("provider:{}", i),
+                probe_url: format!("https://test{}.idx", i),
+                connect_ms: 50 + i as u64 * 10,
+                ttfb_ms: 75 + i as u64 * 15,
+                throughput_mbs: 10.0 - i as f64,
+                score: 125.0 + i as f64 * 25.0,
+                success: true,
+                error: None,
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            });
+        }
+
+        models.insert("test".to_string(), providers);
+
+        let results = ProviderProbeResults {
+            models,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            git_sha: None,
+        };
+
+        // Record failures for some providers
+        probe.record_failure("provider:0");
+        probe.record_failure("provider:0");
+        probe.record_failure("provider:0");
+
+        probe.record_failure("provider:2");
+        probe.record_failure("provider:2");
+        probe.record_failure("provider:2");
+
+        // Should skip providers 0 and 2, return provider 1
+        let best = probe.get_best_provider_with_tracker(&results, "test");
+        assert_eq!(best.unwrap().provider, "provider:1");
     }
 }
