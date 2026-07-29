@@ -143,17 +143,27 @@ mod tests {
         assert_eq!(&bytes[0..4], b"GRIB");
         assert_eq!(bytes[7], 2);
 
+        // Total length field (bytes 8-15, big-endian)
+        let total_len = u64::from_be_bytes([
+            bytes[8], bytes[9], bytes[10], bytes[11],
+            bytes[12], bytes[13], bytes[14], bytes[15]
+        ]);
+        assert_eq!(total_len, 187, "Total length field should be 187");
+
         // Section 1: Identification (starts at byte 16)
-        assert_eq!(bytes[16], 1, "Section 1 number");
-        let section1_len = u32::from_be_bytes([bytes[17], bytes[18], bytes[19], bytes[20]]);
+        // Section 1 structure: [length (4 bytes)][number (1 byte)][data...]
+        let section1_len = u32::from_be_bytes([bytes[16], bytes[17], bytes[18], bytes[19]]);
         assert_eq!(section1_len, 21, "Section 1 length");
+        assert_eq!(bytes[20], 1, "Section 1 number");
 
         // Section 3: Grid Definition (starts at byte 37)
-        assert_eq!(bytes[37], 3, "Section 3 number");
-        let section3_len = u32::from_be_bytes([bytes[38], bytes[39], bytes[40], bytes[41]]);
+        // Section 3 structure: [length (4 bytes)][number (1 byte)][data...]
+        let section3_len = u32::from_be_bytes([bytes[37], bytes[38], bytes[39], bytes[40]]);
         assert_eq!(section3_len, 72, "Section 3 claimed length (mismatch!)");
+        assert_eq!(bytes[41], 3, "Section 3 number");
 
-        // End Section marker
-        assert_eq!(&bytes[172..176], b"7777", "End section marker");
+        // End Section marker (last 4 bytes)
+        assert_eq!(bytes.len(), 187, "File should be 187 bytes");
+        assert_eq!(&bytes[183..187], b"7777", "End section marker");
     }
 }
