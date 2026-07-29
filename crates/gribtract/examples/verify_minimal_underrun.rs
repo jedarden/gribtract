@@ -49,6 +49,52 @@ const MINIMAL_GRIB2_DATA: &[u8] = &[
     0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x06, 0x06, 0x80, 0x00, 0x00, 0x00, 0x06, 0x07, 0x37,
 ];
 
+fn main() {
+    println!("Running minimal buffer underrun verification...");
+
+    let bytes = MINIMAL_GRIB2_DATA;
+
+    // Verify data has expected size
+    assert_eq!(bytes.len(), 159, "Minimal GRIB2 data should be 159 bytes");
+
+    // Verify basic GRIB2 structure
+    assert_eq!(&bytes[0..4], b"GRIB", "Should have valid GRIB magic bytes");
+    assert_eq!(bytes[7], 2, "Should be GRIB edition 2");
+
+    println!("✓ File structure verified: {} bytes, GRIB2 format", bytes.len());
+
+    // Attempt to decode - this should trigger buffer underrun
+    let result = decode(bytes);
+
+    // Verify that buffer underrun IS triggered
+    match result {
+        Ok(fields) => {
+            println!(
+                "✗ Buffer underrun NOT triggered! Decoding succeeded with {} fields.",
+                fields.len()
+            );
+            println!("  This test expects the minimal GRIB2 data to trigger a TooShort error.");
+        }
+        Err(Error::TooShort { needed, got }) => {
+            // This is the expected outcome - buffer underrun detected
+            println!(
+                "✓ Buffer underrun correctly detected: need {} bytes, got {} bytes",
+                needed, got
+            );
+            assert!(
+                needed > got,
+                "Buffer underrun should indicate more bytes needed than available"
+            );
+        }
+        Err(other_error) => {
+            println!(
+                "✗ Unexpected error type: {:?}. Expected TooShort error indicating buffer underrun.",
+                other_error
+            );
+        }
+    }
+}
+
 #[test]
 fn verify_minimal_buffer_underrun() {
     let bytes = MINIMAL_GRIB2_DATA;
