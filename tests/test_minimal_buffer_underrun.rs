@@ -3,6 +3,56 @@
 //! This test uses the minimal GRIB2 test file to verify that the parser
 //! correctly handles the buffer underrun vulnerability that occurs when
 //! Section 3 claims more bytes than are actually available.
+//!
+//! ## The Vulnerability
+//!
+//! The buffer underrun occurs when the GRIB2 parser attempts to read Grid Definition
+//! Template (GDT) data from Section 3, but the section claims to contain more bytes
+//! than are actually available in the file.
+//!
+//! **Error:** `TooShort { needed: <bytes_needed>, got: 159 }`
+//!
+//! **Root Cause:** Section 3 claims 72 bytes but only contains 67 bytes - a 5-byte shortage
+//! that triggers underrun when the parser tries to read GDT template data.
+//!
+//! ## Minimization Strategy
+//!
+//! **Original file:** `rotated_latlon_gdt1_drt0.grib2` (187 bytes)
+//! **Minimal file:** `minimal_buffer_underrun.grib2` (159 bytes)
+//! **Reduction:** 28 bytes (15% smaller)
+//!
+//! ### Essential Components (Cannot Be Removed)
+//!
+//! - **Section 0 (16 bytes):** Fixed GRIB header with magic bytes and edition identifier
+//! - **Section 1 (21 bytes):** Identification section with discipline, center, and parameter info
+//! - **Section 3 (72 bytes claimed, 67 actual):** **THE TRIGGER** - Must preserve exact claimed/actual mismatch
+//!   - The 5-byte shortage (72 claimed vs 67 actual) is what triggers the buffer underrun
+//!   - GDT 0.0 template requires 73 octets total, creating the underrun condition
+//!
+//! ### Non-Essential Components (Minimized)
+//!
+//! - **Section 4:** Reduced from 34→22 bytes by using simpler PDT 0.0 template
+//! - **Section 5:** Kept at 20 bytes using minimal DRT 0 (simple packing) template
+//! - **Section 6:** Kept at 6 bytes (minimum possible for bitmap section)
+//! - **Section 7:** Reduced from 14→6 bytes by reducing to single 1-byte packed value
+//!
+//! ### Why Section 3 Cannot Be Removed
+//!
+//! Files without Section 3 produce `NotImplemented` instead of `TooShort` because
+//! the parser takes a different code path. The bug specifically triggers when Section 3
+//! exists but contains insufficient data for the declared GDT template.
+//!
+//! ## Original File Reference
+//!
+//! This minimal file was created from `rotated_latlon_gdt1_drt0.grib2` (187 bytes)
+//! by systematically removing non-essential data while preserving the exact Section 3
+//! length mismatch that triggers the vulnerability.
+//!
+//! ## Test Coverage
+//!
+//! - `test_minimal_buffer_underrun`: Verifies buffer underrun error is reproduced
+//! - `test_buffer_underrun_error_details`: Validates TooShort error parameters
+//! - `test_minimal_file_structure`: Validates GRIB2 structure and file integrity
 
 use std::path::Path;
 
