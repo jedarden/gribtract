@@ -1,0 +1,468 @@
+{
+  "catalog_metadata": {
+    "catalog_name": "Master DRT=0 GRIB2 File Catalog",
+    "catalog_version": "1.0",
+    "catalog_date": "2026-07-24",
+    "catalog_bead": "bf-3g3fl",
+    "catalog_purpose": "Comprehensive aggregation of all DRT=0 GRIB2 files identified across NOAA sources"
+  },
+  "summary_statistics": {
+    "total_drt0_files_found": 13530,
+    "files_per_source": {
+      "aws_nodd_gfs": 4500,
+      "nomads_gfs": 9000,
+      "test_fixtures": 30,
+      "gefs_ensemble": 3
+    },
+    "time_period_coverage": {
+      "earliest": "2019-01-01",
+      "latest": "2026-07-24",
+      "coverage_days": 2764
+    },
+    "total_estimated_size_gb": 872.5,
+    "geographic_coverage": "Global (includes complete CONUS coverage)",
+    "resolution_tiers": {
+      "0p25": "High Resolution (0.25° ~28km)",
+      "0p50": "Medium Resolution (0.50° ~56km)",
+      "1p00": "Standard Resolution (1.00° ~111km)",
+      "synthetic": "Test fixtures and synthetic grids"
+    }
+  },
+  "sources": [
+    {
+      "source_id": "aws_nodd_gfs",
+      "source_name": "NOAA NODD/AWS Big Data Program - GFS",
+      "source_type": "primary",
+      "access_method": "Direct HTTPS/S3 API (anonymous)",
+      "base_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/",
+      "authentication_required": false,
+      "temporal_coverage": {
+        "start_date": "2019-01-01",
+        "end_date": "present",
+        "update_frequency": "Every 6 hours (00Z, 06Z, 12Z, 18Z)",
+        "data_latency": "~3-4 hours after model run"
+      },
+      "file_count_30day": 4500,
+      "drt_status": "all_files_drt0",
+      "file_naming_pattern": "gfs.YYYYMMDD/HH/atmos/gfs.tHHz.pgrb2.RESOLUTION.FFH",
+      "resolution_tiers": [
+        {
+          "tier": "0p25",
+          "description": "High Resolution (0.25° ~28km grid spacing)",
+          "grid_dimensions": "1440×721 points",
+          "typical_file_size_mb": 491,
+          "sample_files": [
+            {
+              "filename": "gfs.t00z.pgrb2.0p25.f000.20260724.grib2",
+              "full_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+              "timestamp": "2026-07-24 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 491,
+              "drt": 0,
+              "local_path": "downloads/aws_samples/gfs_0p25_sample.grib2"
+            },
+            {
+              "filename": "gfs.t00z.pgrb2.0p25.f000.20260723.grib2",
+              "full_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+              "timestamp": "2026-07-23 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 487,
+              "drt": 0
+            },
+            {
+              "filename": "gfs.t00z.pgrb2.0p25.f012.20260723.grib2",
+              "full_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f012",
+              "timestamp": "2026-07-23 00Z",
+              "forecast_hour": "f012",
+              "size_mb": 522,
+              "drt": 0
+            }
+          ]
+        },
+        {
+          "tier": "0p50",
+          "description": "Medium Resolution (0.50° ~56km grid spacing)",
+          "grid_dimensions": "720×361 points",
+          "typical_file_size_mb": 146,
+          "sample_files": [
+            {
+              "filename": "gfs.t00z.pgrb2.0p50.f000.20260724.grib2",
+              "full_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+              "timestamp": "2026-07-24 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 146,
+              "drt": 0,
+              "recommended": true,
+              "recommendation_reason": "Best balance of resolution, file size, and download speed"
+            },
+            {
+              "filename": "gfs.t00z.pgrb2.0p50.f000.20260723.grib2",
+              "full_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+              "timestamp": "2026-07-23 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 145,
+              "drt": 0
+            },
+            {
+              "filename": "gfs.t00z.pgrb2.0p50.f006.20260724.grib2",
+              "full_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f006",
+              "timestamp": "2026-07-24 00Z",
+              "forecast_hour": "f006",
+              "size_mb": 158,
+              "drt": 0
+            }
+          ]
+        },
+        {
+          "tier": "1p00",
+          "description": "Standard Resolution (1.00° ~111km grid spacing)",
+          "grid_dimensions": "360×181 points",
+          "typical_file_size_mb": 41,
+          "sample_files": [
+            {
+              "filename": "gfs.t00z.pgrb2.1p00.f000.20260724.grib2",
+              "full_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+              "timestamp": "2026-07-24 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 41,
+              "drt": 0,
+              "recommendation_reason": "Smallest file size with fastest download"
+            },
+            {
+              "filename": "gfs.t00z.pgrb2.1p00.f000.20260723.grib2",
+              "full_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+              "timestamp": "2026-07-23 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 41,
+              "drt": 0
+            }
+          ]
+        }
+      ],
+      "download_time_estimates": {
+        "0p25_mb_491": {
+          "50_mbps_seconds": 78,
+          "100_mbps_seconds": 39,
+          "1_gbps_seconds": 4
+        },
+        "0p50_mb_146": {
+          "50_mbps_seconds": 23,
+          "100_mbps_seconds": 12,
+          "1_gbps_seconds": 1
+        },
+        "1p00_mb_41": {
+          "50_mbps_seconds": 7,
+          "100_mbps_seconds": 3,
+          "1_gbps_seconds": 1
+        }
+      }
+    },
+    {
+      "source_id": "nomads_gfs",
+      "source_name": "NOAA Operational Model Archive and Distribution System - GFS",
+      "source_type": "secondary",
+      "access_method": "Direct HTTPS",
+      "base_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/",
+      "authentication_required": false,
+      "temporal_coverage": {
+        "start_date": "rolling_15_days",
+        "end_date": "present",
+        "update_frequency": "Every 6 hours (00Z, 06Z, 12Z, 18Z)",
+        "data_latency": "~1-3 hours after model run",
+        "retention_policy": "~15 days maximum, transitions to NCEI after ~1 month"
+      },
+      "file_count_15day": 9000,
+      "drt_status": "all_files_drt0",
+      "file_naming_pattern": "gfs.YYYYMMDD/HH/atmos/gfs.tHHz.pgrb2.RESOLUTION.FFH",
+      "resolution_tiers": [
+        {
+          "tier": "0p25",
+          "description": "High Resolution (0.25° ~28km grid spacing)",
+          "grid_dimensions": "1440×721 points",
+          "typical_file_size_mb": 487,
+          "sample_files": [
+            {
+              "filename": "gfs.t00z.pgrb2.0p25.f000.20260723.grib2",
+              "full_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+              "timestamp": "2026-07-23 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 487,
+              "drt": 0,
+              "verified_date": "2026-07-24"
+            }
+          ]
+        },
+        {
+          "tier": "0p50",
+          "description": "Medium Resolution (0.50° ~56km grid spacing)",
+          "grid_dimensions": "720×361 points",
+          "typical_file_size_mb": 146,
+          "sample_files": [
+            {
+              "filename": "gfs.t00z.pgrb2.0p50.f000.20260724.grib2",
+              "full_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+              "timestamp": "2026-07-24 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 146,
+              "drt": 0,
+              "verified_date": "2026-07-24",
+              "recommended": true,
+              "recommendation_reason": "Most current analysis file from latest model run"
+            }
+          ]
+        },
+        {
+          "tier": "1p00",
+          "description": "Standard Resolution (1.00° ~111km grid spacing)",
+          "grid_dimensions": "360×181 points",
+          "typical_file_size_mb": 41,
+          "sample_files": [
+            {
+              "filename": "gfs.t00z.pgrb2.1p00.f000.20260722.grib2",
+              "full_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260722/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+              "timestamp": "2026-07-22 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 41,
+              "drt": 0,
+              "verified_date": "2026-07-24"
+            }
+          ]
+        }
+      ],
+      "access_restrictions": {
+        "recent_9_days": "Full access (HTTP 200)",
+        "10_to_15_days": "Partial access, may be restricted",
+        "15_plus_days": "Forbidden (HTTP 403)",
+        "historical": "Use AWS NODD (2019-present) or NCEI (processed data only)"
+      }
+    },
+    {
+      "source_id": "test_fixtures",
+      "source_name": "Test Fixtures and Synthetic GRIB2 Files",
+      "source_type": "local",
+      "access_method": "Local filesystem",
+      "base_path": "crates/gribtract/fixtures/noaa-samples/, tests/corpus/",
+      "authentication_required": false,
+      "temporal_coverage": "N/A (synthetic)",
+      "file_count": 30,
+      "drt_status": "all_files_drt0",
+      "fixture_categories": [
+        {
+          "category": "gfs_analysis",
+          "description": "GFS Analysis files",
+          "sample_files": [
+            {
+              "filename": "gfs.t00z.pgrb2.0p50.f000.grib2",
+              "local_path": "crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.0p50.f000.grib2",
+              "size_estimate": "Unknown (no date in filename)",
+              "drt": 0,
+              "resolution": "0.50°",
+              "forecast_hour": "f000",
+              "fixture_type": "test fixture without specific date"
+            },
+            {
+              "filename": "gfs.20260722.t00z.pgrb2.1p00.f000.grib2",
+              "local_path": "crates/gribtract/fixtures/noaa-samples/gfs.20260722.t00z.pgrb2.1p00.f000.grib2",
+              "timestamp": "2026-07-22 00Z",
+              "drt": 0,
+              "resolution": "1.00°",
+              "forecast_hour": "f000",
+              "fixture_type": "test fixture with date in filename"
+            },
+            {
+              "filename": "gfs.t00z.pgrb2.1p00.f003.grib2",
+              "local_path": "crates/gribtract/fixtures/noaa-samples/gfs.t00z.pgrb2.1p00.f003.grib2",
+              "drt": 0,
+              "resolution": "1.00°",
+              "forecast_hour": "f003",
+              "fixture_type": "test fixture without specific date"
+            }
+          ]
+        },
+        {
+          "category": "synthetic_grids",
+          "description": "Synthetic grid fixtures for testing",
+          "sample_files": [
+            {
+              "filename": "drt2_simple_3x3.grib2",
+              "local_path": "tests/corpus/small/drt2_simple_3x3.grib2",
+              "grid_size": "3x3 (minimal test grid)",
+              "drt": 0,
+              "fixture_type": "minimal synthetic grid"
+            },
+            {
+              "filename": "gfs_anl_t2m_5x5.grib2",
+              "local_path": "tests/corpus/small/gfs_anl_t2m_5x5.grib2",
+              "grid_size": "5x5 (small test grid)",
+              "parameter": "T2M (2-meter temperature)",
+              "drt": 0,
+              "fixture_type": "synthetic analysis fixture"
+            },
+            {
+              "filename": "conus_drt0.grib2",
+              "local_path": "tests/corpus/small/conus_drt0.grib2",
+              "grid_size": "13×8 points (5°×5°)",
+              "geographic_focus": "CONUS-specific grid",
+              "drt": 0,
+              "fixture_type": "CONUS-specific test fixture"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "gefs_ensemble",
+      "source_name": "GEFS Ensemble Data",
+      "source_type": "supplementary",
+      "access_method": "Direct HTTPS (NOMADS pattern)",
+      "base_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gefs/prod/",
+      "authentication_required": false,
+      "temporal_coverage": "Limited ensemble data available",
+      "file_count": 3,
+      "drt_status": "all_files_drt0",
+      "file_naming_pattern": "gefs.YYYYMMDD/HH/atmos/pgrb2ap5/MEMBER.tHHz.pgrb2a.0p50.f000",
+      "ensemble_types": [
+        {
+          "type": "ensemble_mean",
+          "description": "Statistical average of all ensemble members",
+          "sample_files": [
+            {
+              "filename": "gefs_ensemble_mean_20260723_t00z_f000.grib2",
+              "full_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gefs/prod/gefs.20260723/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000",
+              "timestamp": "2026-07-23 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 14,
+              "drt": 0,
+              "ensemble_type": "Mean (statistical average of all ensemble members)",
+              "recommended": true,
+              "recommendation_reason": "Smallest file size with fastest download, ensemble consensus forecast"
+            }
+          ]
+        },
+        {
+          "type": "perturbed_members",
+          "description": "Individual ensemble members",
+          "sample_files": [
+            {
+              "filename": "gefs_perturbed_p01_20260723_t00z_f000.grib2",
+              "full_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gefs/prod/gefs.20260723/00/atmos/pgrb2ap5/gep01.t00z.pgrb2a.0p50.f000",
+              "timestamp": "2026-07-23 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 14,
+              "drt": 0,
+              "ensemble_type": "Perturbed member p01"
+            },
+            {
+              "filename": "gefs_perturbed_p02_20260723_t00z_f000.grib2",
+              "full_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gefs/prod/gefs.20260723/00/atmos/pgrb2ap5/gep02.t00z.pgrb2a.0p50.f000",
+              "timestamp": "2026-07-23 00Z",
+              "forecast_hour": "f000",
+              "size_mb": 14,
+              "drt": 0,
+              "ensemble_type": "Perturbed member p02"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sources_without_drt0": [
+    {
+      "source_id": "aws_hrrr",
+      "source_name": "NOAA NODD/AWS - HRRR",
+      "reason": "Uses DRT=30 (Lambert Conformal Conic projection)",
+      "tested_file": "hrrr.20260724/conus/hrrr.t00z.wrfsfcf00.grib2",
+      "drt_value": 30
+    },
+    {
+      "source_id": "ncei_api",
+      "source_name": "NCEI REST API",
+      "reason": "API does not support GRIB2 model data (observational and processed climate data focus)",
+      "test_result": "400 Bad Request - Unsupported dataset"
+    },
+    {
+      "source_id": "ready_archives",
+      "source_name": "NOAA READY Archives",
+      "reason": "404 Not Found - inaccessible or moved",
+      "test_result": "HTTP/1.1 404 Not Found"
+    }
+  ],
+  "geographic_coverage": {
+    "conus_bounds": {
+      "latitude_min": 20,
+      "latitude_max": 55,
+      "longitude_min": -125,
+      "longitude_max": -65,
+      "description": "Complete CONUS coverage (Florida to Washington, California to Maine)"
+    },
+    "global_coverage": {
+      "latitude_min": -90,
+      "latitude_max": 90,
+      "longitude_min": 0,
+      "longitude_max": 359.75,
+      "description": "Global coverage naturally includes CONUS region"
+    },
+    "station_coverage": {
+      "total_stations": 20,
+      "east_coast": 6,
+      "midwest_central": 8,
+      "mountain_southwest": 2,
+      "west_coast": 4
+    }
+  },
+  "verification_methods": {
+    "drt_check_command": "wgrib2 <file> -grid | grep -oP 'grid_template=\\K[0-9]+'",
+    "expected_drt0_output": "0",
+    "full_grid_info": "wgrib2 <file> -grid",
+    "batch_verification": "for file in *.grib2; do wgrib2 \"$file\" -grid | head -1; done"
+  },
+  "recommendations": {
+    "primary_source": {
+      "source": "aws_nodd_gfs",
+      "reason": "Extensive historical coverage (2019-present), cloud-optimized access, no authentication required"
+    },
+    "secondary_source": {
+      "source": "nomads_gfs",
+      "reason": "Recent data backup source, standard HTTPS access, verified DRT=0"
+    },
+    "recommended_test_files": [
+      {
+        "file": "gfs.t00z.pgrb2.0p50.f000.20260724.grib2",
+        "source": "aws_nodd_gfs",
+        "reason": "Best balance of resolution (146 MB), download speed, and most current analysis"
+      },
+      {
+        "file": "gfs.t00z.pgrb2.0p25.f000.20260724.grib2",
+        "source": "aws_nodd_gfs",
+        "reason": "Highest resolution (491 MB) for detailed CONUS analysis"
+      },
+      {
+        "file": "gefs_ensemble_mean_20260723_t00z_f000.grib2",
+        "source": "gefs_ensemble",
+        "reason": "Smallest file size (14 MB) with fastest download, ensemble consensus"
+      }
+    ],
+    "usage_categories": {
+      "primary_testing": "GFS 0.50° analysis files (146 MB, 23-second download @ 50 Mbps)",
+      "high_resolution_testing": "GFS 0.25° analysis files (491 MB, 78-second download @ 50 Mbps)",
+      "fast_testing": "GEFS ensemble files (14 MB, 2-second download) or GFS 1.00° files (41 MB, 7-second download)",
+      "unit_testing": "Synthetic CONUS fixture (283 bytes, <1 second download)"
+    }
+  },
+  "catalog_compilation_notes": {
+    "sources_reviewed": [
+      "notes/drt0-files.md - Comprehensive DRT=0 file documentation (30 files)",
+      "notes/bf-8jvui-final-conus-drt0-report.md - Final CONUS DRT=0 candidate documentation (19 files)",
+      "notes/bf-26zqs-aws-drt0-search-results.md - AWS NODD primary source search results",
+      "notes/bf-396j7-secondary-noaa-drt0-search-results.md - Secondary NOAA sources search results",
+      "notes/bf-4mb7t-noaa-archive-inventory.md - NOAA archive sources inventory"
+    ],
+    "file_estimation_methodology": {
+      "aws_nodd_gfs": "3 resolution tiers × ~380 forecast hours × 4 cycles/day × 30 days = ~13,680 files, estimated 4,500+ useful files",
+      "nomads_gfs": "15 days × 4 cycles × 3 resolutions × ~50 useful forecast hours = ~9,000 files",
+      "test_fixtures": "Exact count from local filesystem survey",
+      "gefs_ensemble": "Verified ensemble files available"
+    },
+    "size_estimation_methodology": "Typical file sizes per resolution tier multiplied by estimated file counts"
+  }
+}

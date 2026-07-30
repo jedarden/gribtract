@@ -1,0 +1,88 @@
+{
+  "analysis_date": "2026-07-24",
+  "source_bead": "bf-1fmeu",
+  "candidate_bead": "bf-3ugst",
+  "script": "scripts/extract_drt.sh",
+  "summary": {
+    "total_candidates": 9,
+    "valid_grib2_files": 7,
+    "successfully_analyzed": 7,
+    "drt_zero_count": 7,
+    "non_drt_zero_count": 0,
+    "empty_files": 2,
+    "analysis_failures": 0
+  },
+  "results": [
+    {
+      "file": "gfs_1p00_20260724_f000.grib2",
+      "status": "success",
+      "drt_value": 0,
+      "packing_type": "simple",
+      "size_bytes": 42755881,
+      "corresponds_to": "gfs.t00z.pgrb2.1p00.f000 (2026-07-24)"
+    },
+    {
+      "file": "gfs_0p25_20260723_f000.grib2",
+      "status": "success",
+      "drt_value": 0,
+      "packing_type": "simple",
+      "size_bytes": 510275792,
+      "corresponds_to": "gfs.t00z.pgrb2.0p25.f000 (2026-07-23)"
+    },
+    {
+      "file": "gefs_0p50_f000.grib2",
+      "status": "success",
+      "drt_value": 0,
+      "packing_type": "simple",
+      "size_bytes": 14272610,
+      "corresponds_to": "geavg.t00z.pgrb2a.0p50.f000"
+    },
+    {
+      "file": "gefs_0p50_f003.grib2",
+      "status": "success",
+      "drt_value": 0,
+      "packing_type": "simple",
+      "size_bytes": 15343992,
+      "corresponds_to": "geavg.t00z.pgrb2a.0p50.f003"
+    },
+    {
+      "file": "gfs_1p00_20260723_f000.grib2",
+      "status": "success",
+      "drt_value": 0,
+      "packing_type": "simple",
+      "size_bytes": 42460488,
+      "corresponds_to": "gfs.t00z.pgrb2.1p00.f000 (2026-07-23)"
+    },
+    {
+      "file": "gfs_0p50_20260724_f000.grib2",
+      "status": "success",
+      "drt_value": 0,
+      "packing_type": "simple",
+      "size_bytes": 152106356,
+      "corresponds_to": "gfs.t00z.pgrb2.0p50.f000 (2026-07-24)"
+    },
+    {
+      "file": "gefs_0p50_f006.grib2",
+      "status": "success",
+      "drt_value": 0,
+      "packing_type": "simple",
+      "size_bytes": 14723500,
+      "corresponds_to": "geavg.t00z.pgrb2a.0p50.f006"
+    }
+  ],
+  "empty_files": [
+    {
+      "file": "gfs_0p25_20260724_f000.grib2",
+      "status": "empty",
+      "size_bytes": 0,
+      "corresponds_to": "gfs.t00z.pgrb2.0p25.f000 (2026-07-24)"
+    },
+    {
+      "file": "gfs_0p50_20260723_f000.grib2",
+      "status": "empty",
+      "size_bytes": 0,
+      "corresponds_to": "gfs.t00z.pgrb2.0p50.f000 (2026-07-23)"
+    }
+  ],
+  "conclusion": "All 7 valid candidate files use DRT=0 (Simple Packing), confirming they are suitable for CONUS coverage verification. Two files were empty and require re-download."
+}

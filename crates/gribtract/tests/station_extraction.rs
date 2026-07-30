@@ -12,13 +12,13 @@ use gribtract_testutil::{corpus, golden};
 /// 7 CONUS stations from the bead spec: (name, lat_deg_N, lon_deg_E).
 /// Negative longitudes are western hemisphere; `nearest_index` normalises them.
 const STATIONS: &[(&str, f64, f64)] = &[
-    ("New York",     40.78, -73.97),
+    ("New York", 40.78, -73.97),
     ("Philadelphia", 39.87, -75.23),
-    ("Chicago",      41.79, -87.75),
-    ("Miami",        25.79, -80.29),
-    ("Austin",       30.32, -97.76),
-    ("Denver",       39.85, -104.66),
-    ("Los Angeles",  33.94, -118.41),
+    ("Chicago", 41.79, -87.75),
+    ("Miami", 25.79, -80.29),
+    ("Austin", 30.32, -97.76),
+    ("Denver", 39.85, -104.66),
+    ("Los Angeles", 33.94, -118.41),
 ];
 
 /// Verifies the decode-once-extract-many pattern for DRT=3 data.
@@ -51,10 +51,15 @@ fn drt3_decode_once_extract_many_matches_full_decode() {
             .expect("complex_extra must be populated for DRT=3 lazy field");
 
         let n_pts = lazy.grid.num_data_points as usize;
-        let decoded_once = gribtract::decode_all_drt3(&lazy.section7_raw, &lazy.packing, extra, n_pts)
-            .expect("decode_all_drt3 must succeed");
+        let decoded_once =
+            gribtract::decode_all_drt3(&lazy.section7_raw, &lazy.packing, extra, n_pts)
+                .expect("decode_all_drt3 must succeed");
 
-        assert_eq!(decoded_once.len(), n_pts, "decoded length must match n_points");
+        assert_eq!(
+            decoded_once.len(),
+            n_pts,
+            "decoded length must match n_points"
+        );
 
         // Compare every grid point against the full eager decode.
         let tol = lazy.packing.tolerance().max(1e-12);
@@ -72,7 +77,10 @@ fn drt3_decode_once_extract_many_matches_full_decode() {
                 }
             }
         }
-        assert_eq!(mismatches, 0, "{mismatches} grid points differ between cached and full decode");
+        assert_eq!(
+            mismatches, 0,
+            "{mismatches} grid points differ between cached and full decode"
+        );
 
         // Also verify the 7 CONUS stations match the golden reference.
         let golden_fixture = golden::load_golden("gfs_tmp2m_1deg_anl")
@@ -83,7 +91,9 @@ fn drt3_decode_once_extract_many_matches_full_decode() {
             golden::GoldenGridValues::Masked { .. } => panic!("expected Dense golden"),
         };
         for &(name, lat, lon) in STATIONS {
-            let idx = full.grid.nearest_index(lat, lon)
+            let idx = full
+                .grid
+                .nearest_index(lat, lon)
                 .unwrap_or_else(|| panic!("nearest_index None for '{name}'"));
             let cached_val = decoded_once[idx];
             let golden_val = golden_values[idx];
@@ -93,7 +103,9 @@ fn drt3_decode_once_extract_many_matches_full_decode() {
                 "station '{name}' idx={idx}: cached_drt3={cached_val:.6}, golden={golden_val:.6}, diff={diff:.9}",
             );
         }
-        eprintln!("  [ok] decode-once-extract-many: {n_pts} grid points, 0 mismatches vs full decode");
+        eprintln!(
+            "  [ok] decode-once-extract-many: {n_pts} grid points, 0 mismatches vs full decode"
+        );
     }
 }
 
@@ -108,7 +120,9 @@ fn expected_nearest_index(lat: f64, lon: f64) -> usize {
     let nx = 360usize;
     let ny = 181usize;
     let mut lon_n = lon % 360.0;
-    if lon_n < 0.0 { lon_n += 360.0; }
+    if lon_n < 0.0 {
+        lon_n += 360.0;
+    }
     let row = ((90.0 - lat) / 1.0).round() as usize;
     let col = (lon_n / 1.0).round() as usize % nx;
     assert!(row < ny, "row {row} out of bounds for station lat={lat}");
@@ -121,10 +135,13 @@ fn station_extraction_drt3_gfs_tmp2m() {
     let bytes = corpus::load("gfs_tmp2m_1deg_anl")
         .expect("fixture gfs_tmp2m_1deg_anl must be present in corpus");
 
-    let fields = gribtract::decode(&bytes)
-        .expect("decode must succeed for gfs_tmp2m_1deg_anl");
+    let fields = gribtract::decode(&bytes).expect("decode must succeed for gfs_tmp2m_1deg_anl");
 
-    assert_eq!(fields.len(), 1, "expected exactly one field in gfs_tmp2m_1deg_anl");
+    assert_eq!(
+        fields.len(),
+        1,
+        "expected exactly one field in gfs_tmp2m_1deg_anl"
+    );
     let field = &fields[0];
 
     // Sanity-check grid dimensions.
@@ -156,10 +173,9 @@ fn station_extraction_drt3_gfs_tmp2m() {
     // ── Per-station assertions ────────────────────────────────────────────────────
     for &(name, lat, lon) in STATIONS {
         // nearest_index must return Some for every CONUS station on a 360×181 grid.
-        let idx = field
-            .grid
-            .nearest_index(lat, lon)
-            .unwrap_or_else(|| panic!("nearest_index returned None for station '{name}' ({lat}, {lon})"));
+        let idx = field.grid.nearest_index(lat, lon).unwrap_or_else(|| {
+            panic!("nearest_index returned None for station '{name}' ({lat}, {lon})")
+        });
 
         // Cross-check our manual index calculation matches the library.
         let expected_idx = expected_nearest_index(lat, lon);

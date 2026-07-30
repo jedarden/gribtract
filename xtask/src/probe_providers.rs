@@ -15,6 +15,9 @@ use std::collections::HashMap;
 use std::io::Read as _;
 use std::time::{Duration, Instant};
 
+// Re-use the date utilities from gribtract-fetch to avoid duplication
+use gribtract_fetch::utils::probe_date_str;
+
 // ── JSON schema (shared with gribtract::ProviderProbe) ────────────────────────
 
 /// Per-(model, provider) probe result.
@@ -124,36 +127,6 @@ fn model_catalogue() -> Vec<ModelSpec> {
     ]
 }
 
-// ── Date helpers ──────────────────────────────────────────────────────────────
-
-/// Return `YYYYMMDD` for `days_ago` days before today (UTC).
-/// Uses a proleptic Gregorian algorithm (Hinnant) — no `chrono` dependency.
-pub fn probe_date_str(days_ago: u64) -> String {
-    let secs = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_secs();
-    let days = (secs / 86400).saturating_sub(days_ago) as i64;
-    let (y, m, d) = civil_date(days);
-    format!("{:04}{:02}{:02}", y, m, d)
-}
-
-/// Days-since-1970-01-01 → (year, month, day).
-/// Algorithm: <https://howardhinnant.github.io/date_algorithms.html>
-pub fn civil_date(days: i64) -> (i32, u32, u32) {
-    let z = days + 719_468;
-    let era: i64 = if z >= 0 { z } else { z - 146_096 } / 146_097;
-    let doe = (z - era * 146_097) as u32; // day of era [0, 146096]
-    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146_096) / 365; // [0, 399]
-    let y: i64 = yoe as i64 + era * 400;
-    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100); // [0, 365]
-    let mp = (5 * doy + 2) / 153; // [0, 11]
-    let d = doy - (153 * mp + 2) / 5 + 1; // [1, 31]
-    let m = if mp < 10 { mp + 3 } else { mp - 9 }; // [1, 12]
-    let y = if m <= 2 { y + 1 } else { y };
-    (y as i32, m, d)
-}
-
 // ── HTTP probe ────────────────────────────────────────────────────────────────
 
 const TIMEOUT_SECS: u64 = 10;
@@ -253,8 +226,11 @@ pub fn rank_providers(results: &[ProviderResult]) -> HashMap<String, Vec<String>
             // Failures sort last; among successes sort by ascending score.
             let a_ok = a.ok as u8;
             let b_ok = b.ok as u8;
-            b_ok.cmp(&a_ok)
-                .then(a.score.partial_cmp(&b.score).unwrap_or(std::cmp::Ordering::Equal))
+            b_ok.cmp(&a_ok).then(
+                a.score
+                    .partial_cmp(&b.score)
+                    .unwrap_or(std::cmp::Ordering::Equal),
+            )
         });
         rankings.insert(model, entries.iter().map(|r| r.provider.clone()).collect());
     }
@@ -336,24 +312,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn civil_date_known_dates() {
-        // 1970-01-01 = day 0
-        assert_eq!(civil_date(0), (1970, 1, 1));
-        // 2000-01-01 = 10957 days since epoch
-        // (30 years, accounting for leap years)
-        assert_eq!(civil_date(10957), (2000, 1, 1));
-        // 2026-06-20 = 20624 days since epoch
-        assert_eq!(civil_date(20624), (2026, 6, 20));
-    }
-
-    #[test]
-    fn probe_date_str_is_8_digits() {
-        let s = probe_date_str(2);
-        assert_eq!(s.len(), 8, "YYYYMMDD must be 8 chars: {s}");
-        assert!(s.chars().all(|c| c.is_ascii_digit()));
-    }
-
-    #[test]
     fn compute_score_lower_is_better() {
         let fast = compute_score(10.0, 50.0);
         let slow = compute_score(200.0, 1.0);
@@ -401,7 +359,10 @@ mod tests {
     #[test]
     fn probe_output_rankings() {
         let mut rankings = HashMap::new();
-        rankings.insert("gfs".to_string(), vec!["noaa-s3".to_string(), "gcs".to_string()]);
+        rankings.insert(
+            "gfs".to_string(),
+            vec!["noaa-s3".to_string(), "gcs".to_string()],
+        );
         let output = ProbeOutput {
             timestamp: "2026-06-22T00:00:00Z".into(),
             probe_date: "20260620".into(),
@@ -411,7 +372,11 @@ mod tests {
         // Access rankings directly (ProbeOutput is the xtask-local write struct;
         // the runtime best_provider API lives in gribtract::ProviderProbe).
         assert_eq!(
-            output.rankings.get("gfs").and_then(|v| v.first()).map(|s| s.as_str()),
+            output
+                .rankings
+                .get("gfs")
+                .and_then(|v| v.first())
+                .map(|s| s.as_str()),
             Some("noaa-s3")
         );
         assert!(!output.rankings.contains_key("hrrr"));

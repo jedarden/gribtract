@@ -1,0 +1,133 @@
+DRT=0 Filtered Candidate List
+============================
+Generated: 2026-07-24
+Source Bead: bf-4wg4g
+Analysis File: drt_analysis/drt_analysis_results.txt
+
+FILTERING RESULTS
+-----------------
+Original candidates from bf-3ugst header download: 9
+Valid GRIB2 files available for DRT analysis: 7
+Files with DRT=0 (Simple Packing): 7
+Files excluded (DRT≠0): 0
+Files with analysis failures: 0
+Empty/missing files (excluded): 2
+
+FILTER CRITERIA
+---------------
+- DRT value must equal 0 (Simple Packing)
+- Exclude files with DRT=2, DRT=3, or other complex packing schemes
+- Exclude empty or corrupted files
+- Files must be successfully analyzed by wgrib2
+
+DRT=0 CONFIRMED CANDIDATES (7)
+------------------------------
+
+1. gfs_1p00_20260724_f000.grib2
+   DRT: 0 (Simple Packing)
+   Model: GFS
+   Resolution: 1.00°
+   Date: 2026-07-24
+   Forecast Hour: 000
+   Size: 42,755,881 bytes
+   Messages: 696
+   Source URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000
+   Local Path: /home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2
+   Header File: headers/bf-3ugst/gfs.t00z.pgrb2.1p00.f000.headers.txt
+
+2. gfs_0p25_20260723_f000.grib2
+   DRT: 0 (Simple Packing)
+   Model: GFS
+   Resolution: 0.25°
+   Date: 2026-07-23
+   Forecast Hour: 000
+   Size: 510,275,792 bytes
+   Messages: 696
+   Source URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000
+   Local Path: /home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2
+   Header File: headers/bf-3ugst/gfs.t00z.pgrb2.0p25.f000.headers.txt
+
+3. gefs_0p50_f000.grib2
+   DRT: 0 (Simple Packing)
+   Model: GEFS (ensemble mean)
+   Resolution: 0.50°
+   Date: 2026-07-24
+   Forecast Hour: 000
+   Size: 14,272,610 bytes
+   Messages: 71
+   Source URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000
+   Local Path: /home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2
+   Header File: headers/bf-3ugst/geavg.t00z.pgrb2a.0p50.f000.headers.txt
+
+4. gefs_0p50_f003.grib2
+   DRT: 0 (Simple Packing)
+   Model: GEFS (ensemble mean)
+   Resolution: 0.50°
+   Date: 2026-07-24
+   Forecast Hour: 003
+   Size: 15,343,992 bytes
+   Messages: 85
+   Source URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003
+   Local Path: /home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2
+   Header File: headers/bf-3ugst/geavg.t00z.pgrb2a.0p50.f003.headers.txt
+
+5. gfs_1p00_20260723_f000.grib2
+   DRT: 0 (Simple Packing)
+   Model: GFS
+   Resolution: 1.00°
+   Date: 2026-07-23
+   Forecast Hour: 000
+   Size: 42,460,488 bytes
+   Messages: 696
+   Source URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000
+   Local Path: /home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2
+   Header File: headers/bf-3ugst/gfs.t00z.pgrb2.1p00.f000.headers.txt
+
+6. gfs_0p50_20260724_f000.grib2
+   DRT: 0 (Simple Packing)
+   Model: GFS
+   Resolution: 0.50°
+   Date: 2026-07-24
+   Forecast Hour: 000
+   Size: 152,106,356 bytes
+   Messages: 696
+   Source URL: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000
+   Local Path: /home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2
+   Header File: headers/bf-3ugst/gfs.t00z.pgrb2.0p50.f000.headers.txt
+
+7. gefs_0p50_f006.grib2
+   DRT: 0 (Simple Packing)
+   Model: GEFS (ensemble mean)
+   Resolution: 0.50°
+   Date: 2026-07-24
+   Forecast Hour: 006
+   Size: 14,723,500 bytes
+   Messages: 85
+   Source URL: https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006
+   Local Path: /home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2
+   Header File: headers/bf-3ugst/geavg.t00z.pgrb2a.0p50.f006.headers.txt
+
+EXCLUDED FILES (2)
+------------------
+Empty/missing files that could not be analyzed:
+
+1. gfs_0p25_20260724_f000.grib2
+   Status: EMPTY FILE (0 bytes)
+   Issue: Download incomplete or failed
+   Expected Source: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p25.f000
+
+2. gfs_0p50_20260723_f000.grib2
+   Status: EMPTY FILE (0 bytes)
+   Issue: Download incomplete or failed
+   Expected Source: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p50.f000
+
+PACKING SPECIFICATIONS SUMMARY
+-------------------------------
+All 7 confirmed DRT=0 files use Simple Packing (DRT=0), which means:
+- No complex data compression (DRT=2: complex packing)
+- No secondary bit packing (DRT=3: spatial differencing)
+- Direct grid point values without complex preprocessing
+- Suitable for efficient parsing and grid extraction
+
+Analysis Method: wgrib2 -grid with grid_template extraction
+Verification Source: scripts/extract_drt.sh

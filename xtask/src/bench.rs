@@ -9,8 +9,8 @@ use std::time::Instant;
 
 use serde::{Deserialize, Serialize};
 
-use gribtract_testutil::{corpus, diff, golden};
 use crate::bench_station;
+use gribtract_testutil::{corpus, diff, golden};
 
 /// Progress sender used by [`run_with_sender`] to stream log lines to callers
 /// (e.g. the live HTTP server for SSE streaming).
@@ -140,7 +140,12 @@ fn run_inner(args: &[String], tx: Option<ProgressSender>) {
     progress!("xtask bench: corpus={corpus_name} workload={workload_filter}");
 
     let host = collect_host_info();
-    progress!("  host: {} ({} cores, {} GB RAM)", host.cpu, host.cores, host.mem_gb);
+    progress!(
+        "  host: {} ({} cores, {} GB RAM)",
+        host.cpu,
+        host.cores,
+        host.mem_gb
+    );
 
     let git_sha = get_git_sha();
     progress!("  git_sha: {git_sha}");
@@ -318,8 +323,7 @@ fn run_inner(args: &[String], tx: Option<ProgressSender>) {
         }
 
         // Lazy DRT=0 partial-decode path (only runs when DRT=0 data with raw bytes available)
-        if let Some(lazy_r) =
-            bench_station::run_lazy_nearest(&all_lazy_fields, &all_decoded_fields)
+        if let Some(lazy_r) = bench_station::run_lazy_nearest(&all_lazy_fields, &all_decoded_fields)
         {
             runs.push(BenchRun {
                 decoder: "gribtract".to_string(),
@@ -376,7 +380,10 @@ fn run_inner(args: &[String], tx: Option<ProgressSender>) {
     // ── Write bench-results.json ──────────────────────────────────────────────
     let json_pretty = serde_json::to_string_pretty(&result).expect("serialize BenchResult");
     std::fs::write("bench-results.json", &json_pretty).expect("write bench-results.json");
-    progress!("bench-results.json written ({} run entries)", result.runs.len());
+    progress!(
+        "bench-results.json written ({} run entries)",
+        result.runs.len()
+    );
 
     // ── Append to bench-history.jsonl ─────────────────────────────────────────
     let json_line = serde_json::to_string(&result).expect("serialize BenchResult for history");
@@ -396,7 +403,10 @@ fn run_inner(args: &[String], tx: Option<ProgressSender>) {
 
     // ── Summary ───────────────────────────────────────────────────────────────
     println!("=== xtask bench summary ===");
-    println!("corpus: {} messages, {} bytes", corpus_messages, corpus_bytes);
+    println!(
+        "corpus: {} messages, {} bytes",
+        corpus_messages, corpus_bytes
+    );
     for run in &result.runs {
         match run.workload.as_deref() {
             Some("station-extract") => {

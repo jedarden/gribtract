@@ -278,3 +278,148 @@ either:
 Given that Attempt 6 already found no measurable performance benefit from the
 specialized versions, the effort is not justified. The generic windowed extractor
 remains fast and correct.
+
+---
+
+## Attempt 8: Re-benchmark the corrected specialized extractors (2026-07-22)
+
+**Technique:** The specialized extractors were re-introduced after Attempt 7 (with
+the buffer-init bug fixed) and verified correct by bead `bf-gv2j` (100% differential
+agreement + a new `extract_group_specialized_matches_generic` cross-validation test).
+This attempt is the missing **performance gate**: an A/B benchmark of specialized vs
+generic-only on the now-correct, now-tested code — the measurement Attempt 6 lacked
+on a bug-free version.
+
+**Methodology:** `cargo xtask bench --workload full-grid`, 3 consecutive runs per
+variant on the DRT=3 GFS 1-degree fixture (65160 points). The A/B was toggled at the
+single dispatch site in `decode_drt3`'s group loop: the **specialized** variant calls
+`extract_group_specialized` (dispatches on w=4/8/12/16); the **generic-only** variant
+calls `extract_group_windowed` directly. Same machine, same corpus, release builds.
+
+**Result (DRT=3 / template 5.3, GFS fixture — the only metric this change can move):**
+
+| variant                       | runs (MB/s)        | mean           |
+|-------------------------------|--------------------|----------------|
+| specialized (w=4/8/12/16)     | 20.9, 21.7, 21.5   | **21.37 MB/s** |
+| generic-only (windowed)       | 20.7, 20.3, 20.8   | **20.60 MB/s** |
+
+- Delta: +0.77 MB/s (**+3.7%** for specialized by mean) — but **not significant**:
+  the 5.0 (simple-packing) control row on the *same* generic binary swung 80.8 → 86.5
+  MB/s (**±7%**) across consecutive runs, so the host's run-to-run noise is larger
+  than the apparent specialized gain. **No measurable win.** (An earlier timed-out
+  run of this same bead measured +0.5%; both are inside the noise floor.)
+- Agreement: 100.0% in every run for both variants; full workspace tests pass
+  (87 passed, 0 failed); differential suite explicitly reports **6/6 (100.0%)** and
+  holds at `AGREEMENT_FLOOR = 100`.
+
+**Why `station-extract` (stations-hours/s) is not reported here:** the extractor runs
+inside `decode()`. The station-extract bench decodes each fixture **once**, caches the
+fields, then times only the post-decode nearest/bilinear interpolation. The extractor
+change is therefore amortized out of `station-hours/s` entirely — only the full-grid
+decode MB/s reflects it. (For the record, the station-extract workload reports
+~60M nearest station-hours/s and 100% agreement, unchanged across variants.)
+
+**Why no win (consistent with Attempt 6):** the bit-extraction inner loop is no longer
+the bottleneck after Attempts 4 and 5. `extract_group_windowed`'s while-loop refill
+runs at most `ceil(w/8) ≤ 2` times per element for w ≤ 16, and the branch predictor
+learns the refill pattern within a group. The specialized paths remove that loop, but
+the saved cycles are dwarfed by the spatial-differencing running sum (strict sequential
+dependency) and the final f64 scaling pass, which dominate `decode_drt3`. The dispatch
+`match w` plus duplicated code paths (icache pressure) further offset any micro-gain.
+
+**Reverted to generic-only.** The specialized extractor functions
+(`extract_group_w4`/`w8`/`w12`/`w16`, `extract_group_specialized`) and the
+`extract_group_specialized_matches_generic` test were removed from `decode.rs`. The
+group loop now calls `extract_group_windowed` directly — the sole extractor path.
+`extract_group_windowed_matches_read_bits_at` is retained (it guards the surviving
+function). Per the plan rule, a faster path that does not measurably win is reverted.
+
+**Conclusion / dead end:** per-width **scalar** specializations of the DRT=3 group
+extractor are a confirmed dead end — benchmarked twice (Attempts 6 and 8) with the same
+conclusion, now on a version independently verified correct by `bf-gv2j`. **Do not
+re-attempt scalar specializations.** The next meaningful DRT=3 speedup requires
+attacking the spatial-differencing sequential dependency or eliminating the `packed`
+intermediate allocation (see Attempt 5 "Next headroom"), or SIMD intrinsics operating
+across multiple group values at once.
+
+---
+
+## Attempt 9: SIMD-based per-width specializations with AVX2 intrinsics (2026-07-27)
+
+**Technique:** Add specialized extractors for common widths (w=4, 8, 12, 16) using
+`std::arch::x86_64` AVX2 SIMD intrinsics (`__m256i` vector operations). A dispatch
+function `extract_group_dispatch` checks for AVX2 support at runtime and uses the
+SIMD path for supported widths, falling back to the generic `extract_group_windowed`
+for other widths or when AVX2 is unavailable. This is distinct from the scalar
+specializations in Attempts 6 & 8.
+
+The SIMD implementation processes 8 values per vector operation using 256-bit AVX2
+registers, with dedicated bit-packing logic for each width (4-bit: 2 values/byte,
+8-bit: direct byte loads, 12-bit: cross-byte reads, 16-bit: big-endian u16 pairs).
+
+**Result (DRT=3 / template 5.3, GFS 1-degree fixture — 3 runs/variant):**
+
+| variant                       | runs (MB/s)        | mean           |
+|-------------------------------|--------------------|----------------|
+| SIMD specialized (AVX2)       | 20.8, 20.8, 20.8   | **20.80 MB/s** |
+| Generic-only (windowed)       | 20.8, 20.9, 20.6   | **20.77 MB/s** |
+
+- Delta: +0.03 MB/s (**+0.1%** for SIMD by mean) — **not significant**; well within
+  the host's run-to-run noise (±1–2% on consecutive identical-config runs).
+- Agreement: 100.0% in every run for both variants; full workspace tests pass
+  (83 passed, 0 failed); differential suite reports **6/6 (100.0%)**.
+- SIMD code compiled and executed correctly on AVX2 hardware, all decode tests passed.
+
+**Why no win (consistent with Attempts 6 & 8):** The bit-extraction inner loop
+is no longer the bottleneck after Attempts 4 and 5. `extract_group_windowed`'s
+while-loop refill runs at most `ceil(w/8) ≤ 2` iterations per element for w ≤ 16,
+and the branch predictor learns the pattern. The SIMD paths eliminate this loop,
+but the saved cycles are dwarfed by:
+1. The spatial-differencing running sum (strict sequential dependency, O(n_points)).
+2. The final f64 scaling pass (reads/writes ~520 KB for a 65K-point field).
+3. Vector register pressure and the cross-byte bit-packing complexity for non-power-of-2
+   widths (especially w=12) offset any micro-architectural gains.
+
+**Reverted to generic-only.** The SIMD dispatch function (`extract_group_dispatch`)
+and the AVX2 specialized extractor (`extract_group_simd_avx2`) were removed from
+`decode.rs`. The group loop now calls `extract_group_windowed` directly — the sole
+extractor path. `extract_group_windowed_matches_read_bits_at` is retained (guards
+the surviving function). Per the plan rule, a faster path that does not measurably
+win is reverted.
+
+**Conclusion / dead end:** Per-width **SIMD** specializations of the DRT=3 group
+extractor are a confirmed dead end — benchmarked with AVX2 intrinsics and found to
+provide no measurable benefit over the generic windowed extractor. **Do not
+re-attempt per-width specializations (scalar or SIMD).** The next meaningful DRT=3
+speedup requires attacking the spatial-differencing sequential dependency or
+eliminating the `packed` intermediate allocation (see Attempt 5 "Next headroom").
+
+---
+
+## Attempt 10: Bead bf-3fh6 - stale duplicate of completed work (2026-07-27)
+
+**Technique:** Bead `bf-3fh6` was created to implement "per-width specialized group extractors
+for DRT=3" based on the "Implication for DRT=3 speed" section from Attempt 2. However,
+that implication has already been fully explored and documented:
+
+- Attempt 6 (2026-07-01): scalar specializations — no measurable win
+- Attempt 8 (2026-07-22): corrected scalar specializations, A/B benchmarked — +3.7% but not
+  significant (within noise floor)
+- Attempt 9 (2026-07-27): SIMD AVX2 specializations — +0.1%, not significant
+
+All three attempts reached the same conclusion: per-width specializations (scalar or SIMD)
+are a dead end because the bit-extraction inner loop is no longer the bottleneck after
+Attempts 4 and 5. The spatial-differencing running sum and final f64 scaling dominate.
+
+**Result:** This bead represents duplicate work. The current code in `decode.rs` already
+uses only the generic `extract_group_windowed` function — the specialized extractors were
+removed in Attempts 6, 8, and 9 after benchmarking showed no measurable benefit.
+
+**Why this bead is stale:** The bead description was seeded from Attempt 2's implication
+("next attempt should specialize per-group extraction for the most common group widths"),
+but that work was completed before this bead was claimed. The parse-speed-log already
+contains three thorough attempts (6, 8, 9) documenting why per-width specializations do
+not improve performance.
+
+**No code change.** The correct state (generic-only extractor) is already in place.
+This log entry documents that bead `bf-3fh6` was closed as a stale/duplicate request.

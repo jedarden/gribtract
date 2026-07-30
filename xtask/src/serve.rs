@@ -150,9 +150,7 @@ fn serve_run_sse(stream: &mut TcpStream) -> std::io::Result<()> {
 }
 
 fn serve_404(stream: &mut TcpStream) -> std::io::Result<()> {
-    stream.write_all(
-        b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
-    )
+    stream.write_all(b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
 }
 
 // ── HTML construction ─────────────────────────────────────────────────────────

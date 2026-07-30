@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""gen_golden.py — Generate gribtract golden reference files using eccodes.
+"""gen_golden.py — Generate gribtract golden reference JSON using eccodes CLI tools.
 
-Run this script where eccodes is available (e.g., an internal cluster with the
-ECMWF toolchain installed).  The output JSON is committed into the repo and
-used by the differential harness for offline comparison.
+This script uses grib_dump (eccodes CLI) to extract GRIB2 metadata and data values,
+then transforms it into the golden JSON format expected by the differential test suite.
 
 Usage:
     python3 scripts/gen_golden.py <grib2_file> <fixture_id> [--output-dir DIR]
@@ -11,214 +10,460 @@ Usage:
 Output:
     tests/corpus/golden/<fixture_id>.json
 
-The JSON format mirrors GoldenField in crates/gribtract-testutil/src/golden.rs.
-
-Requires: eccodes Python bindings  (pip install eccodes)
+Requirements:
+    - eccodes CLI tools (grib_dump) must be installed and in PATH
 """
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
-
-try:
-    import eccodes
-except ImportError:
-    print("ERROR: eccodes Python bindings not found.  Install with: pip install eccodes", file=sys.stderr)
-    sys.exit(1)
+from datetime import datetime
 
 
-def _get(msg, key, default=None):
-    """Retrieve a key from an eccodes message, returning default on error."""
+def run_grib_dump(grib2_path):
+    """Run grib_dump with JSON output and return parsed data.
+
+    Args:
+        grib2_path: Path to GRIB2 file
+
+    Returns:
+        Parsed JSON data from grib_dump
+
+    Raises:
+        subprocess.CalledProcessError: If grib_dump fails
+        ValueError: If grib_dump output is not valid JSON
+    """
     try:
-        return eccodes.codes_get(msg, key)
-    except eccodes.KeyValueNotFoundError:
-        return default
+        # Run grib_dump with JSON and data values output
+        result = subprocess.run(
+            ['grib_dump', '-j', '-d', str(grib2_path)],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+
+        # Parse JSON output
+        return json.loads(result.stdout)
+
+    except subprocess.CalledProcessError as e:
+        print(f"ERROR: grib_dump failed: {e}", file=sys.stderr)
+        if e.stderr:
+            print(f"grib_dump stderr: {e.stderr}", file=sys.stderr)
+        raise
+
+    except json.JSONDecodeError as e:
+        print(f"ERROR: Failed to parse grib_dump JSON output: {e}", file=sys.stderr)
+        print(f"grib_dump stdout: {result.stdout[:500]}...", file=sys.stderr)
+        raise ValueError(f"Invalid JSON from grib_dump: {e}")
 
 
-def decode_message(msg):
-    """Extract one GoldenField dict from an open eccodes message handle."""
-    edition = _get(msg, "edition")
-    if edition != 2:
-        return None
+# Section-5 packing keys whose values we fetch from `grib_ls -p` because
+# `grib_dump -j` (JSON mode) omits them entirely for simple/complex packing.
+PACKING_KEYS = [
+    'referenceValue',
+    'binaryScaleFactor',
+    'decimalScaleFactor',
+    'numberOfBitsContainingEachPackedValue',
+    'typeOfOriginalFieldValues',
+]
 
-    center    = _get(msg, "centre", 0)
-    subcenter = _get(msg, "subCentre", 0)
+# Keys whose values are integers (the rest — referenceValue — is a float).
+_PACKING_INT_KEYS = {
+    'binaryScaleFactor',
+    'decimalScaleFactor',
+    'numberOfBitsContainingEachPackedValue',
+    'typeOfOriginalFieldValues',
+}
 
-    discipline = _get(msg, "discipline", 0)
-    category   = _get(msg, "parameterCategory", 0)
-    number     = _get(msg, "parameterNumber", 0)
 
-    year        = _get(msg, "year", 0)
-    month       = _get(msg, "month", 0)
-    day         = _get(msg, "day", 0)
-    hour        = _get(msg, "hour", 0)
-    minute      = _get(msg, "minute", 0)
-    second      = _get(msg, "second", 0)
-    significance = _get(msg, "significanceOfReferenceTime", 0)
+def _coerce_packing_value(key, raw):
+    """Coerce a grib_ls token to its native Python type.
 
-    time_range_unit = _get(msg, "indicatorOfUnitOfTimeRange", 1)
-    forecast_offset = _get(msg, "forecastTime", 0)
+    `key` is one of PACKING_KEYS; `raw` is the whitespace-separated token from
+    grib_ls. Integer keys -> int, referenceValue -> float.
+    """
+    if key in _PACKING_INT_KEYS:
+        return int(float(raw))
+    return float(raw)
 
-    type1         = _get(msg, "typeOfFirstFixedSurface", 255)
-    scale_factor1 = _get(msg, "scaleFactorOfFirstFixedSurface", 0)
-    scaled_value1 = _get(msg, "scaledValueOfFirstFixedSurface", 0)
-    type2         = _get(msg, "typeOfSecondFixedSurface", 255)
-    scale_factor2 = _get(msg, "scaleFactorOfSecondFixedSurface", 0)
-    scaled_value2 = _get(msg, "scaledValueOfSecondFixedSurface", 0)
 
-    pdt = _get(msg, "productDefinitionTemplateNumber", 0)
-    ensemble = None
-    if pdt in (1, 11):
-        ensemble = {
-            "member_type": _get(msg, "typeOfEnsembleForecast", 0),
-            "number": _get(msg, "perturbationNumber", 0),
-        }
+def run_grib_ls_keys(grib2_path, keys):
+    """Fetch per-message key values from `grib_ls -p`.
 
-    gdt             = _get(msg, "gridDefinitionTemplateNumber", 0)
-    num_data_points = _get(msg, "numberOfDataPoints", 0)
-    nx              = _get(msg, "Ni", 0)
-    ny              = _get(msg, "Nj", 0)
-    lat_first       = _get(msg, "latitudeOfFirstGridPointInDegrees", 0.0)
-    lon_first       = _get(msg, "longitudeOfFirstGridPointInDegrees", 0.0)
-    lat_last        = _get(msg, "latitudeOfLastGridPointInDegrees", 0.0)
-    lon_last        = _get(msg, "longitudeOfLastGridPointInDegrees", 0.0)
-    di              = _get(msg, "iDirectionIncrementInDegrees", 0.0)
-    dj              = _get(msg, "jDirectionIncrementInDegrees", 0.0)
-    scanning_mode   = _get(msg, "scanningMode", 0)
-    resolution_flags = _get(msg, "resolutionAndComponentFlags", 48)
-    shape_of_earth  = _get(msg, "shapeOfTheEarth", 6)
+    grib_dump's JSON mode omits several Section-5 packing header keys
+    (referenceValue, binary/decimalScaleFactor, numberOfBitsContainingEachPackedValue,
+    typeOfOriginalFieldValues). grib_ls surfaces them, so this returns one dict per
+    GRIB message (values coerced to int/float) for merging into the dump data.
 
-    drt                  = _get(msg, "dataRepresentationTemplateNumber", 0)
-    reference_value      = float(_get(msg, "referenceValue", 0.0))
-    binary_scale_factor  = _get(msg, "binaryScaleFactor", 0)
-    decimal_scale_factor = _get(msg, "decimalScaleFactor", 0)
-    bits_per_value       = _get(msg, "bitsPerValue", 0)
-    original_field_type  = _get(msg, "typeOfOriginalFieldValues", 0)
+    Returns:
+        List of dicts, one per message. Empty list if grib_ls is unavailable,
+        fails, or returns no value rows.
+    """
+    try:
+        result = subprocess.run(
+            ['grib_ls', '-p', ','.join(keys), str(grib2_path)],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return []
 
-    values = eccodes.codes_get_values(msg).tolist()
-    bitmap_present = _get(msg, "bitmapPresent", 0)
-    if bitmap_present:
-        bitmap = eccodes.codes_get_array(msg, "bitmap").tolist()
-        grid_values = {
-            "Masked": {
-                "values": values,
-                "present": [bool(b) for b in bitmap],
+    lines = result.stdout.splitlines()
+    # Drop the leading filename echo line.
+    if lines and Path(grib2_path).name in lines[0]:
+        lines = lines[1:]
+
+    # Keep only non-empty lines that are not summary lines ("N of M messages ...").
+    rows = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or 'messages' in stripped:
+            continue
+        rows.append(stripped.split())
+
+    if len(rows) < 2:
+        return []
+
+    # rows[0] is the header (key names); rows[1:] are per-message value rows.
+    per_message = []
+    for raw_values in rows[1:]:
+        entry = {}
+        for key, raw in zip(keys, raw_values):
+            if raw == 'MISSING':
+                continue
+            try:
+                entry[key] = _coerce_packing_value(key, raw)
+            except (TypeError, ValueError):
+                continue
+        per_message.append(entry)
+    return per_message
+
+
+def key_to_dict(items, key):
+    """Convert a list of {key, value} items to a dictionary.
+
+    Args:
+        items: List of dictionaries with 'key' and 'value' keys
+        key: The key to look up
+
+    Returns:
+        Value if found, None otherwise
+    """
+    for item in items:
+        if item.get('key') == key:
+            return item.get('value')
+    return None
+
+
+def extract_scanning_mode(data):
+    """Extract scanning mode flags from eccodes data dict.
+
+    eccodes provides individual bits, we need to combine them into a single byte.
+
+    Args:
+        data: Dictionary containing keys from grib_dump (already converted)
+
+    Returns:
+        Integer scanning mode byte
+    """
+    # Extract individual scanning mode flags
+    i_scans_negatively = data.get('iScansNegatively', 0) or 0
+    j_scans_positively = data.get('jScansPositively', 0) or 0
+    j_points_consecutive = data.get('jPointsAreConsecutive', 0) or 0
+    alternative_scanning = data.get('alternativeRowScanning', 0) or 0
+
+    # Combine into scanning mode byte (per GRIB2 spec)
+    # Bit 0: iScansNegatively
+    # Bit 1: jScansPositively
+    # Bit 2: jPointsAreConsecutive
+    # Bit 3: alternativeRowScanning
+    scanning_mode = (
+        (i_scans_negatively & 1) |
+        ((j_scans_positively & 1) << 1) |
+        ((j_points_consecutive & 1) << 2) |
+        ((alternative_scanning & 1) << 3)
+    )
+    return scanning_mode
+
+
+def parse_data_date(date_int):
+    """Parse dataDate integer (YYYYMMDD) into year, month, day components.
+
+    Args:
+        date_int: Date as integer (YYYYMMDD format)
+
+    Returns:
+        Tuple of (year, month, day)
+    """
+    date_str = str(int(date_int))
+    if len(date_str) != 8:
+        return (0, 0, 0)
+
+    year = int(date_str[0:4])
+    month = int(date_str[4:6])
+    day = int(date_str[6:8])
+
+    return (year, month, day)
+
+
+def parse_data_time(time_int):
+    """Parse dataTime integer (HHMM) into hour, minute, second components.
+
+    Args:
+        time_int: Time as integer (HHMM format)
+
+    Returns:
+        Tuple of (hour, minute, second)
+    """
+    time_str = str(int(time_int)).zfill(4)
+    hour = int(time_str[0:2])
+    minute = int(time_str[2:4])
+    second = 0
+
+    return (hour, minute, second)
+
+
+def transform_message_to_golden(message_data, packing_extra=None):
+    """Transform a single message from grib_dump format to golden format.
+
+    Args:
+        message_data: List of {key, value} items from grib_dump
+        packing_extra: Optional dict of Section-5 packing keys (sourced from
+            `grib_ls -p`) to merge in, since grib_dump -j omits them.
+
+    Returns:
+        Dictionary in golden JSON format
+    """
+    # Create a lookup dict for easier access
+    data = {item['key']: item['value'] for item in message_data}
+
+    # Merge Section-5 packing keys that grib_dump -j omits (sourced from grib_ls -p).
+    if packing_extra:
+        data.update(packing_extra)
+
+    # Extract basic fields
+    center = data.get('centre', 0)
+    subcenter = data.get('subCentre', 0)
+
+    # Parameter info
+    discipline = data.get('discipline', 255)
+    param_category = data.get('parameterCategory', 255)
+    param_number = data.get('parameterNumber', 255)
+
+    # Parse reference time from dataDate and dataTime
+    date_int = data.get('dataDate', 0)
+    time_int = data.get('dataTime', 0)
+    significance = data.get('significanceOfReferenceTime', 0)
+
+    year, month, day = parse_data_date(date_int)
+    hour, minute, second = parse_data_time(time_int)
+
+    # Forecast info
+    time_range_unit = data.get('indicatorOfUnitForForecastTime', 1)
+    forecast_offset = data.get('forecastTime', 0)
+
+    # Level info
+    level_type1 = data.get('typeOfFirstFixedSurface', 255) or 255
+    level_scale1 = data.get('scaleFactorOfFirstFixedSurface', 0) or 0
+    level_scaled1 = data.get('scaledValueOfFirstFixedSurface', 0) or 0
+    level_type2 = data.get('typeOfSecondFixedSurface', 255) or 255
+    level_scale2 = data.get('scaleFactorOfSecondFixedSurface', 0) or 0
+    level_scaled2 = data.get('scaledValueOfSecondFixedSurface', 0) or 0
+
+    # Grid info
+    gdt_template = data.get('gridDefinitionTemplateNumber', 0)
+    num_data_points = data.get('numberOfDataPoints')
+    nx = data.get('Ni')
+    ny = data.get('Nj')
+    lat_first = data.get('latitudeOfFirstGridPointInDegrees')
+    lon_first = data.get('longitudeOfFirstGridPointInDegrees')
+    lat_last = data.get('latitudeOfLastGridPointInDegrees')
+    lon_last = data.get('longitudeOfLastGridPointInDegrees')
+    di = data.get('iDirectionIncrementInDegrees')
+    dj = data.get('jDirectionIncrementInDegrees')
+    shape_of_earth = data.get('shapeOfTheEarth', 6)
+
+    # Extract scanning mode
+    scanning_mode = extract_scanning_mode(data)
+
+    # Product definition template
+    pdt_template = data.get('productDefinitionTemplateNumber', 0)
+
+    # Extract ensemble info for PDT 4.1
+    ensemble_info = None
+    if pdt_template == 1:
+        # PDT 4.1 has ensemble forecast info
+        # eccodes might not provide all ensemble fields, check what's available
+        ensemble_type = data.get('typeOfEnsembleForecast')
+        perturbation_number = data.get('perturbationNumber')
+        if ensemble_type is not None or perturbation_number is not None:
+            ensemble_info = {
+                'member_type': ensemble_type if ensemble_type is not None else 0,
+                'number': perturbation_number if perturbation_number is not None else 0
             }
-        }
-    else:
-        grid_values = {"Dense": values}
 
-    return {
-        "center": center,
-        "subcenter": subcenter,
-        "parameter": {
-            "discipline": discipline,
-            "category": category,
-            "number": number,
-        },
-        "forecast": {
-            "reference_time": {
-                "year": year,
-                "month": month,
-                "day": day,
-                "hour": hour,
-                "minute": minute,
-                "second": second,
-                "significance": significance,
-            },
-            "time_range_unit": time_range_unit,
-            "forecast_offset": forecast_offset,
-        },
-        "level": {
-            "type1": type1,
-            "scale_factor1": scale_factor1,
-            "scaled_value1": scaled_value1,
-            "type2": type2,
-            "scale_factor2": scale_factor2,
-            "scaled_value2": scaled_value2,
-        },
-        "ensemble": ensemble,
-        "grid": {
-            "template": gdt,
-            "num_data_points": num_data_points,
-            "nx": nx,
-            "ny": ny,
-            "lat_first": lat_first,
-            "lon_first": lon_first,
-            "lat_last": lat_last,
-            "lon_last": lon_last,
-            "di": di,
-            "dj": dj,
-            "scanning_mode": scanning_mode,
-            "resolution_flags": resolution_flags,
-            "shape_of_earth": shape_of_earth,
-        },
-        "values": grid_values,
-        "gdt_template": gdt,
-        "pdt_template": pdt,
-        "drt_template": drt,
-        "packing": {
-            "reference_value": reference_value,
-            "binary_scale_factor": binary_scale_factor,
-            "decimal_scale_factor": decimal_scale_factor,
-            "bits_per_value": bits_per_value,
-            "original_field_type": original_field_type,
-        },
+    # Data representation template
+    packing_type = data.get('packingType', 'grid_simple')
+
+    # Map packing type to DRT template number
+    # grid_simple -> 0, grid_complex -> 2, etc.
+    drt_map = {
+        'grid_simple': 0,
+        'grid_complex': 2,
+        'grid_jpeg': 40,
+        'grid_png': 41,
+        'grid_second_simple': 1,
+    }
+    drt_template = drt_map.get(packing_type, 0)
+
+    # Packing info (eccodes may not provide all fields)
+    packing_info = {
+        'reference_value': data.get('referenceValue', 0.0),
+        'binary_scale_factor': data.get('binaryScaleFactor', 0),
+        'decimal_scale_factor': data.get('decimalScaleFactor', 0),
+        'bits_per_value': data.get('numberOfBitsContainingEachPackedValue', 0),
+        'original_field_type': data.get('typeOfOriginalFieldValues', 0)
     }
 
+    # Values
+    values = data.get('values', [])
+    values_info = {'Dense': values} if values else None
 
-def gen_golden(grib2_path, fixture_id, output_dir):
-    fields = []
-    with open(grib2_path, "rb") as f:
-        while True:
-            try:
-                msg = eccodes.codes_grib_new_from_file(f)
-            except Exception:
-                break
-            if msg is None:
-                break
-            try:
-                field = decode_message(msg)
-                if field is not None:
-                    fields.append(field)
-            finally:
-                eccodes.codes_release(msg)
+    # Build golden format message
+    golden_message = {
+        'center': center,
+        'subcenter': subcenter,
+        'parameter': {
+            'discipline': discipline,
+            'category': param_category,
+            'number': param_number
+        },
+        'forecast': {
+            'reference_time': {
+                'year': year,
+                'month': month,
+                'day': day,
+                'hour': hour,
+                'minute': minute,
+                'second': second,
+                'significance': significance
+            },
+            'time_range_unit': time_range_unit,
+            'forecast_offset': forecast_offset
+        },
+        'level': {
+            'type1': level_type1,
+            'scale_factor1': level_scale1,
+            'scaled_value1': level_scaled1,
+            'type2': level_type2,
+            'scale_factor2': level_scale2,
+            'scaled_value2': level_scaled2
+        },
+        'ensemble': ensemble_info,
+        'grid': {
+            'template': gdt_template,
+            'num_data_points': num_data_points,
+            'nx': nx,
+            'ny': ny,
+            'lat_first': lat_first,
+            'lon_first': lon_first,
+            'lat_last': lat_last,
+            'lon_last': lon_last,
+            'di': di,
+            'dj': dj,
+            'scanning_mode': scanning_mode,
+            'resolution_flags': 48,  # Default from eccodes
+            'shape_of_earth': shape_of_earth
+        },
+        'values': values_info,
+        'gdt_template': gdt_template,
+        'pdt_template': pdt_template,
+        'drt_template': drt_template,
+        'packing': packing_info
+    }
 
-    if not fields:
-        print(f"WARNING: no GRIB2 fields decoded from {grib2_path}", file=sys.stderr)
+    return golden_message
+
+
+def gen_golden_eccodes(grib2_path, fixture_id, output_dir):
+    """Generate golden JSON using eccodes CLI tools (grib_dump).
+
+    Args:
+        grib2_path: Path to input GRIB2 file
+        fixture_id: Fixture ID for output filename
+        output_dir: Directory for output JSON
+
+    Raises:
+        SystemExit: On file access or parsing errors
+    """
+    grib2_path = Path(grib2_path)
+
+    if not grib2_path.exists():
+        print(f"ERROR: GRIB2 file not found: {grib2_path}", file=sys.stderr)
         sys.exit(1)
 
+    # Run grib_dump and get JSON
+    try:
+        dump_data = run_grib_dump(grib2_path)
+    except (subprocess.CalledProcessError, ValueError) as e:
+        print(f"ERROR: Failed to extract data from {grib2_path}: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # Check for messages
+    if 'messages' not in dump_data or not dump_data['messages']:
+        print(f"ERROR: No messages found in grib_dump output", file=sys.stderr)
+        sys.exit(1)
+
+    # Fetch Section-5 packing keys that grib_dump -j omits (one dict per message).
+    packing_rows = run_grib_ls_keys(grib2_path, PACKING_KEYS)
+
+    # Transform each message to golden format
+    messages = []
+    for idx, message_data in enumerate(dump_data['messages']):
+        extra = packing_rows[idx] if idx < len(packing_rows) else None
+        golden_message = transform_message_to_golden(message_data, extra)
+        messages.append(golden_message)
+
+    # Build golden file structure
     golden = {
-        "fixture_id": fixture_id,
-        "_provenance": (
-            f"Generated by scripts/gen_golden.py from {Path(grib2_path).name}"
-            " using eccodes Python bindings."
+        'fixture_id': fixture_id,
+        '_provenance': (
+            f'Generated by scripts/gen_golden.py from {grib2_path.name}'
+            ' using eccodes CLI tools: grib_dump -j -d for metadata/values,'
+            ' grib_ls -p for Section-5 packing keys omitted by grib_dump -j.'
         ),
-        "fields": fields,
+        'fields': messages,
+        'parser_version': 'eccodes_cli_1.0'
     }
 
-    out = Path(output_dir) / f"{fixture_id}.json"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with open(out, "w") as fh:
-        json.dump(golden, fh, indent=4)
-    print(f"Written: {out}  ({len(fields)} field(s))")
+    # Write output
+    out_path = Path(output_dir) / f'{fixture_id}.json'
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(out_path, 'w') as f:
+        json.dump(golden, f, indent=4)
+
+    print(f'Written: {out_path}  ({len(messages)} message(s))')
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate gribtract golden reference JSON from a GRIB2 file using eccodes"
+        description='Generate gribtract golden reference JSON from a GRIB2 file using eccodes CLI tools'
     )
-    parser.add_argument("grib2_file", help="Input GRIB2 file")
-    parser.add_argument("fixture_id", help="Fixture ID (becomes the output filename)")
+    parser.add_argument('grib2_file', help='Input GRIB2 file')
+    parser.add_argument('fixture_id', help='Fixture ID (becomes the output filename)')
     parser.add_argument(
-        "--output-dir",
-        default="tests/corpus/golden",
-        help="Directory for the output JSON (default: tests/corpus/golden)",
+        '--output-dir',
+        default='tests/corpus/golden',
+        help='Directory for the output JSON (default: tests/corpus/golden)',
     )
     args = parser.parse_args()
-    gen_golden(args.grib2_file, args.fixture_id, args.output_dir)
+
+    gen_golden_eccodes(args.grib2_file, args.fixture_id, args.output_dir)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

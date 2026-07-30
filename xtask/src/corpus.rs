@@ -56,19 +56,12 @@ fn cmd_list() {
     };
     let root = corpus_root();
 
-    println!(
-        "{:<30}  {:<10}  {:<10}  path",
-        "id", "storage", "present"
-    );
+    println!("{:<30}  {:<10}  {:<10}  path", "id", "storage", "present");
     println!("{}", "-".repeat(80));
 
     for f in &fixtures {
         let file_path = root.join(&f.path);
-        let present = if file_path.exists() {
-            "yes"
-        } else {
-            "no"
-        };
+        let present = if file_path.exists() { "yes" } else { "no" };
         println!(
             "{:<30}  {:<10}  {:<10}  {}",
             f.id,
@@ -85,7 +78,9 @@ fn cmd_list() {
         .iter()
         .filter(|f| f.storage == "remote" && !root.join(&f.path).exists())
         .count();
-    println!("{total} total fixtures, {remote_count} remote, {missing_remote} remote missing locally");
+    println!(
+        "{total} total fixtures, {remote_count} remote, {missing_remote} remote missing locally"
+    );
 }
 
 // ── fetch ─────────────────────────────────────────────────────────────────────
@@ -148,11 +143,18 @@ fn cmd_fetch(args: &[String]) {
             // If --fixture was used on a non-remote entry, it's already inline
             let path = root.join(&entry.path);
             if path.exists() {
-                println!("[ok]      {} (storage={}, already present)", entry.id, entry.storage);
+                println!(
+                    "[ok]      {} (storage={}, already present)",
+                    entry.id, entry.storage
+                );
                 already_ok += 1;
             } else {
-                eprintln!("[missing] {} (storage={}, but file not found at {})",
-                    entry.id, entry.storage, path.display());
+                eprintln!(
+                    "[missing] {} (storage={}, but file not found at {})",
+                    entry.id,
+                    entry.storage,
+                    path.display()
+                );
                 failed += 1;
             }
             continue;
@@ -172,7 +174,10 @@ fn cmd_fetch(args: &[String]) {
                     eprintln!("[stale]   {} — sha256 mismatch, re-downloading", entry.id);
                 }
                 Err(e) => {
-                    eprintln!("[warn]    {} — cannot read existing file: {e}; re-downloading", entry.id);
+                    eprintln!(
+                        "[warn]    {} — cannot read existing file: {e}; re-downloading",
+                        entry.id
+                    );
                 }
             }
         }
@@ -192,7 +197,11 @@ fn cmd_fetch(args: &[String]) {
         // Create parent directory if needed
         if let Some(parent) = dest.parent() {
             if let Err(e) = std::fs::create_dir_all(parent) {
-                eprintln!("[error]   {} — cannot create directory {}: {e}", entry.id, parent.display());
+                eprintln!(
+                    "[error]   {} — cannot create directory {}: {e}",
+                    entry.id,
+                    parent.display()
+                );
                 failed += 1;
                 continue;
             }
@@ -260,9 +269,8 @@ fn resolve_url(entry: &FixtureEntry) -> Result<String, String> {
          GRIBTRACT_B2_BUCKET, or add a 'url' field to the manifest entry"
             .to_string()
     })?;
-    let bucket = std::env::var("GRIBTRACT_B2_BUCKET").map_err(|_| {
-        "GRIBTRACT_B2_ENDPOINT is set but GRIBTRACT_B2_BUCKET is not".to_string()
-    })?;
+    let bucket = std::env::var("GRIBTRACT_B2_BUCKET")
+        .map_err(|_| "GRIBTRACT_B2_ENDPOINT is set but GRIBTRACT_B2_BUCKET is not".to_string())?;
 
     let endpoint = endpoint.trim_end_matches('/');
     Ok(format!("{}/file/{}/{}", endpoint, bucket, entry.sha256))
@@ -285,10 +293,7 @@ fn download(url: &str, dest: &Path) -> Result<u64, String> {
 
     let resp = req.call().map_err(|e| format!("HTTP GET {url}: {e}"))?;
     if resp.status() != 200 {
-        return Err(format!(
-            "HTTP {} from {url}",
-            resp.status()
-        ));
+        return Err(format!("HTTP {} from {url}", resp.status()));
     }
 
     let mut reader = resp.into_reader();
@@ -298,8 +303,8 @@ fn download(url: &str, dest: &Path) -> Result<u64, String> {
     let mut buf = [0u8; 65536];
     let mut total = 0u64;
     loop {
-        let n = std::io::Read::read(&mut reader, &mut buf)
-            .map_err(|e| format!("read error: {e}"))?;
+        let n =
+            std::io::Read::read(&mut reader, &mut buf).map_err(|e| format!("read error: {e}"))?;
         if n == 0 {
             break;
         }
@@ -314,8 +319,7 @@ fn download(url: &str, dest: &Path) -> Result<u64, String> {
 /// Verify a file's SHA-256. Returns `Ok(true)` if it matches, `Ok(false)` if not,
 /// `Err` if the file cannot be read.
 fn verify_sha256(path: &Path, expected: &str) -> Result<bool, String> {
-    let bytes =
-        std::fs::read(path).map_err(|e| format!("cannot read {}: {e}", path.display()))?;
+    let bytes = std::fs::read(path).map_err(|e| format!("cannot read {}: {e}", path.display()))?;
     let digest = format!("{:x}", Sha256::digest(&bytes));
     Ok(digest == expected)
 }
@@ -407,7 +411,10 @@ mod tests {
             url: None,
         };
         let url = resolve_url(&entry).unwrap();
-        assert_eq!(url, "https://f000.backblazeb2.com/file/gribtract-corpus/deadbeef");
+        assert_eq!(
+            url,
+            "https://f000.backblazeb2.com/file/gribtract-corpus/deadbeef"
+        );
         std::env::remove_var("GRIBTRACT_B2_ENDPOINT");
         std::env::remove_var("GRIBTRACT_B2_BUCKET");
     }

@@ -1,6 +1,6 @@
 [package]
 name = "gribtract-core"
-description = "Low-level GRIB2 section parser and template decoders — no_std-friendly"
+description = "Low-level GRIB2 section parser and template decoders"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

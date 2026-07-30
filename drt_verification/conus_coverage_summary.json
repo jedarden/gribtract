@@ -1,0 +1,200 @@
+{
+  "verification_metadata": {
+    "bead": "bf-1evex",
+    "date": "2026-07-24T11:46:00Z",
+    "purpose": "CONUS geographic coverage verification for DRT=0 candidates",
+    "conus_definition": {
+      "lat_min": 24,
+      "lat_max": 50,
+      "lon_min": 235,
+      "lon_max": 293,
+      "description": "24°N-50°N, 125°W-67°W (235°E-293°E)"
+    },
+    "filter_criteria": "≥50% CONUS coverage required",
+    "verification_method": "wgrib2 grid analysis with manual CONUS point calculation"
+  },
+  "verification_summary": {
+    "total_candidates_analyzed": 7,
+    "candidates_passing_filter": 7,
+    "candidates_failing_filter": 0,
+    "pass_rate_percent": 100,
+    "all_provide_complete_conus_coverage": true,
+    "geographic_filtering_required": false
+  },
+  "conus_coverage_results": [
+    {
+      "candidate_id": "gfs_0p25_20260723_f000",
+      "filename": "gfs_0p25_20260723_f000.grib2",
+      "model": "GFS",
+      "resolution": "0.25°",
+      "grid_template": 0,
+      "global_grid": "1440×721",
+      "global_points": 1038240,
+      "conus_lat_points": 105,
+      "conus_lon_points": 233,
+      "conus_points": 24465,
+      "coverage_percent": 2.36,
+      "conus_status": "COMPLETE",
+      "geographic_bounds": {
+        "lat_min": 24,
+        "lat_max": 50,
+        "lon_min": 235,
+        "lon_max": 293
+      },
+      "recommendation": "High-resolution research applications"
+    },
+    {
+      "candidate_id": "gfs_0p50_20260724_f000",
+      "filename": "gfs_0p50_20260724_f000.grib2",
+      "model": "GFS",
+      "resolution": "0.50°",
+      "grid_template": 0,
+      "global_grid": "720×361",
+      "global_points": 259920,
+      "conus_lat_points": 53,
+      "conus_lon_points": 117,
+      "conus_points": 6201,
+      "coverage_percent": 2.38,
+      "conus_status": "COMPLETE",
+      "geographic_bounds": {
+        "lat_min": 24,
+        "lat_max": 50,
+        "lon_min": 235,
+        "lon_max": 293
+      },
+      "recommendation": "General CONUS applications (optimal balance)"
+    },
+    {
+      "candidate_id": "gefs_0p50_20260724_f000",
+      "filename": "gefs_0p50_f000.grib2",
+      "model": "GEFS",
+      "ensemble_type": "mean",
+      "forecast_hour": "f000",
+      "resolution": "0.50°",
+      "grid_template": 0,
+      "global_grid": "720×361",
+      "global_points": 259920,
+      "conus_lat_points": 53,
+      "conus_lon_points": 117,
+      "conus_points": 6201,
+      "coverage_percent": 2.38,
+      "conus_status": "COMPLETE",
+      "geographic_bounds": {
+        "lat_min": 24,
+        "lat_max": 50,
+        "lon_min": 235,
+        "lon_max": 293
+      },
+      "recommendation": "Ensemble mean for probabilistic forecasts"
+    },
+    {
+      "candidate_id": "gefs_0p50_20260724_f003",
+      "filename": "gefs_0p50_f003.grib2",
+      "model": "GEFS",
+      "ensemble_type": "mean",
+      "forecast_hour": "f003",
+      "resolution": "0.50°",
+      "grid_template": 0,
+      "global_grid": "720×361",
+      "global_points": 259920,
+      "conus_lat_points": 53,
+      "conus_lon_points": 117,
+      "conus_points": 6201,
+      "coverage_percent": 2.38,
+      "conus_status": "COMPLETE",
+      "geographic_bounds": {
+        "lat_min": 24,
+        "lat_max": 50,
+        "lon_min": 235,
+        "lon_max": 293
+      },
+      "recommendation": "3-hour ensemble forecast"
+    },
+    {
+      "candidate_id": "gefs_0p50_20260724_f006",
+      "filename": "gefs_0p50_f006.grib2",
+      "model": "GEFS",
+      "ensemble_type": "mean",
+      "forecast_hour": "f006",
+      "resolution": "0.50°",
+      "grid_template": 0,
+      "global_grid": "720×361",
+      "global_points": 259920,
+      "conus_lat_points": 53,
+      "conus_lon_points": 117,
+      "conus_points": 6201,
+      "coverage_percent": 2.38,
+      "conus_status": "COMPLETE",
+      "geographic_bounds": {
+        "lat_min": 24,
+        "lat_max": 50,
+        "lon_min": 235,
+        "lon_max": 293
+      },
+      "recommendation": "6-hour ensemble forecast"
+    },
+    {
+      "candidate_id": "gfs_1p00_20260724_f000",
+      "filename": "gfs_1p00_20260724_f000.grib2",
+      "model": "GFS",
+      "resolution": "1.00°",
+      "grid_template": 0,
+      "global_grid": "360×181",
+      "global_points": 65160,
+      "conus_lat_points": 27,
+      "conus_lon_points": 59,
+      "conus_points": 1593,
+      "coverage_percent": 2.44,
+      "conus_status": "COMPLETE",
+      "geographic_bounds": {
+        "lat_min": 24,
+        "lat_max": 50,
+        "lon_min": 235,
+        "lon_max": 293
+      },
+      "recommendation": "Real-time applications (fastest access)"
+    },
+    {
+      "candidate_id": "gfs_1p00_20260723_f000",
+      "filename": "gfs_1p00_20260723_f000.grib2",
+      "model": "GFS",
+      "resolution": "1.00°",
+      "grid_template": 0,
+      "global_grid": "360×181",
+      "global_points": 65160,
+      "conus_lat_points": 27,
+      "conus_lon_points": 59,
+      "conus_points": 1593,
+      "coverage_percent": 2.44,
+      "conus_status": "COMPLETE",
+      "geographic_bounds": {
+        "lat_min": 24,
+        "lat_max": 50,
+        "lon_min": 235,
+        "lon_max": 293
+      },
+      "recommendation": "Real-time applications (fastest access)"
+    }
+  ],
+  "acceptance_criteria": {
+    "wgrib2_grid_analysis_completed": true,
+    "grid_parameters_extracted": true,
+    "conus_extent_verified": true,
+    "candidates_filtered_by_conus_coverage": true,
+    "geographic_bounds_documented": true,
+    "coverage_percentages_documented": true
+  },
+  "key_findings": [
+    "All 7 DRT=0 candidates use Grid Template 0 (Regular Latitude-Longitude)",
+    "Global grid coverage naturally includes CONUS as subset",
+    "No geographic filtering required - 100% pass rate",
+    "CONUS grid points range from 1,593 (1.00°) to 24,465 (0.25°)",
+    "Coverage percentages consistent at 2.36-2.44% of global grids"
+  ],
+  "recommendations": {
+    "development_testing": "Use GFS 1.00° files (1,593 CONUS points, fastest downloads)",
+    "production_applications": "Use GFS 0.50° files (6,201 CONUS points, optimal balance)",
+    "high_resolution_research": "Use GFS 0.25° files (24,465 CONUS points, maximum detail)"
+  },
+  "next_steps": "All candidates ready for CONUS DRT=0 tool development. No geographic exclusions needed."
+}

@@ -1,0 +1,1764 @@
+1:0:vt=2026072700:mean sea level:anl:PRMSL Pressure Reduced to MSL [Pa]:
+    ndata=262792:undef=0:mean=101202:min=100204:max=102391
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+2:236072:vt=2026072700:1 hybrid level:anl:PRES Pressure [Pa]:
+    ndata=262792:undef=0:mean=97484.4:min=66952.3:max=102106
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+3:476571:vt=2026072700:1 hybrid level:anl:RWMR Rain Mixing Ratio [kg/kg]:
+    ndata=262792:undef=0:mean=2.92003e-06:min=0:max=0.00152
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+4:492741:vt=2026072700:1 hybrid level:anl:SNMR Snow Mixing Ratio [kg/kg]:
+    ndata=262792:undef=0:mean=0:min=0:max=0
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+5:492960:vt=2026072700:1 hybrid level:anl:REFD Reflectivity [dB]:
+    ndata=262792:undef=0:mean=-15.9686:min=-20:max=46.49
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+6:588206:vt=2026072700:1 hybrid level:anl:RIME Rime Factor [non-dim]:
+    ndata=262792:undef=0:mean=1:min=1:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+7:588425:vt=2026072700:1 hybrid level:anl:HGT Geopotential Height [gpm]:
+    ndata=262792:undef=0:mean=340.952:min=-52:max=3590
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+8:708647:vt=2026072700:1 hybrid level:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=296.506:min=275.436:max=315.176
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+9:922949:vt=2026072700:1 hybrid level:anl:POT Potential Temperature [K]:
+    ndata=262792:undef=0:mean=298.924:min=274.865:max=327.575
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+10:1136382:vt=2026072700:1 hybrid level:anl:RH Relative Humidity [%]:
+    ndata=262792:undef=0:mean=71.1713:min=6.44192:max=99.6319
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+11:1448519:vt=2026072700:1 hybrid level:anl:DPT Dew Point Temperature [K]:
+    ndata=262792:undef=0:mean=289.626:min=263.151:max=303.471
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+12:1791301:vt=2026072700:1 hybrid level:anl:SPFH Specific Humidity [kg/kg]:
+    ndata=262792:undef=0:mean=0.0129013:min=0.00214204:max=0.0276704
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+13.1:2142353:vt=2026072700:1 hybrid level:anl:UGRD U-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.0143607:min=-14.3875:max=11.6425
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+13.2:2142353:vt=2026072700:1 hybrid level:anl:VGRD V-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.125535:min=-13.0524:max=14.1776
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+14:2559654:vt=2026072700:1 hybrid level:anl:VVEL Vertical Velocity (Pressure) [Pa/s]:
+    ndata=262792:undef=0:mean=-0.0220438:min=-1.88926:max=1.79194
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+15:2846859:vt=2026072700:1 hybrid level:anl:TKE Turbulent Kinetic Energy [J/kg]:
+    ndata=262792:undef=0:mean=0.518507:min=0:max=6.5
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+16:2937897:vt=2026072700:entire atmosphere (considered as a single layer):anl:REFC Composite reflectivity [dB]:
+    ndata=262792:undef=0:mean=-14.0512:min=-20:max=49.12
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+17:3082147:vt=2026072700:surface:anl:VIS Visibility [m]:
+    ndata=262792:undef=0:mean=22804.6:min=0:max=24100
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+18:3136180:vt=2026072700:cloud top:anl:VIS Visibility [m]:
+    ndata=262792:undef=0:mean=17146.6:min=0:max=60000
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+19:3306332:vt=2026072700:1 hybrid level:anl:BMIXL Blackadars Mixing Length Scale [m]:
+    ndata=262792:undef=0:mean=0:min=0:max=0
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+20:3306551:vt=2026072700:planetary boundary layer:anl:HGT Geopotential Height [gpm]:
+    ndata=262792:undef=0:mean=692.335:min=20.3272:max=4581.45
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+21.1:3690604:vt=2026072700:planetary boundary layer:anl:UGRD U-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.307965:min=-18.1227:max=14.8148
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+21.2:3690604:vt=2026072700:planetary boundary layer:anl:VGRD V-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.330868:min=-15.8356:max=17.4769
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+22:3967581:vt=2026072700:planetary boundary layer:anl:VRATE Ventilation Rate [m^2/s]:
+    ndata=262792:undef=0:mean=3588.51:min=0:max=36000
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+23:4050229:vt=2026072700:surface:anl:GUST Wind Speed (Gust) [m/s]:
+    ndata=262792:undef=0:mean=5.32504:min=0.0220796:max=19.8221
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+24:4192066:vt=2026072700:entire atmosphere (considered as a single layer):anl:RETOP Echo Top [m]:
+    ndata=262792:undef=0:mean=-4553.76:min=-5000:max=14991.6
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+25:4241102:vt=2026072700:250 mb:anl:ABSV Absolute Vorticity [1/s]:
+    ndata=262792:undef=0:mean=9.15156e-05:min=-0.000566423:max=0.000573577
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+26:4423459:vt=2026072700:500 mb:anl:VVEL Vertical Velocity (Pressure) [Pa/s]:
+    ndata=262792:undef=0:mean=-0.000607693:min=-32.4299:max=2.40613
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+27:4643970:vt=2026072700:500 mb:anl:ABSV Absolute Vorticity [1/s]:
+    ndata=262792:undef=0:mean=8.94214e-05:min=-0.000736185:max=0.00118781
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+28:4831490:vt=2026072700:700 mb:anl:VVEL Vertical Velocity (Pressure) [Pa/s]:
+    ndata=262792:undef=0:mean=-0.000727988:min=-21.9605:max=3.62045
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+29:5074072:vt=2026072700:700 mb:anl:ABSV Absolute Vorticity [1/s]:
+    ndata=262792:undef=0:mean=8.80379e-05:min=-0.000566593:max=0.00119541
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+30:5273870:vt=2026072700:750 mb:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=284.211:min=266.836:max=301.636
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+31:5377057:vt=2026072700:800 mb:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=287.437:min=269.704:max=307.204
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+32:5483555:vt=2026072700:850 mb:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=290.413:min=272.503:max=312.403
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+33:5593459:vt=2026072700:850 mb:anl:ABSV Absolute Vorticity [1/s]:
+    ndata=262792:undef=0:mean=8.81011e-05:min=-0.000339057:max=0.00116394
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+34:5801248:vt=2026072700:900 mb:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=293.091:min=275.805:max=315.605
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+35:5913026:vt=2026072700:surface:anl:HINDEX Haines Index [Numeric]:
+    ndata=262792:undef=139575:mean=4.57489:min=2:max=6
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+36:6025083:vt=2026072700:1000 mb:anl:ABSV Absolute Vorticity [1/s]:
+    ndata=262792:undef=0:mean=8.8604e-05:min=-0.000405694:max=0.000833306
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+37:6244832:vt=2026072700:mean sea level:anl:MSLET MSLP (Eta model reduction) [Pa]:
+    ndata=262792:undef=0:mean=101107:min=99690.2:max=102350
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+38:6472330:vt=2026072700:0.7 sigma level:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=279.207:min=259.552:max=289.864
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+39:6590977:vt=2026072700:0.75 sigma level:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=282.482:min=263.035:max=294.098
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+40:6714885:vt=2026072700:0.8 sigma level:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=285.546:min=266.347:max=297.472
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+41:6841419:vt=2026072700:0.85 sigma level:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=288.339:min=269.433:max=301.245
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+42:6969315:vt=2026072700:0.9 sigma level:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=290.94:min=271.784:max=305.534
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+43:7101412:vt=2026072700:4000 m above ground:anl:REFD Reflectivity [dB]:
+    ndata=262792:undef=0:mean=-17.3636:min=-20:max=48.92
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+44:7173268:vt=2026072700:1000 m above ground:anl:REFD Reflectivity [dB]:
+    ndata=262792:undef=0:mean=-16.0094:min=-20:max=48.02
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+45:7264849:vt=2026072700:surface:anl:PRES Pressure [Pa]:
+    ndata=262792:undef=0:mean=97710.4:min=67058.8:max=102350
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+46:7505357:vt=2026072700:surface:anl:HGT Geopotential Height [gpm]:
+    ndata=262792:undef=0:mean=320.794:min=-73.93:max=3576.39
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+47:7685382:vt=2026072700:surface:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=297.456:min=271.739:max=322.209
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+48:7926931:vt=2026072700:0-0.1 m below ground:anl:TSOIL Soil Temperature [K]:
+    ndata=262792:undef=0:mean=286.026:min=271.62:max=322.12
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+49:8104657:vt=2026072700:0-0.1 m below ground:anl:SOILW Volumetric Soil Moisture Content [Fraction]:
+    ndata=262792:undef=0:mean=0.638636:min=0.025:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+50:8247721:vt=2026072700:0-0.1 m below ground:anl:SOILL Liquid Volumetric Soil Moisture (non Frozen) [Proportion]:
+    ndata=262792:undef=0:mean=0.638636:min=0.025:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+51:8390785:vt=2026072700:0.1-0.4 m below ground:anl:TSOIL Soil Temperature [K]:
+    ndata=262792:undef=0:mean=282.387:min=271.19:max=313.37
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+52:8567048:vt=2026072700:0.1-0.4 m below ground:anl:SOILW Volumetric Soil Moisture Content [Fraction]:
+    ndata=262792:undef=0:mean=0.640719:min=0.023:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+53:8711038:vt=2026072700:0.1-0.4 m below ground:anl:SOILL Liquid Volumetric Soil Moisture (non Frozen) [Proportion]:
+    ndata=262792:undef=0:mean=0.640719:min=0.023:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+54:8855028:vt=2026072700:0.4-1 m below ground:anl:TSOIL Soil Temperature [K]:
+    ndata=262792:undef=0:mean=281.112:min=271.16:max=310.99
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+55:9031096:vt=2026072700:0.4-1 m below ground:anl:SOILW Volumetric Soil Moisture Content [Fraction]:
+    ndata=262792:undef=0:mean=0.637242:min=0.023:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+56:9177123:vt=2026072700:0.4-1 m below ground:anl:SOILL Liquid Volumetric Soil Moisture (non Frozen) [Proportion]:
+    ndata=262792:undef=0:mean=0.637179:min=0.023:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+57:9323089:vt=2026072700:1-2 m below ground:anl:TSOIL Soil Temperature [K]:
+    ndata=262792:undef=0:mean=279.33:min=270.95:max=308.36
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+58:9496838:vt=2026072700:1-2 m below ground:anl:SOILW Volumetric Soil Moisture Content [Fraction]:
+    ndata=262792:undef=0:mean=0.660002:min=0.047:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+59:9644731:vt=2026072700:1-2 m below ground:anl:SOILL Liquid Volumetric Soil Moisture (non Frozen) [Proportion]:
+    ndata=262792:undef=0:mean=0.65221:min=0.047:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+60:9792729:vt=2026072700:3 m underground:anl:TSOIL Soil Temperature [K]:
+    ndata=262792:undef=0:mean=280.029:min=263:max=300.6
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+61:9878288:vt=2026072700:0-1 m below ground:anl:MSTAV Moisture Availability [%]:
+    ndata=262792:undef=0:mean=20.2238:min=0:max=96
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+62:9983298:vt=2026072700:0-2 m below ground:anl:SOILM Soil Moisture Content [kg/m^2]:
+    ndata=262792:undef=0:mean=765.72:min=0:max=1000
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+63:10085564:vt=2026072700:surface:anl:CNWAT Plant Canopy Surface Water [kg/m^2]:
+    ndata=262792:undef=0:mean=0.0257926:min=0:max=0.5
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+64:10104453:vt=2026072700:surface:anl:WEASD Water Equivalent of Accumulated Snow Depth [kg/m^2]:
+    ndata=262792:undef=0:mean=0.0230403:min=0:max=11.4
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+65:10107979:vt=2026072700:surface:anl:SNOWC Snow Cover [%]:
+    ndata=262792:undef=0:mean=0.388901:min=0:max=100
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+66:10111180:vt=2026072700:surface:anl:SNOD Snow Depth [m]:
+    ndata=262792:undef=0:mean=8.34713e-05:min=0:max=0.04998
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+67:10116371:vt=2026072700:surface:anl:SMDRY Direct Evaporation Cease (soil moisture) [Proportion]:
+    ndata=262792:undef=0:mean=0.0310527:min=0:max=0.135
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+68:10203479:vt=2026072700:surface:anl:POROS Soil Porosity [Proportion]:
+    ndata=262792:undef=0:mean=0.207071:min=0:max=0.476
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+69:10293893:vt=2026072700:2 m above ground:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=296.823:min=274.262:max=316.932
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+70:10517627:vt=2026072700:2 m above ground:anl:SPFH Specific Humidity [kg/kg]:
+    ndata=262792:undef=0:mean=0.0133167:min=0.00226007:max=0.0284001
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+71:10739277:vt=2026072700:2 m above ground:anl:DPT Dew Point Temperature [K]:
+    ndata=262792:undef=0:mean=290.135:min=263.864:max=303.814
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+72:10971575:vt=2026072700:2 m above ground:anl:RH Relative Humidity [%]:
+    ndata=262792:undef=0:mean=72.3041:min=6.13387:max=100.034
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+73.1:11178605:vt=2026072700:10 m above ground:anl:UGRD U-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.0292638:min=-13.783:max=11.207
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+73.2:11178605:vt=2026072700:10 m above ground:anl:VGRD V-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.111443:min=-11.9447:max=13.6753
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+74:11564422:vt=2026072700:10 m above ground:anl:POT Potential Temperature [K]:
+    ndata=262792:undef=0:mean=299.04:min=274.414:max=327.93
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+75:11891483:vt=2026072700:10 m above ground:anl:SPFH Specific Humidity [kg/kg]:
+    ndata=262792:undef=0:mean=0.0129518:min=0.0021429:max=0.0276429
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+76:12012783:vt=2026072700:surface:anl:CPOFP Percent of Frozen Precipitation [%]:
+    ndata=262792:undef=0:mean=-44.7749:min=-50:max=-6.10352e-06
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+77:12077473:vt=2026072700:surface:anl:CPRAT Convective Precipitation Rate [kg/m^2/s]:
+    ndata=262792:undef=0:mean=4.8016e-06:min=0:max=0.0008546
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+78:12136776:vt=2026072700:surface:anl:PRATE Precipitation Rate [kg/m^2/s]:
+    ndata=262792:undef=0:mean=8.75221e-06:min=0:max=0.00327
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+79:12171166:vt=2026072700:surface:0-0 day acc fcst:APCP Total Precipitation [kg/m^2]:
+    ndata=262792:undef=0:mean=0:min=0:max=0
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+80:12171409:vt=2026072700:surface:0-0 day acc fcst:ACPCP Convective Precipitation [kg/m^2]:
+    ndata=262792:undef=0:mean=0:min=0:max=0
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+81:12171652:vt=2026072700:surface:0-0 day acc fcst:WEASD Water Equivalent of Accumulated Snow Depth [kg/m^2]:
+    ndata=262792:undef=0:mean=0:min=0:max=0
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+82:12171895:vt=2026072700:surface:0-0 day acc fcst:SNOM Snow Melt [kg/m^2]:
+    ndata=262792:undef=0:mean=0.000369517:min=0:max=0.38
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+83:12175475:vt=2026072700:surface:0-0 day acc fcst:SSRUN Storm Surface Runoff [kg/m^2]:
+    ndata=262792:undef=0:mean=0.000911329:min=0:max=2.9
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+84:12182844:vt=2026072700:surface:0-0 day acc fcst:BGRUN Baseflow-Groundwater Runoff [kg/m^2]:
+    ndata=262792:undef=0:mean=0.00269165:min=0:max=0.661
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+85:12238478:vt=2026072700:lowest level of the wet bulb zero:anl:HGT Geopotential Height [gpm]:
+    ndata=262792:undef=0:mean=3602.12:min=-139.668:max=5726.21
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+86:12585685:vt=2026072700:surface:anl:CSNOW Categorical Snow [-]:
+    ndata=262792:undef=0:mean=0:min=0:max=0
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+87:12585904:vt=2026072700:surface:anl:CICEP Categorical Ice Pellets [-]:
+    ndata=262792:undef=0:mean=0:min=0:max=0
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+88:12586123:vt=2026072700:surface:anl:CFRZR Categorical Freezing Rain [-]:
+    ndata=262792:undef=0:mean=0:min=0:max=0
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+89:12586342:vt=2026072700:surface:anl:CRAIN Categorical Rain [-]:
+    ndata=262792:undef=0:mean=0.104588:min=0:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+90:12603442:vt=2026072700:surface:anl:SFCR Surface Roughness [m]:
+    ndata=262792:undef=0:mean=0.484882:min=0:max=2.75
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+91:12699840:vt=2026072700:surface:anl:FRICV Frictional Velocity [m/s]:
+    ndata=262792:undef=0:mean=0.265604:min=0.00379189:max=1.15779
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+92:12915633:vt=2026072700:surface:anl:SFEXC Exchange Coefficient [(kg/m^3)(m/s)]:
+    ndata=262792:undef=0:mean=0.0111211:min=0:max=0.041
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+93:13013027:vt=2026072700:surface:anl:VEG Vegetation [%]:
+    ndata=262792:undef=0:mean=27.2185:min=0:max=99
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+94:13143600:vt=2026072700:surface:anl:VGTYP Vegetation Type [Integer(0-13)]:
+    ndata=262792:undef=0:mean=3.48041:min=0:max=19
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+95:13236003:vt=2026072700:surface:anl:SOTYP Soil Type [-]:
+    ndata=262792:undef=0:mean=2.43944:min=0:max=16
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+96:13323975:vt=2026072700:surface:anl:CCOND Canopy Conductance [m/s]:
+    ndata=262792:undef=0:mean=0.00172682:min=0:max=0.0231
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+97:13417342:vt=2026072700:surface:anl:RSMIN Minimal Stomatal Resistance [s/m]:
+    ndata=262792:undef=0:mean=85.6714:min=0:max=400
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+98:13515978:vt=2026072700:surface:anl:RLYRS Number of Soil Layers in Root Zone [non-dim]:
+    ndata=262792:undef=0:mean=1.60014:min=0:max=4
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+99:13584558:vt=2026072700:surface:anl:WILT Wilting Point [Fraction]:
+    ndata=262792:undef=0:mean=0.0310527:min=0:max=0.135
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+100:13671666:vt=2026072700:surface:anl:SMREF Transpiration Stress-onset (soil moisture) [Proportion]:
+    ndata=262792:undef=0:mean=0.154821:min=0:max=0.404
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+101:13767864:vt=2026072700:surface:anl:RCS Solar parameter in canopy conductance [Fraction]:
+    ndata=262792:undef=0:mean=0.191479:min=0:max=0.854
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+102:13897782:vt=2026072700:surface:anl:RCT Temperature parameter in canopy conductance [Fraction]:
+    ndata=262792:undef=0:mean=0.428632:min=0:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+103:14056687:vt=2026072700:surface:anl:RCQ Humidity parameter in canopy conductance [Fraction]:
+    ndata=262792:undef=0:mean=0.329218:min=0:max=0.996
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+104:14184049:vt=2026072700:surface:anl:RCSOL Soil moisture parameter in canopy conductance [Fraction]:
+    ndata=262792:undef=0:mean=0.285714:min=0:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+105:14285141:vt=2026072700:500-1000 mb:anl:LFTX Surface Lifted Index [K]:
+    ndata=262792:undef=0:mean=272.895:min=255.238:max=296.838
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+106:14419466:vt=2026072700:surface:anl:CAPE Convective Available Potential Energy [J/kg]:
+    ndata=262792:undef=0:mean=1064.33:min=0:max=5944
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+107:14653771:vt=2026072700:surface:anl:CIN Convective Inhibition [J/kg]:
+    ndata=262792:undef=0:mean=-14.6445:min=-925.674:max=0.0255859
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+108:14830101:vt=2026072700:entire atmosphere (considered as a single layer):anl:PWAT Precipitable Water [kg/m^2]:
+    ndata=262792:undef=0:mean=33.1118:min=6.15256:max=82.5526
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+109:14976190:vt=2026072700:entire atmosphere (considered as a single layer):anl:TCOLW Total Column-Integrated Cloud Water [kg/m^2]:
+    ndata=262792:undef=0:mean=0.0243749:min=0:max=2.4474
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+110:15150554:vt=2026072700:entire atmosphere (considered as a single layer):anl:TCOLI Total Column-Integrated Cloud Ice [kg/m^2]:
+    ndata=262792:undef=0:mean=0.00342876:min=0:max=0.9411
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+111:15209173:vt=2026072700:entire atmosphere (considered as a single layer):anl:TCOLR Total Column Integrated Rain [kg/m^2]:
+    ndata=262792:undef=0:mean=0.0107465:min=0:max=9.591
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+112:15261632:vt=2026072700:entire atmosphere (considered as a single layer):anl:TCOLS Total Column Integrated Snow [kg/m^2]:
+    ndata=262792:undef=0:mean=0.0534429:min=0:max=20.476
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+113:15321998:vt=2026072700:entire atmosphere (considered as a single layer):anl:TCOLC Total Column-Integrated Condensate [kg/m^2]:
+    ndata=262792:undef=0:mean=0.0919985:min=0:max=27.757
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+114:15477648:vt=2026072700:entire atmosphere (considered as a single layer):anl:TCLSW Total column-integrated supercooled liquid water [kg/m^2]:
+    ndata=262792:undef=0:mean=0.005021:min=0:max=1.7325
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+115:15529052:vt=2026072700:entire atmosphere (considered as a single layer):anl:TCOLM Total column-integrated melting ice [kg/m^2]:
+    ndata=262792:undef=0:mean=0.000910966:min=0:max=0.8452
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+116:15554767:vt=2026072700:entire atmosphere (considered as a single layer):anl:SWHR Solar Radiative Heating Rate [K/s]:
+    ndata=262792:undef=0:mean=0.103953:min=0:max=0.29725
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+117:15832083:vt=2026072700:entire atmosphere (considered as a single layer):anl:LWHR Long-Wave Radiative Heating Rate [K/s]:
+    ndata=262792:undef=0:mean=-0.208102:min=-0.31872:max=-0.0074199
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+118:16223399:vt=2026072700:entire atmosphere (considered as a single layer):0-0 day ave fcst:LRGHR Large Scale Condensate Heating Rate [K/s]:
+    ndata=262792:undef=0:mean=0.0196271:min=-10.0047:max=60.6653
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+119:16423997:vt=2026072700:entire atmosphere (considered as a single layer):0-0 day ave fcst:CNVHR Deep Convective Heating Rate [K/s]:
+    ndata=262792:undef=0:mean=0.0392633:min=-5.81853e-05:max=6.47874
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+120:16504509:vt=2026072700:entire atmosphere (considered as a single layer):anl:MDIV Horizontal Moisture Divergence [kg/kg/s]:
+    ndata=262792:undef=0:mean=-1.55391e-05:min=-0.00579213:max=0.0370929
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+121:16810021:vt=2026072700:lowest bottom level of supercooled liquid water layer:anl:HGT Geopotential Height [gpm]:
+    ndata=262792:undef=0:mean=-4497.2:min=-5000:max=6373.2
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+122:16882768:vt=2026072700:highest top level of supercooled liquid water layer:anl:HGT Geopotential Height [gpm]:
+    ndata=262792:undef=0:mean=-4457.13:min=-5000:max=9361
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+123:16951206:vt=2026072700:entire atmosphere (considered as a single layer):anl:CUEFI Convective Cloud Efficiency [non-dim]:
+    ndata=262792:undef=0:mean=0.734902:min=0.2:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+124:17025133:vt=2026072700:low cloud layer:anl:LCDC Low Cloud Cover [%]:
+    ndata=262792:undef=0:mean=28.3716:min=0:max=100
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+125:17128428:vt=2026072700:middle cloud layer:anl:MCDC Medium Cloud Cover [%]:
+    ndata=262792:undef=0:mean=9.94182:min=0:max=100
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+126:17188787:vt=2026072700:high cloud layer:anl:HCDC High Cloud Cover [%]:
+    ndata=262792:undef=0:mean=6.27183:min=0:max=100
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+127:17228936:vt=2026072700:cloud base:anl:PRES Pressure [Pa]:
+    ndata=262792:undef=0:mean=36033.1:min=-50000:max=101656
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+128:17577730:vt=2026072700:cloud ceiling:anl:HGT Geopotential Height [gpm]:
+    ndata=262792:undef=0:mean=14081.8:min=17.3952:max=20000.2
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+129:17794904:vt=2026072700:convective cloud bottom level:anl:PRES Pressure [Pa]:
+    ndata=262792:undef=0:mean=17626.4:min=-50000:max=99508
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+130:18128114:vt=2026072700:shallow convective cloud bottom level:anl:PRES Pressure [Pa]:
+    ndata=262792:undef=0:mean=8644.99:min=-50000:max=99508
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+131:18460938:vt=2026072700:grid scale cloud bottom level:anl:PRES Pressure [Pa]:
+    ndata=262792:undef=0:mean=-4101.06:min=-50000:max=101608
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+132:18727049:vt=2026072700:cloud top:anl:PRES Pressure [Pa]:
+    ndata=262792:undef=0:mean=25700:min=-50000:max=101220
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+133:19096809:vt=2026072700:cloud top:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=-18.1122:min=-500:max=303.54
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+134:19436583:vt=2026072700:top of atmosphere:anl:BRTMP Brightness Temperature [K]:
+    ndata=262792:undef=0:mean=290.752:min=193:max=315
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+135:19550440:vt=2026072700:convective cloud top level:anl:PRES Pressure [Pa]:
+    ndata=262792:undef=0:mean=10952:min=-50000:max=97544
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+136:19901210:vt=2026072700:shallow convective cloud top level:anl:PRES Pressure [Pa]:
+    ndata=262792:undef=0:mean=4261.57:min=-50000:max=97544
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+137:20245518:vt=2026072700:grid scale cloud top level:anl:PRES Pressure [Pa]:
+    ndata=262792:undef=0:mean=-7930.52:min=-50000:max=101220
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+138:20511249:vt=2026072700:surface:0-0 day ave fcst:DSWRF Downward Short-Wave Radiation Flux [W/m^2]:
+    ndata=262792:undef=0:mean=229.94:min=0:max=800
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+139:20603341:vt=2026072700:surface:anl:DSWRF Downward Short-Wave Radiation Flux [W/m^2]:
+    ndata=262792:undef=0:mean=218.419:min=0:max=773
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+140:20765942:vt=2026072700:3000-0 m above ground:anl:HLCY Storm Relative Helicity [m^2/s^2]:
+    ndata=262792:undef=0:mean=55.738:min=-109.825:max=593.175
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+141:20903986:vt=2026072700:1000-0 m above ground:anl:HLCY Storm Relative Helicity [m^2/s^2]:
+    ndata=262792:undef=0:mean=20.1472:min=-82.33:max=294.47
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+142.1:21128479:vt=2026072700:6000-0 m above ground:anl:USTM U-Component Storm Motion [m/s]:
+    ndata=262792:undef=0:mean=1.63202:min=-16.7349:max=20.3451
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+142.2:21128479:vt=2026072700:6000-0 m above ground:anl:VSTM V-Component Storm Motion [m/s]:
+    ndata=262792:undef=0:mean=-1.89348:min=-24.0091:max=19.1909
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+143:21549075:vt=2026072700:30-0 mb above ground:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=295.772:min=277.4:max=313.5
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+144:21666341:vt=2026072700:30-0 mb above ground:anl:RH Relative Humidity [%]:
+    ndata=262792:undef=0:mean=71.7469:min=7:max=99
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+145.1:21770043:vt=2026072700:30-0 mb above ground:anl:UGRD U-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.212848:min=-15.9337:max=13.8463
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+145.2:21770043:vt=2026072700:30-0 mb above ground:anl:VGRD V-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.281883:min=-15.4064:max=15.9936
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+146:22190424:vt=2026072700:30-0 mb above ground:anl:PLI Parcel Lifted Index (to 500 hPa) [K]:
+    ndata=262792:undef=0:mean=-0.214665:min=-17.7665:max=19.0335
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+147:22320065:vt=2026072700:60-30 mb above ground:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=293.834:min=274.517:max=310.517
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+148:22435531:vt=2026072700:60-30 mb above ground:anl:RH Relative Humidity [%]:
+    ndata=262792:undef=0:mean=73.4353:min=8:max=99
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+149.1:22541185:vt=2026072700:60-30 mb above ground:anl:UGRD U-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.487173:min=-17.7627:max=15.9373
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+149.2:22541185:vt=2026072700:60-30 mb above ground:anl:VGRD V-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.378129:min=-18.4713:max=18.9287
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+150:22767331:vt=2026072700:90-60 mb above ground:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=292.015:min=272.143:max=307.543
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+151:22883336:vt=2026072700:90-60 mb above ground:anl:RH Relative Humidity [%]:
+    ndata=262792:undef=0:mean=71.7892:min=7.42682:max=99.4268
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+152.1:22994373:vt=2026072700:90-60 mb above ground:anl:UGRD U-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.781275:min=-19.7766:max=18.0234
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+152.2:22994373:vt=2026072700:90-60 mb above ground:anl:VGRD V-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.550809:min=-17.8775:max=21.2225
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+153:23219935:vt=2026072700:120-90 mb above ground:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=290.349:min=270.347:max=304.647
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+154:23336722:vt=2026072700:120-90 mb above ground:anl:RH Relative Humidity [%]:
+    ndata=262792:undef=0:mean=68.5278:min=1:max=99
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+155.1:23452493:vt=2026072700:120-90 mb above ground:anl:UGRD U-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=1.20454:min=-23.8415:max=19.6585
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+155.2:23452493:vt=2026072700:120-90 mb above ground:anl:VGRD V-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.640184:min=-17.1497:max=20.7503
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+156:23680389:vt=2026072700:150-120 mb above ground:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=288.696:min=268.517:max=302.217
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+157:23799738:vt=2026072700:150-120 mb above ground:anl:RH Relative Humidity [%]:
+    ndata=262792:undef=0:mean=66.1915:min=1:max=99
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+158.1:23917627:vt=2026072700:150-120 mb above ground:anl:UGRD U-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=1.56088:min=-26.6624:max=20.7376
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+158.2:23917627:vt=2026072700:150-120 mb above ground:anl:VGRD V-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.61607:min=-17.8657:max=19.8343
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+159:24150344:vt=2026072700:180-150 mb above ground:anl:TMP Temperature [K]:
+    ndata=262792:undef=0:mean=287.131:min=266.105:max=300.305
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+160.1:24273078:vt=2026072700:180-150 mb above ground:anl:UGRD U-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=1.92172:min=-27.717:max=20.783
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+160.2:24273078:vt=2026072700:180-150 mb above ground:anl:VGRD V-Component of Wind [m/s]:
+    ndata=262792:undef=0:mean=0.539262:min=-18.123:max=22.277
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+161:24508311:vt=2026072700:180-0 mb above ground:anl:4LFTX Best (4 layer) Lifted Index [K]:
+    ndata=262792:undef=0:mean=-0.768978:min=-17.7665:max=12.8335
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+162:24638890:vt=2026072700:180-0 mb above ground:anl:CAPE Convective Available Potential Energy [J/kg]:
+    ndata=262792:undef=0:mean=994.157:min=0:max=5744
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+163:24872378:vt=2026072700:180-0 mb above ground:anl:CIN Convective Inhibition [J/kg]:
+    ndata=262792:undef=0:mean=-13.1936:min=-496.978:max=0.0220703
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+164:25062782:vt=2026072700:surface:anl:HPBL Planetary Boundary Layer Height [m]:
+    ndata=262792:undef=0:mean=769.195:min=26.72:max=5508.32
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+165:25480521:vt=2026072700:level of adiabatic condensation from sfc:anl:HGT Geopotential Height [gpm]:
+    ndata=262792:undef=0:mean=981.388:min=74.7812:max=5061.88
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+166:25840116:vt=2026072700:0.47-1 sigma layer:anl:RH Relative Humidity [%]:
+    ndata=262792:undef=0:mean=54.7514:min=9:max=99
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+167:25938822:vt=2026072700:90-0 mb above ground:anl:CAPE Convective Available Potential Energy [J/kg]:
+    ndata=262792:undef=0:mean=719.482:min=0:max=5243
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+168:26143829:vt=2026072700:90-0 mb above ground:anl:CIN Convective Inhibition [J/kg]:
+    ndata=262792:undef=0:mean=-15.6311:min=-553.702:max=-0.00209961
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+169:26340928:vt=2026072700:255-0 mb above ground:anl:CAPE Convective Available Potential Energy [J/kg]:
+    ndata=262792:undef=0:mean=1104.25:min=0:max=5944
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+170:26580435:vt=2026072700:255-0 mb above ground:anl:CIN Convective Inhibition [J/kg]:
+    ndata=262792:undef=0:mean=-12.4289:min=-518.299:max=0.0012207
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+171:26757145:vt=2026072700:255-0 mb above ground:anl:PLPL Pressure of level from which parcel was lifted [Pa]:
+    ndata=262792:undef=0:mean=91940.9:min=47771.1:max=99999.9
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+172:27025101:vt=2026072700:surface:anl:LTNG Lightning [non-dim]:
+    ndata=262792:undef=0:mean=0.0593321:min=0:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+173:27038004:vt=2026072700:surface:anl:LAND Land Cover (0=sea, 1=land) [Proportion]:
+    ndata=262792:undef=0:mean=0.468306:min=0:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+174:27047696:vt=2026072700:surface:anl:ICEC Ice Cover [Proportion]:
+    ndata=262792:undef=0:mean=0.0010046:min=0:max=1
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+175:27048582:vt=2026072700:surface:anl:ALBDO Albedo [%]:
+    ndata=262792:undef=0:mean=11.8795:min=6:max=75
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+176:27121792:vt=2026072700:surface:anl:SNFALB Snow-Free Albedo [%]:
+    ndata=262792:undef=0:mean=11.864:min=6:max=75
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+177:27190346:vt=2026072700:surface:anl:MXSALB Maximum Snow Albedo [%]:
+    ndata=262792:undef=0:mean=28.0663:min=6:max=80
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+178:27285052:vt=2026072700:surface:anl:WTMP Water Temperature [K]:
+    ndata=262792:undef=0:mean=297.448:min=271.749:max=322.209
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+179:27604099:vt=2026072700:surface:anl:SHTFL Sensible Heat Net Flux [W/m^2]:
+    ndata=262792:undef=0:mean=19.0093:min=-52.6452:max=304.955
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+180:27839050:vt=2026072700:surface:anl:LHTFL Latent Heat Net Flux [W/m^2]:
+    ndata=262792:undef=0:mean=54.7396:min=-45.1322:max=364.868
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+181:28007464:vt=2026072700:entire atmosphere (considered as a single layer):anl:TCDC Total Cloud Cover [%]:
+    ndata=262792:undef=0:mean=33.8951:min=0:max=100
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+182:28124826:vt=2026072700:entire atmosphere (considered as a single layer):anl:CDCON Convective Cloud Cover [%]:
+    ndata=262792:undef=0:mean=8.26554:min=0:max=97
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+183:28236519:vt=2026072700:top of atmosphere:anl:ULWRF Upward Long-Wave Rad. Flux [W/m^2]:
+    ndata=262792:undef=0:mean=269.034:min=88.717:max=342.317
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+184:28477289:vt=2026072700:surface:anl:DLWRF Downward Long-Wave Rad. Flux [W/m^2]:
+    ndata=262792:undef=0:mean=384.859:min=269.795:max=494.895
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+185:28748506:vt=2026072700:surface:anl:USWRF Upward Short-Wave Radiation Flux [W/m^2]:
+    ndata=262792:undef=0:mean=27.3346:min=0:max=450.3
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+
+186:28930044:vt=2026072700:surface:anl:ULWRF Upward Long-Wave Rad. Flux [W/m^2]:
+    ndata=262792:undef=0:mean=436.283:min=299.987:max=603.187
+    grid_template=30:winds(grid):
+	Lambert Conformal: (614 x 428) input WE:SN output WE:SN res 56
+	Lat1 12.190000 Lon1 226.541000 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP -90.000000 LonSP 0.000000
+	North Pole (614 x 428) Dx 12191.000000 m Dy 12191.000000 m 
+

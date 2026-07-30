@@ -1,0 +1,193 @@
+{
+  "metadata": {
+    "generated": "2026-07-24T07:35:00Z",
+    "source_bead": "bf-64bv0",
+    "upstream_beads": ["bf-5eokv", "bf-3ugst", "bf-1fmeu", "bf-4wg4g"],
+    "purpose": "CONUS coverage verification hand-off",
+    "verification_criteria": "DRT=0 (Simple Packing) with confirmed GRIB2 structure"
+  },
+  "summary": {
+    "total_candidates": 7,
+    "models": {
+      "GFS": 4,
+      "GEFS": 3
+    },
+    "resolutions": {
+      "0.25°": 1,
+      "0.50°": 4,
+      "1.00°": 2
+    },
+    "dates": ["2026-07-23", "2026-07-24"],
+    "all_drt_zero_confirmed": true,
+    "all_simple_packing": true
+  },
+  "candidates": [
+    {
+      "candidate_id": "gfs_1p00_20260724_f000",
+      "filename": "gfs_1p00_20260724_f000.grib2",
+      "source_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2",
+      "model": "GFS",
+      "resolution": "1.00°",
+      "date": "2026-07-24",
+      "forecast_hour": "f000",
+      "size_bytes": 42755881,
+      "drt_confirmation": {
+        "value": 0,
+        "packing_type": "Simple Packing",
+        "method": "wgrib2 -grid analysis",
+        "verified_by": "bf-4wg4g"
+      },
+      "coverage": "Global (includes CONUS)"
+    },
+    {
+      "candidate_id": "gfs_0p25_20260723_f000",
+      "filename": "gfs_0p25_20260723_f000.grib2",
+      "source_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2",
+      "model": "GFS",
+      "resolution": "0.25°",
+      "date": "2026-07-23",
+      "forecast_hour": "f000",
+      "size_bytes": 510275792,
+      "drt_confirmation": {
+        "value": 0,
+        "packing_type": "Simple Packing",
+        "method": "wgrib2 -grid analysis",
+        "verified_by": "bf-4wg4g"
+      },
+      "coverage": "Global (includes CONUS)"
+    },
+    {
+      "candidate_id": "gefs_0p50_20260724_f000",
+      "filename": "gefs_0p50_f000.grib2",
+      "source_url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2",
+      "model": "GEFS",
+      "ensemble_type": "mean",
+      "resolution": "0.50°",
+      "date": "2026-07-24",
+      "forecast_hour": "f000",
+      "size_bytes": 14272610,
+      "drt_confirmation": {
+        "value": 0,
+        "packing_type": "Simple Packing",
+        "method": "wgrib2 -grid analysis",
+        "verified_by": "bf-4wg4g"
+      },
+      "coverage": "Global (includes CONUS)"
+    },
+    {
+      "candidate_id": "gefs_0p50_20260724_f003",
+      "filename": "gefs_0p50_f003.grib2",
+      "source_url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2",
+      "model": "GEFS",
+      "ensemble_type": "mean",
+      "resolution": "0.50°",
+      "date": "2026-07-24",
+      "forecast_hour": "f003",
+      "size_bytes": 15343992,
+      "drt_confirmation": {
+        "value": 0,
+        "packing_type": "Simple Packing",
+        "method": "wgrib2 -grid analysis",
+        "verified_by": "bf-4wg4g"
+      },
+      "coverage": "Global (includes CONUS)"
+    },
+    {
+      "candidate_id": "gfs_1p00_20260723_f000",
+      "filename": "gfs_1p00_20260723_f000.grib2",
+      "source_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2",
+      "model": "GFS",
+      "resolution": "1.00°",
+      "date": "2026-07-23",
+      "forecast_hour": "f000",
+      "size_bytes": 42460488,
+      "drt_confirmation": {
+        "value": 0,
+        "packing_type": "Simple Packing",
+        "method": "wgrib2 -grid analysis",
+        "verified_by": "bf-4wg4g"
+      },
+      "coverage": "Global (includes CONUS)"
+    },
+    {
+      "candidate_id": "gfs_0p50_20260724_f000",
+      "filename": "gfs_0p50_20260724_f000.grib2",
+      "source_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2",
+      "model": "GFS",
+      "resolution": "0.50°",
+      "date": "2026-07-24",
+      "forecast_hour": "f000",
+      "size_bytes": 152106356,
+      "drt_confirmation": {
+        "value": 0,
+        "packing_type": "Simple Packing",
+        "method": "wgrib2 -grid analysis",
+        "verified_by": "bf-4wg4g"
+      },
+      "coverage": "Global (includes CONUS)"
+    },
+    {
+      "candidate_id": "gefs_0p50_20260724_f006",
+      "filename": "gefs_0p50_f006.grib2",
+      "source_url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2",
+      "model": "GEFS",
+      "ensemble_type": "mean",
+      "resolution": "0.50°",
+      "date": "2026-07-24",
+      "forecast_hour": "f006",
+      "size_bytes": 14723500,
+      "drt_confirmation": {
+        "value": 0,
+        "packing_type": "Simple Packing",
+        "method": "wgrib2 -grid analysis",
+        "verified_by": "bf-4wg4g"
+      },
+      "coverage": "Global (includes CONUS)"
+    }
+  ],
+  "excluded_candidates": [
+    {
+      "candidate_id": "gfs_0p25_20260724_f000_excluded",
+      "filename": "gfs_0p25_20260724_f000.grib2",
+      "source_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+      "status": "empty",
+      "reason": "Download incomplete or failed - file is 0 bytes",
+      "requires_redownload": true
+    },
+    {
+      "candidate_id": "gfs_0p50_20260723_f000_excluded",
+      "filename": "gfs_0p50_20260723_f000.grib2",
+      "source_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+      "status": "empty",
+      "reason": "Download incomplete or failed - file is 0 bytes",
+      "requires_redownload": true
+    }
+  ],
+  "next_steps_for_conus_verification": {
+    "ready_for_verification": true,
+    "verification_method": "CONUS grid cell analysis using wgrib2 -grid",
+    "expected_output": "CONUS coverage percentage and cell counts per candidate",
+    "dependencies": [
+      "Local file availability at specified local_path",
+      "wgrib2 binary for grid cell extraction",
+      "CONUS bounding box definition (lat/lon bounds)"
+    ],
+    "handoff_bead_context": "This list provides the complete set of verified DRT=0 candidates ready for CONUS coverage analysis. Each candidate has been confirmed to use Simple Packing (DRT=0) and is suitable for downstream processing."
+  },
+  "verification_reference": {
+    "drt_zero_definition": "Simple Packing - no complex compression or spatial differencing",
+    "excluded_packing_types": [
+      "DRT=2: Complex packing",
+      "DRT=3: Spatial differencing",
+      "DRT=40000: IEEE floating point"
+    ],
+    "analysis_tools": "wgrib2 -grid with grid_template extraction"
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "source_bead": "bf-5eokv",
+  "extraction_date": "2026-07-24",
+  "search_criteria": {
+    "drt_value": 0,
+    "coverage": "CONUS",
+    "format": "GRIB2"
+  },
+  "total_candidates": 9,
+  "candidates": [
+    {
+      "id": 1,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+      "model": "GFS",
+      "resolution": "0.25",
+      "date": "2026-07-24",
+      "forecast_hour": "000",
+      "drt": 0,
+      "size_mb": 491,
+      "grid": "1440x721",
+      "coverage": "Global (includes CONUS)",
+      "archive": "NOMADS"
+    },
+    {
+      "id": 2,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+      "model": "GFS",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "000",
+      "drt": 0,
+      "size_mb": 146,
+      "grid": "720x361",
+      "coverage": "Global (includes CONUS)",
+      "archive": "NOMADS"
+    },
+    {
+      "id": 3,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "model": "GFS",
+      "resolution": "1.00",
+      "date": "2026-07-24",
+      "forecast_hour": "000",
+      "drt": 0,
+      "size_mb": 41,
+      "grid": "360x181",
+      "coverage": "Global (includes CONUS)",
+      "archive": "NOMADS"
+    },
+    {
+      "id": 4,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+      "model": "GFS",
+      "resolution": "0.25",
+      "date": "2026-07-23",
+      "forecast_hour": "000",
+      "drt": 0,
+      "size_mb": 487,
+      "grid": "1440x721",
+      "coverage": "Global (includes CONUS)",
+      "archive": "NOMADS"
+    },
+    {
+      "id": 5,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+      "model": "GFS",
+      "resolution": "0.50",
+      "date": "2026-07-23",
+      "forecast_hour": "000",
+      "drt": 0,
+      "size_mb": 145,
+      "grid": "720x361",
+      "coverage": "Global (includes CONUS)",
+      "archive": "NOMADS"
+    },
+    {
+      "id": 6,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "model": "GFS",
+      "resolution": "1.00",
+      "date": "2026-07-23",
+      "forecast_hour": "000",
+      "drt": 0,
+      "size_mb": 41,
+      "grid": "360x181",
+      "coverage": "Global (includes CONUS)",
+      "archive": "NOMADS"
+    },
+    {
+      "id": 7,
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000",
+      "model": "GEFS",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "000",
+      "drt": 0,
+      "size_mb": 14,
+      "grid": "720x361",
+      "coverage": "Global (includes CONUS)",
+      "archive": "AWS_S3"
+    },
+    {
+      "id": 8,
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003",
+      "model": "GEFS",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "003",
+      "drt": 0,
+      "size_mb": 15,
+      "grid": "720x361",
+      "coverage": "Global (includes CONUS)",
+      "archive": "AWS_S3"
+    },
+    {
+      "id": 9,
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006",
+      "model": "GEFS",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "006",
+      "drt": 0,
+      "size_mb": 15,
+      "grid": "720x361",
+      "coverage": "Global (includes CONUS)",
+      "archive": "AWS_S3"
+    }
+  ],
+  "summary": {
+    "gfs_candidates": 6,
+    "gefs_candidates": 3,
+    "resolutions": ["0.25", "0.50", "1.00"],
+    "archives": ["NOMADS", "AWS_S3"],
+    "all_drt_zero": true,
+    "all_conus_coverage": true
+  },
+  "verification_methods": {
+    "drt_check": "wgrib2 -V with grid_template parsing",
+    "conus_check": "Grid definition analysis - global grids include CONUS"
+  }
+}

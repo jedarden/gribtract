@@ -1,0 +1,16 @@
+file_path,resolution,size_mb,filename,drt_value,notes
+downloads/candidates/0p25/gfs.t00z.pgrb2.0p25.f000.20260722.grib2,0p25,489,gfs.t00z.pgrb2.0p25.f000.20260722.grib2,0,Regular lat/lon grid
+downloads/candidates/0p25/gfs.t00z.pgrb2.0p25.f000.20260724.grib2,0p25,491,gfs.t00z.pgrb2.0p25.f000.20260724.grib2,0,Regular lat/lon grid
+downloads/candidates/0p25/gfs.t00z.pgrb2.0p25.f003.20260724.grib2,0p25,519,gfs.t00z.pgrb2.0p25.f003.20260724.grib2,0,Regular lat/lon grid
+downloads/candidates/0p25/gfs.t00z.pgrb2.0p25.f006.20260724.grib2,0p25,521,gfs.t00z.pgrb2.0p25.f006.20260724.grib2,0,Regular lat/lon grid
+downloads/candidates/0p25/gfs.t00z.pgrb2.0p25.f012.20260723.grib2,0p25,521,gfs.t00z.pgrb2.0p25.f012.20260723.grib2,0,Regular lat/lon grid
+downloads/candidates/0p50/gfs.t00z.pgrb2.0p50.f000.20260723.grib2,0p50,145,gfs.t00z.pgrb2.0p50.f000.20260723.grib2,0,Regular lat/lon grid
+downloads/candidates/0p50/gfs.t00z.pgrb2.0p50.f000.20260724.grib2,0p50,146,gfs.t00z.pgrb2.0p50.f000.20260724.grib2,0,Regular lat/lon grid
+downloads/candidates/0p50/gfs.t00z.pgrb2.0p50.f003.20260724.grib2,0p50,154,gfs.t00z.pgrb2.0p50.f003.20260724.grib2,0,Regular lat/lon grid
+downloads/candidates/0p50/gfs.t00z.pgrb2.0p50.f006.20260724.grib2,0p50,154,gfs.t00z.pgrb2.0p50.f006.20260724.grib2,0,Regular lat/lon grid
+downloads/candidates/0p50/gfs.t00z.pgrb2.0p50.f012.20260721.grib2,0p50,154,gfs.t00z.pgrb2.0p50.f012.20260721.grib2,0,Regular lat/lon grid
+downloads/candidates/1p00/gfs.t00z.pgrb2.1p00.f000.20260723.grib2,1p00,41,gfs.t00z.pgrb2.1p00.f000.20260723.grib2,0,Regular lat/lon grid
+downloads/candidates/1p00/gfs.t00z.pgrb2.1p00.f000.20260724.grib2,1p00,41,gfs.t00z.pgrb2.1p00.f000.20260724.grib2,0,Regular lat/lon grid
+downloads/candidates/1p00/gfs.t00z.pgrb2.1p00.f003.20260724.grib2,1p00,44,gfs.t00z.pgrb2.1p00.f003.20260724.grib2,0,Regular lat/lon grid
+downloads/candidates/1p00/gfs.t00z.pgrb2.1p00.f006.20260724.grib2,1p00,44,gfs.t00z.pgrb2.1p00.f006.20260724.grib2,0,Regular lat/lon grid
+downloads/candidates/1p00/gfs.t00z.pgrb2.1p00.f024.20260722.grib2,1p00,44,gfs.t00z.pgrb2.1p00.f024.20260722.grib2,0,Regular lat/lon grid

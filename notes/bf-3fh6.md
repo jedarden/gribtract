@@ -76,7 +76,21 @@ The specialized extractors had a correctness bug that caused data corruption. Th
 - ✓ Code reverted (specialized extractors removed) with detailed log entry explaining the correctness bug
 - ✓ Performance unchanged (generic extractor was already optimal)
 
+## Bead Re-use (2026-07-27) — Already Complete
+
+This bead was reclaimed for another iteration of Phase 2c optimization work, but investigation revealed that the requested work (per-width specialized extractors) has already been fully explored:
+
+- **Attempt 6** (2026-07-01): Scalar specializations — no measurable win
+- **Attempt 7** (2026-07-02): Bug verification — specialized extractors had correctness bugs
+- **Attempt 8** (2026-07-22): Corrected scalar specializations A/B benchmarked — +3.7% but within noise floor
+- **Attempt 9** (2026-07-27): SIMD AVX2 specializations — +0.1%, not significant
+
+All attempts reached the same conclusion: per-width specializations are a dead end because bit extraction is no longer the bottleneck after Attempts 4+5. The parse-speed-log.md now contains Attempt 10 documenting this bead iteration as a stale duplicate.
+
+**Current state:** Generic `extract_group_windowed` is the sole extractor path, running at 20-21 MB/s on DRT=3 fixture with 100% correctness agreement.
+
 ## References
 
-- Parse speed log: `docs/notes/parse-speed-log.md` Attempt 7 (bug verification)
+- Parse speed log: `docs/notes/parse-speed-log.md` Attempts 6, 7, 8, 9, 10
 - Related beads: bf-3thh (spatial-diff + f64-scale merge), bf-l70y (windowed u64 extractor)
+- Commit 7850436: docs(bf-3fh6): document SIMD per-width specialization attempt (Attempt 9)

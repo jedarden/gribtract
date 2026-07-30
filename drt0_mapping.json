@@ -1,0 +1,217 @@
+{
+  "metadata": {
+    "title": "NOAA CONUS Dataset → DRT=0 File Availability Mapping",
+    "generated_date": "2026-07-24",
+    "generating_bead": "bf-24ma0",
+    "verification_tool": "wgrib2 v3.1.3",
+    "verification_method": "-Sec5 analysis for Data Representation Template extraction"
+  },
+  "summary": {
+    "total_datasets_tested": 7,
+    "pure_drt0_datasets": 2,
+    "partial_drt0_datasets": 1,
+    "complex_only_datasets": 4,
+    "best_drt0_source": "RTMA 2.5 CONUS - 100% DRT=5.0 simple packing"
+  },
+  "datasets": [
+    {
+      "name": "RTMA 2.5 CONUS",
+      "type": "analysis",
+      "drt0_available": true,
+      "pure_drt0": true,
+      "drt0_percentage": 100,
+      "total_records": 13,
+      "drt0_records": 13,
+      "drt3_records": 0,
+      "other_drt_records": 0,
+      "resolution": "2.5 km",
+      "grid_type": "Lambert conformal CONUS",
+      "grid_dimensions": "2345 × 1597 points (3.7M cells)",
+      "file_size_mb": 80,
+      "update_frequency": "Hourly analyses",
+      "file_pattern": "rtma2p5.tHHz.2dvaranl_ndfd.grb2_wexp",
+      "sample_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/rtma2p5.20260723/rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp",
+      "recommendation": "⭐ BEST - Pure DRT=0, simple packing",
+      "verification": {
+        "command": "wgrib2 rtma2p5.t12z.2dvaranl_ndfd.grb2_wexp -Sec5",
+        "result": "All 13 records: Data Repr. Template=5.0"
+      }
+    },
+    {
+      "name": "URMA 2.5 CONUS",
+      "type": "analysis",
+      "drt0_available": true,
+      "pure_drt0": true,
+      "drt0_percentage": 100,
+      "total_records": 14,
+      "drt0_records": 14,
+      "drt3_records": 0,
+      "other_drt_records": 0,
+      "resolution": "2.5 km",
+      "grid_type": "Lambert conformal CONUS (Grid 184)",
+      "grid_dimensions": "Similar to RTMA 2.5",
+      "file_size_mb": 83,
+      "update_frequency": "Hourly analyses",
+      "file_pattern": "urma2p5.tHHz.2dvaranl_ndfd.grb2_wexp",
+      "sample_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/urma/prod/urma2p5.20260724/urma2p5.t00z.2dvaranl_ndfd.grb2_wexp",
+      "recommendation": "✅ Excellent - Pure DRT=0, simple packing",
+      "verification": {
+        "command": "wgrib2 urma2p5.t00z.2dvaranl_ndfd.grb2_wexp -Sec5",
+        "result": "All 14 records: Data Repr. Template=5.0"
+      }
+    },
+    {
+      "name": "HRRR CONUS",
+      "type": "forecast",
+      "drt0_available": true,
+      "pure_drt0": false,
+      "drt0_percentage": 18.8,
+      "total_records": 170,
+      "drt0_records": 32,
+      "drt3_records": 138,
+      "other_drt_records": 0,
+      "resolution": "3 km",
+      "grid_type": "CONUS",
+      "grid_dimensions": "Cloud-resolving convection-allowing",
+      "file_size_mb": 140,
+      "update_frequency": "Hourly",
+      "file_pattern": "hrrr.tCCz.wrfsfcfFF.grib2",
+      "sample_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/hrrr/prod/hrrr.20260724/conus/hrrr.t00z.wrfsfcf00.grib2",
+      "recommendation": "⚠️ PARTIAL - 19% DRT=0, 81% complex packing",
+      "verification": {
+        "command": "wgrib2 hrrr.t00z.wrfsfcf00.grib2 -Sec5 | grep -o 'Data Repr. Template=5\\.[0-9]*' | sort | uniq -c",
+        "result": "32 DRT=5.0, 138 DRT=5.3"
+      }
+    },
+    {
+      "name": "GFS Global",
+      "type": "forecast",
+      "drt0_available": false,
+      "pure_drt0": false,
+      "drt0_percentage": 0.14,
+      "total_records": 696,
+      "drt0_records": 1,
+      "drt3_records": 695,
+      "other_drt_records": 0,
+      "resolution": "0.25°-1.00° global",
+      "grid_type": "Global lat-lon (includes CONUS)",
+      "grid_dimensions": "1440×721 (0.25°), 720×361 (0.50°), 360×181 (1.00°)",
+      "file_size_mb": 40-487,
+      "update_frequency": "6-hourly (00, 06, 12, 18Z)",
+      "file_pattern": "gfs.tCCz.pgrb2.XXX.fFFF",
+      "sample_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "recommendation": "❌ NO - 99.86% complex packing (DRT=5.3)",
+      "verification": {
+        "command": "wgrib2 gfs.t00z.pgrb2.1p00.f000 -Sec5 | grep -o 'Data Repr. Template=5\\.[0-9]*' | sort | uniq -c",
+        "result": "1 DRT=5.0, 695 DRT=5.3"
+      }
+    },
+    {
+      "name": "GEFS Global Ensemble",
+      "type": "forecast",
+      "drt0_available": false,
+      "pure_drt0": false,
+      "drt0_percentage": 0,
+      "total_records": "71-85",
+      "drt0_records": 0,
+      "drt3_records": "71-85",
+      "other_drt_records": 0,
+      "resolution": "0.50° global",
+      "grid_type": "Global lat-lon",
+      "grid_dimensions": "720×361",
+      "file_size_mb": 14,
+      "update_frequency": "6-hourly (00, 06, 12, 18Z)",
+      "file_pattern": "geavg.tCCz.pgrb2a.0p50.fFFF",
+      "sample_url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000",
+      "recommendation": "❌ NO - 100% complex packing (DRT=5.3)",
+      "verification": {
+        "command": "wgrib2 geavg.t00z.pgrb2a.0p50.f000 -Sec5 | grep -o 'Data Repr. Template=5\\.[0-9]*' | sort | uniq -c",
+        "result": "0 DRT=5.0, 71-85 DRT=5.3"
+      }
+    },
+    {
+      "name": "NAM CONUS Nest",
+      "type": "forecast",
+      "drt0_available": false,
+      "pure_drt0": false,
+      "drt0_percentage": 0,
+      "total_records": 860,
+      "drt0_records": 0,
+      "drt3_records": 860,
+      "other_drt_records": 0,
+      "resolution": "5 km",
+      "grid_type": "CONUS nest (Grid 227)",
+      "grid_dimensions": "High-resolution nest",
+      "file_size_mb": 886,
+      "update_frequency": "6-hourly (00, 06, 12, 18Z)",
+      "file_pattern": "nam.tCCz.conusnest.hiresfFF.tm00.grib2",
+      "sample_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nam/prod/nam.20260723/nam.t12z.conusnest.hiresf00.tm00.grib2",
+      "recommendation": "❌ NO - 100% complex packing (DRT=5.3)",
+      "verification": {
+        "command": "wgrib2 nam.t12z.conusnest.hiresf00.tm00.grib2 -Sec5 | grep -o 'Data Repr. Template=5\\.[0-9]*' | sort | uniq -c",
+        "result": "0 DRT=5.0, 860 DRT=5.3"
+      }
+    },
+    {
+      "name": "RAP CONUS",
+      "type": "forecast",
+      "drt0_available": false,
+      "pure_drt0": false,
+      "drt0_percentage": 0,
+      "total_records": 355,
+      "drt0_records": 0,
+      "drt3_records": 0,
+      "other_drt_records": 355,
+      "resolution": "13 km",
+      "grid_type": "CONUS (AWIPS Grid 130)",
+      "grid_dimensions": "AWIPS 13km grid",
+      "file_size_mb": 18,
+      "update_frequency": "Hourly",
+      "file_pattern": "rap.tCCz.awp130pgrbfFF.grib2",
+      "sample_url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rap/prod/rap.20260724/rap.t00z.awp130pgrbf00.grib2",
+      "recommendation": "❌ NO - 100% JPEG compression (DRT=5.40)",
+      "verification": {
+        "command": "wgrib2 rap.t00z.awp130pgrbf00.grib2 -Sec5 | grep -o 'Data Repr. Template=5\\.[0-9]*' | sort | uniq -c",
+        "result": "355 DRT=5.40 (JPEG compression)"
+      }
+    }
+  ],
+  "drt_types": {
+    "5.0": {
+      "name": "Simple Packing",
+      "description": "Basic packing without spatial differencing",
+      "decoder_complexity": "LOW - Easiest to decode",
+      "recommended_for": "Simple decode requirements"
+    },
+    "5.2": {
+      "name": "Complex Packing",
+      "description": "Complex packing only",
+      "decoder_complexity": "MEDIUM - Requires complex packing decoder",
+      "recommended_for": "Not found in tested datasets"
+    },
+    "5.3": {
+      "name": "Complex + Spatial Differencing",
+      "description": "Complex packing with spatial differencing",
+      "decoder_complexity": "HIGH - Requires spatial differencing decode",
+      "recommended_for": "99.86% of GFS/GEFS data, 100% of NAM data"
+    },
+    "5.40": {
+      "name": "Complex + JPEG Compression",
+      "description": "Complex packing with JPEG compression",
+      "decoder_complexity": "VERY HIGH - JPEG + complex decoder",
+      "recommended_for": "100% of RAP data"
+    }
+  },
+  "recommendations": {
+    "for_pure_drt0_requirements": [
+      "Use RTMA 2.5 CONUS - Best option, 100% DRT=0, hourly updates",
+      "Use URMA 2.5 CONUS - Alternative, 100% DRT=0, unrestricted analysis"
+    ],
+    "for_complex_packing_tolerance": [
+      "Implement DRT=5.3 decoder - Required for 99.86% of forecast model data",
+      "Implement JPEG decoder - Required for RAP (DRT=5.40)",
+      "Consider HRRR - 19% DRT=0, but 81% still requires complex decoder"
+    ]
+  },
+  "conclusion": "Only NOAA analysis products (RTMA/URMA) provide pure DRT=0 simple packing for CONUS coverage. All operational forecast models use complex packing requiring additional decoding steps."
+}

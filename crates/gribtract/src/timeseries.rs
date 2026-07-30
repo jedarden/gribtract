@@ -54,13 +54,21 @@ pub struct ParameterRecord {
 
 impl From<ParameterId> for ParameterRecord {
     fn from(p: ParameterId) -> Self {
-        Self { discipline: p.discipline, category: p.category, number: p.number }
+        Self {
+            discipline: p.discipline,
+            category: p.category,
+            number: p.number,
+        }
     }
 }
 
 impl From<ParameterRecord> for ParameterId {
     fn from(p: ParameterRecord) -> Self {
-        Self { discipline: p.discipline, category: p.category, number: p.number }
+        Self {
+            discipline: p.discipline,
+            category: p.category,
+            number: p.number,
+        }
     }
 }
 
@@ -197,7 +205,11 @@ pub fn extract_timeseries(fields: &[Field], request: &TimeseriesRequest) -> Fore
         let mut values: Vec<Option<f64>> = Vec::with_capacity(n_stations);
         for station in &request.stations {
             // Normalise longitude to [0, 360) for grid lookup.
-            let lon = if station.lon < 0.0 { station.lon + 360.0 } else { station.lon };
+            let lon = if station.lon < 0.0 {
+                station.lon + 360.0
+            } else {
+                station.lon
+            };
             let idx_opt = field.grid.nearest_index(station.lat, lon);
             let value = idx_opt.and_then(|idx| field.values.get_at(idx));
             values.push(value);
@@ -268,18 +280,31 @@ mod tests {
         Field {
             center: 7,
             subcenter: 0,
-            parameter: ParameterId { discipline, category, number },
+            parameter: ParameterId {
+                discipline,
+                category,
+                number,
+            },
             forecast: ForecastTime {
                 reference_time: ReferenceTime {
-                    year: 2026, month: 6, day: 21, hour: 0, minute: 0, second: 0,
+                    year: 2026,
+                    month: 6,
+                    day: 21,
+                    hour: 0,
+                    minute: 0,
+                    second: 0,
                     significance: 1,
                 },
                 time_range_unit: 1,
                 forecast_offset,
             },
             level: Level {
-                type1: level_type1, scale_factor1: 0, scaled_value1: 2,
-                type2: 255, scale_factor2: 0, scaled_value2: 0,
+                type1: level_type1,
+                scale_factor1: 0,
+                scaled_value1: 2,
+                type2: 255,
+                scale_factor2: 0,
+                scaled_value2: 0,
             },
             ensemble: None,
             grid: GridDefinition {
@@ -315,9 +340,17 @@ mod tests {
     #[test]
     fn empty_fields_returns_empty_timeseries() {
         let request = TimeseriesRequest {
-            parameter: ParameterRecord { discipline: 0, category: 0, number: 0 },
+            parameter: ParameterRecord {
+                discipline: 0,
+                category: 0,
+                number: 0,
+            },
             level_type1: 103,
-            stations: vec![Station { id: "NYC".into(), lat: 40.78, lon: -73.97 }],
+            stations: vec![Station {
+                id: "NYC".into(),
+                lat: 40.78,
+                lon: -73.97,
+            }],
         };
         let ts = extract_timeseries(&[], &request);
         assert!(ts.rows.is_empty());
@@ -328,12 +361,19 @@ mod tests {
     #[test]
     fn non_matching_parameter_skipped() {
         // Field has discipline=0, category=1, number=0 but request asks for 0,0,0.
-        let field = make_field(0, 1, 0, 103, 0, 3, 3, 30.0, 270.0, 1.0, 1.0,
-                               vec![1.0; 9]);
+        let field = make_field(0, 1, 0, 103, 0, 3, 3, 30.0, 270.0, 1.0, 1.0, vec![1.0; 9]);
         let request = TimeseriesRequest {
-            parameter: ParameterRecord { discipline: 0, category: 0, number: 0 },
+            parameter: ParameterRecord {
+                discipline: 0,
+                category: 0,
+                number: 0,
+            },
             level_type1: 103,
-            stations: vec![Station { id: "A".into(), lat: 31.0, lon: -89.0 }],
+            stations: vec![Station {
+                id: "A".into(),
+                lat: 31.0,
+                lon: -89.0,
+            }],
         };
         let ts = extract_timeseries(&[field], &request);
         assert!(ts.rows.is_empty());
@@ -351,9 +391,17 @@ mod tests {
         let field = make_field(0, 0, 0, 103, 0, 3, 3, 30.0, 270.0, 1.0, 1.0, vals);
 
         let request = TimeseriesRequest {
-            parameter: ParameterRecord { discipline: 0, category: 0, number: 0 },
+            parameter: ParameterRecord {
+                discipline: 0,
+                category: 0,
+                number: 0,
+            },
             level_type1: 103,
-            stations: vec![Station { id: "S1".into(), lat: 31.1, lon: -88.9 }],
+            stations: vec![Station {
+                id: "S1".into(),
+                lat: 31.1,
+                lon: -88.9,
+            }],
         };
         let ts = extract_timeseries(&[field], &request);
         assert_eq!(ts.rows.len(), 1);
@@ -370,9 +418,17 @@ mod tests {
         let f6 = make_field(0, 0, 0, 103, 6, 2, 2, 10.0, 10.0, 10.0, 10.0, vals.clone());
         let f12 = make_field(0, 0, 0, 103, 12, 2, 2, 10.0, 10.0, 10.0, 10.0, vals.clone());
 
-        let station = Station { id: "X".into(), lat: 10.0, lon: 10.0 };
+        let station = Station {
+            id: "X".into(),
+            lat: 10.0,
+            lon: 10.0,
+        };
         let request = TimeseriesRequest {
-            parameter: ParameterRecord { discipline: 0, category: 0, number: 0 },
+            parameter: ParameterRecord {
+                discipline: 0,
+                category: 0,
+                number: 0,
+            },
             level_type1: 103,
             stations: vec![station],
         };
@@ -395,9 +451,17 @@ mod tests {
         let vals = vec![99.0; 9];
         let field = make_field(0, 0, 0, 103, 0, 3, 3, 30.0, 270.0, 1.0, 1.0, vals);
         let request = TimeseriesRequest {
-            parameter: ParameterRecord { discipline: 0, category: 0, number: 0 },
+            parameter: ParameterRecord {
+                discipline: 0,
+                category: 0,
+                number: 0,
+            },
             level_type1: 103,
-            stations: vec![Station { id: "OUT".into(), lat: 50.0, lon: -90.0 }],
+            stations: vec![Station {
+                id: "OUT".into(),
+                lat: 50.0,
+                lon: -90.0,
+            }],
         };
         let ts = extract_timeseries(&[field], &request);
         assert_eq!(ts.rows.len(), 1);
@@ -409,9 +473,17 @@ mod tests {
         let vals = vec![270.0, 271.0, 272.0, 273.0];
         let field = make_field(0, 0, 0, 103, 0, 2, 2, 10.0, 350.0, 10.0, 10.0, vals);
         let request = TimeseriesRequest {
-            parameter: ParameterRecord { discipline: 0, category: 0, number: 0 },
+            parameter: ParameterRecord {
+                discipline: 0,
+                category: 0,
+                number: 0,
+            },
             level_type1: 103,
-            stations: vec![Station { id: "P1".into(), lat: 10.0, lon: -10.0 }],
+            stations: vec![Station {
+                id: "P1".into(),
+                lat: 10.0,
+                lon: -10.0,
+            }],
         };
         let ts = extract_timeseries(&[field], &request);
         let json = to_json(&ts).expect("serialisation must succeed");
@@ -428,12 +500,28 @@ mod tests {
         let field = make_field(0, 0, 0, 103, 0, 5, 5, 0.0, 0.0, 1.0, 1.0, vals);
 
         let stations = vec![
-            Station { id: "A".into(), lat: 0.0, lon: 0.0 }, // idx=0, val=0
-            Station { id: "B".into(), lat: 2.0, lon: 3.0 }, // idx=2*5+3=13, val=13
-            Station { id: "C".into(), lat: 4.0, lon: 4.0 }, // idx=4*5+4=24, val=24
+            Station {
+                id: "A".into(),
+                lat: 0.0,
+                lon: 0.0,
+            }, // idx=0, val=0
+            Station {
+                id: "B".into(),
+                lat: 2.0,
+                lon: 3.0,
+            }, // idx=2*5+3=13, val=13
+            Station {
+                id: "C".into(),
+                lat: 4.0,
+                lon: 4.0,
+            }, // idx=4*5+4=24, val=24
         ];
         let request = TimeseriesRequest {
-            parameter: ParameterRecord { discipline: 0, category: 0, number: 0 },
+            parameter: ParameterRecord {
+                discipline: 0,
+                category: 0,
+                number: 0,
+            },
             level_type1: 103,
             stations,
         };

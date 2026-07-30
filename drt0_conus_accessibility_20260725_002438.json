@@ -1,0 +1,124 @@
+{
+  "timestamp": "2026-07-25T00:24:38-04:00",
+  "summary": {
+    "total": 7,
+    "tested": 7,
+    "accessible": 1,
+    "downloaded": 0,
+    "valid_grib2": 0
+  },
+  "results": [
+    {
+      "filename": "gfs_1p00_20260724_f000.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "http_status": "200",
+      "accessible": 1,
+      "auth_required": false,
+      "download_test": {
+        "downloaded": false,
+        "download_size": 0,
+        "download_time": 0,
+        "valid_grib2": false
+      }
+    },
+    {
+      "filename": "gfs_0p25_20260723_f000.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "http_status": "200",
+      "accessible": 1,
+      "auth_required": false,
+      "download_test": {
+        "downloaded": false,
+        "download_size": 0,
+        "download_time": 0,
+        "valid_grib2": false
+      }
+    },
+    {
+      "filename": "gefs_0p50_f000.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "http_status": "200",
+      "accessible": 1,
+      "auth_required": false,
+      "download_test": {
+        "downloaded": false,
+        "download_size": 0,
+        "download_time": 0,
+        "valid_grib2": false
+      }
+    },
+    {
+      "filename": "gefs_0p50_f003.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "http_status": "200",
+      "accessible": 1,
+      "auth_required": false,
+      "download_test": {
+        "downloaded": false,
+        "download_size": 0,
+        "download_time": 0,
+        "valid_grib2": false
+      }
+    },
+    {
+      "filename": "gfs_1p00_20260723_f000.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "http_status": "200",
+      "accessible": 1,
+      "auth_required": false,
+      "download_test": {
+        "downloaded": false,
+        "download_size": 0,
+        "download_time": 0,
+        "valid_grib2": false
+      }
+    },
+    {
+      "filename": "gfs_0p50_20260724_f000.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "http_status": "200",
+      "accessible": 1,
+      "auth_required": false,
+      "download_test": {
+        "downloaded": false,
+        "download_size": 0,
+        "download_time": 0,
+        "valid_grib2": false
+      }
+    },
+    {
+      "filename": "gefs_0p50_f006.grib2",
+      "local_path": "/home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006",
+      "local_exists": true,
+      "local_valid_grib2": true,
+      "http_status": "200",
+      "accessible": 1,
+      "auth_required": false,
+      "download_test": {
+        "downloaded": false,
+        "download_size": 0,
+        "download_time": 0,
+        "valid_grib2": false
+      }
+    }
+  ]
+}

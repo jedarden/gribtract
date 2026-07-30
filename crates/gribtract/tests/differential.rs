@@ -10,6 +10,12 @@ use gribtract_testutil::diff::{compare_fixture, CoverageReport};
 use gribtract_testutil::golden;
 
 /// Minimum acceptable agreement percentage. Raise this as templates are implemented.
+/// Ratcheted to 100.0% after wiring the GFS Gaussian fixture (bf-91ov1): every
+/// comparable (golden-bearing, feature-available) fixture now matches its golden
+/// reference — 8/8 by default, 9/9 with the `jpeg2000` feature. The last gap was
+/// `gen_golden.py`'s Section-5 packing-key omission (`grib_dump -j` drops
+/// referenceValue/bits-per-value), which left the PDT=1 golden mismatched; the
+/// script now pulls those keys via `grib_ls -p`, regenerating the affected goldens.
 const AGREEMENT_FLOOR: f64 = 100.0;
 
 #[test]
@@ -19,13 +25,17 @@ fn differential_coverage_report() {
     let mut report = CoverageReport::default();
 
     for entry in &fixtures {
-        // Only run inline fixtures; remote fixtures require a separate fetch step.
-        if entry.storage != "inline" {
+        // Skip remote fixtures that haven't been fetched locally.
+        // Remote fixtures that are present locally (via `cargo xtask corpus fetch`)
+        // will participate in the differential test.
+        if entry.storage == "remote" && !corpus::is_available_locally(entry) {
+            eprintln!("  [skip-remote-not-fetched] {}", entry.id);
+            report.fixtures_skipped_remote += 1;
             continue;
         }
 
-        // Count all inline fixtures in fixtures_total first, so that
-        // fixtures_total - fixtures_no_golden correctly computes the comparable count.
+        // Count all fixtures that will run (inline + fetched remote) in fixtures_total first,
+        // so that fixtures_total - fixtures_no_golden correctly computes the comparable count.
         report.fixtures_total += 1;
 
         // Skip DRT=40 (JPEG2000) fixtures when jpeg2000 feature is disabled
@@ -58,8 +68,7 @@ fn differential_coverage_report() {
                 report.fixtures_decode_error += 1;
             }
             Ok(actual_fields) => {
-                let matched =
-                    compare_fixture(&actual_fields, &golden_fixture.fields, &mut report);
+                let matched = compare_fixture(&actual_fields, &golden_fixture.fields, &mut report);
                 if matched {
                     report.fixtures_matched += 1;
                     eprintln!("  [match]      {}", entry.id);

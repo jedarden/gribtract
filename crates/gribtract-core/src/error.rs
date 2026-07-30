@@ -14,20 +14,18 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::TooShort { needed, got } =>
-                write!(f, "buffer too short: need {needed}, got {got}"),
-            Error::BadMagic(b) =>
-                write!(f, "bad GRIB magic: {:?}", b),
-            Error::UnknownEdition(e) =>
-                write!(f, "unknown GRIB edition: {e}"),
-            Error::BadSectionNumber { expected, got } =>
-                write!(f, "unexpected section number: expected {expected}, got {got}"),
-            Error::Overflow =>
-                write!(f, "integer overflow in section length"),
-            Error::NotImplemented =>
-                write!(f, "decode not implemented"),
-            Error::InvalidData(msg) =>
-                write!(f, "invalid data: {msg}"),
+            Error::TooShort { needed, got } => {
+                write!(f, "buffer too short: need {needed}, got {got}")
+            }
+            Error::BadMagic(b) => write!(f, "bad GRIB magic: {:?}", b),
+            Error::UnknownEdition(e) => write!(f, "unknown GRIB edition: {e}"),
+            Error::BadSectionNumber { expected, got } => write!(
+                f,
+                "unexpected section number: expected {expected}, got {got}"
+            ),
+            Error::Overflow => write!(f, "integer overflow in section length"),
+            Error::NotImplemented => write!(f, "decode not implemented"),
+            Error::InvalidData(msg) => write!(f, "invalid data: {msg}"),
         }
     }
 }

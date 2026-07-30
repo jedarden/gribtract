@@ -19,11 +19,12 @@ serde_json = { version = "1", optional = true }
 url = "2"
 bytes = "1"
 chrono = { version = "0.4", optional = true }
+rayon = { version = "1.10", optional = true }
 
 [features]
 default = []
 async = ["tokio", "reqwest/__tls"]
-probe = ["serde", "serde_json", "async", "chrono"]
+probe = ["serde", "serde_json", "async", "chrono", "rayon"]
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

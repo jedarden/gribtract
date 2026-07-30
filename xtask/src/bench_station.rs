@@ -18,29 +18,29 @@ use gribtract::{BilinearCorners, Field, GridDefinition, LazyField};
 /// so benchmark runs are comparable across builds and hardware.
 pub const STATIONS: &[(&str, f64, f64)] = &[
     // Eastern Time
-    ("New York",       40.7789,  -73.9692),  // KNYC Central Park
-    ("Miami",          25.7959,  -80.2870),  // KMIA
-    ("Philadelphia",   39.8721,  -75.2411),  // KPHL
-    ("Atlanta",        33.6407,  -84.4277),  // KATL
-    ("Boston",         42.3656,  -71.0096),  // KBOS
-    ("Washington DC",  38.8512,  -77.0402),  // KDCA Reagan
+    ("New York", 40.7789, -73.9692),      // KNYC Central Park
+    ("Miami", 25.7959, -80.2870),         // KMIA
+    ("Philadelphia", 39.8721, -75.2411),  // KPHL
+    ("Atlanta", 33.6407, -84.4277),       // KATL
+    ("Boston", 42.3656, -71.0096),        // KBOS
+    ("Washington DC", 38.8512, -77.0402), // KDCA Reagan
     // Central Time
-    ("Chicago",        41.7868,  -87.7522),  // KMDW Midway
-    ("Dallas",         32.8998,  -97.0403),  // KDFW
-    ("Houston",        29.9902,  -95.3368),  // KIAH
-    ("Minneapolis",    44.8820,  -93.2218),  // KMSP
-    ("Austin",         30.1945,  -97.6699),  // KAUS
-    ("New Orleans",    29.9934,  -90.2580),  // KMSY
-    ("San Antonio",    29.5337,  -98.4698),  // KSAT
-    ("Oklahoma City",  35.3931,  -97.6007),  // KOKC
+    ("Chicago", 41.7868, -87.7522),       // KMDW Midway
+    ("Dallas", 32.8998, -97.0403),        // KDFW
+    ("Houston", 29.9902, -95.3368),       // KIAH
+    ("Minneapolis", 44.8820, -93.2218),   // KMSP
+    ("Austin", 30.1945, -97.6699),        // KAUS
+    ("New Orleans", 29.9934, -90.2580),   // KMSY
+    ("San Antonio", 29.5337, -98.4698),   // KSAT
+    ("Oklahoma City", 35.3931, -97.6007), // KOKC
     // Mountain / Arizona
-    ("Denver",         39.8561, -104.6737),  // KDEN
-    ("Phoenix",        33.4373, -112.0078),  // KPHX Sky Harbor
+    ("Denver", 39.8561, -104.6737),  // KDEN
+    ("Phoenix", 33.4373, -112.0078), // KPHX Sky Harbor
     // Pacific Time
-    ("Los Angeles",    33.9416, -118.4085),  // KLAX
-    ("Las Vegas",      36.0840, -115.1537),  // KLAS
-    ("Seattle",        47.4502, -122.3088),  // KSEA Sea-Tac
-    ("San Francisco",  37.6189, -122.3750),  // KSFO
+    ("Los Angeles", 33.9416, -118.4085),   // KLAX
+    ("Las Vegas", 36.0840, -115.1537),     // KLAS
+    ("Seattle", 47.4502, -122.3088),       // KSEA Sea-Tac
+    ("San Francisco", 37.6189, -122.3750), // KSFO
 ];
 
 // ── Result type ───────────────────────────────────────────────────────────────
@@ -79,7 +79,11 @@ impl GeometryCache {
         // Track unique grids to avoid recomputing for identical geometries.
         // In a single forecast cycle all messages share the same grid, so this
         // typically collapses to one computation.
-        type GridEntry = (GridDefinition, Vec<Option<usize>>, Vec<Option<BilinearCorners>>);
+        type GridEntry = (
+            GridDefinition,
+            Vec<Option<usize>>,
+            Vec<Option<BilinearCorners>>,
+        );
         let mut seen: Vec<GridEntry> = Vec::new();
         let mut nearest = Vec::with_capacity(fields.len());
         let mut bilinear = Vec::with_capacity(fields.len());
@@ -267,8 +271,7 @@ pub fn run_lazy_nearest(
         !lf.section7_raw.is_empty()
             && !lf.has_bitmap
             && (lf.drt_template == 0
-                || ((lf.drt_template == 2 || lf.drt_template == 3)
-                    && lf.complex_extra.is_some()))
+                || ((lf.drt_template == 2 || lf.drt_template == 3) && lf.complex_extra.is_some()))
     });
     if !has_lazy_data {
         return None;
@@ -291,13 +294,7 @@ pub fn run_lazy_nearest(
             2 | 3 => {
                 let extra = lf.complex_extra.as_ref()?;
                 let n_pts = lf.grid.num_data_points as usize;
-                gribtract::decode_point_drt3(
-                    &lf.section7_raw,
-                    &lf.packing,
-                    extra,
-                    n_pts,
-                    idx,
-                )
+                gribtract::decode_point_drt3(&lf.section7_raw, &lf.packing, extra, n_pts, idx)
             }
             _ => None,
         }
@@ -327,8 +324,7 @@ pub fn run_lazy_nearest(
             break;
         }
     }
-    let ns_per_iter =
-        (t_warmup.elapsed().as_nanos() as f64 / n_warmup as f64).max(1.0);
+    let ns_per_iter = (t_warmup.elapsed().as_nanos() as f64 / n_warmup as f64).max(1.0);
 
     // Timed
     let n_timed = ((200_000_000.0f64 / ns_per_iter).ceil() as u32).clamp(10, 100_000);
@@ -345,9 +341,15 @@ pub fn run_lazy_nearest(
     for (fi, lf) in lazy_fields.iter().enumerate() {
         let tol = lf.packing.tolerance().max(1e-12);
         for si in 0..n_stations {
-            let Some(idx) = cache.nearest[fi][si] else { continue };
-            let Some(lazy_val) = extract_lazy_point(lf, idx) else { continue };
-            let Some(ref_val) = full_fields[fi].values.get_at(idx) else { continue };
+            let Some(idx) = cache.nearest[fi][si] else {
+                continue;
+            };
+            let Some(lazy_val) = extract_lazy_point(lf, idx) else {
+                continue;
+            };
+            let Some(ref_val) = full_fields[fi].values.get_at(idx) else {
+                continue;
+            };
             in_range += 1;
             if (lazy_val - ref_val).abs() <= tol {
                 matched += 1;
@@ -436,7 +438,9 @@ pub fn run_lazy_drt3_cached(
             {
                 continue;
             }
-            let Some(extra) = &lf.complex_extra else { continue };
+            let Some(extra) = &lf.complex_extra else {
+                continue;
+            };
             let n_pts = lf.grid.num_data_points as usize;
             for &idx_opt in &c.nearest[fi] {
                 let Some(idx) = idx_opt else { continue };
@@ -463,7 +467,9 @@ pub fn run_lazy_drt3_cached(
             {
                 continue;
             }
-            let Some(extra) = &lf.complex_extra else { continue };
+            let Some(extra) = &lf.complex_extra else {
+                continue;
+            };
             let n_pts = lf.grid.num_data_points as usize;
             // Decode the full grid ONCE for this field.
             let Ok(decoded) =
@@ -529,21 +535,26 @@ pub fn run_lazy_drt3_cached(
         {
             continue;
         }
-        let Some(extra) = &lf.complex_extra else { continue };
+        let Some(extra) = &lf.complex_extra else {
+            continue;
+        };
         let n_pts = lf.grid.num_data_points as usize;
-        let Ok(decoded) =
-            gribtract::decode_all_drt3(&lf.section7_raw, &lf.packing, extra, n_pts)
+        let Ok(decoded) = gribtract::decode_all_drt3(&lf.section7_raw, &lf.packing, extra, n_pts)
         else {
             continue;
         };
         let tol = lf.packing.tolerance().max(1e-12);
         for si in 0..n_stations {
-            let Some(idx) = cache.nearest[fi][si] else { continue };
+            let Some(idx) = cache.nearest[fi][si] else {
+                continue;
+            };
             if idx >= decoded.len() {
                 continue;
             }
             let cached_val = decoded[idx];
-            let Some(ref_val) = full_fields[fi].values.get_at(idx) else { continue };
+            let Some(ref_val) = full_fields[fi].values.get_at(idx) else {
+                continue;
+            };
             in_range += 1;
             if (cached_val - ref_val).abs() <= tol {
                 matched += 1;
@@ -561,8 +572,16 @@ pub fn run_lazy_drt3_cached(
     } else {
         0.0
     };
-    let speedup = if naive_shps > 0.0 { station_hours_per_sec / naive_shps } else { 0.0 };
-    let agreement = if in_range > 0 { matched as f64 / in_range as f64 } else { 1.0 };
+    let speedup = if naive_shps > 0.0 {
+        station_hours_per_sec / naive_shps
+    } else {
+        0.0
+    };
+    let agreement = if in_range > 0 {
+        matched as f64 / in_range as f64
+    } else {
+        1.0
+    };
 
     eprintln!(
         "  [station-drt3-cached] {} fields × {} stations → {} in-range | \

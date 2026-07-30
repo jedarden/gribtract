@@ -9,9 +9,9 @@
 //! We walk two levels up to find the workspace root. This is fragile only if the
 //! crate moves within the workspace; callers can override with `GRIBTRACT_CORPUS_ROOT`.
 
-use std::path::{Path, PathBuf};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Deserialize)]
 struct Manifest {
@@ -42,9 +42,7 @@ pub fn corpus_root() -> PathBuf {
         return PathBuf::from(root);
     }
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    Path::new(manifest_dir)
-        .join("../..")
-        .join("tests/corpus")
+    Path::new(manifest_dir).join("../..").join("tests/corpus")
 }
 
 /// Load and parse the fixture manifest.
@@ -52,10 +50,13 @@ fn load_manifest() -> Result<Manifest, String> {
     let manifest_path = corpus_root().join("manifest.json");
     let json = std::fs::read_to_string(&manifest_path)
         .map_err(|e| format!("cannot read manifest {}: {}", manifest_path.display(), e))?;
-    let manifest: Manifest = serde_json::from_str(&json)
-        .map_err(|e| format!("cannot parse manifest: {}", e))?;
+    let manifest: Manifest =
+        serde_json::from_str(&json).map_err(|e| format!("cannot parse manifest: {}", e))?;
     if manifest.version != 1 {
-        return Err(format!("unsupported manifest version: {}", manifest.version));
+        return Err(format!(
+            "unsupported manifest version: {}",
+            manifest.version
+        ));
     }
     Ok(manifest)
 }
@@ -75,21 +76,40 @@ pub fn fixture_entry(id: &str) -> Result<FixtureEntry, String> {
         .ok_or_else(|| format!("fixture '{}' not found in manifest", id))
 }
 
+/// Check if a fixture is available locally.
+///
+/// Returns `true` if the fixture file exists at the expected path.
+/// For `storage=inline` fixtures this should always be true (they're committed).
+/// For `storage=remote` fixtures this returns true only after `cargo xtask corpus fetch`.
+pub fn is_available_locally(entry: &FixtureEntry) -> bool {
+    let file_path = corpus_root().join(&entry.path);
+    file_path.exists()
+}
+
 /// Load fixture bytes by id, verifying SHA-256.
 ///
 /// Returns `Err` if the fixture is not in the manifest, the file is missing,
 /// or the digest does not match.
+///
+/// For fixtures with `storage=remote`, this function will succeed if the file
+/// has been fetched locally (i.e., exists at the expected path). Otherwise it
+/// returns an error pointing to the fetch command.
 pub fn load(id: &str) -> Result<Vec<u8>, String> {
     let entry = fixture_entry(id)?;
 
+    let file_path = corpus_root().join(&entry.path);
+
+    // For remote fixtures, check if file exists locally first
     if entry.storage == "remote" {
-        return Err(format!(
-            "fixture '{}' has storage=remote — run `cargo xtask corpus fetch {}` first",
-            id, id
-        ));
+        if !file_path.exists() {
+            return Err(format!(
+                "fixture '{}' has storage=remote and is not present locally — run `cargo xtask corpus fetch {}` first",
+                id, id
+            ));
+        }
+        // File exists: fall through to load and verify
     }
 
-    let file_path = corpus_root().join(&entry.path);
     let bytes = std::fs::read(&file_path)
         .map_err(|e| format!("cannot read fixture {}: {}", file_path.display(), e))?;
 
@@ -97,7 +117,9 @@ pub fn load(id: &str) -> Result<Vec<u8>, String> {
     if bytes.len() as u64 != entry.size_bytes {
         return Err(format!(
             "fixture '{}' size mismatch: manifest says {} bytes, file is {}",
-            id, entry.size_bytes, bytes.len()
+            id,
+            entry.size_bytes,
+            bytes.len()
         ));
     }
 
@@ -121,7 +143,10 @@ mod tests {
     fn manifest_parses() {
         let manifest = load_manifest().expect("manifest should parse");
         assert_eq!(manifest.version, 1);
-        assert!(!manifest.fixtures.is_empty(), "manifest should have at least one fixture");
+        assert!(
+            !manifest.fixtures.is_empty(),
+            "manifest should have at least one fixture"
+        );
     }
 
     #[test]
@@ -136,10 +161,18 @@ mod tests {
 
         // Total length encoded in bytes 8-15 (big-endian u64)
         let msg_len = u64::from_be_bytes(bytes[8..16].try_into().unwrap());
-        assert_eq!(msg_len as usize, bytes.len(), "encoded length should match file size");
+        assert_eq!(
+            msg_len as usize,
+            bytes.len(),
+            "encoded length should match file size"
+        );
 
         // End marker "7777"
-        assert_eq!(&bytes[bytes.len() - 4..], b"7777", "missing 7777 end marker");
+        assert_eq!(
+            &bytes[bytes.len() - 4..],
+            b"7777",
+            "missing 7777 end marker"
+        );
 
         // Discipline = 0 (meteorological products)
         assert_eq!(bytes[6], 0, "discipline should be 0 (meteorological)");

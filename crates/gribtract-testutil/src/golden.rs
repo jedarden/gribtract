@@ -5,14 +5,14 @@
 //! for each fixture, produced by an authoritative reference decoder (eccodes/wgrib2)
 //! and checked in for offline comparison.
 
-use serde::Deserialize;
 use crate::corpus::corpus_root;
+use serde::{Deserialize, Serialize};
 
 // ── Mirror types for JSON deserialization ─────────────────────────────────────
 // These mirror gribtract_core::types but carry serde derives. The comparator
 // maps actual decoded values to these to avoid adding serde to gribtract-core.
 
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct GoldenReferenceTime {
     pub year: u16,
     pub month: u8,
@@ -23,54 +23,74 @@ pub struct GoldenReferenceTime {
     pub significance: u8,
 }
 
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct GoldenParameterId {
     pub discipline: u8,
     pub category: u8,
     pub number: u8,
 }
 
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct GoldenForecastTime {
     pub reference_time: GoldenReferenceTime,
     pub time_range_unit: u8,
     pub forecast_offset: u32,
 }
 
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct GoldenLevel {
     pub type1: u8,
-    pub scale_factor1: i8,
-    pub scaled_value1: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scale_factor1: Option<i8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scaled_value1: Option<i32>,
     pub type2: u8,
-    pub scale_factor2: i8,
-    pub scaled_value2: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scale_factor2: Option<i8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scaled_value2: Option<i32>,
 }
 
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct GoldenEnsemble {
     pub member_type: u8,
     pub number: i16,
 }
 
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct GoldenGridDefinition {
     pub template: u16,
     pub num_data_points: u32,
-    pub nx: u32,
-    pub ny: u32,
+    #[serde(default = "default_nx")]
+    pub nx: Option<u32>,
+    #[serde(default = "default_ny")]
+    pub ny: Option<u32>,
     pub lat_first: f64,
     pub lon_first: f64,
-    pub lat_last: f64,
-    pub lon_last: f64,
-    pub di: f64,
-    pub dj: f64,
+    #[serde(default = "default_zero_f64")]
+    pub lat_last: Option<f64>,
+    #[serde(default = "default_zero_f64")]
+    pub lon_last: Option<f64>,
+    #[serde(default = "default_zero_f64")]
+    pub di: Option<f64>,
+    #[serde(default = "default_zero_f64")]
+    pub dj: Option<f64>,
     pub scanning_mode: u8,
     pub resolution_flags: u8,
     pub shape_of_earth: u8,
 }
 
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+fn default_nx() -> Option<u32> {
+    None
+}
+fn default_ny() -> Option<u32> {
+    None
+}
+fn default_zero_f64() -> Option<f64> {
+    None
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct GoldenPackingInfo {
     pub reference_value: f32,
     pub binary_scale_factor: i16,
@@ -80,10 +100,111 @@ pub struct GoldenPackingInfo {
 }
 
 /// Grid values in golden JSON: `{"Dense": [...]}` or `{"Masked": {...}}`.
-#[derive(Debug, Deserialize, Clone, PartialEq)]
+///
+/// The `Dense` variant allows `null` values in the JSON array, which are
+/// interpreted as missing/undefined data points and represented as NaN.
+#[derive(Debug, Clone, PartialEq)]
 pub enum GoldenGridValues {
     Dense(Vec<f64>),
-    Masked { values: Vec<f64>, present: Vec<bool> },
+    Masked {
+        values: Vec<f64>,
+        present: Vec<bool>,
+    },
+}
+
+// Custom deserializer to handle null values in Dense arrays
+impl<'de> Deserialize<'de> for GoldenGridValues {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        use serde::de::{self, MapAccess, Visitor};
+        use std::fmt;
+
+        struct GoldenGridValuesVisitor;
+
+        impl<'de> Visitor<'de> for GoldenGridValuesVisitor {
+            type Value = GoldenGridValues;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("an object with keys 'Dense' or 'Masked'")
+            }
+
+            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                let mut dense_value = None;
+                let mut masked_values = None;
+                let mut masked_present = None;
+
+                while let Some(key) = map.next_key::<String>()? {
+                    match key.as_str() {
+                        "Dense" => {
+                            // Deserialize as Vec<Option<f64>> to handle nulls
+                            let raw: Vec<Option<f64>> = map.next_value()?;
+                            // Convert nulls to NaN
+                            dense_value =
+                                Some(raw.into_iter().map(|v| v.unwrap_or(f64::NAN)).collect());
+                        }
+                        "values" => {
+                            masked_values = Some(map.next_value()?);
+                        }
+                        "present" => {
+                            masked_present = Some(map.next_value()?);
+                        }
+                        _ => {
+                            map.next_value::<de::IgnoredAny>()?;
+                        }
+                    }
+                }
+
+                if let Some(dense) = dense_value {
+                    Ok(GoldenGridValues::Dense(dense))
+                } else if let (Some(values), Some(present)) = (masked_values, masked_present) {
+                    Ok(GoldenGridValues::Masked { values, present })
+                } else {
+                    Err(de::Error::custom(
+                        "expected 'Dense' key or both 'values' and 'present' keys",
+                    ))
+                }
+            }
+        }
+
+        deserializer.deserialize_any(GoldenGridValuesVisitor)
+    }
+}
+
+// Custom serializer to convert NaN values to null in JSON output
+impl Serialize for GoldenGridValues {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeMap;
+
+        match self {
+            GoldenGridValues::Dense(values) => {
+                let mut map = serializer.serialize_map(Some(1))?;
+                map.serialize_key("Dense")?;
+                // Convert Vec<f64> to JSON array with nulls for NaN
+                let json_values: Vec<Option<f64>> = values
+                    .iter()
+                    .map(|&v| if v.is_nan() { None } else { Some(v) })
+                    .collect();
+                map.serialize_value(&json_values)?;
+                map.end()
+            }
+            GoldenGridValues::Masked { values, present } => {
+                let mut map = serializer.serialize_map(Some(2))?;
+                map.serialize_key("values")?;
+                map.serialize_value(values)?;
+                map.serialize_key("present")?;
+                map.serialize_value(present)?;
+                map.end()
+            }
+        }
+    }
 }
 
 impl GoldenGridValues {
@@ -102,7 +223,11 @@ impl GoldenGridValues {
         match self {
             GoldenGridValues::Dense(v) => v
                 .iter()
-                .map(|&val| (val, true))
+                .map(|&val| {
+                    // NaN values (from null in JSON) are treated as missing
+                    let present = !val.is_nan();
+                    (val, present)
+                })
                 .collect::<Vec<_>>()
                 .into_iter(),
             GoldenGridValues::Masked { values, present } => values
@@ -116,7 +241,7 @@ impl GoldenGridValues {
 }
 
 /// A single expected decoded field.
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct GoldenField {
     pub center: u16,
     pub subcenter: u16,
@@ -133,7 +258,7 @@ pub struct GoldenField {
 }
 
 /// The full golden reference for one corpus fixture.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct GoldenFixture {
     pub fixture_id: String,
     pub fields: Vec<GoldenField>,
@@ -173,8 +298,8 @@ mod tests {
         assert_eq!(f.parameter.discipline, 0);
         assert_eq!(f.parameter.category, 0);
         assert_eq!(f.parameter.number, 0);
-        assert_eq!(f.grid.nx, 5);
-        assert_eq!(f.grid.ny, 5);
+        assert_eq!(f.grid.nx, Some(5));
+        assert_eq!(f.grid.ny, Some(5));
         assert_eq!(f.gdt_template, 0);
         assert_eq!(f.pdt_template, 0);
         assert_eq!(f.drt_template, 0);

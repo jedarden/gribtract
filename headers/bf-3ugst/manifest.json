@@ -1,0 +1,120 @@
+{
+  "source_bead": "bf-3ugst",
+  "download_date": "2026-07-24",
+  "summary": {
+    "total_candidates": 9,
+    "successful": 9,
+    "failed": 0,
+    "success_rate": "100.0%"
+  },
+  "headers": [
+    {
+      "candidate_id": 1,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+      "model": "GFS",
+      "resolution": "0.25",
+      "date": "2026-07-24",
+      "forecast_hour": "000",
+      "header_file": "gfs.t00z.pgrb2.0p25.f000.headers.txt",
+      "message_count": 696,
+      "status": "success",
+      "download_timestamp": "2026-07-24T11:08:39Z"
+    },
+    {
+      "candidate_id": 2,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+      "model": "GFS",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "000",
+      "header_file": "gfs.t00z.pgrb2.0p50.f000.headers.txt",
+      "message_count": 696,
+      "status": "success",
+      "download_timestamp": "2026-07-24T11:08:53Z"
+    },
+    {
+      "candidate_id": 3,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260724/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "model": "GFS",
+      "resolution": "1.00",
+      "date": "2026-07-24",
+      "forecast_hour": "000",
+      "header_file": "gfs.t00z.pgrb2.1p00.f000.headers.txt",
+      "message_count": 696,
+      "status": "success",
+      "download_timestamp": "2026-07-24T11:08:58Z"
+    },
+    {
+      "candidate_id": 4,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p25.f000",
+      "model": "GFS",
+      "resolution": "0.25",
+      "date": "2026-07-23",
+      "forecast_hour": "000",
+      "header_file": "gfs.t00z.pgrb2.0p25.f000.headers.txt",
+      "message_count": 696,
+      "status": "success",
+      "download_timestamp": "2026-07-24T11:10:04Z"
+    },
+    {
+      "candidate_id": 5,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+      "model": "GFS",
+      "resolution": "0.50",
+      "date": "2026-07-23",
+      "forecast_hour": "000",
+      "header_file": "gfs.t00z.pgrb2.0p50.f000.headers.txt",
+      "message_count": 696,
+      "status": "success",
+      "download_timestamp": "2026-07-24T11:10:18Z"
+    },
+    {
+      "candidate_id": 6,
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20260723/00/atmos/gfs.t00z.pgrb2.1p00.f000",
+      "model": "GFS",
+      "resolution": "1.00",
+      "date": "2026-07-23",
+      "forecast_hour": "000",
+      "header_file": "gfs.t00z.pgrb2.1p00.f000.headers.txt",
+      "message_count": 696,
+      "status": "success",
+      "download_timestamp": "2026-07-24T11:10:22Z"
+    },
+    {
+      "candidate_id": 7,
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000",
+      "model": "GEFS",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "000",
+      "header_file": "geavg.t00z.pgrb2a.0p50.f000.headers.txt",
+      "message_count": 71,
+      "status": "success",
+      "download_timestamp": "2026-07-24T11:10:24Z"
+    },
+    {
+      "candidate_id": 8,
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f003",
+      "model": "GEFS",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "003",
+      "header_file": "geavg.t00z.pgrb2a.0p50.f003.headers.txt",
+      "message_count": 85,
+      "status": "success",
+      "download_timestamp": "2026-07-24T11:10:25Z"
+    },
+    {
+      "candidate_id": 9,
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20260724/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f006",
+      "model": "GEFS",
+      "resolution": "0.50",
+      "date": "2026-07-24",
+      "forecast_hour": "006",
+      "header_file": "geavg.t00z.pgrb2a.0p50.f006.headers.txt",
+      "message_count": 85,
+      "status": "success",
+      "download_timestamp": "2026-07-24T11:10:27Z"
+    }
+  ]
+}

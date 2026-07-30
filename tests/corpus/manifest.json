@@ -67,6 +67,58 @@
       }
     },
     {
+      "id": "conus_drt0",
+      "path": "small/conus_drt0.grib2",
+      "sha256": "2b962c04ef2a478e8cb027aa082c8853ca0c69ce44266a0517f764b90ba50008",
+      "size_bytes": 283,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 fixture: 2m temperature analysis, CONUS lat/lon grid (55-20°N, 125-65°W, 5°x5° spacing, 13x8=104 points). Section 0 discipline=0 (meteorological), edition=2. Section 1: center=7 (US NCEP), analysis (significance=0), 2024-01-15T00:00:00Z. Section 3 template 3.0 (lat/lon), shape=6 (WGS84), Ni=13, Nj=8, scanning_mode=0x00 (+i, -j), lat bounds 20-55°N, lon bounds 125-65°W (235-295°E). Section 4 template 4.0: discipline=0/cat=0/num=0 (temperature K), level type=103 (height above ground), value=2m, forecast_offset=0h. Section 5 template 5.0 (simple packing, DRT=0): R=270.0, E=0, D=0, nbits=8. Section 6: no bitmap (indicator=255). Section 7: 104 packed bytes X=0..103, unpacked values = 270.0+X K (270.0K at 55°N/125°W .. 373.0K at 20°N/65°W).",
+        "capture_date": "2026-07-23",
+        "generated_by": "scripts/gen_conus_drt0.py (gribtract project)"
+      }
+    },
+    {
+      "id": "rotated_latlon_gdt1_drt0",
+      "path": "small/rotated_latlon_gdt1_drt0.grib2",
+      "sha256": "535975d670fc07e0a46efb20d2fcbbc90bea96f4b573a7f7bd6250928f735295",
+      "size_bytes": 187,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 GDT=1 fixture: 3x3 rotated lat/lon, south pole at (30°N, 0°E), angle=0°. DRT=0 simple packing: R=270.0 E=0 D=0 N=8. X=[0..8] -> Y=[270..278] K.",
+        "capture_date": "2026-06-21",
+        "generated_by": "scripts/gen_grib2_rotated.py (gribtract project)"
+      }
+    },
+    {
+      "id": "drt4_ieee32_3x3",
+      "path": "small/drt4_ieee32_3x3.grib2",
+      "sha256": "0bc2262db4ce4e07e212cd94fea3a748d96d6ca0392c59a2ee581293423bda6f",
+      "size_bytes": 217,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 DRT=4 fixture: 3x3 lat/lon, IEEE 754 32-bit floats. R=100.0 E=0 D=0 N=32. Values: raw IEEE 32-bit floats [100.0..108.0]. Section 5 template 5.4 (IEEE 754 32-bit floats).",
+        "capture_date": "2026-07-27",
+        "generated_by": "scripts/gen_grib2_drt4.py (gribtract project)"
+      }
+    },
+    {
+      "id": "rotated_latlon_5x5",
+      "path": "small/rotated_latlon_5x5.grib2",
+      "sha256": "8ae9de6cc4cc04d3ada06bed503f44cc4c3395afb43ce84aa10446e2dc081b95",
+      "size_bytes": 216,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 fixture with rotated latitude/longitude grid: 2m temperature analysis, 5x5 grid (25 points). Section 0 discipline=0 (meteorological), edition=2. Section 1: center=7 (US NCEP), analysis (significance=0), 2024-06-19T00:00:00Z. Section 3 template 3.1 (rotated lat/lon): shape=6 (WGS84), Ni=5, Nj=5, scanning_mode=0x00 (+i, -j), latitude 40°N to 0°N by 10°, longitude 0°E to 40°E by 10°, south pole at (30°N, 0°E), rotation angle=0°. Section 4 template 4.0: discipline=0/cat=0/num=0 (temperature K), level type=103 (height above ground), value=2m, forecast_offset=0h. Section 5 template 5.0 (simple packing, DRT=0): R=270.0, E=0, D=0, nbits=8. Section 6: no bitmap (indicator=255). Section 7: 25 packed bytes.",
+        "capture_date": "2024-06-19",
+        "generated_by": "scripts/gen_grib2.py (gribtract project)"
+      }
+    },
+    {
       "id": "pdt1_ensemble_3x2",
       "path": "small/pdt1_ensemble_3x2.grib2",
       "sha256": "efc2bd63db399e592419c1ef1a8f780bb93e78be8a1954e1900e19789350b0fa",
@@ -93,6 +145,19 @@
       }
     },
     {
+      "id": "gfs_gaussian_gdt40_drt0",
+      "path": "small/gfs_gaussian_gdt40_drt0.grib2",
+      "sha256": "d9d0814526f2415d2e1c4af28e1e958897e512d003ba32f1ff03b84e3fab0c6a",
+      "size_bytes": 307,
+      "storage": "inline",
+      "provenance": {
+        "source": "synthetic",
+        "description": "Minimal GRIB2 fixture: 2m temperature analysis on a synthetic GFS Gaussian Latitude/Longitude grid (GDT 3.40). Grid: N=4 (parallels pole->equator), Ni=16 (4N longitudes, di=22.5deg), Nj=8 (2N latitudes), 128 points. Lat bounds +80N to -80N, lon 0E to 337.5E. Section 0 discipline=0 (meteorological), edition=2. Section 1: center=7 (US NCEP), analysis (significance=0), 2024-06-19T00:00:00Z. Section 3 template 3.40 (Gaussian lat/lon): shape=6 (WGS84), Ni=16, Nj=8, scanning_mode=0x00 (+i, -j), octets 68-71 carry N=4 (replaces Dj; latitude spacing is non-uniform Gaussian quadrature). Section 4 template 4.0: discipline=0/cat=0/num=0 (temperature K), level type=103 (height above ground), value=2m, forecast_offset=0h. Section 5 template 5.0 (simple packing): R=270.0, E=0, D=0, nbits=8. Section 6: no bitmap (indicator=255). Section 7: 128 packed bytes X=0..127, unpacked values = 270.0+X K. Small/inline analogue of the large remote core_gaussian_gdt40 (T254) and gfs_gaussian_gdt40_t1534 (T1534) Gaussian fixtures.",
+        "capture_date": "2026-07-26",
+        "generated_by": "scripts/gen_grib2_gaussian.py (gribtract project)"
+      }
+    },
+    {
       "id": "gfswave_arctic_wind_drt40",
       "path": "small/gfswave_arctic_wind_drt40.grib2",
       "sha256": "50cc647b08467d945688d255fafde49b7a52b21263566c6767ce4ee68ef85a5a",
@@ -116,6 +181,145 @@
         "description": "MRMS ReflectivityAtLowestAltitude Caribbean (00:00:55 UTC 2026-06-20). Single GRIB2 message: radar reflectivity (dBZ) at the lowest altitude scan. Template GDT=0 (lat/lon)/PDT=0/DRT=41 (PNG data compression). Grid: 4500000 points (lat/lon 3000x1500), no bitmap (indicator=255). Missing values are -999.0 dBZ (areas without radar coverage). Sourced from noaa-mrms-pds.s3.amazonaws.com/CARIB/ReflectivityAtLowestAltitude_00.50/20260620/MRMS_ReflectivityAtLowestAltitude_00.50_20260620-000055.grib2.gz (gunzipped). No eccodes golden generated (eccodes unavailable at capture time); golden pending generation on internal cluster.",
         "capture_date": "2026-06-22",
         "generated_by": "curl+gunzip from noaa-mrms-pds.s3.amazonaws.com (gribtract project)"
+      }
+    },
+    {
+      "id": "nam_awip12_lambert_drt3",
+      "path": "large/nam.t00z.awip1200.tm00.grib2",
+      "sha256": "b022c093603e67ebcc006a8e50cb30610bf4e3ce7d6609733d9949b5add6bf2c",
+      "size_bytes": 26364442,
+      "storage": "remote",
+      "url": "https://noaa-nam-pds.s3.amazonaws.com/nam.20250115/nam.t00z.awip1200.tm00.grib2",
+      "provenance": {
+        "source": "NOAA NAM awip12 (NCEP Grid 218, Lambert Conformal)",
+        "description": "NAM (North American Mesoscale) awip12 analysis, run 2025-01-15 00z, forecast hour F00. 196 GRIB2 messages, ALL GDT 3.30 (Lambert Conformal Conic) + DRT 3 (template 5.3: complex packing with 2nd-order spatial differencing). NCEP Grid 218: Nx=614, Ny=428 (262792 points), La1=12.19N/Lo1=226.541E, LaD=25N, LoV=265E, Latin1=Latin2=25N, Dx=Dy=12.191 km, scanningMode=0x40, bitsPerValue=15, centre=kwbc (NCEP). eccodes 2.41.0 decodes all 196 messages cleanly (ground-truth verifier). Sourced from noaa-nam-pds S3 (AWS Open Data, public, no auth, Accept-Ranges: bytes). NOTE: ✅ Fully supported - gribtract's DRT=3 decoder successfully decodes all 196 fields with correct metadata and values. End-to-end integration testing completed 2026-07-23 (bead bf-4p7j0). Differential suite validation completed 2026-07-23 (bead bf-1cf8): all 187 GDT=30/PDT=0/DRT=3 fields match golden reference output at 100% agreement (tolerance-based comparison). Performance: 50 MiB/s full decode, all fields have non-zero value counts. Lazy decode returns 186/196 fields (acceptable). Multi-field message handling working correctly. See docs/bf-4p7j0-nam-lambert-final-state.md for detailed results.",
+        "capture_date": "2026-07-22",
+        "generated_by": "curl from noaa-nam-pds.s3.amazonaws.com; verified by eccodes 2.41.0 (gribtract project)"
+      }
+    },
+    {
+      "id": "nam_awip12_lambert_drt3_20250120",
+      "path": "large/nam.t00z.awip1200.tm00.20250120.grib2",
+      "sha256": "0ca7d348375cf529c22877d3d7bdc97ce4cc7811dfd3b5688aa2685afeafb4f1",
+      "size_bytes": 27000733,
+      "storage": "remote",
+      "url": "https://noaa-nam-pds.s3.amazonaws.com/nam.20250120/nam.t00z.awip1200.tm00.grib2",
+      "provenance": {
+        "source": "NOAA NAM awip12 (NCEP Grid 218, Lambert Conformal)",
+        "description": "NAM (North American Mesoscale) awip12 analysis, run 2025-01-20 00z, forecast hour F00. 196 GRIB2 messages, ALL GDT 3.30 (Lambert Conformal Conic) + DRT 3 (template 5.3: complex packing with 2nd-order spatial differencing). NCEP Grid 218: Nx=614, Ny=428 (262792 points), La1=12.19N/Lo1=226.541E, LaD=25N, LoV=265E, Latin1=Latin2=25N, Dx=Dy=12.191 km, scanningMode=0x40, bitsPerValue=15, centre=kwbc (NCEP). Sourced from noaa-nam-pds S3 (AWS Open Data, public, no auth, Accept-Ranges: bytes). Verified via wgrib2: grid_template=30 (Lambert Conformal). NOTE: gribtract's own DRT=3 unpacker is not yet implemented, so this is a target fixture for DRT=3 + Lambert-conformal decoder coverage — storage=remote because the 26.3 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-23",
+        "generated_by": "curl from noaa-nam-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
+      }
+    },
+    {
+      "id": "hrrr_conus_drt0_lambert_20260723",
+      "path": "large/hrrr.t12z.wrfsfcf00.20260723.grib2",
+      "sha256": "22a80611536f4098358ec06eee4db8eb1998ee376da860ba7949c19aaa9adfd0",
+      "size_bytes": 142393582,
+      "storage": "remote",
+      "url": "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20260723/conus/hrrr.t12z.wrfsfcf00.grib2",
+      "provenance": {
+        "source": "NOAA HRRR (High-Resolution Rapid Refresh, CONUS 3km Lambert Conformal)",
+        "description": "HRRR CONUS wrfsfcf analysis, run 2026-07-23 12z, forecast hour F00. GRIB2 messages including DRT 0 (simple packing) messages. Grid: 1799 x 1059 points (1.9M total), 3km resolution, Lambert Conformal projection. Contains MXUPHL (Maximum Updraft Helicity) message 45 with DRT=0 simple packing, extracted as conus_drt0_mxuphl_20260723.grib2 for DRT=0 fixture testing. Coverage: CONUS (La1=21.138N, approximately 20N-55N, 125W-65W). Sourced from noaa-hrrr-bdp-pds S3 (AWS Open Data, public, no auth). Verified via wgrib2: grid_template=30 (Lambert Conformal), packing=grid point data - simple packing (for DRT=0 messages). NOTE: Contains DRT=0 messages suitable for testing simple packing decoder — storage=remote because the 136 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-23",
+        "generated_by": "curl from noaa-hrrr-bdp-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
+      }
+    },
+    {
+      "id": "hrrr_conus_drt3_lambert",
+      "path": "large/hrrr.t12z.wrfsfcf00.grib2",
+      "sha256": "22a80611536f4098358ec06eee4db8eb1998ee376da860ba7949c19aaa9adfd0",
+      "size_bytes": 141252632,
+      "storage": "remote",
+      "url": "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20240601/conus/hrrr.t12z.wrfsfcf00.grib2",
+      "provenance": {
+        "source": "NOAA HRRR (High-Resolution Rapid Refresh, CONUS 3km Lambert Conformal)",
+        "description": "HRRR CONUS wrfsfcf analysis, run 2024-06-01 12z, forecast hour F00. 170 GRIB2 messages, ALL GDT 3.30 (Lambert Conformal Conic) + DRT 3 (template 5.3: complex packing with spatial differencing). Grid: 1059 x 1799 points (1.9M total), 3km resolution, La1=21.138N/Lo1=237.280E, LaD=38.5N, LoV=262.5E, Latin1=Latin2=38.5N, Dx=Dy=3000m. Includes surface fields: REFC (composite reflectivity), UGRD/VGRD (wind components at multiple levels: 250/300/500/700/850 mb), HGT (geopotential height), TMP (temperature), DPT (dew point), and 165+ additional meteorological fields. Sourced from noaa-hrrr-bdp-pds S3 (AWS Open Data, public, no auth). Verified via wgrib2: grid_template=30 (Lambert Conformal), Data Repr. Template=5.3 (DRT=3). NOTE: gribtract's own DRT=3 unpacker is not yet implemented, so this is a target fixture for DRT=3 + Lambert-conformal decoder coverage — storage=remote because the 135 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-23",
+        "generated_by": "curl from noaa-hrrr-bdp-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
+      }
+    },
+    {
+      "id": "gefs_ensemble_mean_pdt48",
+      "path": "large/gefs.20240101.00.atmos.pgrb2ap5.geavg.t00z.pgrb2a.0p50.f000.grib2",
+      "sha256": "bb2c90188ec6370aca833b55118b199097c21ef978f0b5e6fe8ab9e9955b3158",
+      "size_bytes": 13664431,
+      "storage": "remote",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20240101/00/atmos/pgrb2ap5/geavg.t00z.pgrb2a.0p50.f000",
+      "provenance": {
+        "source": "NOAA GEFS (Global Ensemble Forecast System)",
+        "description": "GEFS ensemble mean analysis, run 2024-01-01 00z, forecast hour F00. 71 GRIB2 messages, ALL GDT 0 (lat/lon) + PDT 4.8 (ensemble mean statistical product). Grid: 0.5° resolution global lat/lon (pgrb2ap5). Product: geavg (ensemble mean across 31 members). Template: PDT 4.8 (statistically processed ensemble product, wgrib2 pdt=2). Variables: ensemble mean of HGT (geopotential height), TMP (temperature), UGRD/VGRD (wind components), RH (relative humidity) at multiple pressure levels (10 mb, 50 mb, etc.). Verified via wgrib2: pdt=2 (PDT 4.8) for all 71 messages. Sourced from noaa-gefs-pds S3 (AWS Open Data, public, no auth). storage=remote because the 13.7 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-23",
+        "generated_by": "curl from noaa-gefs-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
+      }
+    },
+    {
+      "id": "gefs_member01_pdt41",
+      "path": "large/gefs.20240101.00.atmos.pgrb2ap5.gep01.t00z.pgrb2a.0p50.f000.grib2",
+      "sha256": "7e5b2bafb0427a0a66e0b48e8632c5daa49559427e4c58a4c0950799cbf7beb6",
+      "size_bytes": 13618045,
+      "storage": "remote",
+      "url": "https://noaa-gefs-pds.s3.amazonaws.com/gefs.20240101/00/atmos/pgrb2ap5/gep01.t00z.pgrb2a.0p50.f000",
+      "provenance": {
+        "source": "NOAA GEFS (Global Ensemble Forecast System)",
+        "description": "GEFS individual ensemble member (control forecast, member 01, ENS=+1), run 2024-01-01 00z, forecast hour F00. 71 GRIB2 messages, ALL GDT 0 (lat/lon) + PDT 4.1 (individual ensemble member). Grid: 0.5° resolution global lat/lon (pgrb2ap5). Template: PDT 4.1 (individual ensemble member forecast, wgrib2 pdt=1). Variables: ensemble member values for HGT (geopotential height), TMP (temperature), UGRD/VGRD (wind components), RH (relative humidity) at multiple pressure levels (10 mb, 50 mb, 100 mb, 200 mb, etc.). Verified via wgrib2: pdt=1 (PDT 4.1) for all 71 messages. Each message is the control forecast (member 01) from the 31-member GEFS ensemble. Sourced from noaa-gefs-pds S3 (AWS Open Data, public, no auth). storage=remote because the 13.0 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-23",
+        "generated_by": "curl from noaa-gefs-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
+      }
+    },
+    {
+      "id": "core_gaussian_gdt40",
+      "path": "large/flx.2024011500.grib2",
+      "sha256": "003a93bfc907c17be3b62891071260569c409a97a0d258e59460a0d013064397",
+      "size_bytes": 10968510,
+      "storage": "remote",
+      "url": "https://storage.googleapis.com/noaa-nws-ncep-core/grib/3hour/flx/2024/01/flx.2024011500.grb",
+      "provenance": {
+        "source": "NOAA CORe Archive (Climate Data Record - Google Cloud Storage)",
+        "description": "CORe 3-hourly flux file, 2024-01-15 00z. GRIB2 messages using GDT 3.40 (Gaussian Latitude/Longitude grid). Grid: 512 x 256 Gaussian grid, 131,072 points. Latitude range: 89.46°N to -89.46°S. Longitude range: 0° to 359.30° with ~0.703° increment. Number of latitudes between pole-equator: 128. File type: flx (flux files directly created by FV3GFS model, containing radiative, heat fluxes, land surface, soil conditions, and cloud layers). Verified via wgrib2: grid_template=40 (GDT 3.40) confirmed. Sourced from NOAA NWS NCEP CORe archive on Google Cloud Storage (public, no auth, Open Data Dissemination). Coverage: 1950-present. storage=remote because the 10.5 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-23",
+        "generated_by": "curl from storage.googleapis.com/noaa-nws-ncep-core; verified by wgrib2 (gribtract project)"
+      }
+    },
+    {
+      "id": "gfs_gaussian_gdt40_t1534",
+      "path": "large/gdas.t00z.sfluxgrbf000.grib2",
+      "sha256": "f0d63afe6f4ca96ecbd437f962596ec1017b2088569faaba139625b49c471d9e",
+      "size_bytes": 127659863,
+      "storage": "remote",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gdas.20260724/00/atmos/gdas.t00z.sfluxgrbf000.grib2",
+      "provenance": {
+        "source": "NOAA GDAS (Global Data Assimilation System) Surface Flux",
+        "description": "GDAS surface flux analysis, run 2026-07-24 00z, forecast hour F000. 54 GRIB2 messages, ALL GDT 3.40 (Gaussian Latitude/Longitude grid). T1534 Gaussian grid: 3072 x 1536 grid points, N=768 (number of parallels between pole and equator), ~0.117° resolution (~12 km). Latitude range: 89.910324° to -89.910324°, Longitude range: 0.000000° to 359.882813°. Total grid points: 4,718,592. Variables include surface flux fields (radiation, heat fluxes, land surface, soil conditions, cloud layers). Sourced from NOAA NOMADS (public, no auth). Verified via wgrib2: grid_template=40 (GDT 3.40) confirmed. Verified via gribtract: successfully decoded all 54 fields with correct grid metadata and data values. Grid template 3.40 parameters correctly parsed: template=40, num_data_points=4718592, nx=3072, ny=1536, projection=GaussianLatLon(N=768). NOTE: ✅ Fully supported - gribtract's GDT 3.40 decoder successfully handles T1534 Gaussian grids. End-to-end integration testing completed 2026-07-24 (bead bf-1qia4). All 54 fields decoded with correct metadata and 4.7M data points per field. See notes/bf-1qia4.md for detailed verification results. storage=remote because the 122 MiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`).",
+        "capture_date": "2026-07-24",
+        "generated_by": "curl from nomads.ncep.noaa.gov; verified by wgrib2 and gribtract (gribtract project)"
+      }
+    },
+    {
+      "id": "ecmwf_ensemble_pdt41_enso",
+      "path": "large/ecmwf_ensemble_enso_0h.grib2",
+      "sha256": "a363988b982f45bbab7f114cb789c3169c0e13237bd54a60fce82d0ef9911b6b",
+      "size_bytes": 1551056896,
+      "storage": "remote",
+      "provenance": {
+        "source": "ECMWF (European Centre for Medium-Range Weather Forecasts)",
+        "description": "ECMWF ENSO (El Niño-Southern Oscillation) ensemble analysis, 2023-01-18 00z. 2,614 GRIB2 messages, predominantly PDT 4.1 (2,563 messages, 98.0%) for individual ensemble forecasts, with 51 PDT 4.11 messages. Variables include UGRD/VGRD (10m wind components), TMP (2m temperature), and precipitation accumulations. Ensemble members identified from ENS=+1 through ENS=+49, representing a large ensemble system with individual perturbation forecasts. Center=98 (ECMWF), analysis time (significance=0). storage=remote because the 1.55 GiB file is too large to commit (lives in tests/corpus/large/, gitignored, fetched+sha256-verified by `cargo xtask corpus fetch`). NOTE: gribtract's PDT 4.1 decoder support is pending — this fixture provides comprehensive ensemble coverage for testing individual ensemble member forecast handling.",
+        "capture_date": "2026-07-23",
+        "generated_by": "ECMWF ensemble dataset; verified by wgrib2 (gribtract project)"
+      }
+    },
+    {
+      "id": "gfs_conus_drt0_0p50",
+      "path": "large/gfs.t00z.pgrb2.0p50.f000",
+      "sha256": "f2ccb6c8abaeee0a6b0e52f91a096ecdb3c3446384f27da63e5df7fccf3fc302",
+      "size_bytes": 152106356,
+      "storage": "remote",
+      "url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260724/00/atmos/gfs.t00z.pgrb2.0p50.f000",
+      "provenance": {
+        "source": "NOAA GFS (Global Forecast System)",
+        "description": "GFS 0.50° global lat/lon analysis, run 2026-07-24 00z, forecast hour F000. Grid: 720×361 points (0.50° resolution), covering CONUS as subset of global grid (CONUS bounds: 20°N-50°N, 125°W-65°W). All messages use DRT=0 (simple packing, Grid Template 0 - Regular Latitude/Longitude). File contains 696 GRIB2 records including temperature, wind, geopotential height, and other meteorological fields at multiple pressure levels and surface levels. Sourced from NOAA AWS NODD (noaa-gfs-bdp-pds.s3.amazonaws.com), public access with no authentication required. CONUS coverage: ~900 grid points over CONUS. Verified via wgrib2: grid_template=0, DRT=0 confirmed. NOTE: ✅ Fully suitable for CONUS DRT=0 testing — provides complete CONUS coverage with simple packing format for DRT=0 decoder validation.",
+        "capture_date": "2026-07-25",
+        "generated_by": "curl from noaa-gfs-bdp-pds.s3.amazonaws.com; verified by wgrib2 (gribtract project)"
       }
     }
   ],

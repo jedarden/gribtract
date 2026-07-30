@@ -1,0 +1,105 @@
+DRT=0 Verification Report
+Generated: Fri Jul 24 07:42:02 AM EDT 2026
+=
+
+Checking: gfs.t00z.pgrb2.0p25.f000.20260722.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.0p25.f000.20260724.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.0p25.f003.20260724.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.0p25.f006.20260724.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.0p25.f012.20260723.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.0p50.f000.20260723.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.0p50.f000.20260724.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.0p50.f003.20260724.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.0p50.f006.20260724.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.0p50.f012.20260721.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.1p00.f000.20260723.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.1p00.f000.20260724.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.1p00.f003.20260724.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.1p00.f006.20260724.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+Checking: gfs.t00z.pgrb2.1p00.f024.20260722.grib2
+  Data Repr. Template: 5.3
+  Packing: packing=Grid point data - complex packing and spatial differencing,c3
+  DRT: 3
+  ✗ NOT DRT=0 (DRT=3)
+
+
+=== Summary ===
+
+Total files checked: 15
+Empty files: 0
+Total DRT=0 files: 0
+Total NON-DRT=0 files: 15
+
+DRT=0 list saved to: /home/coding/gribtract/drt_analysis/drt0_candidates.txt
+NON-DRT0 list saved to: /home/coding/gribtract/drt_analysis/non_drt0_candidates.txt
+Packing details saved to: /home/coding/gribtract/drt_analysis/packing_specifications.txt

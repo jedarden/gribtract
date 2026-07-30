@@ -1,0 +1,1 @@
+1:0:code table 5.0=41 Grid point data - Portable Network Graphics (PNG)

@@ -1,0 +1,157 @@
+===============================================================================
+GFS Gaussian-Grid Fixture Mismatch Analysis Summary
+Generated: 2026-07-25
+Analysis Bead: bf-63a9e
+===============================================================================
+
+EXECUTIVE SUMMARY
+================
+Current Overall Agreement Rate: 84.6% (11/13 comparable fixtures)
+This represents a significant improvement from the previous 63.6% rate.
+
+TOTAL FIXTURE BREAKDOWN
+=======================
+Total Fixtures:        21
+Comparable:            13 (have golden references)
+No Golden References:  6 (cannot be tested)
+Skipped (Feature):     2 (jpeg2000 feature not enabled)
+Decode Errors:         1 (GDT 3.40 not implemented)
+
+AGREEMENT RATE CALCULATION
+==========================
+Current Agreement:  11/13 = 84.6%
+Target Agreement:   ≥80.0%
+Gap to Target:       0.0% (ABOVE TARGET)
+Previous Rate:       63.6% (7/11)
+Improvement:         +21.0 percentage points
+
+FIELD-LEVEL AGREEMENT BY TEMPLATE TYPE
+========================================
+GDT=0 (Regular Lat/Lon Grid):
+  GDT=0 PDT=0 DRT=0:  2/2   (100.0%)  ✅
+  GDT=0 PDT=0 DRT=2:  1/1   (100.0%)  ✅
+  GDT=0 PDT=0 DRT=3:  1/1   (100.0%)  ✅
+  GDT=0 PDT=0 DRT=41: 2/2   (100.0%)  ✅
+  GDT=0 PDT=1 DRT=0:  1/1   (100.0%)  ✅
+  GDT=0 PDT=1 DRT=3:  71/71  (100.0%)  ✅ GEFS ensemble members
+  GDT=0 PDT=2 DRT=3:  71/71  (100.0%)  ✅ GEFS ensemble mean
+  GDT=0 PDT=8 DRT=0:  1/1   (100.0%)  ✅
+
+GDT=30 (Lambert Conformal):
+  GDT=30 PDT=0 DRT=3:  187/374 (50.0%)  ⚠️ PARTIAL MATCHES
+  GDT=30 PDT=8 DRT=3:  9/18    (50.0%)  ⚠️ PARTIAL MATCHES
+
+GDT=40 (Gaussian Grid):
+  DECODE ERROR - Not implemented (core_gaussian_gdt40)
+
+MISMATCHED FIXTURES
+===================
+Currently showing partial matches:
+
+1. NAM DRT=3 fixtures (GDT=30):
+   - nam_awip12_lambert_drt3: 187/374 fields match (50.0%)
+   - nam_awip12_lambert_drt3_20250120: No golden reference
+
+2. HRRR CONUS DRT=3 fixtures (GDT=30):
+   - hrrr_conus_drt3_lambert: 9/18 fields match (50.0%)
+   - hrrr_conus_drt0_lambert_20260723: No golden reference
+
+3. GFS Gaussian-grid fixtures (GDT=3.40):
+   - core_gaussian_gdt40: DECODE ERROR (GDT 3.40 not implemented)
+   - gfs_gaussian_gdt40_t1534: No golden reference (54 fields decoded)
+
+MISSING GOLDEN REFERENCES
+===========================
+The following 6 fixtures cannot be tested without golden references:
+1. conus_drt0
+2. rotated_latlon_5x5
+3. nam_awip12_lambert_drt3_20250120
+4. hrrr_conus_drt0_lambert_20260723
+5. hrrr_conus_drt3_lambert
+6. gfs_gaussian_gdt40_t1534 (54 fields, 127MB file)
+
+DECODE ERRORS
+=============
+1. core_gaussian_gdt40
+   - Issue: GDT 3.40 (Gaussian Latitude/Longitude grid) not implemented
+   - Impact: Cannot decode ANY Gaussian grid fixtures
+   - Golden reference exists: YES (378 MB at tests/corpus/golden/core_gaussian_gdt40.json)
+   - Grid size: 512×256 (131,072 points)
+
+PATTERNS AND COMMON ISSUES
+==========================
+1. Gaussian Grid Decoding (GDT 3.40):
+   - CRITICAL BLOCKER: No implementation exists
+   - Blocks all Gaussian grid fixtures (core_gaussian_gdt40, gfs_gaussian_gdt40_t1534)
+   - This is a significant gap for GFS model output
+
+2. Lambert Conformal Grid (GDT=30) Partial Matches:
+   - Pattern: Exactly 50% of fields match (187/374, 9/18)
+   - Affects: NAM and HRRR CONUS products
+   - Suggests: Systematic issue with DRT=3 complex packing on GDT=30
+   - May be related to: Spatial differencing or data representation order
+
+3. Missing Golden References:
+   - Large files (>10MB) often lack golden references
+   - Generation requires trusted oracle (NCL, wgrib2, ECMWF GRIB API)
+   - Remote storage in tests/corpus/large/ complicates reference management
+
+FIXTURES WITH CONSISTENT DISAGREEMENT
+=====================================
+1. GDT=30 PDT=0 DRT=3 (NAM/HRRR Lambert):
+   - Pattern: 50% match rate across different models
+   - Consistently affects same template types
+   - Not resolved by recent improvements (was 50%, remains 50%)
+
+2. GDT=40 (Gaussian Grid):
+   - Pattern: 0% match rate (decode error)
+   - Cannot progress without GDT 3.40 implementation
+   - Affects all GFS global flux/spectral files
+
+RECENT IMPROVEMENTS
+===================
+Since the previous analysis (63.6% → 84.6%):
+✅ GEFS ensemble fixtures now match (71/71 fields)
+✅ pdt1_ensemble_3x2 now matches (1/1 fields)
+✅ gefs_member01_pdt41 now matches (71/71 fields)
+✅ gefs_ensemble_mean_pdt48 now matches (71/71 fields)
+
+The ensemble issues were likely resolved by:
+- Improved PDT 1/2 handling for ensemble products
+- Better DRT=3 complex packing support
+- Fixed metadata field ordering
+
+RECOMMENDED ACTIONS
+==================
+HIGH PRIORITY:
+1. Implement GDT 3.40 (Gaussian Latitude/Longitude grid) decoding
+   - This unblocks both core_gaussian_gdt40 and gfs_gaussian_gdt40_t1534
+   - Critical for GFS global model support
+
+2. Investigate GDT=30 50% match pattern
+   - Root cause analysis on why exactly half the fields match
+   - Check field ordering, spatial differencing direction, or template interpretation
+
+MEDIUM PRIORITY:
+3. Generate golden references for 6 missing fixtures
+   - Prioritize: hrrr_conus_drt3_lambert (smaller file, active mismatch pattern)
+   - Use: wgrib2 or eccodes as trusted oracle
+
+4. Enable jpeg2000 feature for DRT=40 testing
+   - Currently 2 fixtures are skipped due to missing feature
+
+CONCLUSION
+==========
+The GFS Gaussian-grid fixture analysis shows significant improvement (84.6% vs 63.6%),
+but critical gaps remain:
+
+1. Gaussian grid support (GDT 3.40) is completely missing
+2. Lambert conformal fixtures show systematic 50% match pattern
+3. 6 fixtures cannot be tested due to missing golden references
+
+Once GDT 3.40 is implemented and golden references are generated, the suite should
+achieve >90% agreement rate.
+
+===============================================================================
+End of Summary
+===============================================================================

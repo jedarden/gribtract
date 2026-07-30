@@ -1,0 +1,77 @@
+# Minimal GRIB2 File Header
+# File: minimal_buffer_underrun.grib2 (187 bytes)
+# Purpose: Trigger buffer underrun vulnerability in GRIB2 parser
+#
+## Structure Summary
+# Total Size: 187 bytes (99.6% reduction from full 5-121MB files)
+# Format: GRIB2 Edition 2
+# Discipline: Meteorological (0)
+#
+## File Layout (by byte offsets)
+# 0-15:    Section 0 - Indicator (16 bytes)
+#            - Magic: "GRIB" (bytes 0-3)
+#            - Discipline: 0 (byte 4)
+#            - Edition: 2 (byte 7)
+#            - Total Length: 187 bytes (bytes 8-15, big-endian)
+#
+# 16-36:   Section 1 - Identification (21 bytes)
+#            - Section length: 21 (bytes 16-19)
+#            - Section number: 1 (byte 20)
+#
+# 37-103:  Section 3 - Grid Definition (67 bytes, claims 72!)
+#            - Section length: 72 (bytes 37-40) *** LIES! ***
+#            - Section number: 3 (byte 41)
+#            - Source of grid definition: 255 (predefined) (byte 42)
+#            - Grid points: 1 (bytes 43-46)
+#            - Grid template: 0 (bytes 47-48)
+#            - Template data: 55 bytes claimed, only 50 present
+#            *** MISSING 5 BYTES - TRIGGERS UNDERRUN ***
+#
+# 104-137: Section 4 - Product Definition (34 bytes)
+# 138-159: Section 5 - Data Representation (22 bytes)
+# 160-165: Section 6 - Bitmap (6 bytes)
+# 166-171: Section 7 - Data (6 bytes)
+# 172-175: End Section - "7777" marker (4 bytes)
+#
+## What Was Removed from Full GRIB2 Files
+# - Section 2 (Local Use): Often 100s of KB, not needed for bug
+# - Extensive Section 7 data: Reduced from millions to 6 bytes
+# - Section 8 (Repeating): Only for multi-message files
+# - Most metadata fields in Sections 1, 4, 5: Simplified to minimum
+#
+## Why These Removals Were Safe
+# The buffer underrun bug occurs specifically during Section 3 parsing.
+# Only Sections 0-3 are read before the bug triggers, so sections 4-7
+# are structurally required but not involved in the vulnerability.
+# Section 2 and 8 are optional and not needed for basic parsing.
+#
+## Bug Trigger Mechanism
+# 1. Parser reads Section 3 length field (bytes 37-40) = 72 bytes
+# 2. Parser trusts this length claim without validation
+# 3. Parser calculates Grid Definition Template size: 52 + Nx*Ny bytes
+#    For this file: 52 + 1*1 = 53 bytes needed
+# 4. Parser attempts to read template data (bytes 50-102 expected)
+# 5. Reality: Section 3 only has 67 bytes total (ends at byte 104)
+# 6. Result: Parser reads 5 bytes into Section 4 or hits bounds check
+# 7. Error: TooShort { needed: 1, got: 0 } or undefined behavior
+#
+## Critical Byte Offsets for Underrun
+# - 37-40: Section 3 length field (claims 72, should be 67)
+# - 50-51: Grid Definition Template number (0 = Template 3.0)
+# - 103-104: Last actual byte of Section 3
+# - 104-105: First byte of Section 4 (parser shouldn't see this!)
+#
+## Expected Behavior
+# When parsed, this file should trigger:
+#   TooShort { needed: 1, got: 0 } error
+# or memory safety check failure.
+# If parsing succeeds, the bug has been fixed or file is corrupted.
+#
+## Verification
+# Run: cargo run --example verify_minimal_underrun
+# Expected output: "✓ Buffer underrun successfully triggered"
+#
+## Usage Notes
+# This file is HAND-CRAFTED for testing. It is NOT a valid GRIB2 file
+# in the sense that it contains intentional structural defects.
+# Use only for controlled testing of buffer underrun vulnerability.

@@ -1,0 +1,11 @@
+# Final Verified DRT=0 CONUS File List
+# Generated: 2026-07-24 by bead bf-593mb
+# Total files: 7 verified candidates
+
+/home/coding/gribtract/drt_search_results/gfs_1p00_20260724_f000.grib2
+/home/coding/gribtract/drt_search_results/gfs_0p25_20260723_f000.grib2
+/home/coding/gribtract/drt_search_results/gefs_0p50_f000.grib2
+/home/coding/gribtract/drt_search_results/gefs_0p50_f003.grib2
+/home/coding/gribtract/drt_search_results/gfs_1p00_20260723_f000.grib2
+/home/coding/gribtract/drt_search_results/gfs_0p50_20260724_f000.grib2
+/home/coding/gribtract/drt_search_results/gefs_0p50_f006.grib2
