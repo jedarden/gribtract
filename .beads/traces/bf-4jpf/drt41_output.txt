@@ -1,1 +1,0 @@
-1:0:Sec5 len=21 #defined data points=6 Data Repr. Template=5.41
