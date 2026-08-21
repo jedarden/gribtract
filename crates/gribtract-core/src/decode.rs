@@ -1193,22 +1193,27 @@ fn parse_drt_3(b: &mut Buf) -> Result<(PackingInfo, ComplexPackingExtra)> {
     ))
 }
 
-/// Data Representation Template 5.4: IEEE 754 32-bit floats.
+/// Data Representation Template 5.4: IEEE floating-point data.
 ///
-/// WMO GRIB2 Table 5.4:
-/// - Octs 12-21: common packing header (same as DRT=0)
-/// - Oct 22-23: reserved (must be 0)
+/// WMO GRIB2 Table 5.4 contains only octet 12, the precision from Table 5.7.
+/// This decoder supports IEEE 32-bit data (precision 1); unlike simple packing,
+/// the template has no reference value, scale factors, or bit-packing metadata.
 fn parse_drt_4(b: &mut Buf) -> Result<PackingInfo> {
-    let packing = parse_drt_common(b)?; // oct 12-21: common header
-
-    // Oct 22-23: reserved (must be 0 per WMO spec)
-    let reserved1 = b.read_u8()?; // oct 22
-    let reserved2 = b.read_u8()?; // oct 23
-    if reserved1 != 0 || reserved2 != 0 {
-        return Err(Error::InvalidData("DRT=4 reserved octets must be 0"));
+    let precision = b.read_u8()?; // oct 12: Table 5.7
+    if precision != 1 {
+        return Err(Error::NotImplemented);
     }
 
-    Ok(packing)
+    // `PackingInfo` is carried on every Field. These fields are absent from
+    // template 5.4, so retain neutral values and expose the 32-bit precision
+    // through `bits_per_value`.
+    Ok(PackingInfo {
+        reference_value: 0.0,
+        binary_scale_factor: 0,
+        decimal_scale_factor: 0,
+        bits_per_value: 32,
+        original_field_type: 0,
+    })
 }
 
 // ── Section 6: Bit Map ────────────────────────────────────────────────────────
@@ -1412,7 +1417,7 @@ fn decode_drt41(body: &[u8], packing: &PackingInfo, n_points: usize) -> Result<G
 /// Section 7 contains raw 4-byte big-endian IEEE 754 float values. No
 /// scaling or unpacking is applied — the floats are returned as-is.
 fn decode_drt4(body: &[u8], n_points: usize) -> Result<GridValues> {
-    let bytes_needed = n_points * 4;
+    let bytes_needed = n_points.checked_mul(4).ok_or(Error::Overflow)?;
     if body.len() < bytes_needed {
         return Err(Error::TooShort {
             needed: bytes_needed,
@@ -2180,6 +2185,42 @@ mod tests {
             }
             _ => panic!("expected Dense"),
         }
+    }
+
+    #[test]
+    fn drt4_uses_precision_octet_and_raw_ieee32_values() {
+        let mut header = Buf::new(&[1]); // Table 5.7: IEEE 32-bit
+        let packing = parse_drt_4(&mut header).expect("DRT 5.4 precision 1");
+        assert_eq!(packing.reference_value, 0.0);
+        assert_eq!(packing.binary_scale_factor, 0);
+        assert_eq!(packing.decimal_scale_factor, 0);
+        assert_eq!(packing.bits_per_value, 32);
+        assert_eq!(header.remaining(), 0);
+
+        let data = [
+            100.5_f32.to_be_bytes(),
+            (-0.0_f32).to_be_bytes(),
+            (-12.25_f32).to_be_bytes(),
+        ]
+        .concat();
+        let GridValues::Dense(values) =
+            decode_section7(&data, &packing, 4, None, 3).expect("decode DRT 5.4 raw values")
+        else {
+            panic!("expected Dense");
+        };
+        assert_eq!(values.len(), 3);
+        assert_eq!(values[0], 100.5);
+        assert_eq!(values[1].to_bits(), (-0.0_f64).to_bits());
+        assert_eq!(values[2], -12.25);
+    }
+
+    #[test]
+    fn drt4_rejects_non_ieee32_precision() {
+        let mut header = Buf::new(&[2]); // IEEE 64-bit is outside this decoder's scope.
+        assert!(matches!(
+            parse_drt_4(&mut header),
+            Err(Error::NotImplemented)
+        ));
     }
 
     #[test]

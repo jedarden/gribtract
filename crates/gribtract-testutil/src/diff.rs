@@ -336,8 +336,9 @@ pub fn compare_field(actual: &Field, golden: &GoldenField) -> FieldResult {
     }
 
     // Grid values
-    // DRT 4 (IEEE 32-bit float) uses exact bit-identical comparison
-    let tolerance = if actual.drt_template == 4 {
+    // DRT 4 (IEEE 32-bit float) uses exact bit-identical comparison.
+    let ieee_float_exact = actual.drt_template == 4;
+    let tolerance = if ieee_float_exact {
         0.0
     } else {
         actual.packing.tolerance()
@@ -365,7 +366,12 @@ pub fn compare_field(actual: &Field, golden: &GoldenField) -> FieldResult {
             continue;
         }
         let delta = (a.0 - g.0).abs();
-        if delta > tolerance {
+        let mismatch = if ieee_float_exact {
+            a.0.to_bits() != g.0.to_bits()
+        } else {
+            delta > tolerance
+        };
+        if mismatch {
             value_mismatches.push(PointMismatch {
                 index: i,
                 expected: g.0,
@@ -665,7 +671,7 @@ mod tests {
 
     #[test]
     fn drt_4_uses_exact_bit_identical_comparison() {
-        // DRT 4 should use bit-identical comparison (tolerance = 0.0)
+        // DRT 4 should use bit-identical comparison (tolerance = 0.0).
         let mut actual = sample_field();
         actual.drt_template = 4;
 
@@ -688,6 +694,14 @@ mod tests {
         } else {
             panic!("Expected ValuesMismatch for DRT 4 with tiny difference");
         }
+
+        // Numeric zero comparison alone would consider these equal. Their IEEE
+        // representations differ, so DRT 4 must report a mismatch.
+        let mut actual_negative_zero = actual;
+        actual_negative_zero.values = GridValues::Dense(vec![-0.0, 271.0, 272.0, 273.0]);
+        let golden_positive_zero = sample_golden_with_drt(vec![0.0, 271.0, 272.0, 273.0], 4);
+        let result = compare_field(&actual_negative_zero, &golden_positive_zero);
+        assert!(matches!(result, FieldResult::ValuesMismatch(_)));
     }
 
     #[test]

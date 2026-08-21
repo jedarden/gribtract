@@ -95,12 +95,12 @@
     {
       "id": "drt4_ieee32_3x3",
       "path": "small/drt4_ieee32_3x3.grib2",
-      "sha256": "0bc2262db4ce4e07e212cd94fea3a748d96d6ca0392c59a2ee581293423bda6f",
-      "size_bytes": 217,
+      "sha256": "3e12d5f0aceb8b48c70f389681ca48a999fc8a2b5d044393d22d0cc771d1fde3",
+      "size_bytes": 206,
       "storage": "inline",
       "provenance": {
         "source": "synthetic",
-        "description": "Minimal GRIB2 DRT=4 fixture: 3x3 lat/lon, IEEE 754 32-bit floats. R=100.0 E=0 D=0 N=32. Values: raw IEEE 32-bit floats [100.0..108.0]. Section 5 template 5.4 (IEEE 754 32-bit floats).",
+        "description": "Minimal GRIB2 DRT=4 fixture: 3x3 lat/lon, IEEE 754 32-bit floats. Precision=1 (IEEE 32-bit, WMO Table 5.7). Values: raw IEEE 32-bit floats [100.0..108.0]. Section 5 template 5.4 (IEEE floating-point data).",
         "capture_date": "2026-07-27",
         "generated_by": "scripts/gen_grib2_drt4.py (gribtract project)"
       }
