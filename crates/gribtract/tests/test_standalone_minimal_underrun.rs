@@ -28,22 +28,23 @@
 //! - Structure: Only sections 0, 1, and 3 (all other sections removed)
 //! - Trigger: Section 3 length field (72) > actual data (67)
 
-use std::path::{Path, PathBuf};
 use std::fs;
+use std::path::{Path, PathBuf};
 
 /// Get the path to the test fixture, handling different working directory contexts
 fn get_fixture_path() -> PathBuf {
     // Use CARGO_MANIFEST_DIR environment variable if available (most reliable)
     if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
-        let manifest_path = PathBuf::from(manifest_dir)
-            .join("tests/corpus/small/minimal_synthetic_underrun.grib2");
+        let manifest_path =
+            PathBuf::from(manifest_dir).join("tests/corpus/small/minimal_synthetic_underrun.grib2");
         if manifest_path.exists() {
             return manifest_path;
         }
     }
 
     // Try the repository root first (where cargo test runs)
-    let repo_root_path = Path::new("crates/gribtract/tests/corpus/small/minimal_synthetic_underrun.grib2");
+    let repo_root_path =
+        Path::new("crates/gribtract/tests/corpus/small/minimal_synthetic_underrun.grib2");
     if repo_root_path.exists() {
         return repo_root_path.to_path_buf();
     }
@@ -80,8 +81,8 @@ fn test_minimal_synthetic_buffer_underrun() {
     let fixture_path = get_fixture_path();
 
     // Load the minimal GRIB2 data
-    let minimal_grib2 = fs::read(fixture_path)
-        .expect("Failed to read minimal synthetic buffer underrun fixture");
+    let minimal_grib2 =
+        fs::read(fixture_path).expect("Failed to read minimal synthetic buffer underrun fixture");
 
     // Verify we have the correct file (104 bytes)
     assert_eq!(
@@ -98,11 +99,7 @@ fn test_minimal_synthetic_buffer_underrun() {
     );
 
     // Verify GRIB edition 2
-    assert_eq!(
-        minimal_grib2[7],
-        2,
-        "File should be GRIB edition 2"
-    );
+    assert_eq!(minimal_grib2[7], 2, "File should be GRIB edition 2");
 
     // Attempt to decode - this should trigger the buffer underrun panic
     let _decode_result = gribtract::decode(&minimal_grib2);
@@ -116,8 +113,8 @@ fn test_minimal_synthetic_buffer_underrun() {
 #[should_panic(expected = "out of range for slice of length")]
 fn test_buffer_underrun_panic_diagnostic_info() {
     let fixture_path = get_fixture_path();
-    let minimal_grib2 = fs::read(fixture_path)
-        .expect("Failed to read minimal synthetic buffer underrun fixture");
+    let minimal_grib2 =
+        fs::read(fixture_path).expect("Failed to read minimal synthetic buffer underrun fixture");
 
     // Attempt to decode - should trigger the buffer underrun panic
     let _decode_result = gribtract::decode(&minimal_grib2);
@@ -130,8 +127,8 @@ fn test_buffer_underrun_panic_diagnostic_info() {
 #[test]
 fn test_minimal_fixture_structure() {
     let fixture_path = get_fixture_path();
-    let minimal_grib2 = fs::read(fixture_path)
-        .expect("Failed to read minimal synthetic buffer underrun fixture");
+    let minimal_grib2 =
+        fs::read(fixture_path).expect("Failed to read minimal synthetic buffer underrun fixture");
 
     // Verify GRIB header structure (Section 0)
     assert_eq!(&minimal_grib2[0..4], b"GRIB", "GRIB magic bytes");
@@ -140,8 +137,14 @@ fn test_minimal_fixture_structure() {
     // The total length should match the actual file size
     // In GRIB2, bytes 8-15 contain the total length (64-bit big-endian)
     let declared_length = u64::from_be_bytes([
-        minimal_grib2[8], minimal_grib2[9], minimal_grib2[10], minimal_grib2[11],
-        minimal_grib2[12], minimal_grib2[13], minimal_grib2[14], minimal_grib2[15],
+        minimal_grib2[8],
+        minimal_grib2[9],
+        minimal_grib2[10],
+        minimal_grib2[11],
+        minimal_grib2[12],
+        minimal_grib2[13],
+        minimal_grib2[14],
+        minimal_grib2[15],
     ]);
 
     assert_eq!(
@@ -152,13 +155,20 @@ fn test_minimal_fixture_structure() {
 
     // Verify the file contains multiple sections (not just Section 0)
     // The synthetic fixture should have at least sections 0, 1, and 3
-    assert!(minimal_grib2.len() > 21, "File should contain more than just Section 0");
+    assert!(
+        minimal_grib2.len() > 21,
+        "File should contain more than just Section 0"
+    );
 
     // Section 3 should exist and contain the malformed length
     // This is the critical section that triggers the buffer underrun
-    let has_section_3 = minimal_grib2.iter()
+    let has_section_3 = minimal_grib2
+        .iter()
         .skip(21) // After Section 0 (16) + Section 1 minimum (21)
         .any(|&b| b == 3);
 
-    assert!(has_section_3, "Fixture should contain Section 3 (Grid Definition)");
+    assert!(
+        has_section_3,
+        "Fixture should contain Section 3 (Grid Definition)"
+    );
 }
