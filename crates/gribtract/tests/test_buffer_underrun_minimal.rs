@@ -34,8 +34,7 @@ use std::fs;
 fn test_minimal_buffer_underrun_reproduction() {
     // Load the minimal GRIB2 test file
     let file_path = "../../tests/data/minimal_buffer_underrun.grib2";
-    let bytes = fs::read(file_path)
-        .expect("Failed to read minimal buffer underrun test file");
+    let bytes = fs::read(file_path).expect("Failed to read minimal buffer underrun test file");
 
     // Verify file structure to ensure we're testing the right file
     assert_eq!(&bytes[0..4], b"GRIB", "Should have valid GRIB magic bytes");
@@ -71,13 +70,11 @@ fn test_minimal_buffer_underrun_reproduction() {
     }
 }
 
-
 #[test]
 fn test_buffer_underrun_error_details() {
     // Test that we get meaningful error details from the buffer underrun
     let file_path = "../../tests/data/minimal_buffer_underrun.grib2";
-    let bytes = fs::read(file_path)
-        .expect("Failed to read minimal buffer underrun test file");
+    let bytes = fs::read(file_path).expect("Failed to read minimal buffer underrun test file");
 
     let result = gribtract::decode(&bytes);
 
@@ -88,12 +85,16 @@ fn test_buffer_underrun_error_details() {
             let error_msg = format!("{:?}", e);
 
             // Should mention TooShort
-            assert!(error_msg.contains("TooShort"),
-                    "Error should mention 'TooShort' to indicate buffer underrun");
+            assert!(
+                error_msg.contains("TooShort"),
+                "Error should mention 'TooShort' to indicate buffer underrun"
+            );
 
             // Error should provide context about what went wrong
-            assert!(error_msg.contains("needed") && error_msg.contains("got"),
-                    "Error should provide 'needed' and 'got' counts for debugging");
+            assert!(
+                error_msg.contains("needed") && error_msg.contains("got"),
+                "Error should provide 'needed' and 'got' counts for debugging"
+            );
         }
     }
 }

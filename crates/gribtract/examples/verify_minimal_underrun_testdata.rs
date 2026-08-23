@@ -39,8 +39,8 @@
 //! cargo test --example verify_minimal_underrun
 //! ```
 
-use std::fs;
 use gribtract::decode;
+use std::fs;
 
 fn main() {
     let file_path = "examples/testdata/minimal_buffer_underrun.grib2";
@@ -81,7 +81,10 @@ fn main() {
     // Attempt to decode - this should trigger the buffer underrun
     match decode(&bytes) {
         Ok(fields) => {
-            println!("✗ Decoding succeeded ({} fields) - buffer underrun NOT triggered", fields.len());
+            println!(
+                "✗ Decoding succeeded ({} fields) - buffer underrun NOT triggered",
+                fields.len()
+            );
             println!("  This means the file is valid or the bug has been fixed");
         }
         Err(e) => {
@@ -145,8 +148,7 @@ mod tests {
 
         // Total length field (bytes 8-15, big-endian)
         let total_len = u64::from_be_bytes([
-            bytes[8], bytes[9], bytes[10], bytes[11],
-            bytes[12], bytes[13], bytes[14], bytes[15]
+            bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15],
         ]);
         assert_eq!(total_len, 187, "Total length field should be 187");
 

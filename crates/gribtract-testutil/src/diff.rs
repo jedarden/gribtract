@@ -68,6 +68,10 @@ pub struct CoverageReport {
     /// These are NOT counted in fixtures_total and excluded from the comparable
     /// count when computing agreement percentage.
     pub fixtures_skipped_remote: usize,
+    /// Fixtures skipped due to storage=deferred (decoder not yet implemented).
+    /// These are NOT counted in fixtures_total and excluded from the comparable
+    /// count when computing agreement percentage.
+    pub fixtures_skipped_deferred: usize,
     /// (gdt_template, pdt_template, drt_template) → stat
     pub by_template: HashMap<(u16, u16, u16), TemplateStat>,
 }
@@ -95,12 +99,13 @@ impl CoverageReport {
             .saturating_sub(self.fixtures_skipped_feature);
         println!("=== Differential Harness Coverage ===");
         println!(
-            "Fixtures : {} total  ({} comparable, {} no-golden, {} skipped-feature, {} skipped-remote-not-fetched)",
+            "Fixtures : {} total  ({} comparable, {} no-golden, {} skipped-feature, {} skipped-remote, {} skipped-deferred)",
             self.fixtures_total,
             comparable,
             self.fixtures_no_golden,
             self.fixtures_skipped_feature,
-            self.fixtures_skipped_remote
+            self.fixtures_skipped_remote,
+            self.fixtures_skipped_deferred
         );
         println!("  matched      : {}", self.fixtures_matched);
         println!("  decode errors: {}", self.fixtures_decode_error);

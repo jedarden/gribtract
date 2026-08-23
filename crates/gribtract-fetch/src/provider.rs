@@ -57,14 +57,25 @@ impl fmt::Display for S3Bucket {
     }
 }
 
+impl std::str::FromStr for S3Bucket {
+    type Err = FetchError;
+
+    fn from_str(s: &str) -> Result<Self> {
+        Self::try_from(s)
+    }
+}
+
 impl S3Bucket {
     /// Get the full S3 bucket URL
     pub fn base_url(&self) -> String {
         format!("{}{s}.s3.amazonaws.com/", NOAA_S3_BASE, s = self)
     }
+}
 
-    /// Convert from string (for config parsing)
-    pub fn from_str(s: &str) -> Result<Self> {
+impl TryFrom<&str> for S3Bucket {
+    type Error = FetchError;
+
+    fn try_from(s: &str) -> Result<Self> {
         match s.to_lowercase().as_str() {
             "noaa-hrrr-bdp-pds" | "hrrr" => Ok(S3Bucket::HrrrBdp),
             "noaa-gefs-pds" | "gefs" => Ok(S3Bucket::GefsPds),
@@ -96,20 +107,23 @@ impl fmt::Display for GcsBucket {
     }
 }
 
-impl GcsBucket {
-    /// Get the full GCS bucket URL
-    pub fn base_url(&self) -> String {
-        format!("{}{b}/", GCS_BASE, b = self)
-    }
+impl std::str::FromStr for GcsBucket {
+    type Err = FetchError;
 
-    /// Convert from string
-    pub fn from_str(s: &str) -> Result<Self> {
+    fn from_str(s: &str) -> Result<Self> {
         match s.to_lowercase().as_str() {
             "high-resolution-rapid-refresh" | "hrrr" => Ok(GcsBucket::HighResolutionRapidRefresh),
             "national-blend-of-models" | "nbm" => Ok(GcsBucket::NationalBlendOfModels),
             "gfs-ensemble-forecast-system" | "gefs" => Ok(GcsBucket::GfsEnsembleForecastSystem),
             _ => Err(FetchError::InvalidUrl(format!("Unknown GCS bucket: {}", s))),
         }
+    }
+}
+
+impl GcsBucket {
+    /// Get the full GCS bucket URL
+    pub fn base_url(&self) -> String {
+        format!("{}{b}/", GCS_BASE, b = self)
     }
 }
 
@@ -134,14 +148,10 @@ impl fmt::Display for NomadsModel {
     }
 }
 
-impl NomadsModel {
-    /// Get the base NOMADS URL for this model
-    pub fn base_url(&self) -> String {
-        format!("{}{m}/", NOMADS_BASE, m = self)
-    }
+impl std::str::FromStr for NomadsModel {
+    type Err = FetchError;
 
-    /// Convert from string
-    pub fn from_str(s: &str) -> Result<Self> {
+    fn from_str(s: &str) -> Result<Self> {
         match s.to_lowercase().as_str() {
             "gfs" => Ok(NomadsModel::Gfs),
             "gefs" => Ok(NomadsModel::Gefs),
@@ -151,6 +161,13 @@ impl NomadsModel {
                 s
             ))),
         }
+    }
+}
+
+impl NomadsModel {
+    /// Get the base NOMADS URL for this model
+    pub fn base_url(&self) -> String {
+        format!("{}{m}/", NOMADS_BASE, m = self)
     }
 }
 
@@ -174,9 +191,9 @@ impl DataProvider {
         }
 
         match parts[0].to_lowercase().as_str() {
-            "s3" => Ok(DataProvider::S3(S3Bucket::from_str(parts[1])?)),
-            "gcs" => Ok(DataProvider::Gcs(GcsBucket::from_str(parts[1])?)),
-            "nomads" => Ok(DataProvider::Nomads(NomadsModel::from_str(parts[1])?)),
+            "s3" => Ok(DataProvider::S3(parts[1].parse()?)),
+            "gcs" => Ok(DataProvider::Gcs(parts[1].parse()?)),
+            "nomads" => Ok(DataProvider::Nomads(parts[1].parse()?)),
             _ => Err(FetchError::InvalidUrl(format!(
                 "Unknown provider type: {}",
                 parts[0]

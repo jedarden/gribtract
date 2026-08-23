@@ -15,8 +15,7 @@ fn main() {
     // Test original file
     println!("1. ORIGINAL FILE");
     println!("   Path: {}", original_path.display());
-    let original_grib2 = fs::read(original_path)
-        .expect("Failed to read original file");
+    let original_grib2 = fs::read(original_path).expect("Failed to read original file");
     println!("   Size: {} bytes", original_grib2.len());
 
     match gribtract::decode(&original_grib2) {
@@ -29,8 +28,7 @@ fn main() {
     // Test minimal file
     println!("2. MINIMAL FILE");
     println!("   Path: {}", minimal_path.display());
-    let minimal_grib2 = fs::read(minimal_path)
-        .expect("Failed to read minimal file");
+    let minimal_grib2 = fs::read(minimal_path).expect("Failed to read minimal file");
     println!("   Size: {} bytes", minimal_grib2.len());
 
     match gribtract::decode(&minimal_grib2) {
@@ -47,7 +45,10 @@ fn main() {
     println!("=== SUMMARY ===");
     println!("Original size: {} bytes", original_grib2.len());
     println!("Minimal size:  {} bytes", minimal_grib2.len());
-    println!("Reduction:     {} bytes ({:.1}%)", size_reduction, reduction_percent);
+    println!(
+        "Reduction:     {} bytes ({:.1}%)",
+        size_reduction, reduction_percent
+    );
     println!();
     println!("Both files produce the same TooShort buffer underrun error ✓");
 }

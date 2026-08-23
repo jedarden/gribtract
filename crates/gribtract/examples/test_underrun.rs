@@ -1,6 +1,6 @@
 // Test that minimal_buffer_underrun.grib2 triggers buffer underrun
-use std::fs;
 use gribtract::decode;
+use std::fs;
 
 fn main() {
     let file_path = "examples/testdata/minimal_buffer_underrun.grib2";
@@ -29,7 +29,10 @@ fn main() {
     // Attempt to decode
     match decode(&bytes) {
         Ok(fields) => {
-            println!("✗ Decoding succeeded ({} fields) - buffer underrun NOT triggered", fields.len());
+            println!(
+                "✗ Decoding succeeded ({} fields) - buffer underrun NOT triggered",
+                fields.len()
+            );
             std::process::exit(1);
         }
         Err(e) => {

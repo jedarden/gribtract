@@ -2,7 +2,6 @@
 
 use crate::error::{FetchError, Result};
 use bytes::Bytes;
-use std::collections::HashMap;
 use std::ops::Range;
 use std::time::Duration;
 
@@ -142,6 +141,7 @@ impl ContentRange {
 #[derive(Debug, Clone)]
 pub struct FetchClient {
     client: reqwest::Client,
+    #[allow(dead_code)]
     default_timeout: Duration,
     /// Consecutive failure count per provider (provider identifier -> failure count)
     consecutive_failures: std::collections::HashMap<String, u32>,

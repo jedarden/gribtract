@@ -34,6 +34,14 @@ fn differential_coverage_report() {
             continue;
         }
 
+        // Skip deferred fixtures - these are not yet supported by the decoder
+        // and their GRIB2 files may not exist in the corpus.
+        if entry.storage == "deferred" {
+            eprintln!("  [skip-deferred] {}", entry.id);
+            report.fixtures_skipped_deferred += 1;
+            continue;
+        }
+
         // Count all fixtures that will run (inline + fetched remote) in fixtures_total first,
         // so that fixtures_total - fixtures_no_golden correctly computes the comparable count.
         report.fixtures_total += 1;

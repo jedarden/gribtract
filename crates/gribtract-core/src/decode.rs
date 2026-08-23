@@ -1485,7 +1485,7 @@ fn decode_drt3(
 
     // Helper: check if we have enough bytes remaining for the next operation
     let check_bytes =
-        |needed: usize, body_len: usize, byte_pos: usize, context: &str| -> Result<()> {
+        |needed: usize, body_len: usize, byte_pos: usize, _context: &str| -> Result<()> {
             let remaining = body_len.saturating_sub(byte_pos);
             if remaining < needed {
                 return Err(Error::TooShort {
@@ -1621,8 +1621,8 @@ fn decode_drt3(
             values.push((r + ival1 as f64 * two_e) / ten_d);
         }
         let mut prev = ival1;
-        for i in 1..packed.len() {
-            prev += packed[i] + minsd;
+        for diff in packed.iter().skip(1) {
+            prev += diff + minsd;
             values.push((r + prev as f64 * two_e) / ten_d);
         }
     } else if order == 2 {
@@ -1636,8 +1636,8 @@ fn decode_drt3(
         }
         let mut delta = ival2 - ival1; // first-order diff at position 1
         let mut prev = ival2;
-        for i in 2..packed.len() {
-            let second_diff = packed[i] + minsd;
+        for second_diff in packed.iter().skip(2) {
+            let second_diff = *second_diff + minsd;
             delta += second_diff;
             prev += delta;
             values.push((r + prev as f64 * two_e) / ten_d);
@@ -1723,7 +1723,7 @@ fn extract_group_windowed(
 
     // Pre-fill: load enough bytes so buf holds at least (skip + w) valid bits.
     // Worst case: skip=7, w=32 → 39 bits → 5 bytes → buf_bits ≤ 40 after pre-fill.
-    let init_bytes = (skip + w + 7) / 8;
+    let init_bytes = (skip + w).div_ceil(8);
     for _ in 0..init_bytes {
         load_byte!();
     }

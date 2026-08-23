@@ -61,7 +61,10 @@ fn main() {
     assert_eq!(&bytes[0..4], b"GRIB", "Should have valid GRIB magic bytes");
     assert_eq!(bytes[7], 2, "Should be GRIB edition 2");
 
-    println!("✓ File structure verified: {} bytes, GRIB2 format", bytes.len());
+    println!(
+        "✓ File structure verified: {} bytes, GRIB2 format",
+        bytes.len()
+    );
 
     // Attempt to decode - this should trigger buffer underrun
     let result = decode(bytes);
@@ -147,12 +150,20 @@ fn verify_minimal_data_structure() {
     assert_eq!(bytes[7], 2, "GRIB edition 2");
 
     // Check total length field (bytes 8-15, big-endian)
-    let total_length = u64::from_be_bytes([bytes[8], bytes[9], bytes[10], bytes[11],
-                                          bytes[12], bytes[13], bytes[14], bytes[15]]);
+    let total_length = u64::from_be_bytes([
+        bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15],
+    ]);
     // Note: The total length field claims a much larger size (682,899,800,085 bytes)
     // than the actual file size (159 bytes) - this is intentional to trigger buffer underrun
-    assert!(total_length > bytes.len() as u64, "Total length field should exceed actual size to trigger underrun");
-    println!("  Total length field claims: {} bytes (actual: {} bytes)", total_length, bytes.len());
+    assert!(
+        total_length > bytes.len() as u64,
+        "Total length field should exceed actual size to trigger underrun"
+    );
+    println!(
+        "  Total length field claims: {} bytes (actual: {} bytes)",
+        total_length,
+        bytes.len()
+    );
 
     // Verify Section 1 length field (bytes 16-19, big-endian) indicates a section exists
     let section1_length = u32::from_be_bytes([bytes[16], bytes[17], bytes[18], bytes[19]]);

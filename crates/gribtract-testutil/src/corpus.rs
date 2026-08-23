@@ -100,14 +100,11 @@ pub fn load(id: &str) -> Result<Vec<u8>, String> {
     let file_path = corpus_root().join(&entry.path);
 
     // For remote fixtures, check if file exists locally first
-    if entry.storage == "remote" {
-        if !file_path.exists() {
-            return Err(format!(
-                "fixture '{}' has storage=remote and is not present locally — run `cargo xtask corpus fetch {}` first",
-                id, id
-            ));
-        }
-        // File exists: fall through to load and verify
+    if entry.storage == "remote" && !file_path.exists() {
+        return Err(format!(
+            "fixture '{}' has storage=remote and is not present locally — run `cargo xtask corpus fetch {}` first",
+            id, id
+        ));
     }
 
     let bytes = std::fs::read(&file_path)

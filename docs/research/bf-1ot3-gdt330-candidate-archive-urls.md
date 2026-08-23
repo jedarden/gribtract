@@ -32,9 +32,9 @@ Comprehensive archive URL documentation for all NOAA models identified in bead b
 
 ### Primary Archive: AWS Open Data Registry
 
-**Base URL:** `https://noaa-hrrr-pds.s3.amazonaws.com/`
+**Base URL:** `https://noaa-hrrr-bdp-pds.s3.amazonaws.com/`
 
-**S3 Bucket:** `s3://noaa-hrrr-pds/`
+**S3 Bucket:** `s3://noaa-hrrr-bdp-pds/`
 
 **Hosting Platform:** Amazon Web Services (AWS) - NOAA Open Data Program
 
@@ -42,13 +42,14 @@ Comprehensive archive URL documentation for all NOAA models identified in bead b
 
 **Directory Structure:**
 ```
-https://noaa-hrrr-pds.s3.amazonaws.com/YYYYMMDD/HH/fFF/
+https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.YYYYMMDD/conus/
 ```
 
 Where:
-- **YYYYMMDD** = Model run date (e.g., `20260703`)
-- **HH** = Cycle hour (00-23, hourly)
-- **fFF** = Forecast hour (00-18 standard, 00-48 extended)
+- **YYYYMMDD** = Model run date (e.g., `20250101`)
+- **conus** = CONUS domain (also `alaska` for Alaska domain)
+
+**Note:** The bucket name is `noaa-hrrr-bdp-pds` (Big Data Project), not `noaa-hrrr-pds`. Both URLs may work due to redirects, but `noaa-hrrr-bdp-pds` is the canonical bucket name.
 
 **File Naming Convention:**
 - Surface fields: `hrrr.tCCz.wrfsfcfFF.grib2`
@@ -60,10 +61,12 @@ Where CC = cycle hour (00-23), FF = forecast hour (00-48)
 
 **Example URLs:**
 ```
-https://noaa-hrrr-pds.s3.amazonaws.com/20260703/00/f00/hrrr.t00z.wrfsfcf00.grib2
-https://noaa-hrrr-pds.s3.amazonaws.com/20260703/06/f12/hrrr.t06z.wrfsfcf12.grib2
-https://noaa-hrrr-pds.s3.amazonaws.com/20260703/00/f01/hrrr.t00z.wrfsubhf01.15.grib2
+https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20250101/conus/hrrr.t00z.wrfsfcf00.grib2
+https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20250101/conus/hrrr.t00z.wrfsfcf01.grib2
+https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20250101/conus/hrrr.t00z.wrfsfcf06.grib2
 ```
+
+**Verification:** Direct S3 bucket listing confirmed this structure on 2026-07-03.
 
 **Alternative Archives:**
 - **NOMADS:** `https://nomads.ncep.noaa.gov/pub/data/nccf/com/hrrr/prod/`
@@ -100,12 +103,12 @@ https://noaa-hrrr-pds.s3.amazonaws.com/20260703/00/f01/hrrr.t00z.wrfsubhf01.15.g
 
 **Directory Structure:**
 ```
-https://noaa-nam-pds.s3.amazonaws.com/YYYYMMDD_HH/
+https://noaa-nam-pds.s3.amazonaws.com/nam.YYYYMMDD/
 ```
 
 Where:
-- **YYYYMMDD** = Model run date (e.g., `20260703`)
-- **HH** = Cycle hour (00, 06, 12, 18)
+- **YYYYMMDD** = Model run date (e.g., `20250101`)
+- Files are stored directly under the date directory with cycle/time in the filename
 
 **File Naming Convention:**
 - AWIP physics: `nam.tCCz.awphys00.tm00.grib2`
@@ -115,9 +118,14 @@ Where CC = cycle hour (00, 06, 12, 18), ffh = forecast hour (00-60)
 
 **Example URLs:**
 ```
-https://noaa-nam-pds.s3.amazonaws.com/20260703_00/nam.t00z.awphys00.tm00.grib2
-https://noaa-nam-pds.s3.amazonaws.com/20260703_12/nam.t12z.awphys12.tm00.grib2
+https://noaa-nam-pds.s3.amazonaws.com/nam.20250101/nam.t00z.afwaca00.tm00.grib2
+https://noaa-nam-pds.s3.amazonaws.com/nam.20250101/nam.t00z.afwaca03.tm00.grib2
+https://noaa-nam-pds.s3.amazonaws.com/nam.20250101/nam.t00z.afwaca06.tm00.grib2
 ```
+
+**File Pattern:** `nam.tCCz.afwacaFF.tm00.grib2` where CC = cycle hour, FF = forecast hour (00, 03, 06, etc.)
+
+**Verification:** Direct S3 bucket listing confirmed this structure on 2026-07-03.
 
 **Alternative Archives:**
 - **NOMADS:** `https://nomads.ncep.noaa.gov/pub/data/nccf/com/nam/prod/`
@@ -215,41 +223,41 @@ https://noaa-nbm-grib2-pds.s3.amazonaws.com/blend.20260703/12/core/blend.t12z.co
 
 ## 4. RAP (Rapid Refresh)
 
-### Primary Archive: AWS Open Data Registry
+### Primary Archive: NOMADS
 
-**Base URL:** `https://noaa-rap-pds.s3.amazonaws.com/`
+**Base URL:** `https://nomads.ncep.noaa.gov/gribfilter.php?ds=rap`
 
-**S3 Bucket:** `s3://noaa-rap-pds/`
-
-**Hosting Platform:** Amazon Web Services (AWS) - NOAA Open Data Program
+**Hosting Platform:** NOMADS (NOAA Operational Model Archive and Distribution System)
 
 **Accessibility:** ✅ Public (no authentication required)
 
-**Directory Structure:**
-```
-https://noaa-rap-pds.s3.amazonaws.com/YYYYMMDD/HH/
-```
-
-Where:
-- **YYYYMMDD** = Model run date (e.g., `20260703`)
-- **HH** = Cycle hour (00-23, hourly)
+**Access Methods:**
+- HTTPS direct download
+- GRIB filter for data subsetting
+- THREDDS Data Server
 
 **File Naming Convention:**
-- 13km pressure levels: `rap.tCCz.awp130pgrbfxx.grib2`
-- 20km pressure levels: `rap.tCCz.awp252pgrbfxx.grib2`
-- 40km pressure levels: `rap.tCCz.awp236pgrbfxx.grib2`
+- 13km pressure levels: `rap.tCCz.awp130pgrbfFF.grib2`
 
-Where CC = cycle hour (00-23), xx = forecast hour
+Where CC = cycle hour (00-23), FF = forecast hour (00-21)
 
-**Example URLs:**
-```
-https://noaa-rap-pds.s3.amazonaws.com/20260703/00/rap.t00z.awp130pgrbf00.grib2
-https://noaa-rap-pds.s3.amazonaws.com/20260703/12/rap.t12z.awp130pgrbf12.grib2
-```
+**NOMADS Access:**
+Use the GRIB filter interface at `https://nomads.ncep.noaa.gov/gribfilter.php?ds=rap` to browse and download files.
 
 **Alternative Archives:**
-- **NOMADS:** `https://nomads.ncep.noaa.gov/pub/data/nccf/com/rap/prod/`
-- **NCEP Products:** `https://www.nco.ncep.noaa.gov/pmb/products/rap/`
+- **NCEP Products:** `https://www.nco.ncep.noaa.gov/pmb/products/rap/` (HTTPS/FTP access)
+- **GribStream API:** `https://gribstream.com/models/rap`
+- **Microsoft Planetary Computer:** `https://planetarycomputer.microsoft.com/dataset/storage/noaa-rap`
+
+### AWS S3 Archive (NARRE Reanalysis - Not Operational RAP)
+
+⚠️ **Important:** The AWS S3 bucket `noaa-rap-pds` contains **NARRE** (North American Regional Reanalysis) data, **not operational RAP** forecasts.
+
+**Base URL:** `https://noaa-rap-pds.s3.amazonaws.com/`
+
+**Contents:** NARRE ensemble products (e.g., `narre.20201201/ensprod/narre.t00z.mean.grd130.f01.grib2`)
+
+**Use Case:** Historical reanalysis data, not operational RAP forecasts.
 
 **Model Specifications:**
 - Resolution: 13 km (Grid #130 - primary)
@@ -522,10 +530,10 @@ https://www.nco.ncep.noaa.gov/pmb/products/hiresw/YYYYMMDD/YYYYMMDD_HH/
 
 | Model | Primary Platform | Secondary Platforms | Public Access |
 |-------|-----------------|---------------------|---------------|
-| **HRRR** | AWS (noaa-hrrr-pds) | NOMADS, U of Utah, NCEP | ✅ Yes |
+| **HRRR** | AWS (noaa-hrrr-bdp-pds) | NOMADS, U of Utah, NCEP | ✅ Yes |
 | **NAM** | AWS (noaa-nam-pds) | NOMADS, READY, NCEP | ✅ Yes |
 | **NDFD/NBM** | NOAA FTP + AWS (noaa-nbm-grib2-pds) | NDFD FTP server | ✅ Yes |
-| **RAP** | AWS (noaa-rap-pds) | NOMADS, NCEP | ✅ Yes |
+| **RAP** | NOMADS (operational) | NCEP, GribStream, Planetary Computer | ✅ Yes |
 | **RRFS** | AWS (noaa-rrfs-pds) | NOMADS, GribStream | ✅ Yes |
 | **HREF** | NOMADS | SPC viewer, Herbie | ✅ Yes |
 | **SREF** | NOMADS | NCEP products page | ✅ Yes |

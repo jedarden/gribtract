@@ -69,19 +69,19 @@ fn analyze_sections(bytes: &[u8]) -> Vec<SectionInfo> {
 
     // Parse remaining sections
     let mut pos = 16;
-    let total_len = usize::from_be_bytes([
-        bytes[8], bytes[9], bytes[10], bytes[11],
-        0, 0, 0, 0
-    ]);
+    let total_len = usize::from_be_bytes([bytes[8], bytes[9], bytes[10], bytes[11], 0, 0, 0, 0]);
     let body_end = total_len.saturating_sub(4);
 
     while pos + 5 <= bytes.len() && pos < body_end {
-        let sec_len = u32::from_be_bytes([
-            bytes[pos], bytes[pos + 1], bytes[pos + 2], bytes[pos + 3]
-        ]) as usize;
+        let sec_len =
+            u32::from_be_bytes([bytes[pos], bytes[pos + 1], bytes[pos + 2], bytes[pos + 3]])
+                as usize;
 
         if sec_len < 5 {
-            println!("  Invalid section length {} at pos {}, stopping", sec_len, pos);
+            println!(
+                "  Invalid section length {} at pos {}, stopping",
+                sec_len, pos
+            );
             break;
         }
 
@@ -103,8 +103,10 @@ fn analyze_sections(bytes: &[u8]) -> Vec<SectionInfo> {
     }
 
     for sec in &sections {
-        println!("  Section {}: start={}, length={}, body_start={}, body_len={}",
-                 sec.number, sec.start_pos, sec.length, sec.body_start, sec.body_len);
+        println!(
+            "  Section {}: start={}, length={}, body_start={}, body_len={}",
+            sec.number, sec.start_pos, sec.length, sec.body_start, sec.body_len
+        );
     }
 
     sections
@@ -113,7 +115,7 @@ fn analyze_sections(bytes: &[u8]) -> Vec<SectionInfo> {
 fn test_section_0_variations(original_bytes: &[u8]) {
     // Test 1.1: Modify total length field to be smaller than actual
     let mut bytes1 = original_bytes.to_vec();
-    bytes1[8] = 0x00;  // Set total length to 100 bytes instead of 187
+    bytes1[8] = 0x00; // Set total length to 100 bytes instead of 187
     bytes1[9] = 0x00;
     bytes1[10] = 0x00;
     bytes1[11] = 0x64;
@@ -121,12 +123,12 @@ fn test_section_0_variations(original_bytes: &[u8]) {
 
     // Test 1.2: Modify discipline field
     let mut bytes2 = original_bytes.to_vec();
-    bytes2[12] = 0xFF;  // Invalid discipline
+    bytes2[12] = 0xFF; // Invalid discipline
     test_variation("Sec0-invalid-discipline", &bytes2);
 
     // Test 1.3: Modify edition number
     let mut bytes3 = original_bytes.to_vec();
-    bytes3[13] = 0x01;  // GRIB1 instead of GRIB2
+    bytes3[13] = 0x01; // GRIB1 instead of GRIB2
     test_variation("Sec0-wrong-edition", &bytes3);
 }
 
@@ -139,7 +141,7 @@ fn test_section_1_variations(original_bytes: &[u8], sections: &[SectionInfo]) {
         bytes1[sec1.start_pos] = 0x00;
         bytes1[sec1.start_pos + 1] = 0x00;
         bytes1[sec1.start_pos + 2] = 0x00;
-        bytes1[sec1.start_pos + 3] = 0x10;  // 16 bytes instead of 21
+        bytes1[sec1.start_pos + 3] = 0x10; // 16 bytes instead of 21
         test_variation("Sec1-shorter-length", &bytes1);
 
         // Test 2.2: Zero out Section 1 body
@@ -170,7 +172,7 @@ fn test_section_3_variations(original_bytes: &[u8], sections: &[SectionInfo]) {
         bytes1[sec3.start_pos] = 0x00;
         bytes1[sec3.start_pos + 1] = 0x00;
         bytes1[sec3.start_pos + 2] = 0x00;
-        bytes1[sec3.start_pos + 3] = 0x20;  // 32 bytes instead of 72
+        bytes1[sec3.start_pos + 3] = 0x20; // 32 bytes instead of 72
         test_variation("Sec3-shorter-length", &bytes1);
 
         // Test 4.2: Modify Section 3 length to be larger than available
@@ -178,7 +180,7 @@ fn test_section_3_variations(original_bytes: &[u8], sections: &[SectionInfo]) {
         bytes2[sec3.start_pos] = 0x00;
         bytes2[sec3.start_pos + 1] = 0x00;
         bytes2[sec3.start_pos + 2] = 0x01;
-        bytes2[sec3.start_pos + 3] = 0x00;  // 256 bytes instead of 72
+        bytes2[sec3.start_pos + 3] = 0x00; // 256 bytes instead of 72
         test_variation("Sec3-larger-length", &bytes2);
 
         // Test 4.3: Zero out Section 3 GDT template data
@@ -190,7 +192,7 @@ fn test_section_3_variations(original_bytes: &[u8], sections: &[SectionInfo]) {
 
         // Test 4.4: Modify GDT version number
         let mut bytes4 = original_bytes.to_vec();
-        bytes4[sec3.body_start] = 0x01;  // GDT 3.1 instead of GDT 3.0
+        bytes4[sec3.body_start] = 0x01; // GDT 3.1 instead of GDT 3.0
         test_variation("Sec3-gdt-version-1", &bytes4);
     }
 }
@@ -208,10 +210,12 @@ fn test_minimal_reproduction(original_bytes: &[u8], sections: &[SectionInfo]) {
         minimal_bytes.extend_from_slice(&original_bytes[sec0.start_pos..sec0.length]);
 
         // Copy Section 1
-        minimal_bytes.extend_from_slice(&original_bytes[sec1.start_pos..sec1.start_pos + sec1.length]);
+        minimal_bytes
+            .extend_from_slice(&original_bytes[sec1.start_pos..sec1.start_pos + sec1.length]);
 
         // Copy Section 3
-        minimal_bytes.extend_from_slice(&original_bytes[sec3.start_pos..sec3.start_pos + sec3.length]);
+        minimal_bytes
+            .extend_from_slice(&original_bytes[sec3.start_pos..sec3.start_pos + sec3.length]);
 
         // Add end marker
         minimal_bytes.extend_from_slice(&[0x37, 0x37, 0x37, 0x37]);
@@ -237,7 +241,8 @@ fn test_minimal_reproduction(original_bytes: &[u8], sections: &[SectionInfo]) {
         minimal_bytes.extend_from_slice(&original_bytes[sec0.start_pos..sec0.length]);
 
         // Copy Section 3 directly (without Section 1)
-        minimal_bytes.extend_from_slice(&original_bytes[sec3.start_pos..sec3.start_pos + sec3.length]);
+        minimal_bytes
+            .extend_from_slice(&original_bytes[sec3.start_pos..sec3.start_pos + sec3.length]);
 
         // Add end marker
         minimal_bytes.extend_from_slice(&[0x37, 0x37, 0x37, 0x37]);
@@ -271,7 +276,7 @@ fn test_length_manipulations(original_bytes: &[u8], sections: &[SectionInfo]) {
         bytes2[sec3.start_pos] = 0x00;
         bytes2[sec3.start_pos + 1] = 0x02;
         bytes2[sec3.start_pos + 2] = 0x00;
-        bytes2[sec3.start_pos + 3] = 0x00;  // 131072 bytes
+        bytes2[sec3.start_pos + 3] = 0x00; // 131072 bytes
         test_variation("length-massive-overclaim", &bytes2);
 
         // Test 6.3: Section 3 length = 0
