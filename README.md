@@ -301,3 +301,9 @@ The CLI is intended as a thin wrapper over the library API for ad-hoc inspection
 ## 📜 License
 
 MIT OR Apache-2.0, at your option.
+
+---
+
+Part of [jedarden.com](https://jedarden.com)
+
+*This GitHub repo is a read-only mirror of git.ardenone.com/jedarden/gribtract — issues and PRs are welcome here either way.*
